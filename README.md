@@ -4,16 +4,26 @@ eXTended Atari Language - a language to take advantage of the extended XL/XE FPG
 ## Introduction
 This project is the recognition that extending the hardware on an XL/XE isn't enough to be useful in and of itself. We need to be able to *use* the hardware. 
 
-I've been noodling off and on regarding creating a new programming language for the 8-bits h.. for about a decade or so. The thing is that I look at Action! or cc65 and ask myself "is this likely to be better than that", and the answer is always "probably not".
+The project is divided into 3 parts 
+
+- 'xtal' is the driver code, that will be the main interface that people see and interact with
+- 'xtal-c' is called by 'xtal' to compile the high-level language down to something the assembler will accept
+- 'xtal-a' is called by 'xtal' to convert the assembly-code produced in the previous stage into a binary executable that the XL/XE/Emulator can directly execute.
+
+It's currently only implemented as an Xcode project (because I like my Mac) but I intentionally wrote it in C++ instead of Swift or Objective-C so that it could be easily ported to a Makefile-environment or even Visual Studio. There's nothing that should cause problems for any modern C++ compiler...
+
+## Why ... ?
+
+I've been noodling off and on regarding creating a new programming language for the 8-bits oh .. for about a decade or so. The thing is that I look at Action! or cc65 and ask myself "is this likely to be better than that", and the answer is always "probably not".
 
 But now we have [some custom hardware](https://forums.atariage.com/topic/275693-to-infinity-and-beyond-new-hardware/page/9/#comments) to drive, and that adds a whole bunch of new opportunities... I think one of the obvious benefits to using the board is the memory management. It seems to me that there's a couple of things that could really help out the 6502:
 
 - A more-capable ALU. The Apple-II actually had a built-in virtual-machine that was 16-bit ("Sweet 16") to provide a general purpose way of using 16-bit arithmetic, and to reduce complexity when writing more involved code. I'm proposing to extend that extension, and introduce a simple 8,16 and 32 bit environment that's easily accessible via the 6502.
 
-- There is a lot of memory on the FPGA board. More than any 6502 could realistically use. As a matter of course, I'm planning on having the memory in page-0 served by the DRAM on the board rather than from the internals of the machine.
+- There is a lot of memory on the FPGA board. More than any 6502 could realistically use. As a matter of course, I'm planning on having the memory in page-0 served by the DRAM on the board rather than from the internals of the machine. once you're doing that, having a flexible way to swap in and out the memory that the 6502 "sees" can make a big difference.
 
 
-## Memory
+### Memory
 
 BASIC takes over the top half of page-0. Getting rid of the need for BASIC (and providing an alternative) therefore gives a huge landscape of page-0 space for use and abuse and the fine-grained remapping abilities are what makes this whole idea really appealing. The proposal is (this is from the top of my RegisterFile.h header :)
 
@@ -63,7 +73,7 @@ So let's go through this...
 - Then (\$B0..\$BF) there's the function scratch-space that's per-function
 - Finally (\$C0..\$FF) you have the remappable memory for lots of zero-page variables.
 
-## Command FIFO
+### Command FIFO
 
 The buffer / arguments at {\$87..\$89} allow commands to be piped from the 6502 to the FPGA. Generally, I'm intending this as the interface to speed up things that take a while on the 6502 (example: floating point multiply) and offload that to the FPGA (or even perhaps the RP2040). Instead of executing the code to perform the task, the 6502 does a few load/stores to the fifo areas, and the effects are stored in the 'registers' that the 6502 can then read to get a result.
 
@@ -98,7 +108,7 @@ It can however be used for other things, examples might be:
 		STA $88
 ```
 
-## ALU
+### ALU
 
 Back in the day, the Apple-II had a '[Sweet16](https://en.wikipedia.org/wiki/SWEET16)' VM built into the ROM logic, which would
 pretend to be a 16-bit CPU, implemneted using the 6502. Similarly, for the arcade version of BattleZone, Atari implemented an external "[math box](https://6502disassembly.com/va-battlezone/mathbox.html)" ALU for the 6502 so it could keep up with the 3D geometry requirements. 
