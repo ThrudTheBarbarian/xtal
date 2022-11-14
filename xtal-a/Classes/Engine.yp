@@ -1,0 +1,128 @@
+%{
+//#define YYDEBUG 1
+//#define YYERROR_VERBOSE 1
+//#define YYTOKEN_TABLE 1
+
+#include <iostream>
+#include <cctype>
+#include <sstream>
+#include <map>
+#include <cmath>
+
+#include "Engine.h"
+
+extern int yydebug;
+int yylex();
+int yyerror(const String &);
+%}
+
+%union
+	{
+	int64_t val;
+	Engine::Symbol * sym;
+	}
+%token <val> NUMBER 			//sets type for numbers
+%token <sym> VAR UNDEF
+%type <val> expr assign 		//sets type for expressions and assignments
+%right '='
+%left '+' '-'
+%left '*' '/'
+%right '^'
+%left UNARYMINUS
+%left LOBYTE
+%left HIBYTE
+%%
+
+list:  /* empty list */
+| list '\n'
+| list assign
+| list expr  				{Engine::getInstance().setResult($2);}
+| list error 				{yyerrok;}
+;
+assign: VAR '=' expr 		{$$ = $1->value = $3; $1->type = VAR; }
+;
+expr: NUMBER
+| VAR 						{
+							if ($1->type == UNDEF)
+								std::cerr << "undefined variable: " + *$1->name;
+							$$ = $1->value;
+							}
+| assign
+| expr '+' expr 			{$$ = $1 + $3;}
+| expr '-' expr 			{$$ = $1 - $3;}
+| expr '*' expr 			{$$ = $1 * $3;}
+| expr '/' expr 			{$$ = $1 / $3;}
+| expr '^' expr 			{$$ = pow($1, $3);}
+| expr '&' expr				{$$ = $1 & $3;}
+| expr '|' expr				{$$ = $1 | $3;}
+| expr '>' expr 			{$$ = ($1 > $3);}
+| expr '<' expr 			{$$ = ($1 < $3);}
+| expr '=' '=' expr 		{$$ = ($1 == $4);}
+| expr '!' '=' expr 		{$$ = ($1 != $4);}
+| '<' expr %prec LOBYTE 	{$$ = ($2 & 0xFF);}
+| '>' expr %prec HIBYTE 	{$$ = (($2 >> 8) & 0xFF);}
+| '-' expr %prec UNARYMINUS {$$ = -$2;}
+| '(' expr ')' 				{$$ = $2;}
+;
+%%
+
+int yylex ()
+	{
+	//yydebug = 1;
+	Engine& e = Engine::getInstance();
+	e.setVarType(VAR);
+	
+	int c;
+	while (((c = e.getc()) == ' ') || c == '\t')
+		;
+  
+	if (isdigit(c) || (c=='$') || (c=='%') || (c == '\''))
+		{
+      	e.unget();
+		yylval.val = e.parseNumber();
+		return NUMBER;
+		}
+		
+	if (isalpha(c) || c == '_')
+		{
+		char sbuf[100], *p = sbuf;
+		do
+			{
+			*p++ = c;
+			c = e.getc();
+			}
+		while (!e.eof() && (isalnum(c) || (c == '_') || (c == '?')));
+      
+		e.unget();
+		*p = 0;
+		
+		int len = (int) strlen(sbuf);
+		if ((sbuf[len-1] == '?') && (sbuf[len-2] == '_'))
+			{
+			String s = sbuf;
+			s.pop_back();
+			s.pop_back();
+			s = e.nextLabel(s);
+			strncpy(sbuf, s.c_str(), MAX(100, s.length()));
+			}
+			
+		if (e.symbols().find(sbuf) == e.symbols().end())
+			{
+			e.symbols()[sbuf].type = VAR;
+			e.symbols()[sbuf].value = -1;
+			e.symbols()[sbuf].name = &(String&)e.symbols().find(sbuf)->first;
+			}
+		Engine::Symbol *s = &e.symbols()[sbuf];
+		yylval.sym = s;
+		return s->type == UNDEF ? VAR : s->type;
+		}
+	return c;
+	}
+
+int yyerror(const String &s)
+	{
+	std::cerr << s << std::endl;
+	asm("svc 0");
+	return -1;
+	}
+

@@ -1,0 +1,650 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F480EF0C2922B472008584FB /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF0B2922B472008584FB /* main.cc */; };
+		F480EF192922B512008584FB /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF182922B512008584FB /* main.cc */; };
+		F480EF242922B564008584FB /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF232922B564008584FB /* main.cc */; };
+		F480EF352922B81B008584FB /* Engine.yp in Sources */ = {isa = PBXBuildFile; fileRef = F480EF292922B81B008584FB /* Engine.yp */; };
+		F480EF362922B81B008584FB /* Macro.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF2C2922B81B008584FB /* Macro.cc */; };
+		F480EF372922B81B008584FB /* Token.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF2D2922B81B008584FB /* Token.cc */; };
+		F480EF382922B81B008584FB /* Engine.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF2F2922B81B008584FB /* Engine.cc */; };
+		F480EF392922B81B008584FB /* Assembler.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF302922B81B008584FB /* Assembler.cc */; };
+		F480EF3A2922B81B008584FB /* OutputBlock.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF322922B81B008584FB /* OutputBlock.cc */; };
+		F480EF3B2922B81B008584FB /* Scanner.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF342922B81B008584FB /* Scanner.cc */; };
+		F480EF502922BB66008584FB /* ArgParser.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF422922BB66008584FB /* ArgParser.cc */; };
+		F480EF512922BB66008584FB /* ArgParser.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF422922BB66008584FB /* ArgParser.cc */; };
+		F480EF522922BB66008584FB /* ArgParser.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF422922BB66008584FB /* ArgParser.cc */; };
+		F480EF532922BB66008584FB /* NotifyCenter.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF432922BB66008584FB /* NotifyCenter.cc */; };
+		F480EF542922BB66008584FB /* NotifyCenter.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF432922BB66008584FB /* NotifyCenter.cc */; };
+		F480EF552922BB66008584FB /* NotifyCenter.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF432922BB66008584FB /* NotifyCenter.cc */; };
+		F480EF562922BB66008584FB /* HelpItem.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF452922BB66008584FB /* HelpItem.cc */; };
+		F480EF572922BB66008584FB /* HelpItem.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF452922BB66008584FB /* HelpItem.cc */; };
+		F480EF582922BB66008584FB /* HelpItem.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF452922BB66008584FB /* HelpItem.cc */; };
+		F480EF592922BB66008584FB /* Stringutils.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF492922BB66008584FB /* Stringutils.cc */; };
+		F480EF5A2922BB66008584FB /* Stringutils.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF492922BB66008584FB /* Stringutils.cc */; };
+		F480EF5B2922BB66008584FB /* Stringutils.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF492922BB66008584FB /* Stringutils.cc */; };
+		F480EF692922BD77008584FB /* printReg.s in Copy Library Files */ = {isa = PBXBuildFile; fileRef = F480EF642922BC1A008584FB /* printReg.s */; };
+		F480EF6A2922BD7A008584FB /* stdmacros.s in Copy Library Files */ = {isa = PBXBuildFile; fileRef = F480EF652922BC1A008584FB /* stdmacros.s */; };
+		F480EF6B2922BDE5008584FB /* xtal-a in Copy Binaries */ = {isa = PBXBuildFile; fileRef = F480EF212922B564008584FB /* xtal-a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F480EF062922B472008584FB /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		F480EF142922B512008584FB /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		F480EF1F2922B564008584FB /* Copy Binaries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = /opt/xtal/bin;
+			dstSubfolderSpec = 0;
+			files = (
+				F480EF6B2922BDE5008584FB /* xtal-a in Copy Binaries */,
+			);
+			name = "Copy Binaries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F480EF682922BD5C008584FB /* Copy Library Files */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /opt/xtal/lib;
+			dstSubfolderSpec = 0;
+			files = (
+				F480EF692922BD77008584FB /* printReg.s in Copy Library Files */,
+				F480EF6A2922BD7A008584FB /* stdmacros.s in Copy Library Files */,
+			);
+			name = "Copy Library Files";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		F480EF082922B472008584FB /* xtal */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = xtal; sourceTree = BUILT_PRODUCTS_DIR; };
+		F480EF0B2922B472008584FB /* main.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cc; sourceTree = "<group>"; };
+		F480EF162922B512008584FB /* xtal-c */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "xtal-c"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F480EF182922B512008584FB /* main.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cc; sourceTree = "<group>"; };
+		F480EF212922B564008584FB /* xtal-a */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "xtal-a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F480EF232922B564008584FB /* main.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cc; sourceTree = "<group>"; };
+		F480EF282922B81A008584FB /* Engine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Engine.h; path = Classes/Engine.h; sourceTree = "<group>"; };
+		F480EF292922B81B008584FB /* Engine.yp */ = {isa = PBXFileReference; explicitFileType = sourcecode.yacc; fileEncoding = 4; name = Engine.yp; path = Classes/Engine.yp; sourceTree = "<group>"; };
+		F480EF2A2922B81B008584FB /* Token.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Token.h; path = Classes/Token.h; sourceTree = "<group>"; };
+		F480EF2B2922B81B008584FB /* Macro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Macro.h; path = Classes/Macro.h; sourceTree = "<group>"; };
+		F480EF2C2922B81B008584FB /* Macro.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Macro.cc; path = Classes/Macro.cc; sourceTree = "<group>"; };
+		F480EF2D2922B81B008584FB /* Token.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Token.cc; path = Classes/Token.cc; sourceTree = "<group>"; };
+		F480EF2E2922B81B008584FB /* OutputBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OutputBlock.h; path = Classes/OutputBlock.h; sourceTree = "<group>"; };
+		F480EF2F2922B81B008584FB /* Engine.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Engine.cc; path = Classes/Engine.cc; sourceTree = "<group>"; };
+		F480EF302922B81B008584FB /* Assembler.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Assembler.cc; path = Classes/Assembler.cc; sourceTree = "<group>"; };
+		F480EF312922B81B008584FB /* Scanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Scanner.h; path = Classes/Scanner.h; sourceTree = "<group>"; };
+		F480EF322922B81B008584FB /* OutputBlock.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OutputBlock.cc; path = Classes/OutputBlock.cc; sourceTree = "<group>"; };
+		F480EF332922B81B008584FB /* Assembler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Assembler.h; path = Classes/Assembler.h; sourceTree = "<group>"; };
+		F480EF342922B81B008584FB /* Scanner.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Scanner.cc; path = Classes/Scanner.cc; sourceTree = "<group>"; };
+		F480EF422922BB66008584FB /* ArgParser.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ArgParser.cc; sourceTree = "<group>"; };
+		F480EF432922BB66008584FB /* NotifyCenter.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NotifyCenter.cc; sourceTree = "<group>"; };
+		F480EF442922BB66008584FB /* ArgParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ArgParser.h; sourceTree = "<group>"; };
+		F480EF452922BB66008584FB /* HelpItem.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HelpItem.cc; sourceTree = "<group>"; };
+		F480EF462922BB66008584FB /* Singleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Singleton.h; sourceTree = "<group>"; };
+		F480EF472922BB66008584FB /* Stringutils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Stringutils.h; sourceTree = "<group>"; };
+		F480EF482922BB66008584FB /* HelpItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelpItem.h; sourceTree = "<group>"; };
+		F480EF492922BB66008584FB /* Stringutils.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Stringutils.cc; sourceTree = "<group>"; };
+		F480EF4A2922BB66008584FB /* NotifyCenter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotifyCenter.h; sourceTree = "<group>"; };
+		F480EF4C2922BB66008584FB /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
+		F480EF4D2922BB66008584FB /* macros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = macros.h; sourceTree = "<group>"; };
+		F480EF4E2922BB66008584FB /* properties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = properties.h; sourceTree = "<group>"; };
+		F480EF4F2922BB66008584FB /* structures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = structures.h; sourceTree = "<group>"; };
+		F480EF5D2922BC1A008584FB /* test03 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test03; sourceTree = "<group>"; };
+		F480EF5E2922BC1A008584FB /* test02 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test02; sourceTree = "<group>"; };
+		F480EF5F2922BC1A008584FB /* test01 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test01; sourceTree = "<group>"; };
+		F480EF612922BC1A008584FB /* AssemblyFormat.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AssemblyFormat.txt; sourceTree = "<group>"; };
+		F480EF642922BC1A008584FB /* printReg.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = printReg.s; sourceTree = "<group>"; };
+		F480EF652922BC1A008584FB /* stdmacros.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = stdmacros.s; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F480EF052922B472008584FB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F480EF132922B512008584FB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F480EF1E2922B564008584FB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F480EEFF2922B472008584FB = {
+			isa = PBXGroup;
+			children = (
+				F480EF3F2922BB66008584FB /* shared */,
+				F480EF0A2922B472008584FB /* xtal */,
+				F480EF172922B512008584FB /* xtal-c */,
+				F480EF222922B564008584FB /* xtal-a */,
+				F480EF092922B472008584FB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F480EF092922B472008584FB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F480EF082922B472008584FB /* xtal */,
+				F480EF162922B512008584FB /* xtal-c */,
+				F480EF212922B564008584FB /* xtal-a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F480EF0A2922B472008584FB /* xtal */ = {
+			isa = PBXGroup;
+			children = (
+				F480EF0B2922B472008584FB /* main.cc */,
+			);
+			path = xtal;
+			sourceTree = "<group>";
+		};
+		F480EF172922B512008584FB /* xtal-c */ = {
+			isa = PBXGroup;
+			children = (
+				F480EF182922B512008584FB /* main.cc */,
+			);
+			path = "xtal-c";
+			sourceTree = "<group>";
+		};
+		F480EF222922B564008584FB /* xtal-a */ = {
+			isa = PBXGroup;
+			children = (
+				F480EF602922BC1A008584FB /* Docs */,
+				F480EF622922BC1A008584FB /* Rsrc */,
+				F480EF5C2922BC1A008584FB /* Tests */,
+				F480EF302922B81B008584FB /* Assembler.cc */,
+				F480EF332922B81B008584FB /* Assembler.h */,
+				F480EF2F2922B81B008584FB /* Engine.cc */,
+				F480EF282922B81A008584FB /* Engine.h */,
+				F480EF292922B81B008584FB /* Engine.yp */,
+				F480EF2C2922B81B008584FB /* Macro.cc */,
+				F480EF2B2922B81B008584FB /* Macro.h */,
+				F480EF322922B81B008584FB /* OutputBlock.cc */,
+				F480EF2E2922B81B008584FB /* OutputBlock.h */,
+				F480EF342922B81B008584FB /* Scanner.cc */,
+				F480EF312922B81B008584FB /* Scanner.h */,
+				F480EF2D2922B81B008584FB /* Token.cc */,
+				F480EF2A2922B81B008584FB /* Token.h */,
+				F480EF232922B564008584FB /* main.cc */,
+			);
+			path = "xtal-a";
+			sourceTree = "<group>";
+		};
+		F480EF3F2922BB66008584FB /* shared */ = {
+			isa = PBXGroup;
+			children = (
+				F480EF402922BB66008584FB /* Classes */,
+				F480EF4B2922BB66008584FB /* include */,
+			);
+			path = shared;
+			sourceTree = "<group>";
+		};
+		F480EF402922BB66008584FB /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				F480EF412922BB66008584FB /* Util */,
+			);
+			path = Classes;
+			sourceTree = "<group>";
+		};
+		F480EF412922BB66008584FB /* Util */ = {
+			isa = PBXGroup;
+			children = (
+				F480EF422922BB66008584FB /* ArgParser.cc */,
+				F480EF432922BB66008584FB /* NotifyCenter.cc */,
+				F480EF442922BB66008584FB /* ArgParser.h */,
+				F480EF452922BB66008584FB /* HelpItem.cc */,
+				F480EF462922BB66008584FB /* Singleton.h */,
+				F480EF472922BB66008584FB /* Stringutils.h */,
+				F480EF482922BB66008584FB /* HelpItem.h */,
+				F480EF492922BB66008584FB /* Stringutils.cc */,
+				F480EF4A2922BB66008584FB /* NotifyCenter.h */,
+			);
+			path = Util;
+			sourceTree = "<group>";
+		};
+		F480EF4B2922BB66008584FB /* include */ = {
+			isa = PBXGroup;
+			children = (
+				F480EF4C2922BB66008584FB /* debug.h */,
+				F480EF4D2922BB66008584FB /* macros.h */,
+				F480EF4E2922BB66008584FB /* properties.h */,
+				F480EF4F2922BB66008584FB /* structures.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		F480EF5C2922BC1A008584FB /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				F480EF5D2922BC1A008584FB /* test03 */,
+				F480EF5E2922BC1A008584FB /* test02 */,
+				F480EF5F2922BC1A008584FB /* test01 */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		F480EF602922BC1A008584FB /* Docs */ = {
+			isa = PBXGroup;
+			children = (
+				F480EF612922BC1A008584FB /* AssemblyFormat.txt */,
+			);
+			path = Docs;
+			sourceTree = "<group>";
+		};
+		F480EF622922BC1A008584FB /* Rsrc */ = {
+			isa = PBXGroup;
+			children = (
+				F480EF632922BC1A008584FB /* lib */,
+			);
+			path = Rsrc;
+			sourceTree = "<group>";
+		};
+		F480EF632922BC1A008584FB /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				F480EF642922BC1A008584FB /* printReg.s */,
+				F480EF652922BC1A008584FB /* stdmacros.s */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F480EF072922B472008584FB /* xtal */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F480EF0F2922B472008584FB /* Build configuration list for PBXNativeTarget "xtal" */;
+			buildPhases = (
+				F480EF042922B472008584FB /* Sources */,
+				F480EF052922B472008584FB /* Frameworks */,
+				F480EF062922B472008584FB /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = xtal;
+			productName = xtal;
+			productReference = F480EF082922B472008584FB /* xtal */;
+			productType = "com.apple.product-type.tool";
+		};
+		F480EF152922B512008584FB /* xtal-c */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F480EF1C2922B512008584FB /* Build configuration list for PBXNativeTarget "xtal-c" */;
+			buildPhases = (
+				F480EF122922B512008584FB /* Sources */,
+				F480EF132922B512008584FB /* Frameworks */,
+				F480EF142922B512008584FB /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "xtal-c";
+			productName = "xtal-c";
+			productReference = F480EF162922B512008584FB /* xtal-c */;
+			productType = "com.apple.product-type.tool";
+		};
+		F480EF202922B564008584FB /* xtal-a */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F480EF252922B564008584FB /* Build configuration list for PBXNativeTarget "xtal-a" */;
+			buildPhases = (
+				F480EF1D2922B564008584FB /* Sources */,
+				F480EF1E2922B564008584FB /* Frameworks */,
+				F480EF1F2922B564008584FB /* Copy Binaries */,
+				F480EF682922BD5C008584FB /* Copy Library Files */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "xtal-a";
+			productName = "xtal-a";
+			productReference = F480EF212922B564008584FB /* xtal-a */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F480EF002922B472008584FB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1410;
+				TargetAttributes = {
+					F480EF072922B472008584FB = {
+						CreatedOnToolsVersion = 14.1;
+					};
+					F480EF152922B512008584FB = {
+						CreatedOnToolsVersion = 14.1;
+					};
+					F480EF202922B564008584FB = {
+						CreatedOnToolsVersion = 14.1;
+					};
+				};
+			};
+			buildConfigurationList = F480EF032922B472008584FB /* Build configuration list for PBXProject "xtal" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F480EEFF2922B472008584FB;
+			productRefGroup = F480EF092922B472008584FB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F480EF072922B472008584FB /* xtal */,
+				F480EF152922B512008584FB /* xtal-c */,
+				F480EF202922B564008584FB /* xtal-a */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F480EF042922B472008584FB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F480EF532922BB66008584FB /* NotifyCenter.cc in Sources */,
+				F480EF0C2922B472008584FB /* main.cc in Sources */,
+				F480EF502922BB66008584FB /* ArgParser.cc in Sources */,
+				F480EF562922BB66008584FB /* HelpItem.cc in Sources */,
+				F480EF592922BB66008584FB /* Stringutils.cc in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F480EF122922B512008584FB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F480EF542922BB66008584FB /* NotifyCenter.cc in Sources */,
+				F480EF192922B512008584FB /* main.cc in Sources */,
+				F480EF512922BB66008584FB /* ArgParser.cc in Sources */,
+				F480EF572922BB66008584FB /* HelpItem.cc in Sources */,
+				F480EF5A2922BB66008584FB /* Stringutils.cc in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F480EF1D2922B564008584FB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F480EF3B2922B81B008584FB /* Scanner.cc in Sources */,
+				F480EF392922B81B008584FB /* Assembler.cc in Sources */,
+				F480EF5B2922BB66008584FB /* Stringutils.cc in Sources */,
+				F480EF352922B81B008584FB /* Engine.yp in Sources */,
+				F480EF582922BB66008584FB /* HelpItem.cc in Sources */,
+				F480EF3A2922B81B008584FB /* OutputBlock.cc in Sources */,
+				F480EF382922B81B008584FB /* Engine.cc in Sources */,
+				F480EF522922BB66008584FB /* ArgParser.cc in Sources */,
+				F480EF372922B81B008584FB /* Token.cc in Sources */,
+				F480EF362922B81B008584FB /* Macro.cc in Sources */,
+				F480EF242922B564008584FB /* main.cc in Sources */,
+				F480EF552922BB66008584FB /* NotifyCenter.cc in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		F480EF0D2922B472008584FB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.5;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		F480EF0E2922B472008584FB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.5;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		F480EF102922B472008584FB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S9DMW7WK55;
+				ENABLE_HARDENED_RUNTIME = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		F480EF112922B472008584FB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S9DMW7WK55;
+				ENABLE_HARDENED_RUNTIME = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		F480EF1A2922B512008584FB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S9DMW7WK55;
+				ENABLE_HARDENED_RUNTIME = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		F480EF1B2922B512008584FB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S9DMW7WK55;
+				ENABLE_HARDENED_RUNTIME = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		F480EF262922B564008584FB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S9DMW7WK55;
+				ENABLE_HARDENED_RUNTIME = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/xtal-a/Classes",
+					"$(PROJECT_DIR)/shared/Classes/Util",
+					"$(PROJECT_DIR)/shared/include",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		F480EF272922B564008584FB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S9DMW7WK55;
+				ENABLE_HARDENED_RUNTIME = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/xtal-a/Classes",
+					"$(PROJECT_DIR)/shared/Classes/Util",
+					"$(PROJECT_DIR)/shared/include",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F480EF032922B472008584FB /* Build configuration list for PBXProject "xtal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F480EF0D2922B472008584FB /* Debug */,
+				F480EF0E2922B472008584FB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F480EF0F2922B472008584FB /* Build configuration list for PBXNativeTarget "xtal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F480EF102922B472008584FB /* Debug */,
+				F480EF112922B472008584FB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F480EF1C2922B512008584FB /* Build configuration list for PBXNativeTarget "xtal-c" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F480EF1A2922B512008584FB /* Debug */,
+				F480EF1B2922B512008584FB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F480EF252922B564008584FB /* Build configuration list for PBXNativeTarget "xtal-a" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F480EF262922B564008584FB /* Debug */,
+				F480EF272922B564008584FB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F480EF002922B472008584FB /* Project object */;
+}

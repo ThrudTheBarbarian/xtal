@@ -1,0 +1,57 @@
+; Assembly code produced at 14:32:20 on Oct 28 2022
+;
+;
+; Assembly begins
+; ----
+
+CMD_PUT_REC 	= $09   	; Send until EOL 
+EOL				= $9B		; ATASCII end-of-line
+
+CIOV 			= $E456     ;	CIO VECTOR
+
+ICHID   		= $0340     ;   Set by OS. Handler Identifier. If not 
+        		            ;   in use, the value is 255 ($FF), which 
+        		            ;   is also the initialization value.
+ICDNO   		= ICHID+1   ;   Set by OS. Device number (eg: D1: D2:).
+ICCOM   		= ICHID+2   ;   Set by User. Command
+ICSTA   		= ICHID+3   ;   Set by OS. May or may not be the same 
+        		            ;   value as CMD_STATUS returned
+ICBAL   		= ICHID+4   ;   Set by User. Buffer address (low byte)
+ICBAH   		= ICHID+5   ;   Set by User. buffer address (high byte)
+ICPTL   		= ICHID+6   ;   Used by BASIC. Address of put byte routine. 
+ICPTH   		= ICHID+7   ;   Used by BASIC. Address of put byte routine. 
+ICBLL   		= ICHID+8   ;   buffer length (low byte) in put/get operations
+ICBLH   		= ICHID+9   ;   buffer length (high byte)
+ICAX1   		= ICHID+10  ;   auxiliary information.  Used by Open .org $600
+
+;.org $4000
+
+start: 	    
+			ldx #0						; Use device 0 (screen)
+			mov.w data, ICBAL			; Pointer to address of msg
+			mov.b CMD_PUT_REC, ICCOM	; Prepare to send to screen
+			mov.w $00FF, ICBLL			; Print up to 255 chars
+			JSR CIOV					; Call print-to-screen
+			RTS							; return to user
+
+	
+; ----
+; Assembly complete
+
+
+
+.macro mov.w
+	LDA #<%1
+	STA %2
+	LDA #>%1
+	STA %2+1
+.endmacro
+
+.macro mov.b
+	LDA #%1
+	STA %2
+.endmacro
+
+
+data: .byte	"Hullo, ","world",'!', EOL
+xtra. .word 42, 42, 42

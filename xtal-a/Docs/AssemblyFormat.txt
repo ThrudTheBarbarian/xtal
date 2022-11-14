@@ -1,0 +1,186 @@
+
+The assembler understands the following format:
+
+- One statement per line, where a statement can be of the form, with
+  optional parts in square brackets:
+
+	[label:] opcode [arg] [arg] [; comment]
+
+- Labels can end with : or . If they end with '.' they are implicitly
+  prepended with the name of the last ":" label, thus allowing things like
+  'loop.' to be re-used between major labels
+  
+- Labels can also end with _? in which case the ? part will automatically be
+  given a monotonically incrementing value every time a label is seen. This
+  is useful for jumps within macros, for example
+  
+- All standard 6502 mnemonics including addressing modes, eg:
+
+	lda #4
+	LDA $aa   		(or %xxxxxxxx for binary or @xxx for octal, or decimal)
+	LDA $aa,X
+	lda $aaaa		(as above with numbers)
+	lda $aaaa , X
+	lda $aaaa,Y
+	lda ($aa, X)
+	lda	($aa),Y
+
+- It also understands higher-level macro-type instructions that correspond to
+  the "registers" in zerop-page. Register memory is controlled thus
+	
+		$1C,$1D		: 65536 sets of 8K banks to function RAM at $6000 .. $7FFF
+		$1E,$1F		: 65536 sets of 8K banks to data/fn RAM at $8000 .. $9FFF
+		$80			: Page index for $C0..$CF  } compiler uses values here as
+		$81			: Page index for $D0..$DF  } 8, 16, or 32-bit vars as
+		$82			: Page index for $E0..$EF  } necessary
+		$83			: Page index for $F0..$FF
+		$84			: varargs count,
+		$85			: varargs page index (vars start @0)
+		$87			: cmd buffer
+		$88			: fifo #1
+		$89			: fifo #2
+		$8A..$9F	: global vars (not swapped, 22 bytes)
+		$A0..$AF	: 16 bytes of function-return-and-args. Not swapped
+	  * $B0..$BF	: 16 bytes of function scratch-space [indexed by $1C,$1D].
+								Not preserved over fn-calls
+	  * $C0..$FF	: page-indexed variables [8,16,32-bit]
+	
+	  * means these locns are affected by zero-page indices ($80…$83 or $1C,D)
+
+- There are 16 registers names r0 through r15 which correspond to memory in
+  the range $C0 to $FF.
+
+- There are another 4 registers named f0 to f3, which are function input and
+  output registers for transferring information to and from functions. These
+  correspond to memory in the range $A0 to $AF.
+
+- There are a final 4 registers named s0 to s3 which are scratch registers,
+  basically just workspace for the current function. They are swapped out as
+  the function is changed via the $1C,1D registers
+
+- There is a command-buffer byte, which accepts a command (0..256) and whenever
+  any byte is written to the fifo #1, that command will execute. If the command
+  needs more than one byte, they are written to fifo #2 until there's only one
+  left, and then write to fifo #1.
+  
+  This allows for fast zero-ing of memory ranges, or register moves etc.
+  
+	Eg: clear register 0. 5 clocks to clear 4 bytes, not 14
+		LDA #ZEROZERO.4
+		STA $87		
+  
+	Eg: clear register 2. 10(5) clocks to clear 4 bytes, not 14
+		LDA #ZERO.4
+		STA $87
+		LDA #2
+		STA $88
+		
+	Eg: clear registers 0-7. 15(10) clocks to clear 32 bytes, not 98
+		LDA #ZERO_MULTIPLE.4
+		STA $87
+		LDA #7
+		STA $89
+		LDA #0
+		STA $88
+	
+	Eg: copy register 1 to register 2, 15(10) clocks, not 20
+		LDA #MOVE.4
+		STA $87
+		LDA #2
+		STA $89
+		LDA #1
+		STA $88
+		
+- Operations can be marked as operating on 1, 2 or 4 bytes at a time. The space
+  unused by the .2 and .1 formats is available for use by code. The used bytes
+  are right-justified in the 4-bytes, so fn0.1 is in memory location $A3
+  
+- functions are expected to mark which registers are "clobbered" by their code
+  and the assembler will emit protecting stack push/pops to handle that in the
+  function call code automatically. [not yet implemented]
+
+- Note that it's perfectly ok to use the register space for any use as long as
+  it is marked as 'clobbered'
+  
+- The higher level macro-type instructions take the format
+  
+	move.4	r0		$aaaa
+	move.2	$aaaa	$bbbb
+	move.1	$aa		r1
+	move.4	#$342	s0
+	
+	muls.4	r0		r1
+	mulu.2	r2		r3
+	
+	divs.1	r4		r5
+	divu.2	r6		r7
+	
+	adds.4	r8 		f0
+	addu.2 	r9 		r10
+	
+	subs.4	r11		r12
+	subu.2	r13		r14
+	
+	call function-name
+	
+- Floating point functionality is handled by replacing the last letter with f,
+  so you end up with [not yet implemented]
+  
+		movf, mulf, divf, addf, subf, modf, itof, and ftoi
+		
+- If the register number is > 16, and the assembler is not currently using
+  values within that page of registers, it will switch the context, emitting
+  a write to a byte in $80 to $83 to update which set of registers will be
+  written to
+
+- The assembler understands memory-allocation directives such as
+
+	label: .byte val,val,val,...
+	label: .word val,val,...
+	label: .long val,val,...			[not yet implemented]
+	
+  where a "val" can be a number in any format, or a string enclosed in ""
+  to produce a series of bytes representing the ATASCII values, or a
+  single character in '' to represent a single ATASCII value
+
+- Similarly, the directive
+
+	.addr symbol
+
+  embeds the address associated with the symbol/label [not yet implemented]
+
+- Extra code can be included with
+
+	.include path/to/file
+	
+  where the set of places to look is passed to the assembler as a command
+  line argument. Defaults (currently) to /opt/xtal/lib
+
+- Macros can be defined with
+
+		.macro name
+			asm stmt
+			asm stmt
+			...
+		.endmacro
+	
+	Any parameters in the macro can simply be named %1, %2, %3 etc. The
+	first parameter must be %1, and the numbers must go up monotonically
+	
+	Macros will be expanded inline as if the assembly language was in
+	place of them. Macros can be called recursively, and a set of them
+	are provided in stdmacros.s in the library
+	
+	Arguments must be resolveable at the point of use on the 2nd pass
+	
+- Constants can be supplied from the commandline with -D <name>=<value>
+  where there are no spaces between name and value
+  
+- Assembly can be conditional with .if (expression). If the expression
+  evaluates to non-zero the "if" block will be included. .if blocks are
+  terminated with .else or .endif and if the expression does evaluate to
+  zero, anything between the optional .else and .endif will be assembled.
+
+	
+	
+
