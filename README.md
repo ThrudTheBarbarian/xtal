@@ -13,7 +13,7 @@ But now we have [some custom hardware](https://forums.atariage.com/topic/275693-
 - There is a lot of memory on the FPGA board. More than any 6502 could realistically use. As a matter of course, I'm planning on having the memory in page-0 served by the DRAM on the board rather than from the internals of the machine.
 
 
-##Memory
+## Memory
 
 BASIC takes over the top half of page-0. Getting rid of the need for BASIC (and providing an alternative) therefore gives a huge landscape of page-0 space for use and abuse and the fine-grained remapping abilities are what makes this whole idea really appealing. The proposal is (this is from the top of my RegisterFile.h header :)
 
