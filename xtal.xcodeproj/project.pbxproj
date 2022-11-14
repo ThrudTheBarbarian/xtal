@@ -32,6 +32,15 @@
 		F480EF692922BD77008584FB /* printReg.s in Copy Library Files */ = {isa = PBXBuildFile; fileRef = F480EF642922BC1A008584FB /* printReg.s */; };
 		F480EF6A2922BD7A008584FB /* stdmacros.s in Copy Library Files */ = {isa = PBXBuildFile; fileRef = F480EF652922BC1A008584FB /* stdmacros.s */; };
 		F480EF6B2922BDE5008584FB /* xtal-a in Copy Binaries */ = {isa = PBXBuildFile; fileRef = F480EF212922B564008584FB /* xtal-a */; };
+		F480EF7C2922C657008584FB /* Expression.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF702922C657008584FB /* Expression.cc */; };
+		F480EF7D2922C657008584FB /* ASTNode.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF712922C657008584FB /* ASTNode.cc */; };
+		F480EF7E2922C657008584FB /* Emitter.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF732922C657008584FB /* Emitter.cc */; };
+		F480EF7F2922C657008584FB /* Token.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF742922C657008584FB /* Token.cc */; };
+		F480EF802922C657008584FB /* Scanner.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF752922C657008584FB /* Scanner.cc */; };
+		F480EF812922C657008584FB /* RegisterFile.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF762922C657008584FB /* RegisterFile.cc */; };
+		F480EF822922C657008584FB /* Register.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF792922C657008584FB /* Register.cc */; };
+		F480EF832922C657008584FB /* Compiler.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF7B2922C657008584FB /* Compiler.cc */; };
+		F480EF842922C8E9008584FB /* xtal-c in Copy Binaries */ = {isa = PBXBuildFile; fileRef = F480EF162922B512008584FB /* xtal-c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -44,14 +53,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
-		F480EF142922B512008584FB /* CopyFiles */ = {
+		F480EF142922B512008584FB /* Copy Binaries */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
+			buildActionMask = 12;
+			dstPath = /opt/xtal/bin;
 			dstSubfolderSpec = 0;
 			files = (
+				F480EF842922C8E9008584FB /* xtal-c in Copy Binaries */,
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			name = "Copy Binaries";
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F480EF1F2922B564008584FB /* Copy Binaries */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -117,6 +128,22 @@
 		F480EF612922BC1A008584FB /* AssemblyFormat.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AssemblyFormat.txt; sourceTree = "<group>"; };
 		F480EF642922BC1A008584FB /* printReg.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = printReg.s; sourceTree = "<group>"; };
 		F480EF652922BC1A008584FB /* stdmacros.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = stdmacros.s; sourceTree = "<group>"; };
+		F480EF6C2922C657008584FB /* Scanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Scanner.h; path = Classes/Scanner.h; sourceTree = "<group>"; };
+		F480EF6D2922C657008584FB /* Compiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Compiler.h; path = Classes/Compiler.h; sourceTree = "<group>"; };
+		F480EF6E2922C657008584FB /* Register.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Register.h; path = Classes/Register.h; sourceTree = "<group>"; };
+		F480EF6F2922C657008584FB /* RegisterFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RegisterFile.h; path = Classes/RegisterFile.h; sourceTree = "<group>"; };
+		F480EF702922C657008584FB /* Expression.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Expression.cc; path = Classes/Expression.cc; sourceTree = "<group>"; };
+		F480EF712922C657008584FB /* ASTNode.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ASTNode.cc; path = Classes/ASTNode.cc; sourceTree = "<group>"; };
+		F480EF722922C657008584FB /* Expression.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Expression.h; path = Classes/Expression.h; sourceTree = "<group>"; };
+		F480EF732922C657008584FB /* Emitter.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Emitter.cc; path = Classes/Emitter.cc; sourceTree = "<group>"; };
+		F480EF742922C657008584FB /* Token.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Token.cc; path = Classes/Token.cc; sourceTree = "<group>"; };
+		F480EF752922C657008584FB /* Scanner.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Scanner.cc; path = Classes/Scanner.cc; sourceTree = "<group>"; };
+		F480EF762922C657008584FB /* RegisterFile.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RegisterFile.cc; path = Classes/RegisterFile.cc; sourceTree = "<group>"; };
+		F480EF772922C657008584FB /* ASTNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASTNode.h; path = Classes/ASTNode.h; sourceTree = "<group>"; };
+		F480EF782922C657008584FB /* Token.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Token.h; path = Classes/Token.h; sourceTree = "<group>"; };
+		F480EF792922C657008584FB /* Register.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Register.cc; path = Classes/Register.cc; sourceTree = "<group>"; };
+		F480EF7A2922C657008584FB /* Emitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Emitter.h; path = Classes/Emitter.h; sourceTree = "<group>"; };
+		F480EF7B2922C657008584FB /* Compiler.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Compiler.cc; path = Classes/Compiler.cc; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +203,22 @@
 		F480EF172922B512008584FB /* xtal-c */ = {
 			isa = PBXGroup;
 			children = (
+				F480EF712922C657008584FB /* ASTNode.cc */,
+				F480EF772922C657008584FB /* ASTNode.h */,
+				F480EF732922C657008584FB /* Emitter.cc */,
+				F480EF7A2922C657008584FB /* Emitter.h */,
+				F480EF702922C657008584FB /* Expression.cc */,
+				F480EF722922C657008584FB /* Expression.h */,
+				F480EF792922C657008584FB /* Register.cc */,
+				F480EF6E2922C657008584FB /* Register.h */,
+				F480EF762922C657008584FB /* RegisterFile.cc */,
+				F480EF6F2922C657008584FB /* RegisterFile.h */,
+				F480EF752922C657008584FB /* Scanner.cc */,
+				F480EF6C2922C657008584FB /* Scanner.h */,
+				F480EF742922C657008584FB /* Token.cc */,
+				F480EF782922C657008584FB /* Token.h */,
+				F480EF7B2922C657008584FB /* Compiler.cc */,
+				F480EF6D2922C657008584FB /* Compiler.h */,
 				F480EF182922B512008584FB /* main.cc */,
 			);
 			path = "xtal-c";
@@ -310,7 +353,7 @@
 			buildPhases = (
 				F480EF122922B512008584FB /* Sources */,
 				F480EF132922B512008584FB /* Frameworks */,
-				F480EF142922B512008584FB /* CopyFiles */,
+				F480EF142922B512008584FB /* Copy Binaries */,
 			);
 			buildRules = (
 			);
@@ -396,9 +439,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F480EF7D2922C657008584FB /* ASTNode.cc in Sources */,
 				F480EF542922BB66008584FB /* NotifyCenter.cc in Sources */,
+				F480EF832922C657008584FB /* Compiler.cc in Sources */,
+				F480EF7C2922C657008584FB /* Expression.cc in Sources */,
 				F480EF192922B512008584FB /* main.cc in Sources */,
+				F480EF822922C657008584FB /* Register.cc in Sources */,
+				F480EF802922C657008584FB /* Scanner.cc in Sources */,
+				F480EF812922C657008584FB /* RegisterFile.cc in Sources */,
+				F480EF7E2922C657008584FB /* Emitter.cc in Sources */,
 				F480EF512922BB66008584FB /* ArgParser.cc in Sources */,
+				F480EF7F2922C657008584FB /* Token.cc in Sources */,
 				F480EF572922BB66008584FB /* HelpItem.cc in Sources */,
 				F480EF5A2922BB66008584FB /* Stringutils.cc in Sources */,
 			);

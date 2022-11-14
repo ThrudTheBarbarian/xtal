@@ -62,7 +62,7 @@ int Assembler::main(int argc, const char *argv[])
 	_includeDirs			= _ap->listOf("-i", "--include",
 										  "Runtime",
 										  "Locations to look for library files");
-	_includeDirs.push_back("/opt/la8/lib");
+	_includeDirs.push_back("/opt/xtal/lib");
 	
 	/*************************************************************************\
 	|* Check on help
