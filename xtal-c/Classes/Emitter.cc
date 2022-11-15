@@ -100,7 +100,7 @@ Register Emitter::_cgLoad(int val)
 	String size = r.sizeAsString();
 	
 	std::stringstream ss;
-	ss 	<< "\tmovi." << size << " #$" << std::hex << val << " "
+	ss 	<< "\tmove." << size << " #$" << std::hex << val << " "
 		<< r.name() << std::endl;
 	_output += ss.str();
 	return r;

@@ -144,6 +144,11 @@
 		F480EF792922C657008584FB /* Register.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Register.cc; path = Classes/Register.cc; sourceTree = "<group>"; };
 		F480EF7A2922C657008584FB /* Emitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Emitter.h; path = Classes/Emitter.h; sourceTree = "<group>"; };
 		F480EF7B2922C657008584FB /* Compiler.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Compiler.cc; path = Classes/Compiler.cc; sourceTree = "<group>"; };
+		F480EF8729231627008584FB /* test.04 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.04; sourceTree = "<group>"; };
+		F480EF8829231627008584FB /* test.03 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.03; sourceTree = "<group>"; };
+		F480EF8929231627008584FB /* test.02 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.02; sourceTree = "<group>"; };
+		F480EF8A29231627008584FB /* test.05 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.05; sourceTree = "<group>"; };
+		F480EF8B29231627008584FB /* test.01 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.01; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -203,6 +208,7 @@
 		F480EF172922B512008584FB /* xtal-c */ = {
 			isa = PBXGroup;
 			children = (
+				F480EF8529231627008584FB /* Tests */,
 				F480EF712922C657008584FB /* ASTNode.cc */,
 				F480EF772922C657008584FB /* ASTNode.h */,
 				F480EF732922C657008584FB /* Emitter.cc */,
@@ -325,6 +331,26 @@
 				F480EF652922BC1A008584FB /* stdmacros.s */,
 			);
 			path = lib;
+			sourceTree = "<group>";
+		};
+		F480EF8529231627008584FB /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				F480EF8629231627008584FB /* 01 */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		F480EF8629231627008584FB /* 01 */ = {
+			isa = PBXGroup;
+			children = (
+				F480EF8729231627008584FB /* test.04 */,
+				F480EF8829231627008584FB /* test.03 */,
+				F480EF8929231627008584FB /* test.02 */,
+				F480EF8A29231627008584FB /* test.05 */,
+				F480EF8B29231627008584FB /* test.01 */,
+			);
+			path = 01;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

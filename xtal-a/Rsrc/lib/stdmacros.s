@@ -991,7 +991,7 @@ dec0_?:
 ;|*    %2 : address of source operand #2
 ;|*    %3 : address of destination operand.
 ;\*************************************************************************/
-.macro _mul16
+.macro _mulu16
 		_clr16 %3
 		ldx #16
 	loop_?:
@@ -1002,6 +1002,44 @@ dec0_?:
 	next_?:
 		dex
 		bpl loop_?
+.endmacro
+
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Multiply two 16-bit signed numbers. Do this by checking the sign of the
+;|* high bytes, and if they differ, then remember to convert the result back
+;|* to negative. Then convery both operands to +ve if necessary, and run
+;|*
+;|* Clobbers: A, X
+;|* Arguments:
+;|*    %1 : address of source operand #1
+;|*    %2 : address of source operand #2
+;|*    %3 : address of destination operand.
+;\*************************************************************************/
+.macro _mul16
+		lda %1				; compute the EOR of high-bits of both numbers
+		eor %2
+		php					; and store for later
+		
+		lda %1				; is num1 negative ?
+		bpl check2_?		; +ve, so nothing to do here
+		_neg16 %1,%1		; convert to +ve
+	
+	check2_?:
+		lda %2				; is num2 negative
+		bpl doMul16_?		; +ve, so nothing to do here
+		_neg16 %2,%2
+	
+	doMul16_?
+		_mulu16 %1, %2, %3	; Do an unsigned multiply
+	
+		plp					; Pull the saved state
+		bpl done_?			; don't need to convert back to -ve
+		_neg16 %3, %3
+	
+	done_?:
 .endmacro
 
 
@@ -1045,7 +1083,7 @@ dec0_?:
 ;|*    %2 : address of source operand #2
 ;|*    %3 : address of destination operand.
 ;\*************************************************************************/
-.macro _mul32
+.macro _mulu32
 		_clr32 %3
 		ldx #32
 	loop_?:
@@ -1058,6 +1096,45 @@ dec0_?:
 	next_?:
 		dex
 		bpl loop_?
+.endmacro
+
+
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Multiply two 32-bit signed numbers. Do this by checking the sign of the
+;|* high bytes, and if they differ, then remember to convert the result back
+;|* to negative. Then convery both operands to +ve if necessary, and run
+;|*
+;|* Clobbers: A, X
+;|* Arguments:
+;|*    %1 : address of source operand #1
+;|*    %2 : address of source operand #2
+;|*    %3 : address of destination operand.
+;\*************************************************************************/
+.macro _mul16
+		lda %1				; compute the EOR of high-bits of both numbers
+		eor %2
+		php					; and store for later
+		
+		lda %1				; is num1 negative ?
+		bpl check2_?		; +ve, so nothing to do here
+		_neg32 %1,%1		; convert to +ve
+	
+	check2_?:
+		lda %2				; is num2 negative
+		bpl doMul16_?		; +ve, so nothing to do here
+		_neg32 %2,%2
+	
+	doMul16_?
+		_mulu32 %1, %2, %3	; Do an unsigned multiply
+	
+		plp					; Pull the saved state
+		bpl done_?			; don't need to convert back to -ve
+		_neg32 %3, %3
+	
+	done_?:
 .endmacro
 
 

@@ -2,10 +2,7 @@
 
 .include stdmacros.s
 
-_memcpy $80, $70, $a0
+	move.4 #$2 r1
+	move.4 #$3 r2
+	move.4 #$5 r3
 
-;move.4 r0 $4567 
-;move.4 r1 f0
-;move.4 #$12345678 r0
-;move.2 $4567 r0
-;move.4 $1234 $5678
