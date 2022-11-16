@@ -2,6 +2,9 @@
 
 .include stdmacros.s
 
-_movi32 $10, $300
-_movi32 $FFFFFFFA, $308
-_mul32 $300, $308, $310
+move.4 #$1122 r1
+move.4 #$2233 r2
+muls.4 r1 r2 r3
+
+;muls.4 r1 r3
+

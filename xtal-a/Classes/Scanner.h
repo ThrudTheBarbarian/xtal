@@ -131,6 +131,33 @@ class Scanner
         int _macro(TokenList &tokens, int& line, Macro macro, String args);
 
         /*********************************************************************\
+        |* Make sure that any registers that need banks remapped, have that
+        |* happen by writing to the correct registers in page 0
+        \*********************************************************************/
+		void _surfaceRegs(TargetType t1,
+						  TargetType t2,
+						  int64_t v1,
+						  int64_t v2,
+						  TokenList &tokens,
+						  int line,
+						  int pass);
+
+        /*********************************************************************\
+        |* Make sure that any registers that need banks remapped, have that
+        |* happen by writing to the correct registers in page 0. This is for
+        |* 3-argument checks
+        \*********************************************************************/
+		void _surfaceRegs3(TargetType t1,
+						   TargetType t2,
+						   TargetType t3,
+						   int64_t v1,
+						   int64_t v2,
+						   int64_t v3,
+						   TokenList &tokens,
+						   int line,
+						   int pass);
+
+        /*********************************************************************\
         |* Handle 'move''
         \*********************************************************************/
 		int _handleMove(Token::TokenInfo info,
@@ -141,9 +168,21 @@ class Scanner
 						int pass);
 
         /*********************************************************************\
+        |* Handle 'mul''
+        \*********************************************************************/
+		int _handleMul(String word,
+					   Token::TokenInfo info,
+					   int extent,
+					   String args,
+					   TokenList &tokens,
+					   int& line,
+					   int pass);
+
+        /*********************************************************************\
         |* Handle any meta opcodes
         \*********************************************************************/
-		int _handleMeta(Token::TokenInfo info,
+		int _handleMeta(String word,
+						Token::TokenInfo info,
 						int extent,
 						String args,
 						TokenList &tokens,

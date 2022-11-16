@@ -4,6 +4,7 @@
 //
 //  Created by Thrud The Barbarian on 10/28/22.
 //
+#include <cstdlib>
 #include  <regex>
 
 #include "Assembler.h"
@@ -21,7 +22,12 @@ static int _ttSizes[] = {1, 	// REG_MAIN			r...
 						 1, 	// REG_SCRATCH		s...
 						 0, 	// ABSOLUTE			...
 						 1};	// IMMEDIATE		#...
-				
+						 
+typedef struct
+	{
+	int idx;
+	uint8_t byte;
+	} IndexedByte;
 
 /****************************************************************************\
 |* Constructor
@@ -161,7 +167,7 @@ int Scanner::scan(TokenList &tokens, int& line, int pass)
 							: (word.ends_with(".2")) ? 2
 							: 4;
 							
-				_handleMeta(info, extent, args, tokens, line, pass);
+				_handleMeta(word, info, extent, args, tokens, line, pass);
 				break;
 				}
 				
@@ -241,12 +247,13 @@ int Scanner::_macro(TokenList &tokens, int &line, Macro macro, String argstr)
 /*****************************************************************************\
 |* Handle any meta-call opcodes
 \*****************************************************************************/
-int Scanner::_handleMeta(Token::TokenInfo info,
-						   int extent,
-						   String args,
-						   TokenList &tokens,
-						   int& line,
-						   int pass)
+int Scanner::_handleMeta(String word,
+						 Token::TokenInfo info,
+						 int extent,
+						 String args,
+						 TokenList &tokens,
+						 int& line,
+						 int pass)
 	{
 	int ok = 0;
 	
@@ -254,6 +261,10 @@ int Scanner::_handleMeta(Token::TokenInfo info,
 		{
 		case P_MOVE:
 			ok = _handleMove(info, extent, args, tokens, line, pass);
+			break;
+		
+		case P_MUL:
+			ok = _handleMul(word, info, extent, args, tokens, line, pass);
 			break;
 		
 		default:
@@ -290,7 +301,271 @@ Scanner::TargetType Scanner::_determineTarget(String s, int64_t &val, int line)
 	
 	return type;
 	}
+
+/*****************************************************************************\
+|* Helper function to sort the indexed bytes
+\*****************************************************************************/
+static int _compareIndexedByte(const void *v1, const void *v2)
+	{
+	const IndexedByte *b1 = (const IndexedByte *)v1;
+	const IndexedByte *b2 = (const IndexedByte *)v2;
 	
+	if (b1->byte == b2->byte)
+		return 0;
+	if (b1->byte > b2->byte)
+		return 1;
+	return -1;
+	}
+
+/*****************************************************************************\
+|* Helper method to surface the correct registers
+\*****************************************************************************/
+void Scanner::_surfaceRegs(TargetType t1,
+						   TargetType t2,
+						   int64_t v1,
+						   int64_t v2,
+						   TokenList &tokens,
+						   int line,
+						   int pass)
+	{
+	Token::TokenInfo opInfo;
+	int bank1	= (v1 % 16) / 4;	// 0 -> $80,	1 -> $81
+	int bank2 	= (v2 % 16) / 4;	// 2 -> $82, 	3 -> $83
+	int page1	= (int) v1 / 16;	// r0 -> 0,		r17 -> 1
+	int page2	= (int) v2 / 16;	// r1 -> 0, 	r18	-> 1
+	
+	if (t1 == REG_MAIN)
+		{
+		if ((t2 == REG_MAIN) && (bank1 == bank2) && (page1 != page2))
+			FATAL(ERR_META, "Overlapping banks for src and dst, line %d", line);
+	
+        /*********************************************************************\
+        |* If we need to change banking 1, do so
+        \*********************************************************************/
+		if (page1 != _pageIndex[bank1])
+			{
+			String arg	= "#" + std::to_string(page1);
+			opInfo 		= Token::parsePrefix("lda");
+			_handle6502(opInfo, arg, tokens, line, pass);
+			
+			arg			= toHexString(PAGEIDX0+bank1, "$");
+			opInfo 		= Token::parsePrefix("sta");
+			_handle6502(opInfo, arg, tokens, line, pass);
+			
+			_pageIndex[bank1] = page1;
+			}
+		}
+
+	/*************************************************************************\
+	|* If the second argument is a main register, make sure the bank is set up
+	\*************************************************************************/
+	if (t2 == REG_MAIN)
+		{
+		if ((t1 == REG_MAIN) && (bank1 == bank2) && (page1 != page2))
+			FATAL(ERR_META, "Overlapping banks for src and dst, line %d", line);
+
+        /*********************************************************************\
+        |* If we need to change banking 2, do so
+        \*********************************************************************/
+		if (page2 != _pageIndex[bank2])
+			{
+			String arg	= "#" + std::to_string(page2);
+			opInfo 		= Token::parsePrefix("lda");
+			_handle6502(opInfo, arg, tokens, line, pass);
+			
+			arg			= toHexString(PAGEIDX0+bank2, "$");
+			opInfo 		= Token::parsePrefix("sta");
+			_handle6502(opInfo, arg, tokens, line, pass);
+			
+			_pageIndex[bank2] = page2;
+			}
+		}
+	}
+
+/*****************************************************************************\
+|* Helper method to surface the correct registers
+\*****************************************************************************/
+void Scanner::_surfaceRegs3(TargetType t1,
+						    TargetType t2,
+						    TargetType t3,
+						    int64_t v1,
+						    int64_t v2,
+						    int64_t v3,
+						    TokenList &tokens,
+						    int line,
+						    int pass)
+	{
+	Token::TokenInfo opInfo;
+	int bank1	= (v1 % 16) / 4;	// 0 -> $80,	1 -> $81
+	int bank2 	= (v2 % 16) / 4;	// 2 -> $82, 	3 -> $83
+	int bank3 	= (v3 % 16) / 4;	// 2 -> $82, 	3 -> $83
+	int page1	= (int) v1 / 16;	// r0 -> 0,		r17 -> 1
+	int page2	= (int) v2 / 16;	// r1 -> 0, 	r18	-> 1
+	int page3	= (int) v3 / 16;	// r1 -> 0, 	r18	-> 1
+	
+	
+	if (t1 == REG_MAIN)
+		{
+		bool bank2Err = (bank1 == bank2) && (page1 != page2);
+		bool bank3Err = (bank1 == bank3) && (page1 != page3);
+		if (((t2 == REG_MAIN) && bank2Err) || ((t3 == REG_MAIN) && bank3Err))
+			FATAL(ERR_META, "Overlapping banks for src and dst, line %d", line);
+	
+        /*********************************************************************\
+        |* If we need to change banking 1, do so
+        \*********************************************************************/
+		if (page1 != _pageIndex[bank1])
+			{
+			String arg	= "#" + std::to_string(page1);
+			opInfo 		= Token::parsePrefix("lda");
+			_handle6502(opInfo, arg, tokens, line, pass);
+			
+			arg			= toHexString(PAGEIDX0+bank1, "$");
+			opInfo 		= Token::parsePrefix("sta");
+			_handle6502(opInfo, arg, tokens, line, pass);
+			
+			_pageIndex[bank1] = page1;
+			}
+		}
+
+	/*************************************************************************\
+	|* If the second argument is a main register, make sure the bank is set up
+	\*************************************************************************/
+	if (t2 == REG_MAIN)
+		{
+		bool bank1Err = (bank2 == bank1) && (page2 != page1);
+		bool bank3Err = (bank2 == bank3) && (page2 != page3);
+		if (((t1 == REG_MAIN) && bank1Err) || ((t3 == REG_MAIN) && bank3Err))
+			FATAL(ERR_META, "Overlapping banks for src and dst, line %d", line);
+
+        /*********************************************************************\
+        |* If we need to change banking 2, do so
+        \*********************************************************************/
+		if (page2 != _pageIndex[bank2])
+			{
+			String arg	= "#" + std::to_string(page2);
+			opInfo 		= Token::parsePrefix("lda");
+			_handle6502(opInfo, arg, tokens, line, pass);
+			
+			arg			= toHexString(PAGEIDX0+bank2, "$");
+			opInfo 		= Token::parsePrefix("sta");
+			_handle6502(opInfo, arg, tokens, line, pass);
+			
+			_pageIndex[bank2] = page2;
+			}
+		}
+
+	/*************************************************************************\
+	|* If the third argument is a main register, make sure the bank is set up
+	\*************************************************************************/
+	if (t3 == REG_MAIN)
+		{
+		bool bank1Err = (bank3 == bank1) && (page3 != page1);
+		bool bank2Err = (bank3 == bank2) && (page3 != page2);
+		if (((t1 == REG_MAIN) && bank1Err) || ((t2 == REG_MAIN) && bank2Err))
+			FATAL(ERR_META, "Overlapping banks for src and dst, line %d", line);
+
+        /*********************************************************************\
+        |* If we need to change banking 3, do so
+        \*********************************************************************/
+		if (page3 != _pageIndex[bank3])
+			{
+			String arg	= "#" + std::to_string(page3);
+			opInfo 		= Token::parsePrefix("lda");
+			_handle6502(opInfo, arg, tokens, line, pass);
+			
+			arg			= toHexString(PAGEIDX0+bank3, "$");
+			opInfo 		= Token::parsePrefix("sta");
+			_handle6502(opInfo, arg, tokens, line, pass);
+			
+			_pageIndex[bank3] = page3;
+			}
+		}
+	}
+	
+/*****************************************************************************\
+|* Handle the meta 'mul' opcode. This is either signed or unsigned, and is
+|* always register to register, eg:
+|*
+|*	muls.4	r0		r1
+|*	mulu.2	r2		r3
+|*
+|* where:
+|*		.x defines the width of the move,
+|*		arguments must be registers, (r*, fn*, s*)
+|*
+\*****************************************************************************/
+int Scanner::_handleMul(String word,
+						Token::TokenInfo info,
+						int extent,
+						String argString,
+						TokenList &tokens,
+						int& line,
+						int pass)
+	{
+	int ok 			= 0;
+	StringList args = split(argString, " \t");
+	if (args.size() != 3)
+		FATAL(ERR_META, "Illegal meta-construct 'mul' at line %d", line);
+	
+	/*************************************************************************\
+	|* Determine src1 target-type and value
+	\*************************************************************************/
+	int64_t v1, v2, v3;
+	String arg1 	= trim(args[0]);
+	TargetType t1	= _determineTarget(arg1, v1, line);
+	if (!IS_REG(t1))
+		FATAL(ERR_META, "Argument 1 to mul must be register on line %d", line);
+		
+	/*************************************************************************\
+	|* Determine src2 target-type and value
+	\*************************************************************************/
+	String arg2 	= trim(args[1]);
+	TargetType t2	= _determineTarget(arg2, v2, line);
+	if (!IS_REG(t2))
+		FATAL(ERR_META, "Argument 2 to mul must be register on line %d", line);
+		
+	/*************************************************************************\
+	|* Determine dst target-type and value
+	\*************************************************************************/
+	String arg3 	= trim(args[2]);
+	TargetType t3	= _determineTarget(arg3, v3, line);
+	if (!IS_REG(t3))
+		FATAL(ERR_META, "Argument 3 to mul must be register on line %d", line);
+
+	/*************************************************************************\
+	|* Make sure any registers that need banks remapped, have that happen
+	\*************************************************************************/
+	_surfaceRegs3(t1, t2, t3, v1, v2, v3, tokens, line, pass);
+
+	/*************************************************************************\
+	|* Use the appropriate macro to run the code inline
+	\*************************************************************************/
+	int base1		= (t1 == REG_MAIN)	? REGMAIN_BASE
+					: (t1 == REG_FN)	? REGFN_BASE
+					:					  REGSCRATCH_BASE;
+	int base2		= (t2 == REG_MAIN)	? REGMAIN_BASE
+					: (t2 == REG_FN)	? REGFN_BASE
+					:					  REGSCRATCH_BASE;
+	int base3		= (t3 == REG_MAIN)	? REGMAIN_BASE
+					: (t3 == REG_FN)	? REGFN_BASE
+					:					  REGSCRATCH_BASE;
+
+	int addr1		= base1 + ((v1 % 16) * 4);
+	int addr2		= base2 + ((v2 % 16) * 4);
+	int addr3		= base3 + ((v3 % 16) * 4);
+
+	String macro	= "_mul";
+	macro		   += std::to_string(extent*8);
+	macro 		   += (lcase(word).starts_with("mulu")) ? "u" : "";
+	macro		   += toHexString(addr1, " $");
+	macro		   += toHexString(addr2, ", $");
+	macro		   += toHexString(addr3, ", $");
+	
+	_src.insert(_at, macro);
+	return ok;
+	}
+
 /*****************************************************************************\
 |* Handle the meta 'move' opcode. This is overloaded several ways, and can be
 |* of the form:
@@ -316,7 +591,7 @@ int Scanner::_handleMove(Token::TokenInfo info,
 	int ok 			= 0;
 	StringList args = split(argString, " \t");
 	if (args.size() != 2)
-		FATAL(ERR_META, "Illegal meta-construct at line %d", line);
+		FATAL(ERR_META, "Illegal meta-construct 'move' at line %d", line);
 		
 	/*************************************************************************\
 	|* Determine src target-type and value
@@ -334,64 +609,14 @@ int Scanner::_handleMove(Token::TokenInfo info,
 		FATAL(ERR_META, "Cannot move to immediate value on line %d", line);
 	
 	/*************************************************************************\
-	|* If the first argument is a main register, make sure the bank is set up
+	|* Make sure any registers that need banks remapped, have that happen
 	\*************************************************************************/
-	Token::TokenInfo opInfo;
-	int bank1	= (v1 % 16) / 4;	// 0 -> $80,	1 -> $81
-	int bank2 	= (v2 % 16) / 4;	// 2 -> $82, 	3 -> $83
-	int page1	= (int) v1 / 16;	// r0 -> 0,		r17 -> 1
-	int page2	= (int) v2 / 16;	// r1 -> 0, 	r18	-> 1
+	_surfaceRegs(t1, t2, v1, v2, tokens, line, pass);
 	
-	if (t1 == REG_MAIN)
-		{
-		if ((bank1 == bank2) && (page1 != page2))
-			FATAL(ERR_META, "Overlapping banks for src and dst, line %d", line);
-	
-        /*********************************************************************\
-        |* If we need to change banking 1, do so
-        \*********************************************************************/
-		if (page1 != _pageIndex[bank1])
-			{
-			String arg	= "#" + std::to_string(page1);
-			opInfo 		= Token::parsePrefix("lda");
-			_handle6502(opInfo, arg, tokens, line, pass);
-			
-			arg			= toHexString(PAGEIDX0+bank1, "$");
-			opInfo 		= Token::parsePrefix("sta");
-			_handle6502(opInfo, arg, tokens, line, pass);
-			
-			_pageIndex[bank1] = page1;
-			}
-		}
-		
-	/*************************************************************************\
-	|* If the second argument is a main register, make sure the bank is set up
-	\*************************************************************************/
-	if (t2 == REG_MAIN)
-		{
-		if ((bank1 == bank2) && (page1 != page2))
-			FATAL(ERR_META, "Overlapping banks for src and dst, line %d", line);
-
-        /*********************************************************************\
-        |* If we need to change banking 2, do so
-        \*********************************************************************/
-		if (page2 != _pageIndex[bank2])
-			{
-			String arg	= "#" + std::to_string(page2);
-			opInfo 		= Token::parsePrefix("lda");
-			_handle6502(opInfo, arg, tokens, line, pass);
-			
-			arg			= toHexString(PAGEIDX0+bank2, "$");
-			opInfo 		= Token::parsePrefix("sta");
-			_handle6502(opInfo, arg, tokens, line, pass);
-			
-			_pageIndex[bank2] = page2;
-			}
-		}
-
 	/*************************************************************************\
 	|* Handle register -> register move
 	\*************************************************************************/
+	Token::TokenInfo opInfo;
 	if (IS_REG(t1) && IS_REG(t2))
 		{
         /*********************************************************************\
@@ -455,18 +680,34 @@ int Scanner::_handleMove(Token::TokenInfo info,
 		int base2		= (t2 == REG_MAIN)	? REGMAIN_BASE
 						: (t2 == REG_FN)	? REGFN_BASE
 						:					  REGSCRATCH_BASE;
-	
-		int addr2	= base2 + ((v2 % 16) * 4) + 3;
 		
+		int addr2	= base2 + ((v2 % 16) * 4);
+		
+		// To optimise stores, we want to find any reoccurrences of the
+		// known byte quantity
+		IndexedByte b[4];
 		for (int i=0; i<extent; i++)
 			{
-			int v		= value & 0xFF;
-			value		= value >> 8;
-			String arg	= toHexString(v, "#$");
-			opInfo 		= Token::parsePrefix("lda");
-			_handle6502(opInfo, arg, tokens, line, pass);
-
-			arg			= toHexString(addr2-i, "$");
+			b[i].idx 	= i;
+			b[i].byte 	= value & 0xFF;
+			value 		= value >> 8;
+			}
+	
+		::qsort(b, extent, sizeof(IndexedByte), _compareIndexedByte);
+		
+		
+		int v = -1;
+		for (int i=0; i<extent; i++)
+			{
+			if (v != b[i].byte)
+				{
+				String arg	= toHexString(b[i].byte, "#$");
+				opInfo 		= Token::parsePrefix("lda");
+				_handle6502(opInfo, arg, tokens, line, pass);
+				v = b[i].byte;
+				}
+			
+			String arg	= toHexString(addr2 + b[i].idx, "$");
 			opInfo 		= Token::parsePrefix("sta");
 			_handle6502(opInfo, arg, tokens, line, pass);
 			}
