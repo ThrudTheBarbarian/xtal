@@ -111,19 +111,24 @@ Register Emitter::_cgLoad(int val)
 \*****************************************************************************/
 Register Emitter::_cgAdd(Register r1, Register r2)
 	{
+	Register result	= _regs->allocate(Register::SIGNED_4BYTE);
+
 	String op 		= "\taddu.";
 	int separator	= Register::UNSIGNED_4BYTE;
 	if ((r1.type() > separator) || (r2.type() > separator))
 		op = "\tadds.";
-	op += r2.sizeAsString();
+	op += result.sizeAsString();
 
 	std::stringstream ss;
 	ss 	<< op << " "
 		<< r1.name() << " "
-		<< r2.name() << std::endl;
+		<< r2.name()
+	    << " " << result.name()
+		<< std::endl;
 	_output += ss.str();
 	_regs->free(r1);
-	return r2;
+	_regs->free(r2);
+	return result;
 	}
 
 /*****************************************************************************\
@@ -132,17 +137,24 @@ Register Emitter::_cgAdd(Register r1, Register r2)
 Register Emitter::_cgMul(Register r1, Register r2)
 	{
 	std::stringstream ss;
+	Register result	= _regs->allocate(Register::SIGNED_4BYTE);
 
 	String op 		= "mulu.";
 	int separator	= Register::UNSIGNED_4BYTE;
 	if ((r1.type() > separator) || (r2.type() > separator))
 		op = "muls.";
-	op += r2.sizeAsString();
+	op += result.sizeAsString();
 	
-	ss << "\t" << op << " " << r1.name() << " " << r2.name() << std::endl;
+	ss << "\t" << op
+	   << " " << r1.name()
+	   << " " << r2.name()
+	   << " " << result.name()
+	   << std::endl;
+	   
 	_output += ss.str();
 	_regs->free(r1);
-	return r2;
+	_regs->free(r2);
+	return result;
 	}
 
 /*****************************************************************************\
@@ -150,19 +162,25 @@ Register Emitter::_cgMul(Register r1, Register r2)
 \*****************************************************************************/
 Register Emitter::_cgSub(Register r1, Register r2)
 	{
+	Register result	= _regs->allocate(Register::SIGNED_4BYTE);
+
 	String op 		= "\tsubu.";
 	int separator	= Register::UNSIGNED_4BYTE;
 	if ((r1.type() > separator) || (r2.type() > separator))
 		op = "\tsubs.";
-	op += r2.sizeAsString();
+	op += result.sizeAsString();
 
 	std::stringstream ss;
 	ss 	<< op << " "
-		<< r1.name() << " "
-		<< r2.name() << std::endl;
+		<< r1.name() 
+	    << " " << r2.name()
+	    << " " << result.name()
+	    << std::endl;
+
 	_output += ss.str();
 	_regs->free(r1);
-	return r2;
+	_regs->free(r2);
+	return result;
 	}
 	
 /*****************************************************************************\
@@ -170,16 +188,23 @@ Register Emitter::_cgSub(Register r1, Register r2)
 \*****************************************************************************/
 Register Emitter::_cgDiv(Register r1, Register r2)
 	{
-	std::stringstream ss;
-	String op 		= "divu.";
+	Register result	= _regs->allocate(Register::SIGNED_4BYTE);
+	String op 		= "\tdivu.";
 	int separator	= Register::UNSIGNED_4BYTE;
 	if ((r1.type() > separator) || (r2.type() > separator))
-		op = "divs.";
-	op += r2.sizeAsString();
+		op = "\tdivs.";
+	op += result.sizeAsString();
 	
-	ss << "\t" << op << " " << r1.name() << " " << r2.name() << std::endl;
+	std::stringstream ss;
+	ss 	<< op << " "
+		<< r1.name()
+	    << " " << r2.name()
+	    << " " << result.name()
+	    << std::endl;
+
 	_output += ss.str();
 	_regs->free(r1);
-	return r2;
+	_regs->free(r2);
+	return result;
 	}
 
