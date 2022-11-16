@@ -20,6 +20,44 @@
 ;/*************************************************************************\
 ;|* Type: Basic operation
 ;|*
+;|* Write a 16-bit number to a memory location in little-endian form
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 immediate value to store
+;|*    %2 address to store it at
+;\*************************************************************************/
+.macro _movi16
+	lda #>%1
+	sta %2+1
+	lda #<%1
+	sta %2
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Basic operation
+;|*
+;|* Write a 32-bit number to a memory location in little-endian form
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 immediate value to store
+;|*    %2 address to store it at
+;\*************************************************************************/
+.macro _movi32
+	lda #>>>%1
+	sta %2+3
+	lda #>>%1
+	sta %2+2
+	lda #>%1
+	sta %2+1
+	lda #<%1
+	sta %2
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Basic operation
+;|*
 ;|* Clear 2 bytes of memory, the address pointed to by the argument, and the
 ;|* subsequent address
 ;|*
@@ -995,22 +1033,23 @@ dec0_?:
 		_clr16 %3
 		ldx #16
 	loop_?:
-		_asl16 %3,%3
-		_asl16 %1,%1
+		_lsr16 %1,%1
 		bcc next_?
 		_add16 %2, %3, %3
 	next_?:
+		_asl16 %2, %2
 		dex
-		bpl loop_?
+		bne loop_?
 .endmacro
 
 
 ;/*************************************************************************\
 ;|* Type: Arithmetic operation
 ;|*
-;|* Multiply two 16-bit signed numbers. Do this by checking the sign of the
-;|* high bytes, and if they differ, then remember to convert the result back
-;|* to negative. Then convery both operands to +ve if necessary, and run
+;|* Multiply two 16-bit possibly-signed numbers. Do this by checking the
+;|* sign of the high bytes, and if they differ, then remember to convert
+;|* the result back to negative. Then convert both operands to +ve if
+;|* necessary, and run
 ;|*
 ;|* Clobbers: A, X
 ;|* Arguments:
@@ -1032,7 +1071,7 @@ dec0_?:
 		bpl doMul16_?		; +ve, so nothing to do here
 		_neg16 %2,%2
 	
-	doMul16_?
+	doMul16_?:
 		_mulu16 %1, %2, %3	; Do an unsigned multiply
 	
 		plp					; Pull the saved state
@@ -1071,72 +1110,6 @@ dec0_?:
 .endmacro
 
 
-;/*************************************************************************\
-;|* Type: Arithmetic operation
-;|*
-;|* calculate the 32 bit product of two 32 bit unsigned numbers. The
-;|* value at %1 is destroyed. Any overflow is lost
-;|*
-;|* Clobbers: A, X
-;|* Arguments:
-;|*    %1 : address of source operand #1
-;|*    %2 : address of source operand #2
-;|*    %3 : address of destination operand.
-;\*************************************************************************/
-.macro _mulu32
-		_clr32 %3
-		ldx #32
-	loop_?:
-		_asl32 %3,%3
-		_asl32 %1,%1
-		bcc next_?
-		_add32 %2, %3, %3
-		bcc next_?
-		_inc16 %3+2
-	next_?:
-		dex
-		bpl loop_?
-.endmacro
-
-
-
-;/*************************************************************************\
-;|* Type: Arithmetic operation
-;|*
-;|* Multiply two 32-bit signed numbers. Do this by checking the sign of the
-;|* high bytes, and if they differ, then remember to convert the result back
-;|* to negative. Then convery both operands to +ve if necessary, and run
-;|*
-;|* Clobbers: A, X
-;|* Arguments:
-;|*    %1 : address of source operand #1
-;|*    %2 : address of source operand #2
-;|*    %3 : address of destination operand.
-;\*************************************************************************/
-.macro _mul16
-		lda %1				; compute the EOR of high-bits of both numbers
-		eor %2
-		php					; and store for later
-		
-		lda %1				; is num1 negative ?
-		bpl check2_?		; +ve, so nothing to do here
-		_neg32 %1,%1		; convert to +ve
-	
-	check2_?:
-		lda %2				; is num2 negative
-		bpl doMul16_?		; +ve, so nothing to do here
-		_neg32 %2,%2
-	
-	doMul16_?
-		_mulu32 %1, %2, %3	; Do an unsigned multiply
-	
-		plp					; Pull the saved state
-		bpl done_?			; don't need to convert back to -ve
-		_neg32 %3, %3
-	
-	done_?:
-.endmacro
-
 
 ;/*************************************************************************\
 ;|* Type: Arithmetic operation
@@ -1166,6 +1139,70 @@ dec0_?:
 	.if (%2 & $0001)
 		_add16 %1, %3, %3
 	.endif
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* calculate the 32 bit product of two 32 bit unsigned numbers. The
+;|* value at %1 is destroyed. Any overflow is lost
+;|*
+;|* Clobbers: A, X
+;|* Arguments:
+;|*    %1 : address of source operand #1
+;|*    %2 : address of source operand #2
+;|*    %3 : address of destination operand.
+;\*************************************************************************/
+.macro _mul32u
+		_clr32 %3
+		ldx #32
+	loop_?:
+		_lsr32 %1,%1
+		bcc next_?
+		_add32 %2,%3,%3
+	next_?:
+		_asl32 %2,%2
+		dex
+		bpl loop_?
+.endmacro
+
+
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Multiply two 32-bit signed numbers. Do this by checking the sign of the
+;|* high bytes, and if they differ, then remember to convert the result back
+;|* to negative. Then convert both operands to +ve if necessary, and run
+;|*
+;|* Clobbers: A, X
+;|* Arguments:
+;|*    %1 : address of source operand #1
+;|*    %2 : address of source operand #2
+;|*    %3 : address of destination operand.
+;\*************************************************************************/
+.macro _mul32
+		lda %1				; compute the EOR of high-bits of both numbers
+		eor %2
+		php					; and store for later
+		
+		lda %1				; is num1 negative ?
+		bpl check2_?		; +ve, so nothing to do here
+		_neg32 %1,%1		; convert to +ve
+	
+	check2_?:
+		lda %2				; is num2 negative
+		bpl doMul32_?		; +ve, so nothing to do here
+		_neg32 %2,%2
+	
+	doMul32_?:
+		_mul32u %1, %2, %3	; Do an unsigned multiply
+	
+		plp					; Pull the saved state
+		bpl done_?			; don't need to convert back to -ve
+		_neg32 %3, %3
+	
+	done_?:
 .endmacro
 
 

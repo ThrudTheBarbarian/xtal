@@ -60,6 +60,8 @@ expr: NUMBER
 | expr '=' '=' expr 		{$$ = ($1 == $4);}
 | expr '!' '=' expr 		{$$ = ($1 != $4);}
 | '<' expr %prec LOBYTE 	{$$ = ($2 & 0xFF);}
+| '>' '>' '>' expr %prec HIBYTE 	{$$ = (($4 >> 24) & 0xFF);}
+| '>' '>' expr %prec HIBYTE 	{$$ = (($3 >> 16) & 0xFF);}
 | '>' expr %prec HIBYTE 	{$$ = (($2 >> 8) & 0xFF);}
 | '-' expr %prec UNARYMINUS {$$ = -$2;}
 | '(' expr ')' 				{$$ = $2;}
