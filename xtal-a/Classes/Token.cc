@@ -364,11 +364,11 @@ String Token::toString(void)
 			break;
 		
 		case A_XINDEX_INDIRECT:
-			info += " (" + HEX1 +", X)";
+			info += " (" + HEX1 +",X)";
 			break;
 		
 		case A_INDIRECT_YINDEX:
-			info += " (" + HEX1 +"), Y";
+			info += " (" + HEX1 +"),Y";
 			break;
 		
 		case A_RELATIVE:
@@ -386,11 +386,11 @@ String Token::toString(void)
 			break;
 		
 		case A_ZEROPAGE_XINDEX:
-			info +=  " " + HEX1 + ", X";
+			info +=  " " + HEX1 + ",X";
 			break;
 		
 		case A_ZEROPAGE_YINDEX:
-			info +=  " " + HEX1 + ", Y";
+			info +=  " " + HEX1 + ",Y";
 			break;
 		
 		default:

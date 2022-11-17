@@ -158,7 +158,21 @@ class Scanner
 						   int pass);
 
         /*********************************************************************\
-        |* Handle 'move''
+        |* Insert a 3-register operation into the source code, so it will be
+        |* acted on next
+        \*********************************************************************/
+		void _insertOp(TargetType t1,
+					   TargetType t2,
+					   TargetType t3,
+					   int64_t v1,
+					   int64_t v2,
+					   int64_t v3,
+					   String stem,
+					   int overflowPos
+					   );
+					   
+        /*********************************************************************\
+        |* Handle 'move'
         \*********************************************************************/
 		int _handleMove(Token::TokenInfo info,
 						int extent,
@@ -168,16 +182,17 @@ class Scanner
 						int pass);
 
         /*********************************************************************\
-        |* Handle 'mul''
+        |* Handle 'mul'
         \*********************************************************************/
-		int _handleMul(String word,
-					   Token::TokenInfo info,
-					   int extent,
-					   String args,
-					   TokenList &tokens,
-					   int& line,
-					   int pass);
-
+		int _handleMath(String word,
+					    Token::TokenInfo info,
+					    int extent,
+					    String args,
+					    TokenList &tokens,
+					    int& line,
+					    int pass,
+						String op);
+ 
         /*********************************************************************\
         |* Handle any meta opcodes
         \*********************************************************************/

@@ -159,6 +159,8 @@ int Assembler::_run(std::string source)
 	while (scanner.scan(tokens, line, 1) == Scanner::SCAN_MORE)
 		;
 
+	scanner.engine().dumpVars();
+	
 	/*************************************************************************\
 	|* Run a sanity check on the if blocks being properly closed
 	\*************************************************************************/

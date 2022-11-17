@@ -1,10 +1,160 @@
 .org $600
 
-.include stdmacros.s
+;.include stdmacros.s
 
-move.4 #$1122 r1
-move.4 #$2233 r2
-muls.4 r1 r2 r3
+;move.4 #$2233 r1
+;move.4 #$11 r2
+;_div32 $c4,$c8,$d0,$d4
 
-;muls.4 r1 r3
+; m6-m9		%1	(dividend)
+; mA-mD		%2	(divisor)
+; m1-m4		%3 (quotient)
+; 			%4 (remainder)
+
+
+divisor  = $11
+dividend = $88884444
+
+lda #<dividend
+sta $c6
+lda #>dividend
+sta $c7
+lda #>>dividend
+sta $c8
+lda #>>>dividend
+sta $c9
+
+lda #<divisor
+sta $ca
+lda #>divisor
+sta $cb
+lda #>>divisor
+sta $cc
+lda #>>>divisor
+sta $cd
+
+jsr sdiv46
+brk
+
+sneg46:
+	lda #4
+	sta $ce
+	ldx #0
+	sec
+
+sng1:
+	lda #0
+	sbc $c1,x
+	sta $c1,x
+	inx
+	dec $ce
+	bne sng1
+	asl a
+	rts
+
+
+
+abs4:
+	lda $c7
+	eor $cb
+	sta $ce
+	ldx #$c4
+	jsr absneg
+	ldx #$c8
+	jsr absneg
+	ldx #0
+	rts
+
+absneg:
+	lda 3,x
+	bpl exit
+	ldy #4
+	sec
+
+absneg1:
+	lda #0
+	sbc 0,x
+	sta 0,x
+	inx
+	dey
+	bne absneg1
+exit:
+	rts
+	
+
+sdiv46:
+	lda $c9
+	sta $c5
+	jsr abs4
+	stx $c1
+	stx $c2
+	stx $c3
+	stx $c4
+	lda $ca
+	ora $cb
+	ora $cc
+	ora $cd
+	beq error
+	
+	ldy #32
+sdv1:
+	asl $c6
+	rol $c7
+	rol $c8
+	rol $c9
+	rol $c1
+	rol $c2
+	rol $c3
+	rol $c4
+	lda #4
+	sta $ce
+	sta $cf
+	ldx #0
+	sec
+sdv2:
+	lda $c1,x
+	sbc $ca,x
+	sta $c1,x
+	inx
+	dec $ce
+	bne sdv2
+	bcs sdv4
+	clc
+	ldx $ce
+sdv3:
+	lda $c1,x
+	adc $ca,x
+	sta $c1,x
+	inx
+	dec $cf
+	bne sdv3
+	beq sdv5
+sdv4:
+	inc $c6
+sdv5:
+	dey
+	bne sdv1
+	bit $c5
+	bpl sdv6
+	jsr sneg46
+sdv6:
+	ldx #4
+sdv7:
+	lda $c0,x
+	sta $c9,x
+	lda $c5,x
+	sta $c0,x
+	dex
+	bne sdv7
+	
+	bit $c0
+	bpl sdv8
+	jsr sneg46
+sdv8:
+	clc
+	rts
+error:
+	sec
+	rts
+	
 

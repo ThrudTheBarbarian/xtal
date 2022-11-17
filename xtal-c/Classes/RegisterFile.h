@@ -23,7 +23,11 @@
 |*	 $83		: Page index for $F0..$FF
 |*	 $84		: varargs count,
 |*	 $85		: varargs page index (vars start @0)
-|*	 $86..$9F	: global vars (not swapped, 26 bytes)
+|*	 $86		: command buffer
+|*   $87 		: command arg1
+|*   $88		: command args fifo
+|*	 $89..$8C	: overflow register, used in some arithmetic code
+|*	 $8D..$9F	: global vars (not swapped, 18 bytes)
 |*	 $A0..$AF	: 16 bytes of function-return-and-args. Not swapped
 |* > $B0..$BF	: 16 bytes of function scratch-space [indexed by $1C,$1D].
 |*                               Not preserved over fn-calls

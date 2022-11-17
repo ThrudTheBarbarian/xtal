@@ -58,6 +58,23 @@
 ;/*************************************************************************\
 ;|* Type: Basic operation
 ;|*
+;|* Write a 32-bit number to a memory location in little-endian form
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 address to store it at
+;\*************************************************************************/
+.macro _zero32
+	lda #0
+	sta %2+3
+	sta %2+2
+	sta %2+1
+	sta %2
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Basic operation
+;|*
 ;|* Clear 2 bytes of memory, the address pointed to by the argument, and the
 ;|* subsequent address
 ;|*
@@ -975,7 +992,7 @@ dec0_?:
 ;|*    %2 : address of destination operand. Can be same as %1
 ;\*************************************************************************/
 .macro _abs16
-		bit %1
+		bit %1+1
         .if (%1 != %2)
 			bpl move_?
 			_neg16 %1, %2
@@ -1002,7 +1019,7 @@ dec0_?:
 ;|*    %2 : address of destination operand. Can be same as %1
 ;\*************************************************************************/
 .macro _abs32
-		bit %1
+		bit %1+3
         .if (%1 != %2)
 			bpl move_?
 			_neg32 %1, %2

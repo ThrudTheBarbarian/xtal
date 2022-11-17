@@ -14,8 +14,10 @@
 
 #include "Stringutils.h"
 
-#define IS_REG(x) ((x == REG_MAIN) || (x == REG_FN) || (x == REG_SCRATCH))
-
+#define IS_REG(x) 				((x == REG_MAIN) || \
+								 (x == REG_FN)   || \
+								 (x == REG_SCRATCH))
+#define OVERFLOW_LOCATION		0x89
 
 static int _ttSizes[] = {1, 	// REG_MAIN			r...
 						 2, 	// REG_FN			fn...
@@ -264,7 +266,19 @@ int Scanner::_handleMeta(String word,
 			break;
 		
 		case P_MUL:
-			ok = _handleMul(word, info, extent, args, tokens, line, pass);
+			ok = _handleMath(word, info, extent, args, tokens, line, pass, "mul");
+			break;
+		
+		case P_ADD:
+			ok = _handleMath(word, info, extent, args, tokens, line, pass, "add");
+			break;
+		
+		case P_SUB:
+			ok = _handleMath(word, info, extent, args, tokens, line, pass, "sub");
+			break;
+		
+		case P_DIV:
+			ok = _handleMath(word, info, extent, args, tokens, line, pass, "div");
 			break;
 		
 		default:
@@ -484,63 +498,19 @@ void Scanner::_surfaceRegs3(TargetType t1,
 	}
 	
 /*****************************************************************************\
-|* Handle the meta 'mul' opcode. This is either signed or unsigned, and is
-|* always register to register, eg:
-|*
-|*	muls.4	r0		r1
-|*	mulu.2	r2		r3
-|*
-|* where:
-|*		.x defines the width of the move,
-|*		arguments must be registers, (r*, fn*, s*)
-|*
+|* Insert a 3-register operation into the source code, so it will be acted on
+|* next
 \*****************************************************************************/
-int Scanner::_handleMul(String word,
-						Token::TokenInfo info,
-						int extent,
-						String argString,
-						TokenList &tokens,
-						int& line,
-						int pass)
+void Scanner::_insertOp(TargetType t1,
+					    TargetType t2,
+					    TargetType t3,
+					    int64_t v1,
+					    int64_t v2,
+					    int64_t v3,
+					    String stem,
+					    int overflowPos
+					    )
 	{
-	int ok 			= 0;
-	StringList args = split(argString, " \t");
-	if (args.size() != 3)
-		FATAL(ERR_META, "Illegal meta-construct 'mul' at line %d", line);
-	
-	/*************************************************************************\
-	|* Determine src1 target-type and value
-	\*************************************************************************/
-	int64_t v1, v2, v3;
-	String arg1 	= trim(args[0]);
-	TargetType t1	= _determineTarget(arg1, v1, line);
-	if (!IS_REG(t1))
-		FATAL(ERR_META, "Argument 1 to mul must be register on line %d", line);
-		
-	/*************************************************************************\
-	|* Determine src2 target-type and value
-	\*************************************************************************/
-	String arg2 	= trim(args[1]);
-	TargetType t2	= _determineTarget(arg2, v2, line);
-	if (!IS_REG(t2))
-		FATAL(ERR_META, "Argument 2 to mul must be register on line %d", line);
-		
-	/*************************************************************************\
-	|* Determine dst target-type and value
-	\*************************************************************************/
-	String arg3 	= trim(args[2]);
-	TargetType t3	= _determineTarget(arg3, v3, line);
-	if (!IS_REG(t3))
-		FATAL(ERR_META, "Argument 3 to mul must be register on line %d", line);
-
-	/*************************************************************************\
-	|* Make sure any registers that need banks remapped, have that happen
-	\*************************************************************************/
-	_surfaceRegs3(t1, t2, t3, v1, v2, v3, tokens, line, pass);
-
-	/*************************************************************************\
-	|* Use the appropriate macro to run the code inline
-	\*************************************************************************/
 	int base1		= (t1 == REG_MAIN)	? REGMAIN_BASE
 					: (t1 == REG_FN)	? REGFN_BASE
 					:					  REGSCRATCH_BASE;
@@ -555,14 +525,98 @@ int Scanner::_handleMul(String word,
 	int addr2		= base2 + ((v2 % 16) * 4);
 	int addr3		= base3 + ((v3 % 16) * 4);
 
-	String macro	= "_mul";
-	macro		   += std::to_string(extent*8);
-	macro 		   += (lcase(word).starts_with("mulu")) ? "u" : "";
+	String macro	= stem;
+	if (overflowPos == 1)
+		macro	   += toHexString(OVERFLOW_LOCATION, ", $");
 	macro		   += toHexString(addr1, " $");
+	
+	if (overflowPos == 2)
+		macro	   += toHexString(OVERFLOW_LOCATION, ", $");
 	macro		   += toHexString(addr2, ", $");
+
+	if (overflowPos == 3)
+		macro	   += toHexString(OVERFLOW_LOCATION, ", $");
 	macro		   += toHexString(addr3, ", $");
 	
+	if (overflowPos == 4)
+		macro 	   += toHexString(OVERFLOW_LOCATION, ", $");
 	_src.insert(_at, macro);
+	}
+	
+/*****************************************************************************\
+|* Handle the meta 'mul' opcode. This is either signed or unsigned, and is
+|* always register to register, eg:
+|*
+|*	muls.4	r0		r1
+|*	mulu.2	r2		r3
+|*
+|* where:
+|*		.x defines the width of the move,
+|*		arguments must be registers, (r*, fn*, s*)
+|*
+\*****************************************************************************/
+int Scanner::_handleMath(String word,
+						 Token::TokenInfo info,
+						 int extent,
+						 String argString,
+						 TokenList &tokens,
+						 int& line,
+						 int pass,
+						 String op)
+	{
+	int ok 			= 0;
+	StringList args = split(argString, " \t");
+	if (args.size() != 3)
+		FATAL(ERR_META, "Illegal meta syntax for '%s' at line %d",
+			  op.c_str(), line);
+	
+	/*************************************************************************\
+	|* Determine src1 target-type and value
+	\*************************************************************************/
+	int64_t v1, v2, v3;
+	String arg1 	= trim(args[0]);
+	TargetType t1	= _determineTarget(arg1, v1, line);
+	if (!IS_REG(t1))
+		FATAL(ERR_META, "Argument 1 to %s must be register on line %d",
+			  op.c_str(), line);
+		
+	/*************************************************************************\
+	|* Determine src2 target-type and value
+	\*************************************************************************/
+	String arg2 	= trim(args[1]);
+	TargetType t2	= _determineTarget(arg2, v2, line);
+	if (!IS_REG(t2))
+		FATAL(ERR_META, "Argument 2 to %s must be register on line %d",
+			  op.c_str(), line);
+		
+	/*************************************************************************\
+	|* Determine dst target-type and value
+	\*************************************************************************/
+	String arg3 	= trim(args[2]);
+	TargetType t3	= _determineTarget(arg3, v3, line);
+	if (!IS_REG(t3))
+		FATAL(ERR_META, "Argument 3 to %s must be register on line %d",
+			  op.c_str(), line);
+
+	/*************************************************************************\
+	|* Make sure any registers that need banks remapped, have that happen
+	\*************************************************************************/
+	_surfaceRegs3(t1, t2, t3, v1, v2, v3, tokens, line, pass);
+
+	/*************************************************************************\
+	|* Use the appropriate macro to run the code inline
+	\*************************************************************************/
+	String stem 	= "_" + op;
+	stem		   += std::to_string(extent*8);
+	
+	String lword	= lcase(word);
+	String notsign	= lcase(op) + "u";
+	stem 		   += (lword.starts_with(notsign)) ? "u" : "";
+	
+	int overflowPos	= (lword.starts_with("div")) ? 4
+					: -1;
+	_insertOp(t1, t2, t3, v1, v2, v3, stem, overflowPos);
+
 	return ok;
 	}
 
@@ -821,8 +875,12 @@ int Scanner::_handle6502(Token::TokenInfo info,
 			if (e.result() > 0xFF)
 				{
 				amode = A_ABSOLUTE;
-				bytes[0] = (e.result())		 & 0xFF;
-				bytes[1] = (e.result() >> 8) & 0xFF;
+				int to	 = (e.result() < _current)
+						 ? (int)(e.result())
+						 : (int)(e.result() + 3);	// Still not sure why...
+						 
+				bytes[0] = (to	   ) & 0xFF;
+				bytes[1] = (to >> 8) & 0xFF;
 				}
 			else
 				{
@@ -952,9 +1010,13 @@ int Scanner::_handle6502(Token::TokenInfo info,
 	/************************************************************************\
     |* Bump the current address
     \************************************************************************/
+	if (pass == 2)
+		{
+		t.setAddrMode(amode);
+		printf("%04x %s\n", _current, t.toString().c_str());
+		}
 	if (_emit(tokens, line, t, amode))
 		_current += numbytes;
-	
 	return 0;
 	}
 	
@@ -1259,9 +1321,10 @@ bool Scanner::_emit(TokenList &tokens,
 	bool emit = shouldEvaluate();
 	if (emit)
 		{
+
 		tokens.push_back(token);
 		token.setAddrMode(amode);
-		_listing += token.toString()+"\n";
+		_listing += /*toHexString(_current) + " : " +*/ token.toString()+"\n";
 		}
 	
 	return emit;
