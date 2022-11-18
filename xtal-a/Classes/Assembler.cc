@@ -11,6 +11,7 @@
 
 #include "ArgParser.h"
 #include "Assembler.h"
+#include "ContextMgr.h"
 #include "Engine.h"
 #include "Scanner.h"
 #include "Stringutils.h"
@@ -91,7 +92,9 @@ int Assembler::main(int argc, const char *argv[])
 			in.seekg(0, std::ios::beg);
 			in.read(&contents[0], contents.size());
 			in.close();
-			input += trim(contents) + '\n';
+			
+			String directive = ".push context file '" + filename + "' 1\n";
+			input += directive + trim(contents) + "\n.pop context\n";
 			}
 		else
 			{
@@ -159,7 +162,7 @@ int Assembler::_run(std::string source)
 	while (scanner.scan(tokens, line, 1) == Scanner::SCAN_MORE)
 		;
 
-	scanner.engine().dumpVars();
+	//scanner.engine().dumpVars();
 	
 	/*************************************************************************\
 	|* Run a sanity check on the if blocks being properly closed
@@ -263,7 +266,8 @@ void Assembler::_report(int line, std::string where, std::string msg)
 \*****************************************************************************/
 String Assembler::_preparse(String src)
 	{
-	bool needsPass = true;
+	auto ctxMgr		= ContextMgr::sharedInstance();
+	bool needsPass 	= true;
 	while (needsPass)
 		{
 		needsPass 		 		= false;
@@ -285,11 +289,14 @@ String Assembler::_preparse(String src)
 						  "Malformed .include directive '%s'",
 						  line.c_str());
 					}
-				String content = _find(trim(words[1]));
+				String fname   = trim(words[1]);
+				String content = _find(fname);
 				if (content.size() > 0)
 					{
 					needsPass = true;
+					result += ".push context file '" + fname + "' 1'";
 					result += trim(content) + "\n";
+					result += ".pop context\n";
 					}
 				else
 					{
@@ -306,6 +313,9 @@ String Assembler::_preparse(String src)
 					{
 					macro.reset();
 					macro.setName(words[1]);
+					
+					String ctx = ".push context macro '" + words[1] + "' 1";
+					macro.lines().push_back(ctx);
 					}
 				else
 					FATAL(ERR_MACRO, "Unnamed macro found: '%s'", line.c_str());
@@ -313,6 +323,7 @@ String Assembler::_preparse(String src)
 			else if (lc.find(".endmacro") != std::string::npos)
 				{
 				currentMode = NORMAL;
+				macro.lines().push_back(".pop context");
 				_macros[macro.name()] = macro;
 				}
 			else

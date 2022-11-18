@@ -50,6 +50,19 @@ std::string lcase(const std::string &s)
 	}
 
 /*****************************************************************************\
+|* Return an uppercase copy of the input
+\*****************************************************************************/
+std::string ucase(const std::string &s)
+	{
+	std::string data = s;
+	std::transform(data.begin(),
+				   data.end(),
+				   data.begin(),
+				   [](unsigned char c){ return std::toupper(c); });
+	return data;
+	}
+
+/*****************************************************************************\
 |* Split a string by a character, called by below
 \*****************************************************************************/
 std::vector<std::string> split(const std::string &text, char sep)

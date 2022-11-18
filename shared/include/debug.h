@@ -136,6 +136,7 @@ enum
 	ERR_MACRO,
 	ERR_META,
 	ERR_IF,
+	ERR_CTX,
 	ERR_MAX
 	};
 

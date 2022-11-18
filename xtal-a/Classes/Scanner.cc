@@ -5,9 +5,12 @@
 //  Created by Thrud The Barbarian on 10/28/22.
 //
 #include <cstdlib>
-#include  <regex>
+#include <regex>
+#include <iomanip>
+#include <sstream>
 
 #include "Assembler.h"
+#include "ContextMgr.h"
 #include "Engine.h"
 #include "Scanner.h"
 #include "Token.h"
@@ -18,7 +21,7 @@
 								 (x == REG_FN)   || \
 								 (x == REG_SCRATCH))
 #define OVERFLOW_LOCATION		0x89
-
+#define CTXMGR					ContextMgr::sharedInstance()
 static int _ttSizes[] = {1, 	// REG_MAIN			r...
 						 2, 	// REG_FN			fn...
 						 1, 	// REG_SCRATCH		s...
@@ -54,6 +57,7 @@ void Scanner::reset(int to)
 	_pageIndex[2] 	= 0;
 	_pageIndex[3] 	= 0;
 	_listing		= "";
+	ContextMgr::sharedInstance()->reset();
 	}
 	
 /*****************************************************************************\
@@ -61,10 +65,11 @@ void Scanner::reset(int to)
 \*****************************************************************************/
 int Scanner::scan(TokenList &tokens, int& line, int pass)
 	{
-	int state = SCAN_MORE;
+	int state 	= SCAN_MORE;
 	
-	String s = _nextLine(line, state);
-	s		 = trim(s.substr(0, s.find(";")));
+	String s	= _nextLine(line, state);
+	s		 	= trim(s.substr(0, s.find(";")));
+	String lc	= lcase(s);
 	
 	/*************************************************************************\
     |* If the string is empty, just return
@@ -106,6 +111,20 @@ int Scanner::scan(TokenList &tokens, int& line, int pass)
 		}
 			
 	/*************************************************************************\
+    |* Check to see if we're pushing a context onto the stack
+    \*************************************************************************/
+	else if (lc.starts_with(".push context"))
+		{
+		_pushContext(s);
+		}
+	/*************************************************************************\
+    |* Or popping one
+    \*************************************************************************/
+	else if (lc.starts_with(".pop context"))
+		{
+		CTXMGR->pop();
+		}
+	/*************************************************************************\
     |* Otherwise get the next word and determine what to do based on that
     \*************************************************************************/
 	else if (s.length() > 0)
@@ -114,7 +133,7 @@ int Scanner::scan(TokenList &tokens, int& line, int pass)
 		String word 				= _firstWord(s, wordState);
 		String lword 				= lcase(word);
 		String args					= trim(s.substr(word.length()));
-		Token::TokenInfo info 	= Token::parsePrefix(lword);
+		Token::TokenInfo info 		= Token::parsePrefix(lword);
 		
 		switch (info.type)
 			{
@@ -154,7 +173,8 @@ int Scanner::scan(TokenList &tokens, int& line, int pass)
 						break;
 						
 					default:
-						FATAL(ERR_PARSE, "Unknown assembly directive at %d", line);
+						FATAL(ERR_PARSE, "Unknown assembly directive\n%s",
+							 CTXMGR->location().c_str());
 					}
 				break;
 				}
@@ -181,8 +201,9 @@ int Scanner::scan(TokenList &tokens, int& line, int pass)
 						_macro(tokens, line, _macros[word], args);
 						}
 					else
-						FATAL(ERR_PARSE, "Unknown assembly token %s at %d",
-										word.c_str(), line);
+						FATAL(ERR_PARSE, "Unknown assembly token %s\n%s",
+								word.c_str(),
+								CTXMGR->location().c_str());
 					}
 			}
 		}
@@ -240,8 +261,9 @@ int Scanner::_macro(TokenList &tokens, int &line, Macro macro, String argstr)
 		_src.insert(_at, content);
 		}
 	else
-		FATAL(ERR_MACRO, "Incorrect number of arguments to %s at line %d",
-				macro.name().c_str(), line);
+		FATAL(ERR_MACRO, "Incorrect number of arguments to %s\n%s",
+				macro.name().c_str(),
+				CTXMGR->location().c_str());
 	
 	return ok;
 	}
@@ -282,7 +304,8 @@ int Scanner::_handleMeta(String word,
 			break;
 		
 		default:
-			FATAL(ERR_META, "Don't understand meta-call at line %d", line);
+			FATAL(ERR_META, "Don't understand meta-call\n%s",
+				CTXMGR->location().c_str());
 		}
 		
 	return ok;
@@ -306,11 +329,14 @@ Scanner::TargetType Scanner::_determineTarget(String s, int64_t &val, int line)
 	if (val > 0)
 		{
 		if ((type == REG_MAIN) && (val >= 1024))
-			FATAL(ERR_META, "Main reg %lld OUB at line %d", val, line);
+			FATAL(ERR_META, "Main reg %lld OUB\n%s",
+				val, CTXMGR->location().c_str());
 		if ((type == REG_FN) && (val >= 4))
-			FATAL(ERR_META, "FN reg %lld OUB at line %d", val, line);
+			FATAL(ERR_META, "FN reg %lld OUB\n%s",
+				val, CTXMGR->location().c_str());
 		if ((type == REG_SCRATCH) && (val >= 4))
-			FATAL(ERR_META, "Scratch reg %lld OUB at line %d", val, line);
+			FATAL(ERR_META, "Scratch reg %lld OUB\n%s",
+				val, CTXMGR->location().c_str());
 		}
 	
 	return type;
@@ -351,7 +377,8 @@ void Scanner::_surfaceRegs(TargetType t1,
 	if (t1 == REG_MAIN)
 		{
 		if ((t2 == REG_MAIN) && (bank1 == bank2) && (page1 != page2))
-			FATAL(ERR_META, "Overlapping banks for src and dst, line %d", line);
+			FATAL(ERR_META, "Overlapping banks for src and dst\n%s",
+				CTXMGR->location().c_str());
 	
         /*********************************************************************\
         |* If we need to change banking 1, do so
@@ -376,7 +403,8 @@ void Scanner::_surfaceRegs(TargetType t1,
 	if (t2 == REG_MAIN)
 		{
 		if ((t1 == REG_MAIN) && (bank1 == bank2) && (page1 != page2))
-			FATAL(ERR_META, "Overlapping banks for src and dst, line %d", line);
+			FATAL(ERR_META, "Overlapping banks for src and dst\n%s",
+				CTXMGR->location().c_str());
 
         /*********************************************************************\
         |* If we need to change banking 2, do so
@@ -423,7 +451,8 @@ void Scanner::_surfaceRegs3(TargetType t1,
 		bool bank2Err = (bank1 == bank2) && (page1 != page2);
 		bool bank3Err = (bank1 == bank3) && (page1 != page3);
 		if (((t2 == REG_MAIN) && bank2Err) || ((t3 == REG_MAIN) && bank3Err))
-			FATAL(ERR_META, "Overlapping banks for src and dst, line %d", line);
+			FATAL(ERR_META, "Overlapping banks for src and dst\n%s",
+				CTXMGR->location().c_str());
 	
         /*********************************************************************\
         |* If we need to change banking 1, do so
@@ -450,7 +479,8 @@ void Scanner::_surfaceRegs3(TargetType t1,
 		bool bank1Err = (bank2 == bank1) && (page2 != page1);
 		bool bank3Err = (bank2 == bank3) && (page2 != page3);
 		if (((t1 == REG_MAIN) && bank1Err) || ((t3 == REG_MAIN) && bank3Err))
-			FATAL(ERR_META, "Overlapping banks for src and dst, line %d", line);
+			FATAL(ERR_META, "Overlapping banks for src and dst\n%s",
+				CTXMGR->location().c_str());
 
         /*********************************************************************\
         |* If we need to change banking 2, do so
@@ -477,7 +507,8 @@ void Scanner::_surfaceRegs3(TargetType t1,
 		bool bank1Err = (bank3 == bank1) && (page3 != page1);
 		bool bank2Err = (bank3 == bank2) && (page3 != page2);
 		if (((t1 == REG_MAIN) && bank1Err) || ((t2 == REG_MAIN) && bank2Err))
-			FATAL(ERR_META, "Overlapping banks for src and dst, line %d", line);
+			FATAL(ERR_META, "Overlapping banks for src and dst\n%s",
+				CTXMGR->location().c_str());
 
         /*********************************************************************\
         |* If we need to change banking 3, do so
@@ -570,8 +601,8 @@ int Scanner::_handleMath(String word,
 	int ok 			= 0;
 	StringList args = split(argString, " \t");
 	if (args.size() != 3)
-		FATAL(ERR_META, "Illegal meta syntax for '%s' at line %d",
-			  op.c_str(), line);
+		FATAL(ERR_META, "Illegal meta syntax for '%s'\n%s",
+			  op.c_str(), CTXMGR->location().c_str());
 	
 	/*************************************************************************\
 	|* Determine src1 target-type and value
@@ -580,8 +611,8 @@ int Scanner::_handleMath(String word,
 	String arg1 	= trim(args[0]);
 	TargetType t1	= _determineTarget(arg1, v1, line);
 	if (!IS_REG(t1))
-		FATAL(ERR_META, "Argument 1 to %s must be register on line %d",
-			  op.c_str(), line);
+		FATAL(ERR_META, "Argument 1 to %s must be register\n%s",
+			  op.c_str(), CTXMGR->location().c_str());
 		
 	/*************************************************************************\
 	|* Determine src2 target-type and value
@@ -589,8 +620,8 @@ int Scanner::_handleMath(String word,
 	String arg2 	= trim(args[1]);
 	TargetType t2	= _determineTarget(arg2, v2, line);
 	if (!IS_REG(t2))
-		FATAL(ERR_META, "Argument 2 to %s must be register on line %d",
-			  op.c_str(), line);
+		FATAL(ERR_META, "Argument 2 to %s must be register\n%s",
+			  op.c_str(), CTXMGR->location().c_str());
 		
 	/*************************************************************************\
 	|* Determine dst target-type and value
@@ -598,8 +629,8 @@ int Scanner::_handleMath(String word,
 	String arg3 	= trim(args[2]);
 	TargetType t3	= _determineTarget(arg3, v3, line);
 	if (!IS_REG(t3))
-		FATAL(ERR_META, "Argument 3 to %s must be register on line %d",
-			  op.c_str(), line);
+		FATAL(ERR_META, "Argument 3 to %s must be register\n%s",
+			  op.c_str(), CTXMGR->location().c_str());
 
 	/*************************************************************************\
 	|* Make sure any registers that need banks remapped, have that happen
@@ -646,7 +677,8 @@ int Scanner::_handleMove(Token::TokenInfo info,
 	int ok 			= 0;
 	StringList args = split(argString, " \t");
 	if (args.size() != 2)
-		FATAL(ERR_META, "Illegal meta-construct 'move' at line %d", line);
+		FATAL(ERR_META, "Illegal meta-construct 'move'\n%s",
+			CTXMGR->location().c_str());
 		
 	/*************************************************************************\
 	|* Determine src target-type and value
@@ -661,7 +693,8 @@ int Scanner::_handleMove(Token::TokenInfo info,
 	String arg2 	= trim(args[1]);
 	TargetType t2	= _determineTarget(arg2, v2, line);
 	if (t2 == IMMEDIATE)
-		FATAL(ERR_META, "Cannot move to immediate value on line %d", line);
+		FATAL(ERR_META, "Cannot move to immediate value\n%s",
+			CTXMGR->location().c_str());
 	
 	/*************************************************************************\
 	|* Make sure any registers that need banks remapped, have that happen
@@ -817,7 +850,8 @@ int Scanner::_handleMove(Token::TokenInfo info,
 		}
 	
 	else
-		FATAL(ERR_META, "Illegal meta operation, line %d", line);
+		FATAL(ERR_META, "Illegal meta operation\n%s",
+			CTXMGR->location().c_str());
 		
 	return ok;
 	}
@@ -947,7 +981,8 @@ int Scanner::_handle6502(Token::TokenInfo info,
 		}
 	else
 		{
-		FATAL(ERR_PARSE, "Unknown addressing mode '%s'", args.c_str());
+		FATAL(ERR_PARSE, "Unknown addressing mode '%s'\n%s",
+			args.c_str(), CTXMGR->location().c_str());
 		}
 	
 	/************************************************************************\
@@ -955,8 +990,9 @@ int Scanner::_handle6502(Token::TokenInfo info,
     \************************************************************************/
     int opcode = Token::opcode(info.which, amode);
     if ((pass == 2) && (opcode < 0))
-		FATAL(ERR_PARSE, "Illegal addressing mode '%s' for %s on line %d",
-				args.c_str(), info.name.c_str(), line);
+		FATAL(ERR_PARSE, "Illegal addressing mode '%s' for %s\n%s",
+				args.c_str(), info.name.c_str(),
+				CTXMGR->location().c_str());
 	
 	/************************************************************************\
     |* Create a token to represent the opcode and add it to the stream
@@ -1014,7 +1050,7 @@ int Scanner::_handle6502(Token::TokenInfo info,
 	if (pass == 2)
 		{
 		t.setAddrMode(amode);
-		printf("%04x %s\n", _current, t.toString().c_str());
+		//printf("%04x %s\n", _current, t.toString().c_str());
 		}
 	if (_emit(tokens, line, t, amode))
 		_current += numbytes;
@@ -1063,7 +1099,8 @@ int Scanner::_else(TokenList &tokens, int& line)
 		_ifState.push_back(!state);
 		}
 	else
-		FATAL(ERR_IF, "Found an ELSE without IF at line %d", line);
+		FATAL(ERR_IF, "Found an ELSE without IF\n%s",
+			CTXMGR->location().c_str());
 		
 	return 0;
 	}
@@ -1076,7 +1113,8 @@ int Scanner::_endif(TokenList &tokens, int& line)
 	if (_ifState.size() > 0)
 		_ifState.pop_back();
 	else
-		FATAL(ERR_IF, "Found an ENDIF without IF at line %d", line);
+		FATAL(ERR_IF, "Found an ENDIF without IF\n%s",
+			CTXMGR->location().c_str());
 		
 	return 0;
 	}
@@ -1229,6 +1267,48 @@ Token Scanner::_hasLabel(String& s)
 	}
 	
 /*****************************************************************************\
+|* Push a context onto the stack
+\*****************************************************************************/
+void Scanner::_pushContext(const String &s)
+	{
+	String name = "";
+	String type = "";
+	String word = "";
+	int line 	= -1;
+	int state 	= 0;
+	
+	std::stringstream ss(s);
+	while (ss >> quoted(word, '\''))
+		{
+		switch (state)
+			{
+			case 0:
+			case 1:
+				break;
+			case 2:
+				type = word;
+				break;
+			case 3:
+				name = word;
+				break;
+			case 4:
+				line = std::stoi(word);
+				break;
+			default:
+				fprintf(stderr, "Error: found '%s'\n", word.c_str());
+				break;
+			}
+		state ++;
+		}
+	
+	if ((name.length() > 0) && (type.length() > 0) && (line >= 0))
+		CTXMGR->push(name, type, line);
+	else
+		FATAL(ERR_CTX, "Found an ill-defined context at\n%s",
+			  CTXMGR->location().c_str());
+	}
+	
+/*****************************************************************************\
 |* Are we at the end of the stream
 \*****************************************************************************/
 bool Scanner::_atEnd(void)
@@ -1290,6 +1370,7 @@ String Scanner::_nextLine(int &line, int &state)
 		int c = _src[_at++];
 		if (c == '\n')
 			{
+			CTXMGR->incLine();
 			line ++;
 			return s;
 			}

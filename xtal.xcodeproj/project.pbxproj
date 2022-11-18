@@ -41,6 +41,7 @@
 		F480EF822922C657008584FB /* Register.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF792922C657008584FB /* Register.cc */; };
 		F480EF832922C657008584FB /* Compiler.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF7B2922C657008584FB /* Compiler.cc */; };
 		F480EF842922C8E9008584FB /* xtal-c in Copy Binaries */ = {isa = PBXBuildFile; fileRef = F480EF162922B512008584FB /* xtal-c */; };
+		F4B8088B29272F2A0049B6EB /* ContextMgr.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B8088A29272F2A0049B6EB /* ContextMgr.cc */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -150,6 +151,8 @@
 		F480EF8A29231627008584FB /* test.05 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.05; sourceTree = "<group>"; };
 		F480EF8B29231627008584FB /* test.01 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.01; sourceTree = "<group>"; };
 		F480EF8C29271A5A008584FB /* Bugs */ = {isa = PBXFileReference; lastKnownFileType = text; path = Bugs; sourceTree = "<group>"; };
+		F4B8088929272F2A0049B6EB /* ContextMgr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ContextMgr.h; path = Classes/ContextMgr.h; sourceTree = "<group>"; };
+		F4B8088A29272F2A0049B6EB /* ContextMgr.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ContextMgr.cc; path = Classes/ContextMgr.cc; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -239,6 +242,10 @@
 				F480EF5C2922BC1A008584FB /* Tests */,
 				F480EF302922B81B008584FB /* Assembler.cc */,
 				F480EF332922B81B008584FB /* Assembler.h */,
+				F4B8088A29272F2A0049B6EB /* ContextMgr.cc */,
+				F4B8088929272F2A0049B6EB /* ContextMgr.h */,
+				F480EF342922B81B008584FB /* Scanner.cc */,
+				F480EF312922B81B008584FB /* Scanner.h */,
 				F480EF2F2922B81B008584FB /* Engine.cc */,
 				F480EF282922B81A008584FB /* Engine.h */,
 				F480EF292922B81B008584FB /* Engine.yp */,
@@ -246,8 +253,6 @@
 				F480EF2B2922B81B008584FB /* Macro.h */,
 				F480EF322922B81B008584FB /* OutputBlock.cc */,
 				F480EF2E2922B81B008584FB /* OutputBlock.h */,
-				F480EF342922B81B008584FB /* Scanner.cc */,
-				F480EF312922B81B008584FB /* Scanner.h */,
 				F480EF2D2922B81B008584FB /* Token.cc */,
 				F480EF2A2922B81B008584FB /* Token.h */,
 				F480EF232922B564008584FB /* main.cc */,
@@ -276,14 +281,14 @@
 			isa = PBXGroup;
 			children = (
 				F480EF422922BB66008584FB /* ArgParser.cc */,
-				F480EF432922BB66008584FB /* NotifyCenter.cc */,
 				F480EF442922BB66008584FB /* ArgParser.h */,
 				F480EF452922BB66008584FB /* HelpItem.cc */,
+				F480EF482922BB66008584FB /* HelpItem.h */,
+				F480EF432922BB66008584FB /* NotifyCenter.cc */,
+				F480EF4A2922BB66008584FB /* NotifyCenter.h */,
 				F480EF462922BB66008584FB /* Singleton.h */,
 				F480EF472922BB66008584FB /* Stringutils.h */,
-				F480EF482922BB66008584FB /* HelpItem.h */,
 				F480EF492922BB66008584FB /* Stringutils.cc */,
-				F480EF4A2922BB66008584FB /* NotifyCenter.h */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -493,6 +498,7 @@
 				F480EF352922B81B008584FB /* Engine.yp in Sources */,
 				F480EF582922BB66008584FB /* HelpItem.cc in Sources */,
 				F480EF3A2922B81B008584FB /* OutputBlock.cc in Sources */,
+				F4B8088B29272F2A0049B6EB /* ContextMgr.cc in Sources */,
 				F480EF382922B81B008584FB /* Engine.cc in Sources */,
 				F480EF522922BB66008584FB /* ArgParser.cc in Sources */,
 				F480EF372922B81B008584FB /* Token.cc in Sources */,
