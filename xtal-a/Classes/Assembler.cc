@@ -32,7 +32,6 @@ typedef enum
 \*****************************************************************************/
 Assembler::Assembler()
 		  :_ap(nullptr)
-		  ,_line(1)
 	{
 	}
 
@@ -118,9 +117,9 @@ int Assembler::main(int argc, const char *argv[])
 /*****************************************************************************\
 |* Error handling - display an informative message
 \*****************************************************************************/
-void Assembler::error(int line, std::string msg)
+void Assembler::error(String msg)
 	{
-	_report(line, "", msg);
+	_report("", msg);
 	}
 
 	
@@ -133,7 +132,6 @@ void Assembler::error(int line, std::string msg)
 int Assembler::_run(std::string source)
 	{
 	int ok = 0;
-	int line = 1;
 	std::vector<Token> tokens;
 
 	/*************************************************************************\
@@ -162,7 +160,7 @@ int Assembler::_run(std::string source)
 	|* are picked up correctly
 	\*************************************************************************/
 	scanner.engine().labelMap().clear();
-	while (scanner.scan(tokens, line, 1) == Scanner::SCAN_MORE)
+	while (scanner.scan(tokens, 1) == Scanner::SCAN_MORE)
 		;
 
 	//scanner.engine().dumpVars();
@@ -180,7 +178,7 @@ int Assembler::_run(std::string source)
 	tokens.clear();
 	scanner.reset();
 	scanner.setSrc(source);
-	while (scanner.scan(tokens, line, 2) == Scanner::SCAN_MORE)
+	while (scanner.scan(tokens, 2) == Scanner::SCAN_MORE)
 		;
 			
 	/*************************************************************************\
@@ -254,12 +252,12 @@ int Assembler::_run(std::string source)
 /*****************************************************************************\
 |* Private method : Generic run method
 \*****************************************************************************/
-void Assembler::_report(int line, std::string where, std::string msg)
+void Assembler::_report(std::string where, std::string msg)
 	{
-	fprintf(stderr, "[line:%d] Error %s:%s\n",
-			line,
+	fprintf(stderr, "Error %s:%s\n%s",
 			where.c_str(),
-			msg.c_str());
+			msg.c_str(),
+			CTXMGR->location().c_str());
 	}
 
 
@@ -290,8 +288,8 @@ String Assembler::_preparse(String src)
 				if (words.size() != 2)
 					{
 					FATAL(ERR_INCLUDE,
-						  "Malformed .include directive '%s'",
-						  line.c_str());
+						  "Malformed .include directive '%s'\n%s",
+						  line.c_str(), CTXMGR->location().c_str());
 					}
 				String fname   = trim(words[1]);
 				String content = _find(fname);

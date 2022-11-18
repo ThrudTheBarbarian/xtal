@@ -63,11 +63,11 @@ void Scanner::reset(int to)
 /*****************************************************************************\
 |* Scan for tokens
 \*****************************************************************************/
-int Scanner::scan(TokenList &tokens, int& line, int pass)
+int Scanner::scan(TokenList &tokens, int pass)
 	{
 	int state 	= SCAN_MORE;
 	
-	String s	= _nextLine(line, state);
+	String s	= _nextLine(state);
 	s		 	= trim(s.substr(0, s.find(";")));
 	String lc	= lcase(s);
 	
@@ -82,7 +82,7 @@ int Scanner::scan(TokenList &tokens, int& line, int pass)
     \*************************************************************************/
     Token t = _hasLabel(s);
     if (t.type() != T_NONE)
-		_emit(tokens, line, t, A_NONE);
+		_emit(tokens, t, A_NONE);
 	
 	/*************************************************************************\
     |* Look for a lone = sign
@@ -104,7 +104,8 @@ int Scanner::scan(TokenList &tokens, int& line, int pass)
 		// Split into two terms either side of the =
 		StringList terms = split(s, '=');
 		if (terms.size() != 2)
-			FATAL(ERR_EQUATE, "Cannot parse '%s' at line %d\n", s.c_str(), line);
+			FATAL(ERR_EQUATE, "Cannot parse '%s'\n%s",
+				s.c_str(), CTXMGR->location().c_str());
 		String identifier = terms[0];
 		String expression = terms[1];
 		_engine.eval(s);
@@ -142,31 +143,31 @@ int Scanner::scan(TokenList &tokens, int& line, int pass)
 				switch (info.which)
 					{
 					case P_IF:
-						_if(tokens, line, args);
+						_if(tokens, args);
 						break;
 					
 					case P_ELSE:
-						_else(tokens, line);
+						_else(tokens);
 						break;
 					
 					case P_ENDIF:
-						_endif(tokens, line);
+						_endif(tokens);
 						break;
 					
 					case P_BYTE:
-						_reserveBytes(tokens, line, 1, args);
+						_reserveBytes(tokens, 1, args);
 						break;
 					
 					case P_WORD:
-						_reserveBytes(tokens, line, 2, args);
+						_reserveBytes(tokens, 2, args);
 						break;
 					
 					case P_ADDR:
-						_embedAddress(tokens, line, args);
+						_embedAddress(tokens, args);
 						break;
 					
 					case P_ORG:
-						_setOrigin(tokens, line, args);
+						_setOrigin(tokens, args);
 						break;
 				
 					case P_INCLUDE:
@@ -180,7 +181,7 @@ int Scanner::scan(TokenList &tokens, int& line, int pass)
 				}
 			case T_6502:
 				if (shouldEvaluate())
-					_handle6502(info, args, tokens, line, pass);
+					_handle6502(info, args, tokens, pass);
 				break;
 			
 			case T_META:
@@ -189,7 +190,7 @@ int Scanner::scan(TokenList &tokens, int& line, int pass)
 							: (word.ends_with(".2")) ? 2
 							: 4;
 							
-				_handleMeta(word, info, extent, args, tokens, line, pass);
+				_handleMeta(word, info, extent, args, tokens, pass);
 				break;
 				}
 				
@@ -198,7 +199,7 @@ int Scanner::scan(TokenList &tokens, int& line, int pass)
 					{
 					if (_macros.find(word) != _macros.end())
 						{
-						_macro(tokens, line, _macros[word], args);
+						_macro(tokens, _macros[word], args);
 						}
 					else
 						FATAL(ERR_PARSE, "Unknown assembly token '%s'\n%s",
@@ -240,7 +241,7 @@ void Scanner::insertMacros(MacroMap macros)
 /*****************************************************************************\
 |* Handle macros
 \*****************************************************************************/
-int Scanner::_macro(TokenList &tokens, int &line, Macro macro, String argstr)
+int Scanner::_macro(TokenList &tokens, Macro macro, String argstr)
 	{
 	int ok = 0;
 	
@@ -276,7 +277,6 @@ int Scanner::_handleMeta(String word,
 						 int extent,
 						 String args,
 						 TokenList &tokens,
-						 int& line,
 						 int pass)
 	{
 	int ok = 0;
@@ -284,23 +284,23 @@ int Scanner::_handleMeta(String word,
 	switch (info.which)
 		{
 		case P_MOVE:
-			ok = _handleMove(info, extent, args, tokens, line, pass);
+			ok = _handleMove(info, extent, args, tokens, pass);
 			break;
 		
 		case P_MUL:
-			ok = _handleMath(word, info, extent, args, tokens, line, pass, "mul");
+			ok = _handleMath(word, info, extent, args, tokens, pass, "mul");
 			break;
 		
 		case P_ADD:
-			ok = _handleMath(word, info, extent, args, tokens, line, pass, "add");
+			ok = _handleMath(word, info, extent, args, tokens, pass, "add");
 			break;
 		
 		case P_SUB:
-			ok = _handleMath(word, info, extent, args, tokens, line, pass, "sub");
+			ok = _handleMath(word, info, extent, args, tokens, pass, "sub");
 			break;
 		
 		case P_DIV:
-			ok = _handleMath(word, info, extent, args, tokens, line, pass, "div");
+			ok = _handleMath(word, info, extent, args, tokens, pass, "div");
 			break;
 		
 		default:
@@ -315,7 +315,7 @@ int Scanner::_handleMeta(String word,
 /*****************************************************************************\
 |* Determine a meta target-type and value
 \*****************************************************************************/
-Scanner::TargetType Scanner::_determineTarget(String s, int64_t &val, int line)
+Scanner::TargetType Scanner::_determineTarget(String s, int64_t &val)
 	{
 	TargetType type = (s.starts_with("r")) 		? REG_MAIN
 					: (s.starts_with("f"))		? REG_FN
@@ -365,7 +365,6 @@ void Scanner::_surfaceRegs(TargetType t1,
 						   int64_t v1,
 						   int64_t v2,
 						   TokenList &tokens,
-						   int line,
 						   int pass)
 	{
 	Token::TokenInfo opInfo;
@@ -387,11 +386,11 @@ void Scanner::_surfaceRegs(TargetType t1,
 			{
 			String arg	= "#" + std::to_string(page1);
 			opInfo 		= Token::parsePrefix("lda");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 			
 			arg			= toHexString(PAGEIDX0+bank1, "$");
 			opInfo 		= Token::parsePrefix("sta");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 			
 			_pageIndex[bank1] = page1;
 			}
@@ -413,11 +412,11 @@ void Scanner::_surfaceRegs(TargetType t1,
 			{
 			String arg	= "#" + std::to_string(page2);
 			opInfo 		= Token::parsePrefix("lda");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 			
 			arg			= toHexString(PAGEIDX0+bank2, "$");
 			opInfo 		= Token::parsePrefix("sta");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 			
 			_pageIndex[bank2] = page2;
 			}
@@ -434,7 +433,6 @@ void Scanner::_surfaceRegs3(TargetType t1,
 						    int64_t v2,
 						    int64_t v3,
 						    TokenList &tokens,
-						    int line,
 						    int pass)
 	{
 	Token::TokenInfo opInfo;
@@ -461,11 +459,11 @@ void Scanner::_surfaceRegs3(TargetType t1,
 			{
 			String arg	= "#" + std::to_string(page1);
 			opInfo 		= Token::parsePrefix("lda");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 			
 			arg			= toHexString(PAGEIDX0+bank1, "$");
 			opInfo 		= Token::parsePrefix("sta");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 			
 			_pageIndex[bank1] = page1;
 			}
@@ -489,11 +487,11 @@ void Scanner::_surfaceRegs3(TargetType t1,
 			{
 			String arg	= "#" + std::to_string(page2);
 			opInfo 		= Token::parsePrefix("lda");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 			
 			arg			= toHexString(PAGEIDX0+bank2, "$");
 			opInfo 		= Token::parsePrefix("sta");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 			
 			_pageIndex[bank2] = page2;
 			}
@@ -517,11 +515,11 @@ void Scanner::_surfaceRegs3(TargetType t1,
 			{
 			String arg	= "#" + std::to_string(page3);
 			opInfo 		= Token::parsePrefix("lda");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 			
 			arg			= toHexString(PAGEIDX0+bank3, "$");
 			opInfo 		= Token::parsePrefix("sta");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 			
 			_pageIndex[bank3] = page3;
 			}
@@ -594,7 +592,6 @@ int Scanner::_handleMath(String word,
 						 int extent,
 						 String argString,
 						 TokenList &tokens,
-						 int& line,
 						 int pass,
 						 String op)
 	{
@@ -609,7 +606,7 @@ int Scanner::_handleMath(String word,
 	\*************************************************************************/
 	int64_t v1, v2, v3;
 	String arg1 	= trim(args[0]);
-	TargetType t1	= _determineTarget(arg1, v1, line);
+	TargetType t1	= _determineTarget(arg1, v1);
 	if (!IS_REG(t1))
 		FATAL(ERR_META, "Argument 1 to %s must be register\n%s",
 			  op.c_str(), CTXMGR->location().c_str());
@@ -618,7 +615,7 @@ int Scanner::_handleMath(String word,
 	|* Determine src2 target-type and value
 	\*************************************************************************/
 	String arg2 	= trim(args[1]);
-	TargetType t2	= _determineTarget(arg2, v2, line);
+	TargetType t2	= _determineTarget(arg2, v2);
 	if (!IS_REG(t2))
 		FATAL(ERR_META, "Argument 2 to %s must be register\n%s",
 			  op.c_str(), CTXMGR->location().c_str());
@@ -627,7 +624,7 @@ int Scanner::_handleMath(String word,
 	|* Determine dst target-type and value
 	\*************************************************************************/
 	String arg3 	= trim(args[2]);
-	TargetType t3	= _determineTarget(arg3, v3, line);
+	TargetType t3	= _determineTarget(arg3, v3);
 	if (!IS_REG(t3))
 		FATAL(ERR_META, "Argument 3 to %s must be register\n%s",
 			  op.c_str(), CTXMGR->location().c_str());
@@ -635,7 +632,7 @@ int Scanner::_handleMath(String word,
 	/*************************************************************************\
 	|* Make sure any registers that need banks remapped, have that happen
 	\*************************************************************************/
-	_surfaceRegs3(t1, t2, t3, v1, v2, v3, tokens, line, pass);
+	_surfaceRegs3(t1, t2, t3, v1, v2, v3, tokens, pass);
 
 	/*************************************************************************\
 	|* Use the appropriate macro to run the code inline
@@ -671,7 +668,6 @@ int Scanner::_handleMove(Token::TokenInfo info,
 						   int extent,
 						   String argString,
 						   TokenList &tokens,
-						   int& line,
 						   int pass)
 	{
 	int ok 			= 0;
@@ -685,13 +681,13 @@ int Scanner::_handleMove(Token::TokenInfo info,
 	\*************************************************************************/
 	int64_t v1, v2;
 	String arg1 	= trim(args[0]);
-	TargetType t1	= _determineTarget(arg1, v1, line);
+	TargetType t1	= _determineTarget(arg1, v1);
 		
 	/*************************************************************************\
 	|* Determine dst target-type and value
 	\*************************************************************************/
 	String arg2 	= trim(args[1]);
-	TargetType t2	= _determineTarget(arg2, v2, line);
+	TargetType t2	= _determineTarget(arg2, v2);
 	if (t2 == IMMEDIATE)
 		FATAL(ERR_META, "Cannot move to immediate value\n%s",
 			CTXMGR->location().c_str());
@@ -699,7 +695,7 @@ int Scanner::_handleMove(Token::TokenInfo info,
 	/*************************************************************************\
 	|* Make sure any registers that need banks remapped, have that happen
 	\*************************************************************************/
-	_surfaceRegs(t1, t2, v1, v2, tokens, line, pass);
+	_surfaceRegs(t1, t2, v1, v2, tokens, pass);
 	
 	/*************************************************************************\
 	|* Handle register -> register move
@@ -724,11 +720,11 @@ int Scanner::_handleMove(Token::TokenInfo info,
 			{
 			String arg	= toHexString(addr1-i, "$");
 			opInfo 		= Token::parsePrefix("lda");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 
 			arg			= toHexString(addr2-i, "$");
 			opInfo 		= Token::parsePrefix("sta");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 			}
 		}
 
@@ -749,11 +745,11 @@ int Scanner::_handleMove(Token::TokenInfo info,
 			{
 			String arg	= toHexString(addr1-i, "$");
 			opInfo 		= Token::parsePrefix("lda");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 
 			arg			= toHexString(addr2+extent-1-i, "$");
 			opInfo 		= Token::parsePrefix("sta");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 			}
 		}
 
@@ -791,13 +787,13 @@ int Scanner::_handleMove(Token::TokenInfo info,
 				{
 				String arg	= toHexString(b[i].byte, "#$");
 				opInfo 		= Token::parsePrefix("lda");
-				_handle6502(opInfo, arg, tokens, line, pass);
+				_handle6502(opInfo, arg, tokens, pass);
 				v = b[i].byte;
 				}
 			
 			String arg	= toHexString(addr2 + b[i].idx, "$");
 			opInfo 		= Token::parsePrefix("sta");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 			}
 		}
 
@@ -818,11 +814,11 @@ int Scanner::_handleMove(Token::TokenInfo info,
 			{
 			String arg	= toHexString(addr1+extent-1-i, "$");
 			opInfo 		= Token::parsePrefix("lda");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 
 			arg			= toHexString(addr2-i, "$");
 			opInfo 		= Token::parsePrefix("sta");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 			}
 		}
 
@@ -841,11 +837,11 @@ int Scanner::_handleMove(Token::TokenInfo info,
 			{
 			String arg	= toHexString(addr1+extent-1-i, "$");
 			opInfo 		= Token::parsePrefix("lda");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 
 			arg			= toHexString(addr2+extent-1-i, "$");
 			opInfo 		= Token::parsePrefix("sta");
-			_handle6502(opInfo, arg, tokens, line, pass);
+			_handle6502(opInfo, arg, tokens, pass);
 			}
 		}
 	
@@ -862,7 +858,6 @@ int Scanner::_handleMove(Token::TokenInfo info,
 int Scanner::_handle6502(Token::TokenInfo info,
 						   String args,
 						   TokenList &tokens,
-						   int& line,
 						   int pass)
 	{
 	Engine& e 		= Engine::getInstance();
@@ -1052,7 +1047,7 @@ int Scanner::_handle6502(Token::TokenInfo info,
 		t.setAddrMode(amode);
 		//printf("%04x %s\n", _current, t.toString().c_str());
 		}
-	if (_emit(tokens, line, t, amode))
+	if (_emit(tokens, t, amode))
 		_current += numbytes;
 	return 0;
 	}
@@ -1060,20 +1055,20 @@ int Scanner::_handle6502(Token::TokenInfo info,
 /*****************************************************************************\
 |* Set the assembly origin by inserting a token into the stream
 \*****************************************************************************/
-int Scanner::_setOrigin(TokenList &tokens, int& line, String args)
+int Scanner::_setOrigin(TokenList &tokens, String args)
 	{
 	Token t(T_DIRECTIVE, P_ORG);
 	_engine.eval(args);
 	_current = _engine.result() & 0xFFFF;
 	t.setAddr(_current);
-	_emit(tokens, line, t, A_NONE);
+	_emit(tokens, t, A_NONE);
 	return 0;
 	}
 
 /*****************************************************************************\
 |* Process if blocks
 \*****************************************************************************/
-int Scanner::_if(TokenList &tokens, int& line, String condition)
+int Scanner::_if(TokenList &tokens, String condition)
 	{
 	// Evaluate the condition
 	_engine.eval(condition);
@@ -1090,7 +1085,7 @@ int Scanner::_if(TokenList &tokens, int& line, String condition)
 |* current if-block. That will prevent output if it was previously enabled,
 |* and allow output if it was previously prevented
 \*****************************************************************************/
-int Scanner::_else(TokenList &tokens, int& line)
+int Scanner::_else(TokenList &tokens)
 	{
 	if (_ifState.size() > 0)
 		{
@@ -1108,7 +1103,7 @@ int Scanner::_else(TokenList &tokens, int& line)
 /*****************************************************************************\
 |* Process endif blocks
 \*****************************************************************************/
-int Scanner::_endif(TokenList &tokens, int& line)
+int Scanner::_endif(TokenList &tokens)
 	{
 	if (_ifState.size() > 0)
 		_ifState.pop_back();
@@ -1122,7 +1117,7 @@ int Scanner::_endif(TokenList &tokens, int& line)
 /*****************************************************************************\
 |* Reserve space for the data in the arguments
 \*****************************************************************************/
-int Scanner::_reserveBytes(TokenList &tokens, int& line, int size, String args)
+int Scanner::_reserveBytes(TokenList &tokens, int size, String args)
 	{
 	Token t(T_DIRECTIVE, P_BYTE);
 
@@ -1189,14 +1184,14 @@ int Scanner::_reserveBytes(TokenList &tokens, int& line, int size, String args)
 		at ++;
 		}
 	
-	_emit(tokens, line, t, A_NONE);
+	_emit(tokens, t, A_NONE);
 	return 0;
 	}
 
 /*****************************************************************************\
 |* Embed an address into the byte stream
 \*****************************************************************************/
-int Scanner::_embedAddress(TokenList &tokens, int& line, String args)
+int Scanner::_embedAddress(TokenList &tokens, String args)
 	{
 	// FIXME - needs implementation
 	return 0;
@@ -1319,7 +1314,7 @@ bool Scanner::_atEnd(void)
 /*****************************************************************************\
 |* Get the next character in the input stream
 \*****************************************************************************/
-int Scanner::_next(int &line)
+int Scanner::_next(void)
 	{
 	if (_atEnd())
 		return EOF;
@@ -1327,7 +1322,6 @@ int Scanner::_next(int &line)
 	int c = _src[_at++];
 	if (c == '\n')
 		{
-		line ++;
 		CTXMGR->incLine();
 		}
 	return c;
@@ -1363,7 +1357,7 @@ String Scanner::_firstWord(String src, int &state)
 /*****************************************************************************\
 |* Get the next line in the input stream
 \*****************************************************************************/
-String Scanner::_nextLine(int &line, int &state)
+String Scanner::_nextLine(int &state)
 	{
 	String s = "";
 	state	 = SCAN_MORE;
@@ -1374,7 +1368,6 @@ String Scanner::_nextLine(int &line, int &state)
 		if (c == '\n')
 			{
 			CTXMGR->incLine();
-			line ++;
 			return s;
 			}
 		s += (char)c;
@@ -1399,9 +1392,8 @@ void Scanner::_putBack(void)
 |* Emit a token
 \*****************************************************************************/
 bool Scanner::_emit(TokenList &tokens,
-					  int& line,
-					  Token token,
-					  AddressingMode amode)
+					Token token,
+					AddressingMode amode)
 	{
 	bool emit = shouldEvaluate();
 	if (emit)

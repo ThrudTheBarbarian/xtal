@@ -68,7 +68,7 @@ class Scanner
         /*********************************************************************\
         |* Get the next character in the input stream
         \*********************************************************************/
-        int _next(int &line);
+        int _next(void);
    
         /*********************************************************************\
         |* Get the next word in the input stream
@@ -78,7 +78,7 @@ class Scanner
         /*********************************************************************\
         |* Get the next line in the input stream
         \*********************************************************************/
-        String _nextLine(int &line, int &state);
+        String _nextLine(int &state);
         
 		/*********************************************************************\
         |* Are we at the end of 'file'
@@ -103,37 +103,37 @@ class Scanner
         /*********************************************************************\
         |* Begin an if block
         \*********************************************************************/
-        int _if(TokenList &tokens, int& line, String condition);
+        int _if(TokenList &tokens, String condition);
 
         /*********************************************************************\
         |* Handle an else statement
         \*********************************************************************/
-        int _else(TokenList &tokens, int& line);
+        int _else(TokenList &tokens);
 
         /*********************************************************************\
         |* End an if block
         \*********************************************************************/
-        int _endif(TokenList &tokens, int& line);
+        int _endif(TokenList &tokens);
 
         /*********************************************************************\
         |* Reserve space for the data in the arguments
         \*********************************************************************/
-        int _reserveBytes(TokenList &tokens, int& line, int size, String args);
+        int _reserveBytes(TokenList &tokens, int size, String args);
 
 		/*********************************************************************\
         |* Embed an address into the byte stream
         \*********************************************************************/
-        int _embedAddress(TokenList &tokens, int& line, String arg);
+        int _embedAddress(TokenList &tokens, String arg);
 
         /*********************************************************************\
         |* Set the origin
         \*********************************************************************/
-		int _setOrigin(TokenList &tokens, int& line, String arg);
+		int _setOrigin(TokenList &tokens, String arg);
 
         /*********************************************************************\
         |* Add a macro
         \*********************************************************************/
-        int _macro(TokenList &tokens, int& line, Macro macro, String args);
+        int _macro(TokenList &tokens, Macro macro, String args);
 
         /*********************************************************************\
         |* Make sure that any registers that need banks remapped, have that
@@ -144,7 +144,6 @@ class Scanner
 						  int64_t v1,
 						  int64_t v2,
 						  TokenList &tokens,
-						  int line,
 						  int pass);
 
         /*********************************************************************\
@@ -159,7 +158,6 @@ class Scanner
 						   int64_t v2,
 						   int64_t v3,
 						   TokenList &tokens,
-						   int line,
 						   int pass);
 
         /*********************************************************************\
@@ -183,7 +181,6 @@ class Scanner
 						int extent,
 						String args,
 						TokenList &tokens,
-						int& line,
 						int pass);
 
         /*********************************************************************\
@@ -194,7 +191,6 @@ class Scanner
 					    int extent,
 					    String args,
 					    TokenList &tokens,
-					    int& line,
 					    int pass,
 						String op);
  
@@ -206,7 +202,6 @@ class Scanner
 						int extent,
 						String args,
 						TokenList &tokens,
-						int& line,
 						int pass);
 
         /*********************************************************************\
@@ -215,21 +210,19 @@ class Scanner
 		int _handle6502(Token::TokenInfo info,
 						String args,
 						TokenList &tokens,
-						int& line,
 						int pass);
 
         /*********************************************************************\
         |* Emit a token into the token stream
         \*********************************************************************/
 		bool _emit(TokenList &tokens,
-				   int& line,
 				   Token token,
 				   AddressingMode amode);
 		
         /*********************************************************************\
         |* Return the target-type and value of a string argument
         \*********************************************************************/
-		TargetType _determineTarget(String s, int64_t &value, int line);
+		TargetType _determineTarget(String s, int64_t &value);
 		
     public:
         /********************************************************************\
@@ -240,7 +233,7 @@ class Scanner
         /*********************************************************************\
         |* Scan for tokens
         \*********************************************************************/
-        int scan(TokenList &tokens, int& line, int pass);
+        int scan(TokenList &tokens, int pass);
 
         /*********************************************************************\
         |* Add symbols to the engine

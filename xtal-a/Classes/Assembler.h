@@ -27,7 +27,6 @@ class Assembler
     |* Properties
     \*************************************************************************/
     GET(ArgParser*, ap);				// Permanent reference to the arguments
-    GET(int, line);						// The current line number
     GET(StringList, includeDirs);		// List of places to pull includes from
     GET(StringList, symbols);			// List of provided symbols
     GET(BlockList, blocks);				// List of output blocks
@@ -44,7 +43,7 @@ class Assembler
         /*********************************************************************\
         |* Actual error reporting
         \*********************************************************************/
-        static void _report(int line, String where, String msg);
+        static void _report(String where, String msg);
         
         /*********************************************************************\
         |* Find an included file on the filesystem
@@ -71,7 +70,7 @@ class Assembler
         /*********************************************************************\
         |* Error handling
         \*********************************************************************/
-        static void error(int line, String msg);
+        static void error(String msg);
 	};
 
 #endif /* Assembler_h */

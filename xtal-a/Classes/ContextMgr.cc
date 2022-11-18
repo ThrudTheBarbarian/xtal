@@ -8,8 +8,6 @@
 #include "ContextMgr.h"
 #include "Stringutils.h"
 
-// FIXME: Contexts aren't storing line numbers correctly
-
 /******************************************************************************\
 |* The global notification center
 \******************************************************************************/
