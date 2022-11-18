@@ -266,8 +266,9 @@ void Assembler::_report(int line, std::string where, std::string msg)
 \*****************************************************************************/
 String Assembler::_preparse(String src)
 	{
-	auto ctxMgr		= ContextMgr::sharedInstance();
-	bool needsPass 	= true;
+	auto ctxMgr					= ContextMgr::sharedInstance();
+	bool needsPass 				= true;
+	
 	while (needsPass)
 		{
 		needsPass 		 		= false;
@@ -294,7 +295,7 @@ String Assembler::_preparse(String src)
 				if (content.size() > 0)
 					{
 					needsPass = true;
-					result += ".push context file '" + fname + "' 1'";
+					result += ".push context file '" + fname + "' 1'\n";
 					result += trim(content) + "\n";
 					result += ".pop context\n";
 					}

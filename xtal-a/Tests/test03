@@ -2,7 +2,6 @@
 
 .include stdmacros.s
 
-jhhh
 	move.4 #$2 r1
 	move.4 #$3 r2
 	move.4 #$5 r3

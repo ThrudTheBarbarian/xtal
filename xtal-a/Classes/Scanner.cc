@@ -201,7 +201,7 @@ int Scanner::scan(TokenList &tokens, int& line, int pass)
 						_macro(tokens, line, _macros[word], args);
 						}
 					else
-						FATAL(ERR_PARSE, "Unknown assembly token %s\n%s",
+						FATAL(ERR_PARSE, "Unknown assembly token '%s'\n%s",
 								word.c_str(),
 								CTXMGR->location().c_str());
 					}

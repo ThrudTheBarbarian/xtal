@@ -50,11 +50,11 @@ ContextMgr::Context& ContextMgr::push(const String name,
 	switch (type)
 		{
 		case FILE:
-			_fileList.push_back(&ctx);
+			_fileList.push_back(&_ctxList.back());
 			break;
 		
 		default:
-			_blockList.push_back(&ctx);
+			_blockList.push_back(&_ctxList.back());
 			break;
 		}
 		
@@ -144,19 +144,22 @@ void ContextMgr::pop(void)
 	}
 
 /******************************************************************************\
-|* Return a location based on the current context hierarchy
+|* Return a location based on the current context hierarchy. We bump the line
+|* by one because we haven't actually hit the \n at the end of the current
+|* line yet
 \******************************************************************************/
 String ContextMgr::location(void)
 	{
-	String msg = "";
-	String prefix = "";
-	
+	String msg 		= "";
+	String prefix 	= "";
+	String at 		= "in ";
 	for (auto i = _ctxList.rbegin(); i != _ctxList.rend(); ++i)
 		{
-		msg += prefix + "in " + _type(i->type)  + " " + i->name
-			 + " at line " + std::to_string(i->line)
+		msg += prefix + at + _type(i->type)  + " " + i->name
+			 + " at line " + std::to_string(i->line + 1)
 			 + "\n";
-		prefix = "..";
+		prefix = ".. ";
+		at = "referenced from ";
 		}
 		
 	return msg;
