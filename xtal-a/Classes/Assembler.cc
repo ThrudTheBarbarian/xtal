@@ -17,6 +17,8 @@
 #include "Stringutils.h"
 #include "Token.h"
 
+#define CTXMGR					ContextMgr::sharedInstance()
+
 static int _debugLevel;
 
 typedef enum
@@ -153,6 +155,7 @@ int Assembler::_run(std::string source)
 	|* Set the source
 	\*************************************************************************/
 	scanner.setSrc(source);
+	//fprintf(stderr, "=====\n%s\n=====\n", source.c_str());
 
 	/*************************************************************************\
 	|* Run the first pass of the assembler, so any variables with forward refs
@@ -295,7 +298,7 @@ String Assembler::_preparse(String src)
 				if (content.size() > 0)
 					{
 					needsPass = true;
-					result += ".push context file '" + fname + "' 1'\n";
+					result += ".push context file '" + fname + "' 0'\n";
 					result += trim(content) + "\n";
 					result += ".pop context\n";
 					}
@@ -308,6 +311,7 @@ String Assembler::_preparse(String src)
 				}
 			else if (lc.find(".macro") != std::string::npos)
 				{
+				result += ";" + line + "\n";
 				currentMode = MACRO;
 				StringList words = split(trim(line), " \t");
 				if (words.size() > 1)
@@ -315,7 +319,7 @@ String Assembler::_preparse(String src)
 					macro.reset();
 					macro.setName(words[1]);
 					
-					String ctx = ".push context macro '" + words[1] + "' 1";
+					String ctx = ".push context macro '" + words[1] + "' 0";
 					macro.lines().push_back(ctx);
 					}
 				else
@@ -323,6 +327,7 @@ String Assembler::_preparse(String src)
 				}
 			else if (lc.find(".endmacro") != std::string::npos)
 				{
+				result += ";" + line + "\n";
 				currentMode = NORMAL;
 				macro.lines().push_back(".pop context");
 				_macros[macro.name()] = macro;
@@ -332,6 +337,7 @@ String Assembler::_preparse(String src)
 				if (currentMode == MACRO)
 					{
 					macro.lines().push_back(line);
+					result += ";\t"+line+"\n";
 					
 					std::regex expr("\\%[0-9]+");
 					std::smatch m;

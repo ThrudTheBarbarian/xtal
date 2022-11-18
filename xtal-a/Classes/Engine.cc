@@ -5,7 +5,10 @@
 //  Created by Thrud The Barbarian on 10/29/22.
 //
 
+#include "ContextMgr.h"
 #include "Engine.h"
+
+#define CTXMGR					ContextMgr::sharedInstance()
 
 extern int yyparse();
 	
@@ -41,11 +44,12 @@ int64_t Engine::parseNumber(void)
 				return c;
 				}
 			else
-				FATAL(ERR_PARSE, "Cannot understand number/base in %s",
-					_src.c_str());
+				FATAL(ERR_PARSE, "Cannot understand number/base in '%s'\n%s",
+					_src.c_str(), CTXMGR->location().c_str());
 			}
 		else
-			FATAL(ERR_PARSE, "Cannot understand number/base");
+			FATAL(ERR_PARSE, "Cannot understand number/base\n%s",
+					CTXMGR->location().c_str());
 		c = _next();
 		}
 

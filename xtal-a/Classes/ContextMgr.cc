@@ -144,10 +144,7 @@ void ContextMgr::pop(void)
 	}
 
 /******************************************************************************\
-|* Return a location based on the current context hierarchy. We bump the line
-|* by one because we haven't actually hit the \n at the end of the current
-|* line yet
-\******************************************************************************/
+|* Return a location based on the current context hierarchy. \******************************************************************************/
 String ContextMgr::location(void)
 	{
 	String msg 		= "";
@@ -156,7 +153,7 @@ String ContextMgr::location(void)
 	for (auto i = _ctxList.rbegin(); i != _ctxList.rend(); ++i)
 		{
 		msg += prefix + at + _type(i->type)  + " " + i->name
-			 + " at line " + std::to_string(i->line + 1)
+			 + " at line " + std::to_string(i->line)
 			 + "\n";
 		prefix = ".. ";
 		at = "referenced from ";

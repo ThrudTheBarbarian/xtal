@@ -1326,7 +1326,10 @@ int Scanner::_next(int &line)
 		
 	int c = _src[_at++];
 	if (c == '\n')
+		{
 		line ++;
+		CTXMGR->incLine();
+		}
 	return c;
 	}
 	

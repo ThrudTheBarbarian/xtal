@@ -5,8 +5,11 @@
 //  Created by Thrud The Barbarian on 10/28/22.
 //
 
+#include "ContextMgr.h"
 #include "Token.h"
 #include "Stringutils.h"
+
+#define CTXMGR					ContextMgr::sharedInstance()
 
 static Token::TokenInfo _tokens[] = {
 	{T_DIRECTIVE, 	P_INCLUDE,	"TOKEN_INCLUDE", ".include", 8},
@@ -394,7 +397,8 @@ String Token::toString(void)
 			break;
 		
 		default:
-			FATAL(ERR_EMIT, "Unknown addressing mode!");
+			FATAL(ERR_EMIT, "Unknown addressing mode!\n%s",
+				CTXMGR->location().c_str());
 		}
 	return info;
 	}
