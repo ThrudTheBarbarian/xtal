@@ -1,0 +1,32 @@
+Labels:
+=======
+
+ - need a way to localise the labels, better than the incrementing id we
+   we currently have. Consider
+   
+	macro xxx
+		done_?:
+	
+	macro yyy
+			bcc done_?
+		done_?:
+		
+	How does it know which label to use ?
+	
+	Suggestion:
+		Internally rename labels to be <context>_<context-name>_<label-name>
+
+		So the above would be:
+			M_xxx_done
+			M_yyy_done
+		
+		If we get functions later:
+		
+			F_fname_xxx
+			
+		Means you can't BCC/JSR out of a context, so maybe make a
+		global context as well - start the label name with G_ or @ and it
+		doesn't get the context munged.
+		
+		Need to rename labels in JMP, JSR and Bxx as well.
+	

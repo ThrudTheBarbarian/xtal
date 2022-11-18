@@ -540,6 +540,9 @@ void Scanner::_insertOp(TargetType t1,
 	
 	if (overflowPos == 4)
 		macro 	   += toHexString(OVERFLOW_LOCATION, ", $");
+	
+	macro += "\n";
+	
 	_src.insert(_at, macro);
 	}
 	
@@ -613,9 +616,7 @@ int Scanner::_handleMath(String word,
 	String notsign	= lcase(op) + "u";
 	stem 		   += (lword.starts_with(notsign)) ? "u" : "";
 	
-	int overflowPos	= (lword.starts_with("div")) ? 4
-					: -1;
-	_insertOp(t1, t2, t3, v1, v2, v3, stem, overflowPos);
+	_insertOp(t1, t2, t3, v1, v2, v3, stem, -1);
 
 	return ok;
 	}

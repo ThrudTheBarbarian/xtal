@@ -149,6 +149,7 @@
 		F480EF8929231627008584FB /* test.02 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.02; sourceTree = "<group>"; };
 		F480EF8A29231627008584FB /* test.05 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.05; sourceTree = "<group>"; };
 		F480EF8B29231627008584FB /* test.01 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.01; sourceTree = "<group>"; };
+		F480EF8C29271A5A008584FB /* Bugs */ = {isa = PBXFileReference; lastKnownFileType = text; path = Bugs; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -312,6 +313,7 @@
 			isa = PBXGroup;
 			children = (
 				F480EF612922BC1A008584FB /* AssemblyFormat.txt */,
+				F480EF8C29271A5A008584FB /* Bugs */,
 			);
 			path = Docs;
 			sourceTree = "<group>";

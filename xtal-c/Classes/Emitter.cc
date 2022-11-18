@@ -188,23 +188,23 @@ Register Emitter::_cgSub(Register r1, Register r2)
 \*****************************************************************************/
 Register Emitter::_cgDiv(Register r1, Register r2)
 	{
-	Register result	= _regs->allocate(Register::SIGNED_4BYTE);
+	Register left	= _regs->allocate(Register::SIGNED_4BYTE);
 	String op 		= "\tdivu.";
 	int separator	= Register::UNSIGNED_4BYTE;
 	if ((r1.type() > separator) || (r2.type() > separator))
 		op = "\tdivs.";
-	op += result.sizeAsString();
+	op += r1.sizeAsString();
 	
 	std::stringstream ss;
 	ss 	<< op << " "
 		<< r1.name()
 	    << " " << r2.name()
-	    << " " << result.name()
+	    << " " << left.name()
 	    << std::endl;
 
 	_output += ss.str();
-	_regs->free(r1);
+	_regs->free(left);
 	_regs->free(r2);
-	return result;
+	return r1;
 	}
 

@@ -107,6 +107,21 @@ int yylex ()
 			s = e.nextLabel(s);
 			strncpy(sbuf, s.c_str(), MAX(100, s.length()));
 			}
+		
+//		if ((sbuf[0] == 'r') || (sbuf[0] == 'R'))
+//			{
+//			bool isNumeric = true;
+//			for (int i=1; i<strlen(sbuf) && isNumeric; i++)
+//				if (!isdigit(sbuf[i]))
+//					isNumeric = false;
+//			if (isNumeric)
+//				{
+//				int value;
+//				sscanf(sbuf+1, "%d", &value);
+//				yylval.val = (value % 16) + 0xC0;
+//				return NUMBER;
+//				}
+//			}
 			
 		if (e.symbols().find(sbuf) == e.symbols().end())
 			{

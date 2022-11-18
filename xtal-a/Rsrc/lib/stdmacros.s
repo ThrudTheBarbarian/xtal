@@ -5,6 +5,31 @@
 ;
 
 ;/*************************************************************************\
+;|* Type: Register defines
+;|*
+;|* Let "normal" 6502 opcodes access the register variables by using
+;|* r0 .. r16. This isn't a perfect solution because it won't handle
+;|* automatically mapping in the correct range of values if r>16, but
+;|* that can be done manually
+;\*************************************************************************/
+r0	= $c0
+r1	= $c4
+r2	= $c8
+r3	= $cc
+r4	= $d0
+r5	= $d4
+r6	= $d8
+r7 	= $dc
+r8	= $e0
+r9	= $e4
+r10	= $e8
+r11	= $ec
+r12	= $f0
+r13	= $f4
+r14	= $f8
+r15	= $fc
+
+;/*************************************************************************\
 ;|* Type: Basic operation
 ;|*
 ;|* Implement CLC,ADC as _add
@@ -1284,32 +1309,82 @@ dec0_?:
 ;/*************************************************************************\
 ;|* Type: Arithmetic operation
 ;|*
-;|* Divide a 32-bit value at location %1 by a 32-bit value %2 and
-;|* store 32-bit result in location %3 and the 32-bit remainder in %4
+;|* Divide a (possibly signed) 32-bit value at location %1 by a (possibly
+;|* signed) 32-bit value %2 and store the 32-bit remainder in location %3
+;|* and surface the result in %1
 ;|*
-;|* Clobbers: A, X
+;|* Clobbers: A, X, Y
 ;|* Arguments:
-;|*    %1 : location of dividend
+;|*    %1 : location of dividend and final result
 ;|*    %2 : location of divisor
-;|*    %3 : location of quotient
-;|*	   %4 : location of remainder
+;|*    %3 : location of remainder
 ;\*************************************************************************/
 .macro _div32
-		_clr32 %4
-		ldx #32
-	loop_?:
-		_asl32 %1, %1
-		_rol32 %4, %4
-		_sub32 %4, %2, %4
-		bcs next_?
-		_add32 %4, %2, %4
-	next_?:
-		_rol32 %3, %3
-		dex
-		bpl loop_?
+		lda %2+3			; Get the upper byte of the divisor
+		pha					; and store in the scratch registor
+		eor %1+3			; EOR with sign of dividend
+		pha					; and store for later
+
+		lda %1+3			; Check if the dividend needs to be negated
+		bpl skipNeg1_?		; If it's +ve, skip the negation
+		_neg32 %1,%1		; otherwise negate
+
+skipNeg1_1:
+		lda %2+3			; Check if the divisor needs to be negated
+		bpl skipNeg2_?		; If it's +ve, skip the negation
+		_neg32 %2,%2
+
+skipNeg2_?:
+		_clr32 %3			; Clear the accumulator
+		
+		lda %2				; Check for divide-by-zero error
+		ora %2+1
+		ora %2+2
+		ora %2+3
+		bne ok_?
+		pla
+		pla
+		sec					; set error status
+		bcs error_?
+ok_?:
+		ldy #$20			; Number of bits to rotate through
+
+sdv_loop_?:
+		_asl32 %1,%1		; left-shift dividend
+		_rol32 %3,%3		; and rotate into 'accumulator'
+		
+		_sub32 %3,%2,%3		; subtract divisor from accumulator
+		bcs sdv4_?			; if carry is set, r0 is +ve, skip add-back
+		
+		_add32 %3,%2,%3		; get r0 +ve again by adding back r2
+		clc					; then always branch to next-bit routine
+		bcc sdv5_?
+
+sdv4_?:
+		inc %1				; increment the results bit
+		bcs sdv5_?			; and allow space for a longer bcs for error
+
+error_?:
+		bcs done_?
+	
+sdv5_?:
+		dey					; Go to the next bit
+		bne sdv_loop_?		; ... for 32 times
+
+		pla					; check remainder sign,
+		bpl sdv6_?			; skip negation if +ve
+		_neg32 %1,%1
+		
+sdv6_?:
+		pla					; check quotient sign
+		bpl sdv8_?			; skip negation if +ve
+		_neg32 %3,%3
+
+sdv8_?:
+		clc					; set status = no error
+done_?:
+
 .endmacro
-
-
 
 ;/*************************************************************************\
 ;|* Type: Comparison operation
