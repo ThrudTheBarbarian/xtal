@@ -59,10 +59,10 @@ class Scanner
 	GETSET(MacroMap, macros, Macros);	// Map of macros from assembler
 	GET(BoolList, ifState);				// 'if' state hierarchy
 	GET(String, listing);				// String form of output
+	GET(int, labelId);					// Current numeric label id
 	
     private:
 		Engine& 	_engine;			// YACC-based expression-parsing engine
-		String		_majorLabel;		// Current major label
 		int			_pageIndex[4];		// Current 'page' for banked addresses
 		
         /*********************************************************************\
@@ -223,6 +223,12 @@ class Scanner
         |* Return the target-type and value of a string argument
         \*********************************************************************/
 		TargetType _determineTarget(String s, int64_t &value);
+		
+		
+        /*********************************************************************\
+        |* Evaluate a branch value
+        \*********************************************************************/
+		int _evaluateLabel(String s);
 		
     public:
         /********************************************************************\

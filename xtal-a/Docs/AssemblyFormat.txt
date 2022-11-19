@@ -6,13 +6,9 @@ The assembler understands the following format:
 
 	[label:] opcode [arg] [arg] [; comment]
 
-- Labels can end with : or . If they end with '.' they are implicitly
-  prepended with the name of the last ":" label, thus allowing things like
-  'loop.' to be re-used between major labels
-  
-- Labels can also end with _? in which case the ? part will automatically be
-  given a monotonically incrementing value every time a label is seen. This
-  is useful for jumps within macros, for example
+- Labels end with ':'. If a label is prefixed with '@' then it is a global
+  label, and will be available anywhere, otherwise labels are local to their
+  context (file, macro, class, function)
   
 - All standard 6502 mnemonics including addressing modes, eg:
 

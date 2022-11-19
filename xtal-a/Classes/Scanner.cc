@@ -50,6 +50,7 @@ Scanner::Scanner(String src)
 \*****************************************************************************/
 void Scanner::reset(int to)
 	{
+	_labelId		= 0;
 	_current		= 0;
 	_at 			= to;
 	_pageIndex[0] 	= 0;
@@ -893,8 +894,7 @@ int Scanner::_handle6502(Token::TokenInfo info,
 		if (isBranch)
 			{
 			amode = A_RELATIVE;
-			e.eval("( "+args+" ) - "+ std::to_string(_current));
-			int offset = (int) e.result();
+			int offset = _evaluateLabel(args) - _current;
 			if (offset != 0)
 				offset -= 2;
 			bytes[0] = (uint32_t)(offset) & 0xFF;
@@ -1217,45 +1217,17 @@ Token Scanner::_hasLabel(String& s)
 	/*************************************************************************\
     |* See if this is a global or local label
     \*************************************************************************/
-	bool global = (label.back() == ':');
-	bool local	= (label.back() == '.');
+	bool isLabel	= (label.back() == ':');
 	label.pop_back();
 	
-	bool isLabel = global | local;
 	if (isLabel)
 		{
-        /*********************************************************************\
-        |* Is this a dynamically-named label ?
-        \*********************************************************************/
-		if (label.back() == '?')
-			{
-			label.pop_back();
-			label.pop_back();
-			String name = label;
-			
-			e.incLabel(name);
-			label = e.nextLabel(label);
-			}
-			
-		if (global)
-			{
-			t.setType(T_LABEL);
-			t.setWhich(P_LABEL);
-			_majorLabel = label;
-			t.setArg1(label);
-			s = trim(s.substr(idx));
-			e.updateSymbol(label, _current);
-			}
-		else if (local)
-			{
-			t.setType(T_LLABEL);
-			t.setWhich(P_LLABEL);
-			String labelName = _majorLabel+"_"+label;
-			e.updateSymbol(labelName, _current);
-			t.setArg1(labelName);
-			t.setArg2(label);
-			s = trim(s.substr(idx));
-			}
+		CTXMGR->addLabel(label, _current);
+
+		t.setType(T_LABEL);
+		t.setWhich(P_LABEL);
+		t.setArg1(label);
+		s = trim(s.substr(idx));
 		}
 		
 	return t;
@@ -1423,4 +1395,17 @@ bool Scanner::shouldEvaluate(void)
 				break;
 			}
 	return evaluate;
+	}
+
+/*****************************************************************************\
+|* Evaluate a branch value
+\*****************************************************************************/
+int Scanner::_evaluateLabel(String s)
+	{
+	String vars = CTXMGR->labelValues();
+	vars += "\n" +s;
+
+	Engine& e 		= Engine::getInstance();
+	e.eval(vars);
+	return (int) e.result();
 	}

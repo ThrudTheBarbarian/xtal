@@ -35,9 +35,10 @@ class ContextMgr
     
 		typedef struct
 			{
-			String name;				// Human-readable name for this context
-			Type type;					// One of the enums for context type
-			int64_t line;				// Where we are in the context
+			String name;			// Human-readable name for this context
+			Type type;				// One of the enums for context type
+			int64_t line;			// Where we are in the context
+			int contextId;			// Incrementing context id
 			} Context;
 			
 	/*************************************************************************\
@@ -45,9 +46,10 @@ class ContextMgr
     \*************************************************************************/
     
     private:
-        std::vector<Context> _ctxList;					// Context hierarchy
-        std::vector<Context*> _blockList;				// Block contexts
-        std::vector<Context*> _fileList;				// File contexts
+        std::vector<Context> 	_ctxList;				// Context hierarchy
+        std::vector<Context*> 	_blockList;				// Block contexts
+        std::vector<Context*> 	_fileList;				// File contexts
+        int 					_nextContextId;			// Incrementing int
         
         static std::shared_ptr<ContextMgr> _instance;	// Shared instance
  
@@ -56,6 +58,11 @@ class ContextMgr
         \*********************************************************************/
         explicit ContextMgr();
 
+		/*********************************************************************\
+        |* A map of label:address pairs, built up by context-id
+        \*********************************************************************/
+		std::map<int,std::map<String,int>> _labels;
+		
 		/*********************************************************************\
         |* Return a human-readable version of the type
         \*********************************************************************/
@@ -92,8 +99,23 @@ class ContextMgr
         /*********************************************************************\
         |* Return the current context identifier for label naming
         \*********************************************************************/
-		String identifier(int idx);
+		String identifier(void);
 
+        /*********************************************************************\
+        |* Add a label to the current or global (if starts with @) context
+        \*********************************************************************/
+		void addLabel(String label, int location);
+
+        /*********************************************************************\
+        |* Return a label's value or -1
+        \*********************************************************************/
+		bool labelValue(String label, int& value);
+
+        /*********************************************************************\
+        |* Return all the context's label values
+        \*********************************************************************/
+		String labelValues(void);
+	
         /**********************************************************************\
         |* This method returns the default global notification center.  You may
         |* alternatively create your own notification center without using the

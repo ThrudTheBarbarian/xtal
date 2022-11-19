@@ -18,6 +18,8 @@ std::shared_ptr<ContextMgr> ContextMgr::_instance = NULL;
 \*****************************************************************************/
 ContextMgr::ContextMgr()
 	{
+	reset();
+	_labels.clear();
 	}
 
 /******************************************************************************\
@@ -40,9 +42,11 @@ ContextMgr::Context& ContextMgr::push(const String name,
 									  ContextMgr::Type type,
 									  int64_t line)
 	{
-	Context ctx = {.name = name,
-				   .type = type,
-				   .line = line};
+	_nextContextId ++;
+	Context ctx = {.name	 	= name,
+				   .type	 	= type,
+				   .line 		= line,
+				   .contextId	= _nextContextId };
 	
 	_ctxList.push_back(ctx);
 	switch (type)
@@ -115,6 +119,7 @@ void ContextMgr::reset()
 	_ctxList.clear();
 	_fileList.clear();
 	_blockList.clear();
+	_nextContextId = 0;
 	}
 	
 /******************************************************************************\
@@ -164,7 +169,7 @@ String ContextMgr::location(void)
 /******************************************************************************\
 |* Return the current context identifier for label naming
 \******************************************************************************/
-String ContextMgr::identifier(int idx)
+String ContextMgr::identifier(void)
 	{
 	String ident = "Uninitialised";
 	
@@ -176,13 +181,76 @@ String ContextMgr::identifier(int idx)
 		ident			= type.substr(0,1)
 						+ "_"
 						+ ctx.name
-						+ std::to_string(idx);
+						+ "_"
+						+ std::to_string(ctx.contextId);
 		
 		}
 	else
-		FATAL(ERR_CTX, "Cannot find context to pop!");
+		FATAL(ERR_CTX, "Cannot find context to identify!");
 	
 	return ident;
+	}
+
+/******************************************************************************\
+|* Add a context-specific, or global label to point to a memory location
+|* within the current context
+\******************************************************************************/
+void ContextMgr::addLabel(String label, int location)
+	{
+	if (_ctxList.size() > 0)
+		{
+		int contextId = -1;
+		if (label.substr(0,1) != "@")
+			contextId = _ctxList.back().contextId;
+			
+		_labels[contextId][label] = location;
+		}
+	else
+		FATAL(ERR_CTX, "Cannot find context to add label to!");
+	}
+
+
+/******************************************************************************\
+|* Return a context-specific, or global label. If it doesn't exist, return -1 \******************************************************************************/
+bool ContextMgr::labelValue(String label, int& value)
+	{
+	bool ok = false;
+	value = -1;
+	if (_ctxList.size() > 0)
+		{
+		int contextId = -1;
+		if (label.substr(0,1) != "@")
+			contextId = _ctxList.back().contextId;
+		
+		if (_labels.count(contextId))
+			{
+			if (_labels[contextId].count(label))
+				{
+				value = _labels[contextId][label];
+				ok 	  = true;
+				}
+			}
+		}
+		
+	return ok;
+	}
+
+/******************************************************************************\
+|* Return all the context label values \******************************************************************************/
+String ContextMgr::labelValues(void)
+	{
+	String results = "";
+	
+	if (_ctxList.size() > 0)
+		{
+		int contextId = _ctxList.back().contextId;
+		
+		if (_labels.count(contextId))
+			for (Elements<String,int>kv : _labels[contextId])
+				results += kv.key + " = " + std::to_string(kv.value) + "\n";
+		}
+		
+	return results;
 	}
 	
 #pragma mark - Private methods
@@ -215,6 +283,9 @@ String ContextMgr::_type(ContextMgr::Type type)
 		case BLOCK:
 			name = "block";
 			break;
+		default:
+			FATAL(ERR_CTX, "Asked for unknown context type\n%s",
+				location().c_str());
 		}
 		
 	return name;
