@@ -1,6 +1,7 @@
 .org $600
 
 .include stdmacros.s
+.include printReg.s
 
 	move.4 #$2 r1
 	move.4 #$3 r2
@@ -11,4 +12,5 @@
 	move.4 #$3 r7
 	divs.4 r6 r7 r8
 	subs.4 r5 r6 r9
+	call printReg r9
 	brk

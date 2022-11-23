@@ -14,6 +14,7 @@
 #include "properties.h"
 #include "macros.h"
 
+#include "Function.h"
 #include "Macro.h"
 #include "OutputBlock.h"
 
@@ -33,6 +34,7 @@ class Assembler
     GET(String, output);				// Output filename
     GET(String, listFile);				// Output listing filename
     GET(MacroMap, macros);				// map of named macros
+    GET(FunctionMap, functions);		// map of named functions
     
     private:
         /*********************************************************************\
@@ -54,7 +56,12 @@ class Assembler
         |* Handle .include or .macro/.endmacro directives
         \*********************************************************************/
         String _preparse(String path);
-        
+           
+        /*********************************************************************\
+        |* Determine if a function has already been defined
+        \*********************************************************************/
+        bool _functionIsDefined(String fnName);
+     
     public:
         /*********************************************************************\
         |* Constructors and Destructor

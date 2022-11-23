@@ -24,7 +24,8 @@ static int _debugLevel;
 typedef enum
 	{
 	NORMAL = 0,
-	MACRO
+	MACRO,
+	FUNCTION
 	} SearchMode;
 
 /*****************************************************************************\
@@ -277,6 +278,7 @@ String Assembler::_preparse(String src)
 		StringList lines 		= split(src, '\n');
 		SearchMode currentMode	= NORMAL;
 		Macro macro;
+		Function function;
 		
 		for (String line : lines)
 			{
@@ -330,6 +332,33 @@ String Assembler::_preparse(String src)
 				macro.lines().push_back(".pop context");
 				_macros[macro.name()] = macro;
 				}
+			else if (lc.find(".function") != std::string::npos)
+				{
+				StringList words = split(trim(line), " \t");
+				if (words.size() > 1)
+					{
+					if (!_functionIsDefined(words[1]))
+						{
+						function.reset();
+						function.setName(words[1]);
+						
+						String ctx = ".push context function '" + words[1] + "' 0";
+						function.lines().push_back(ctx);
+						result += ";" + line + "\n";
+						currentMode = FUNCTION;
+						}
+					}
+				else
+					FATAL(ERR_FUNCTION, "Unnamed function found: '%s'\n%s",
+						line.c_str(), CTXMGR->location().c_str());
+				}
+			else if (lc.find(".endfunction") != std::string::npos)
+				{
+				result += ";" + line + "\n";
+				currentMode = NORMAL;
+				function.lines().push_back(".pop context");
+				_functions[function.name()] = function;
+				}
 			else
 				{
 				if (currentMode == MACRO)
@@ -349,6 +378,25 @@ String Assembler::_preparse(String src)
 							
 						start = m.suffix().first;
 						}
+					}
+				else if (currentMode == FUNCTION)
+					{
+					String trimmed = trim(lc);
+					if (trimmed.starts_with(".clobber"))
+						{
+						StringList words = split(trimmed, " \t");
+						if (words.size() < 2)
+							FATAL(ERR_FUNCTION, "Illegal clobber: '%s'\n%s",
+								line.c_str(), CTXMGR->location().c_str());
+						String arg = words[1];
+						StringList regs = split(arg, ",");
+						for (String reg : regs)
+							function.clobbers().push_back(trim(reg));
+						}
+					else
+						function.lines().push_back(line);
+						
+					result += ";\t" + line + "\n";
 					}
 				else
 					result += trim(line) + "\n";
@@ -395,6 +443,15 @@ String Assembler::_find(String path)
 	return src;
 	}
 
+
+/*****************************************************************************\
+|* Determins if a function has been defined already
+\*****************************************************************************/
+bool Assembler::_functionIsDefined(String fnName)
+	{
+	return _functions.count(fnName) > 0;
+	}
+	
 #pragma mark - Helper Functions
 /*****************************************************************************\
 |* Implement the callback for logging vs debuglevel

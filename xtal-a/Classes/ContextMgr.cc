@@ -5,6 +5,9 @@
 //  Created by Simon Gornall on 11/17/22.
 //
 
+// FIXME: Aliasing isn't working and fileList/ctxList are getting out of sync
+// maybe move to a linked list or vector[int] for the fileList/blockList
+
 #include "ContextMgr.h"
 #include "Stringutils.h"
 

@@ -12,6 +12,17 @@
 ;|* automatically mapping in the correct range of values if r>16, but
 ;|* that can be done manually
 ;\*************************************************************************/
+
+f0	= $a0
+f1	= $a4
+f2	= $a8
+f3	= $fc
+
+s0	= $b0
+s1	= $b4
+s2	= $b8
+s3	= $bc
+
 r0	= $c0
 r1	= $c4
 r2	= $c8
@@ -28,6 +39,7 @@ r12	= $f0
 r13	= $f4
 r14	= $f8
 r15	= $fc
+
 
 ;/*************************************************************************\
 ;|* Type: Basic operation
@@ -80,22 +92,6 @@ r15	= $fc
 	sta %2
 .endmacro
 
-;/*************************************************************************\
-;|* Type: Basic operation
-;|*
-;|* Write a 32-bit number to a memory location in little-endian form
-;|*
-;|* Clobbers: A
-;|* Arguments:
-;|*    %1 address to store it at
-;\*************************************************************************/
-.macro _zero32
-	lda #0
-	sta %2+3
-	sta %2+2
-	sta %2+1
-	sta %2
-.endmacro
 
 ;/*************************************************************************\
 ;|* Type: Basic operation

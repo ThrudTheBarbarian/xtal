@@ -119,6 +119,29 @@ The assembler understands the following format:
 	subu.2	r13		r14
 	
 	call function-name
+	exec function-name
+	
+	The general principle here is a load/store architecture, with move being
+	how you get from memory <-> registers and the other operations working on
+	registers. Since we have so many registers, I'm expecting things to be
+	moved into registers, and then essentially stay there and be operated on.
+	
+	For call, the assembler will:
+		- check that the function being called actually exists as a function
+		- check what the function clobbers, and push to the stack if not f or s
+		- if there are arguments to the call, as a convenience these will be
+		  moved to f0..f3. Currently more than 4 args is unsupported
+		- jsr to the global label @function-name
+		- on return, pull any previously-pushed regs. Note that return
+		  values from functions should be in f0..f3
+		- carry on as you were.
+	
+	For exec, the same happens, but no registers are saved/restored. This can
+	prevent needless save/restore when a function calls another function and
+	doesn't care about the register-state
+	
+	Currently, functions are not supported as being defined within other
+	functions, they must be global objects
 	
 - Floating point functionality is handled by replacing the last letter with f,
   so you end up with [not yet implemented]
@@ -169,7 +192,10 @@ The assembler understands the following format:
 	are provided in stdmacros.s in the library
 	
 	Arguments must be resolveable at the point of use on the 2nd pass
-	
+
+	Currently, macros are not supported as being defined within other
+	macros, they must be global objects
+
 - Constants can be supplied from the commandline with -D <name>=<value>
   where there are no spaces between name and value
   

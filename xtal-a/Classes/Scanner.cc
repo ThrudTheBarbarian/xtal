@@ -305,7 +305,7 @@ int Scanner::_handleMeta(String word,
 			break;
 		
 		default:
-			FATAL(ERR_META, "Don't understand meta-call\n%s",
+			FATAL(ERR_META, "Don't understand meta-call \n%s",
 				CTXMGR->location().c_str());
 		}
 		
