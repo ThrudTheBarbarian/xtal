@@ -772,9 +772,9 @@ r15	= $fc
 ;\*************************************************************************/
 .macro _inc16
 	inc %1
-	bne done_?
+	bne done
 	inc %1+1
-done_?:
+done:
 .endmacro
 
 
@@ -789,13 +789,13 @@ done_?:
 ;\*************************************************************************/
 .macro _inc32
 	inc %1
-	bne done_?
+	bne done
 	inc %1+1
-	bne done_?
+	bne done
 	inc %1+2
-	bne done_?
+	bne done
 	inc %1+3
-done_?:
+done:
 .endmacro
 
 
@@ -810,9 +810,9 @@ done_?:
 ;\*************************************************************************/
 .macro _dec16
 	lda %1
-	bne done_?
+	bne done
 	dec %1+1
-done_?:
+done:
 	dec %1
 .endmacro
 
@@ -828,17 +828,17 @@ done_?:
 ;\*************************************************************************/
 .macro _dec32
 	lda %1
-	bne dec0_?
+	bne dec0
 	lda %1+1
-	bne dec1_?
+	bne dec1
 	lda %1+2
-	bne dec2_?
+	bne dec2
 	dec %1+3
-dec2_?:
+dec2:
 	dec %1+2
-dec1_?:
+dec1:
 	dec %1+1
-dec0_?:
+dec0:
 	dec %1
 .endmacro
 
@@ -1019,16 +1019,16 @@ dec0_?:
 .macro _abs16
 		bit %1+1
         .if (%1 != %2)
-			bpl move_?
+			bpl move
 			_neg16 %1, %2
-			jmp done_?
-	move_?:
+			jmp done
+	move:
 			_xfer16 %1, %2
 		.else
-			bpl done_?
+			bpl done
 			_neg16 %1, %2
 		.endif
-	done_?:
+	done:
 .endmacro
 
 
@@ -1046,16 +1046,16 @@ dec0_?:
 .macro _abs32
 		bit %1+3
         .if (%1 != %2)
-			bpl move_?
+			bpl move
 			_neg32 %1, %2
-			jmp done_?
-	move_?:
+			jmp done
+	move:
 			_xfer32 %1, %2
 		.else
-			bpl done_?
+			bpl done
 			_neg32 %1, %2
 		.endif
-	done_?:
+	done:
 .endmacro
 
 ;/*************************************************************************\
@@ -1073,14 +1073,14 @@ dec0_?:
 .macro _mulu16
 		_clr16 %3
 		ldx #16
-	loop_?:
+	loop:
 		_lsr16 %1,%1
-		bcc next_?
+		bcc next
 		_add16 %2, %3, %3
-	next_?:
+	next:
 		_asl16 %2, %2
 		dex
-		bne loop_?
+		bne loop
 .endmacro
 
 
@@ -1104,22 +1104,22 @@ dec0_?:
 		php					; and store for later
 		
 		lda %1				; is num1 negative ?
-		bpl check2_?		; +ve, so nothing to do here
+		bpl check2		; +ve, so nothing to do here
 		_neg16 %1,%1		; convert to +ve
 	
-	check2_?:
+	check2:
 		lda %2				; is num2 negative
-		bpl doMul16_?		; +ve, so nothing to do here
+		bpl doMul16		; +ve, so nothing to do here
 		_neg16 %2,%2
 	
-	doMul16_?:
+	doMul16:
 		_mulu16 %1, %2, %3	; Do an unsigned multiply
 	
 		plp					; Pull the saved state
-		bpl done_?			; don't need to convert back to -ve
+		bpl done			; don't need to convert back to -ve
 		_neg16 %3, %3
 	
-	done_?:
+	done:
 .endmacro
 
 
@@ -1138,16 +1138,16 @@ dec0_?:
 .macro _mul16x
 		_clr32 %3
 		ldx #16
-	loop_?:
+	loop:
 		_asl32 %3,%3
 		_asl32 %1,%1
-		bcc next_?
+		bcc next
 		_add16 %2, %3, %3
-		bcc next_?
+		bcc next
 		_inc16 %3+2
-	next_?:
+	next:
 		dex
-		bpl loop_?
+		bpl loop
 .endmacro
 
 
@@ -1197,14 +1197,14 @@ dec0_?:
 .macro _mul32u
 		_clr32 %3
 		ldx #32
-	loop_?:
+	loop:
 		_lsr32 %1,%1
-		bcc next_?
+		bcc next
 		_add32 %2,%3,%3
-	next_?:
+	next:
 		_asl32 %2,%2
 		dex
-		bpl loop_?
+		bpl loop
 .endmacro
 
 
@@ -1228,22 +1228,22 @@ dec0_?:
 		php					; and store for later
 		
 		lda %1				; is num1 negative ?
-		bpl check2_?		; +ve, so nothing to do here
+		bpl check2		; +ve, so nothing to do here
 		_neg32 %1,%1		; convert to +ve
 	
-	check2_?:
+	check2:
 		lda %2				; is num2 negative
-		bpl doMul32_?		; +ve, so nothing to do here
+		bpl doMul32		; +ve, so nothing to do here
 		_neg32 %2,%2
 	
-	doMul32_?:
+	doMul32:
 		_mul32u %1, %2, %3	; Do an unsigned multiply
 	
 		plp					; Pull the saved state
-		bpl done_?			; don't need to convert back to -ve
+		bpl done			; don't need to convert back to -ve
 		_neg32 %3, %3
 	
-	done_?:
+	done:
 .endmacro
 
 
@@ -1263,16 +1263,16 @@ dec0_?:
 .macro _div16
 		_clr16 %4
 		ldx #16
-	loop_?:
+	loop:
 		_asl16 %1, %1
 		_rol16 %4, %4
 		_sub16 %4, %2, %4
-		bcs next_?
+		bcs next
 		_add16 %4, %2, %4
-	next_?:
+	next:
 		_rol16 %3, %3
 		dex
-		bpl loop_?
+		bpl loop
 .endmacro
 
 
@@ -1292,16 +1292,16 @@ dec0_?:
 .macro _div16x
 		_clr16 %4
 		ldx #32
-	loop_?:
+	loop:
 		_asl32 %1, %1
 		_rol16 %4, %4
 		_sub16 %4, %2, %4
-		bcs next_?
+		bcs next
 		_add16 %4, %2, %4
-	next_?:
+	next:
 		_rol16 %3, %3
 		dex
-		bpl loop_?
+		bpl loop
 .endmacro
 
 
@@ -1325,63 +1325,63 @@ dec0_?:
 		pha					; and store for later
 
 		lda %1+3			; Check if the dividend needs to be negated
-		bpl skipNeg1_?		; If it's +ve, skip the negation
+		bpl skp1			; If it's +ve, skip the negation
 		_neg32 %1,%1		; otherwise negate
 
-skipNeg1_1:
+skp1:
 		lda %2+3			; Check if the divisor needs to be negated
-		bpl skipNeg2_?		; If it's +ve, skip the negation
+		bpl skp2			; If it's +ve, skip the negation
 		_neg32 %2,%2
 
-skipNeg2_?:
+skp2:
 		_clr32 %3			; Clear the accumulator
 		
 		lda %2				; Check for divide-by-zero error
 		ora %2+1
 		ora %2+2
 		ora %2+3
-		bne ok_?
+		bne ok
 		pla
 		pla
 		sec					; set error status
-		bcs error_?
-ok_?:
+		bcs error
+ok:
 		ldy #$20			; Number of bits to rotate through
 
-sdv_loop_?:
+sdv_loop:
 		_asl32 %1,%1		; left-shift dividend
 		_rol32 %3,%3		; and rotate into 'accumulator'
 		
 		_sub32 %3,%2,%3		; subtract divisor from accumulator
-		bcs sdv4_?			; if carry is set, r0 is +ve, skip add-back
+		bcs sdv4			; if carry is set, r0 is +ve, skip add-back
 		
 		_add32 %3,%2,%3		; get r0 +ve again by adding back r2
 		clc					; then always branch to next-bit routine
-		bcc sdv5_?
+		bcc sdv5
 
-sdv4_?:
+sdv4:
 		inc %1				; increment the results bit
-		bcs sdv5_?			; and allow space for a longer bcs for error
+		bcs sdv5			; and allow space for a longer bcs for error
 
-error_?:
-		bcs done_?
+error:
+		bcs done
 	
-sdv5_?:
+sdv5:
 		dey					; Go to the next bit
-		bne sdv_loop_?		; ... for 32 times
+		bne sdv_loop		; ... for 32 times
 
 		pla					; check remainder sign,
-		bpl sdv6_?			; skip negation if +ve
+		bpl sdv6			; skip negation if +ve
 		_neg32 %1,%1
 		
-sdv6_?:
+sdv6:
 		pla					; check quotient sign
-		bpl sdv8_?			; skip negation if +ve
+		bpl sdv8			; skip negation if +ve
 		_neg32 %3,%3
 
-sdv8_?:
+sdv8:
 		clc					; set status = no error
-done_?:
+done:
 
 .endmacro
 
@@ -1399,10 +1399,10 @@ done_?:
 .macro _cmp16
 		lda %1+1
 		cmp %2+1
-		bne done_?
+		bne done
 		lda %1
 		cmp %2
-	done_?:
+	done:
 .endmacro
 
 
@@ -1420,16 +1420,16 @@ done_?:
 .macro _cmp32
 		lda %1+3
 		cmp %2+3
-		bne done_?
+		bne done
 		lda %1+2
 		cmp %2+2
-		bne done_?
+		bne done
 		lda %1+1
 		cmp %2+1
-		bne done_?
+		bne done
 		lda %1
 		cmp %2
-	done_?:
+	done:
 .endmacro
 
 
@@ -1450,23 +1450,23 @@ done_?:
 .macro _memcpyUp
 		ldy #0
 		ldx %3+1
-		beq frag_?
-	page_?:
+		beq frag
+	page:
 		lda (%1),Y
 		sta (%2),Y
 		iny
-		bne page_?
+		bne page
 		inc %1+1
 		inc %2+1
 		dex
-		bne page_?
-	frag_?:
-		beq done_?
+		bne page
+	frag:
+		beq done
 		lda (%1),Y
 		sta (%1),Y
 		iny
-		bne frag_?
-	done_?:
+		bne frag
+	done:
 .endmacro
 
 
@@ -1493,29 +1493,29 @@ done_?:
 		sta %2+1
 		
 		ldy %3					; Handle fractions of a page-size first
-		bne entry_?				; Got to copy the fragment
-		beq	copyPage_?			; Start copying pages
+		bne entry				; Got to copy the fragment
+		beq	copyPage			; Start copying pages
 		
-	copyByte_?:
+	copyByte:
 		lda (%1),y
 		sta (%2),y
 	
-	entry_?:
+	entry:
 		dey
-		bne copyByte_?
+		bne copyByte
 		lda (%1),y				; copy the remaining byte
 		sta (%2),y
 	
-	copyPage_?:
+	copyPage:
 		ldx %3+1
-		beq done_?
+		beq done
 	
-	initBase_?:
+	initBase:
 		dec %1+1
 		dec %2+1
 		dey
 	
-	copyBytes_?:
+	copyBytes:
 		lda (%1),y				; unroll the loop to make it a little
 		sta (%1),y				; faster. Note that we unroll by 3
 		dey						; because 255/3 = 85 remainder 0
@@ -1526,12 +1526,12 @@ done_?:
 		sta (%1),y
 		dey
 
-	copyEntry_?:
-		bne copyBytes_?
+	copyEntry:
+		bne copyBytes
 		lda (%1),y
 		sta (%1),y
 		dex
-		bne initBase_?
+		bne initBase
 .endmacro
 
 
@@ -1548,12 +1548,12 @@ done_?:
 ;\*************************************************************************/
 .macro _memcpy
 		_cmp16 %1, %2
-		bcc safe_?
+		bcc safe
 		_memcpyUp %1, %2, %3
-		jmp done_?
-	safe_?:
+		jmp done
+	safe:
 		_memcpyDn %1, %2, %3
-	done_?:
+	done:
 .endmacro
 
 

@@ -179,9 +179,9 @@ String ContextMgr::identifier(void)
 		String type 	= ucase(_type(ctx.type));
 		
 		ident			= type.substr(0,1)
-						+ "_"
-						+ ctx.name
-						+ "_"
+						//+ "_"
+						//+ ctx.name
+						//+ "_"
 						+ std::to_string(ctx.contextId);
 		
 		}

@@ -1202,8 +1202,6 @@ int Scanner::_embedAddress(TokenList &tokens, String args)
 \*****************************************************************************/
 Token Scanner::_hasLabel(String& s)
 	{
-	Engine& e = Engine::getInstance();
-	
 	Token t;
 	String label = "";
 	
@@ -1226,7 +1224,7 @@ Token Scanner::_hasLabel(String& s)
 
 		t.setType(T_LABEL);
 		t.setWhich(P_LABEL);
-		t.setArg1(label);
+		t.setArg1(CTXMGR->identifier()+"_"+label);
 		s = trim(s.substr(idx));
 		}
 		

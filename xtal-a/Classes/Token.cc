@@ -380,7 +380,7 @@ String Token::toString(void)
 			if (_op1 > 128)
 				offset = "-" + std::to_string(256-_op1);
 				
-			info += " " + _arg1 + " ; {" + offset + "}";
+			info += " " + CTXMGR->identifier()+"_"+_arg1 + " ; {" + offset + "}";
 			break;
 			}
 		
