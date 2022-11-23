@@ -117,15 +117,19 @@ int Scanner::scan(TokenList &tokens, int pass)
     \*************************************************************************/
 	else if (lc.starts_with(".push context"))
 		{
+		CTXMGR->incLine(-1);	// This isn't a real line so correct the sum
 		_pushContext(s);
 		}
+		
 	/*************************************************************************\
     |* Or popping one
     \*************************************************************************/
 	else if (lc.starts_with(".pop context"))
 		{
 		CTXMGR->pop();
+		CTXMGR->incLine(-1);	// This isn't a real line so correct the sum
 		}
+		
 	/*************************************************************************\
     |* Otherwise get the next word and determine what to do based on that
     \*************************************************************************/

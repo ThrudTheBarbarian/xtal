@@ -47,8 +47,8 @@ class ContextMgr
     
     private:
         std::vector<Context> 	_ctxList;				// Context hierarchy
-        std::vector<Context*> 	_blockList;				// Block contexts
-        std::vector<Context*> 	_fileList;				// File contexts
+        std::vector<int> 		_blockList;				// index of block ctxs
+        std::vector<int> 		_fileList;				// index of file ctxs
         int 					_nextContextId;			// Incrementing int
         
         static std::shared_ptr<ContextMgr> _instance;	// Shared instance

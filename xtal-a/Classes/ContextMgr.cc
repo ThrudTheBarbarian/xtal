@@ -52,14 +52,16 @@ ContextMgr::Context& ContextMgr::push(const String name,
 				   .contextId	= _nextContextId };
 	
 	_ctxList.push_back(ctx);
+	int idx = (int)(_ctxList.size()-1);
+	
 	switch (type)
 		{
 		case FILE:
-			_fileList.push_back(&_ctxList.back());
+			_fileList.push_back(idx);
 			break;
 		
 		default:
-			_blockList.push_back(&_ctxList.back());
+			_blockList.push_back(idx);
 			break;
 		}
 		
@@ -93,24 +95,33 @@ ContextMgr::Context& ContextMgr::push(const String name,
 	}
 
 /******************************************************************************\
-|* Increment the current line number within the current context
+|* Increment the current line number within the current context. Do it in both
+|* the current file and block context (if we're in a block, we're guaranteed
+|* to be in a file)
 \******************************************************************************/
 int64_t ContextMgr::incLine(int64_t delta)
 	{
 	int64_t currentCtxLine = -1;
-	
+	/*
 	if (_fileList.size() > 0)
 		{
-		_fileList.back()->line += delta;
-		currentCtxLine = _fileList.back()->line;
+		int idx = _fileList.back();
+		_ctxList[idx].line += delta;
+		currentCtxLine = _ctxList[idx].line;
 		}
 		
 	if (_blockList.size() > 0)
 		{
-		_blockList.back()->line += delta;
-		currentCtxLine = _blockList.back()->line;
+		int idx = _blockList.back();
+		_ctxList[idx].line += delta;
+		currentCtxLine = _ctxList[idx].line;
 		}
-	
+	*/
+	if (_ctxList.size() > 0)
+		{
+		_ctxList.back().line += delta;
+		currentCtxLine = _ctxList.back().line;
+		}
 	return currentCtxLine;
 	}
 

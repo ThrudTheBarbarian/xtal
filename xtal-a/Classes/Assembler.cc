@@ -298,7 +298,7 @@ String Assembler::_preparse(String src)
 				if (content.size() > 0)
 					{
 					needsPass = true;
-					result += ".push context file '" + fname + "' 0'\n";
+					result += ".push context file '" + fname + "' 1\n";
 					result += trim(content) + "\n";
 					result += ".pop context\n";
 					}
@@ -319,7 +319,7 @@ String Assembler::_preparse(String src)
 					macro.reset();
 					macro.setName(words[1]);
 					
-					String ctx = ".push context macro '" + words[1] + "' 0";
+					String ctx = ".push context macro '" + words[1] + "' 1";
 					macro.lines().push_back(ctx);
 					}
 				else
@@ -342,7 +342,7 @@ String Assembler::_preparse(String src)
 						function.reset();
 						function.setName(words[1]);
 						
-						String ctx = ".push context function '" + words[1] + "' 0";
+						String ctx = ".push context function '" + words[1] + "' 1";
 						function.lines().push_back(ctx);
 						result += ";" + line + "\n";
 						currentMode = FUNCTION;
