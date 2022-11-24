@@ -1,32 +1,9 @@
-Labels:
-=======
+Branching
+=========
 
- - need a way to localise the labels, better than the incrementing id we
-   we currently have. Consider
-   
-	macro xxx
-		done_?:
-	
-	macro yyy
-			bcc done_?
-		done_?:
-		
-	How does it know which label to use ?
-	
-	Suggestion:
-		Internally rename labels to be <context>_<context-name>_<label-name>
+Still some issues with addresses of labels.
 
-		So the above would be:
-			M_xxx_done
-			M_yyy_done
-		
-		If we get functions later:
-		
-			F_fname_xxx
-			
-		Means you can't BCC/JSR out of a context, so maybe make a
-		global context as well - start the label name with G_ or @ and it
-		doesn't get the context munged.
-		
-		Need to rename labels in JMP, JSR and Bxx as well.
-	
+   .byte (possibly all) labels at the end of the test code are off by 2
+		jsr $882 should be jsr $884
+		ascii: is $86E, should be $870
+	_movi16 really doesn't like 'ascii+2', $870 -> $a70 !

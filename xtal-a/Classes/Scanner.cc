@@ -80,6 +80,12 @@ int Scanner::scan(TokenList &tokens, int pass)
 	s		 	= trim(s.substr(0, s.find(";")));
 	String lc	= lcase(s);
 	
+	//if (_current == 0x818)
+	if (pass == 2)
+		printf("%04x : %s\n", _current, s.c_str());
+	if ((_current == 0x7f8) && (pass == 2))
+		printf("yep");
+		
 	/*************************************************************************\
     |* If the string is empty, just return
     \*************************************************************************/
@@ -753,11 +759,11 @@ int Scanner::_handleCall(Token::TokenInfo info,
 	|* If we have arguments then move them over to the fnx locations.
 	|* This is just a convenience interface
 	\*************************************************************************/
-	if (args.size() > 2)
+	if (args.size() > 1)
 		{
 		for (int i=1; i<args.size(); i++)
 			{
-			snprintf(buf, 1024, "_xfer32 %s f%d", args[i].c_str(), i-1);
+			snprintf(buf, 1024, "_xfer32 %s,f%d\n", args[i].c_str(), i-1);
 			assembly.push_back(buf);
 			}
 		}
@@ -765,7 +771,7 @@ int Scanner::_handleCall(Token::TokenInfo info,
 	/*************************************************************************\
 	|* Jump to the subroutine
 	\*************************************************************************/
-	snprintf(buf, 1024, "jsr %s", function.c_str());
+	snprintf(buf, 1024, "jsr %s\n", function.c_str());
 	assembly.push_back(buf);
 
 	/*************************************************************************\
@@ -1038,13 +1044,12 @@ int Scanner::_handle6502(Token::TokenInfo info,
 			}
 		else
 			{
+			bool isJxx = (info.which == P_JMP) || (info.which == P_JSR);
 			e.eval(args);
-			if (e.result() > 0xFF)
+			if (isJxx || (e.result() > 0xFF))
 				{
 				amode = A_ABSOLUTE;
-				int to	 = (e.result() < _current)
-						 ? (int)(e.result())
-						 : (int)(e.result() + 3);	// Still not sure why...
+				int to	 = (int) e.result();
 						 
 				bytes[0] = (to	   ) & 0xFF;
 				bytes[1] = (to >> 8) & 0xFF;
@@ -1322,6 +1327,8 @@ int Scanner::_reserveBytes(TokenList &tokens, int size, String args)
 		}
 	
 	_emit(tokens, t, A_NONE);
+	_current += t.data().size();
+	
 	return 0;
 	}
 
@@ -1358,10 +1365,14 @@ Token Scanner::_hasLabel(String& s)
 	if (isLabel)
 		{
 		CTXMGR->addLabel(label, _current);
+		
+		String sanitised = label;
+		if (sanitised[0] == '@')
+			sanitised =label.substr(1);
 
 		t.setType(T_LABEL);
 		t.setWhich(P_LABEL);
-		t.setArg1(CTXMGR->identifier()+"_"+label);
+		t.setArg1(CTXMGR->identifier()+"_"+sanitised);
 		s = trim(s.substr(idx));
 		}
 		
@@ -1505,10 +1516,10 @@ bool Scanner::_emit(TokenList &tokens,
 	bool emit = shouldEvaluate();
 	if (emit)
 		{
-
 		tokens.push_back(token);
 		token.setAddrMode(amode);
-		_listing += toHexString(_current) + " : " + token.toString()+"\n";
+		_listing += /* toHexString(_current) + " : "  + */
+				 token.toString(_current)+"\n";
 		}
 	
 	return emit;

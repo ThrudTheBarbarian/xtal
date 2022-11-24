@@ -162,7 +162,8 @@ void ContextMgr::pop(void)
 	}
 
 /******************************************************************************\
-|* Return a location based on the current context hierarchy. \******************************************************************************/
+|* Return a location based on the current context hierarchy.
+\******************************************************************************/
 String ContextMgr::location(void)
 	{
 	String msg 		= "";
@@ -231,7 +232,8 @@ void ContextMgr::addLabel(String label, int location)
 
 
 /******************************************************************************\
-|* Return a context-specific, or global label. If it doesn't exist, return -1 \******************************************************************************/
+|* Return a context-specific, or global label. If it doesn't exist, return -1
+\******************************************************************************/
 bool ContextMgr::labelValue(String label, int& value)
 	{
 	bool ok = false;
@@ -256,7 +258,8 @@ bool ContextMgr::labelValue(String label, int& value)
 	}
 
 /******************************************************************************\
-|* Return all the context label values \******************************************************************************/
+|* Return all the context label values
+\******************************************************************************/
 String ContextMgr::labelValues(void)
 	{
 	String results = "";

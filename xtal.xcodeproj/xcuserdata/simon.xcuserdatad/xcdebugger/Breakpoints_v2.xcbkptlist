@@ -7,16 +7,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "E256031F-8B4D-42D5-AFDD-8D0AB317557C"
-            shouldBeEnabled = "Yes"
+            uuid = "5816D0AF-27CC-4EC9-857E-4A8FC5253A16"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "xtal-a/Classes/Scanner.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1125"
-            endingLineNumber = "1125"
-            landmarkName = "Scanner::_handle6502(info, args, tokens, pass)"
+            startingLineNumber = "84"
+            endingLineNumber = "84"
+            landmarkName = "Scanner::scan(tokens, pass)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

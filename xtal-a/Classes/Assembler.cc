@@ -197,7 +197,7 @@ int Assembler::_run(std::string source)
 	|* we left off
 	\*************************************************************************/
 	while (scanner.appendUsedFunctions())
-		while (scanner.scan(tokens, 1) == Scanner::SCAN_MORE)
+		while (scanner.scan(tokens, 2) == Scanner::SCAN_MORE)
 			;
 			
 	/*************************************************************************\

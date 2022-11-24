@@ -146,7 +146,9 @@ class Token
 			S_SIGNED	= 1,
 			S_UNSIGNED	= 2
 			} Signed;
-			
+		
+		static const int64_t NO_ADDRESS = 0xffffffff;
+		
 	/************************************************************************\
     |* Properties
     \************************************************************************/
@@ -175,7 +177,7 @@ class Token
         /*********************************************************************\
         |* Return a string representation of the token
         \*********************************************************************/
-        String toString(void);
+        String toString(int64_t offset = NO_ADDRESS);
 
         /*********************************************************************\
         |* Get token info for a given operation

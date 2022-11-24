@@ -307,7 +307,7 @@ void Token::clear(void)
 /*****************************************************************************\
 |* Return a string representation of the token
 \*****************************************************************************/
-String Token::toString(void)
+String Token::toString(int64_t at)
 	{
 	String info = "";
 	/*************************************************************************\
@@ -328,7 +328,23 @@ String Token::toString(void)
 	if (it->second.type == T_6502)
 		info += "\t";
 	
-	if ((_which == P_LABEL) || (_which == P_LLABEL))
+	if (_which == P_BYTE)
+		{
+		info += ".byte ";
+		String comma = "";
+		for (int i=0; i<_data.size(); i++)
+			{
+			info += comma + toHexString(_data[i], "$") + " ";
+			comma = ", ";
+			if (((i+1) %10 == 0) && i < _data.size()-1)
+				{
+				comma = "";
+				info += "\n.byte ";
+				}
+			}
+		info += "\n";
+		}
+	else if ((_which == P_LABEL) || (_which == P_LLABEL))
 		info += "\n" + _arg1+":";
 	else
 		info += it->second.prefix;
@@ -349,11 +365,11 @@ String Token::toString(void)
 			break;
 		
 		case A_ABSOLUTE_XINDEX:
-			info += " " + HEX2 + ", X";
+			info += " " + HEX2 + ",X";
 			break;
 		
 		case A_ABSOLUTE_YINDEX:
-			info += " " + HEX2 + ", Y";
+			info += " " + HEX2 + ",Y";
 			break;
 		
 		case A_IMMEDIATE:
@@ -377,11 +393,20 @@ String Token::toString(void)
 		
 		case A_RELATIVE:
 			{
-			String offset = std::to_string(_op1);
+			int delta= _op1;
+			
+			String offset = std::to_string(delta);
 			if (_op1 > 128)
-				offset = "-" + std::to_string(256-_op1);
+				{
+				delta = 256 - _op1;
+				offset = "-" + std::to_string(delta);
+				}
 				
-			info += " " + CTXMGR->identifier()+"_"+_arg1 + " ; {" + offset + "}";
+			info += " " + CTXMGR->identifier()+"_"+_arg1 + " ; {" + offset;
+			if (at != NO_ADDRESS)
+				info += " : " + toHexString((int)(at + 2 + delta), "$");
+			info += "}";
+			
 			break;
 			}
 		
