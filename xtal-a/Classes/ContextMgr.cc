@@ -9,6 +9,7 @@
 // maybe move to a linked list or vector[int] for the fileList/blockList
 
 #include "ContextMgr.h"
+#include "Engine.h"
 #include "Stringutils.h"
 
 /******************************************************************************\
@@ -214,9 +215,14 @@ void ContextMgr::addLabel(String label, int location)
 	if (_ctxList.size() > 0)
 		{
 		int contextId = -1;
-		if (label.substr(0,1) != "@")
+		if (label.substr(0,1) == "@")
+			{
+			String symbolName = label.substr(1);
+			Engine::getInstance().updateSymbol(symbolName, location);
+			}
+		else
 			contextId = _ctxList.back().contextId;
-			
+		
 		_labels[contextId][label] = location;
 		}
 	else

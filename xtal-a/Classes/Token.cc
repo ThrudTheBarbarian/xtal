@@ -26,7 +26,8 @@ static Token::TokenInfo _tokens[] = {
 	{T_META, 		P_DIV,		"TOKEN_DIV    ", "div"	   , 3},
 	{T_META, 		P_MUL,		"TOKEN_MUL    ", "mul"	   , 3},
 	{T_META, 		P_SUB,		"TOKEN_SUB    ", "sub"	   , 3},
-	{T_META, 		P_CAL,		"TOKEN_CALL   ", "call"	   , 4},
+	{T_META, 		P_CALL,		"TOKEN_CALL   ", "call"	   , 4},
+	{T_META, 		P_EXEC,		"TOKEN_EXEC   ", "exec"	   , 4},
 	
 	{T_6502, 		P_ADC,		"TOKEN_ADC    ", "adc"	   , 3},
 	{T_6502, 		P_AND,		"TOKEN_AND    ", "and"	   , 3},

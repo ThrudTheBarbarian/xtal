@@ -20,8 +20,10 @@
 #define IS_REG(x) 				((x == REG_MAIN) || \
 								 (x == REG_FN)   || \
 								 (x == REG_SCRATCH))
+#define MAX_REGISTERS			(4*4*256)
+#define REG_BASE				(0xC0)
+
 #define OVERFLOW_LOCATION		0x89
-#define CTXMGR					ContextMgr::sharedInstance()
 static int _ttSizes[] = {1, 	// REG_MAIN			r...
 						 2, 	// REG_FN			fn...
 						 1, 	// REG_SCRATCH		s...
@@ -59,6 +61,12 @@ void Scanner::reset(int to)
 	_pageIndex[3] 	= 0;
 	_listing		= "";
 	ContextMgr::sharedInstance()->reset();
+	
+	for (Elements<String, Function> kv : _functions)
+		{
+		kv.value.setEmitted(false);
+		kv.value.setUsed(false);
+		}
 	}
 	
 /*****************************************************************************\
@@ -234,11 +242,30 @@ void Scanner::insertSymbols(StringList symbols)
 	}
 
 /*****************************************************************************\
-|* Add macros to the scanner
+|* Append any used functions to the end of the source
 \*****************************************************************************/
-void Scanner::insertMacros(MacroMap macros)
+bool Scanner::appendUsedFunctions(void)
 	{
-	_macros = macros;
+	bool emitted = false;
+	
+	for (Elements<String,Function> kv : _functions)
+		{
+		if (kv.value.used() && (!kv.value.emitted()))
+			{
+			kv.value.setEmitted(true);
+			emitted = true;
+			
+			_src.append("; Function definition for " + kv.key + "\n");
+			_src.append(join(kv.value.lines(), "\n"));
+			_src.append("\n\n");
+			
+			//fprintf(stderr, "Function : %s\n------\n%s\n------\n\n\n",
+			//	kv.key.c_str(),
+			//	join(kv.value.lines(), "\n").c_str());
+			}
+		}
+		
+	return emitted;
 	}
 	
 #pragma mark - Private Methods
@@ -306,6 +333,14 @@ int Scanner::_handleMeta(String word,
 		
 		case P_DIV:
 			ok = _handleMath(word, info, extent, args, tokens, pass, "div");
+			break;
+		
+		case P_CALL:
+			ok = _handleCall(info, extent, args, tokens, pass, true);
+			break;
+		
+		case P_EXEC:
+			ok = _handleCall(info, extent, args, tokens, pass, false);
 			break;
 		
 		default:
@@ -651,6 +686,104 @@ int Scanner::_handleMath(String word,
 	
 	_insertOp(t1, t2, t3, v1, v2, v3, stem, -1);
 
+	return ok;
+	}
+
+/*****************************************************************************\
+|* Handle the meta 'call' and 'exec' opcodes.
+|*
+|*	For call, the assembler will:
+|*		- check that the function being called actually exists as a function
+|*		- check what the function clobbers, and push to the stack if not f or s
+|*		- if there are arguments to the call, as a convenience these will be
+|*		  moved to f0..f3. Currently more than 4 args is unsupported
+|*		- jsr to the global label @function-name
+|*		- on return, pull any previously-pushed regs. Note that return
+|*		  values from functions should be in f0..f3
+|*		- carry on as you were.
+|*
+|*	For exec, the same happens, but no registers are saved/restored. This can
+|*	prevent needless save/restore when a function calls another function and
+|*	doesn't care about the register-state
+|*
+|* where:
+|*		.x defines the width of the move,
+|*		arguments can be registers, (r*, fn*, s*), immediate values (#*) or
+|*			*absolute addresses
+|*
+\*****************************************************************************/
+int Scanner::_handleCall(Token::TokenInfo info,
+						   int extent,
+						   String argString,
+						   TokenList &tokens,
+						   int pass,
+						   bool isCall)
+	{
+	char buf[1024];
+	
+	int ok = 0;
+	StringList assembly;
+	
+	StringList args = split(argString, " \t");
+	if (args.size() < 1)
+		FATAL(ERR_FUNCTION, "Syntax error during 'call' or 'exec'\n%s",
+				CTXMGR->location().c_str());
+	
+	if (args.size() > 5)
+		FATAL(ERR_FUNCTION, "Too many args to 'call' or 'exec'\n%s",
+				CTXMGR->location().c_str());
+	
+	String function = args[0];
+	
+	/*************************************************************************\
+	|* Check that the function exists
+	\*************************************************************************/
+	if (_functions.count(function) == 0)
+		FATAL(ERR_FUNCTION, "Cannot find function '%s'\n%s",
+				args[0].c_str(), CTXMGR->location().c_str());
+
+	/*************************************************************************\
+	|* Generate the push-to-stack values, if this is a 'call', but not if this
+	|* is an 'exec'.
+	\*************************************************************************/
+	if (isCall)
+		_functions[function].enstack(assembly);
+
+	/*************************************************************************\
+	|* If we have arguments then move them over to the fnx locations.
+	|* This is just a convenience interface
+	\*************************************************************************/
+	if (args.size() > 2)
+		{
+		for (int i=1; i<args.size(); i++)
+			{
+			snprintf(buf, 1024, "_xfer32 %s f%d", args[i].c_str(), i-1);
+			assembly.push_back(buf);
+			}
+		}
+
+	/*************************************************************************\
+	|* Jump to the subroutine
+	\*************************************************************************/
+	snprintf(buf, 1024, "jsr %s", function.c_str());
+	assembly.push_back(buf);
+
+	/*************************************************************************\
+	|* Restore any pushed values, if this is a 'call', but not if 'exec'
+	\*************************************************************************/
+	if (isCall)
+		_functions[function].destack(assembly);
+
+	/*************************************************************************\
+	|* Insert the assembly into the current source
+	\*************************************************************************/
+	_src.insert(_at, join(assembly, "\n"));
+
+	/*************************************************************************\
+	|* Mark the function as used
+	\*************************************************************************/
+	_functions[function].setUsed(true);
+	
 	return ok;
 	}
 
@@ -1375,7 +1508,7 @@ bool Scanner::_emit(TokenList &tokens,
 
 		tokens.push_back(token);
 		token.setAddrMode(amode);
-		_listing += /*toHexString(_current) + " : " +*/ token.toString()+"\n";
+		_listing += toHexString(_current) + " : " + token.toString()+"\n";
 		}
 	
 	return emit;

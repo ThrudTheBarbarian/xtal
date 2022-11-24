@@ -653,6 +653,7 @@
 		F480EF1A2922B512008584FB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = S9DMW7WK55;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -663,6 +664,7 @@
 		F480EF1B2922B512008584FB /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = S9DMW7WK55;
 				ENABLE_HARDENED_RUNTIME = YES;

@@ -140,7 +140,8 @@ int Assembler::_run(std::string source)
 	\*************************************************************************/
 	Scanner scanner;
 	scanner.insertSymbols(_symbols);
-	scanner.insertMacros(_macros);
+	scanner.setMacros(_macros);
+	scanner.setFunctions(_functions);
 	
 	/*************************************************************************\
 	|* Parse the token-stream into a bunch of output blocks
@@ -164,7 +165,16 @@ int Assembler::_run(std::string source)
 	while (scanner.scan(tokens, 1) == Scanner::SCAN_MORE)
 		;
 
-	scanner.engine().dumpVars();
+	/*************************************************************************\
+	|* Add in any called functions that we discovered and carry on from where
+	|* we left off
+	\*************************************************************************/
+	while (scanner.appendUsedFunctions())
+		while (scanner.scan(tokens, 1) == Scanner::SCAN_MORE)
+			;
+
+	
+	//scanner.engine().dumpVars();
 	
 	/*************************************************************************\
 	|* Run a sanity check on the if blocks being properly closed
@@ -181,6 +191,14 @@ int Assembler::_run(std::string source)
 	scanner.setSrc(source);
 	while (scanner.scan(tokens, 2) == Scanner::SCAN_MORE)
 		;
+		
+	/*************************************************************************\
+	|* Add in any called functions that we discovered and carry on from where
+	|* we left off
+	\*************************************************************************/
+	while (scanner.appendUsedFunctions())
+		while (scanner.scan(tokens, 1) == Scanner::SCAN_MORE)
+			;
 			
 	/*************************************************************************\
 	|* If we're optimising, do so.
@@ -283,7 +301,9 @@ String Assembler::_preparse(String src)
 		for (String line : lines)
 			{
 			String lc = lcase(line);
-			
+			if (trim(lc)[0] == ';')
+				continue;
+				
 			if (lc.find(".include ") != std::string::npos)
 				{
 				StringList words = split(trim(line), " \t");
@@ -358,6 +378,7 @@ String Assembler::_preparse(String src)
 				currentMode = NORMAL;
 				function.lines().push_back(".pop context");
 				_functions[function.name()] = function;
+				function.reset();
 				}
 			else
 				{

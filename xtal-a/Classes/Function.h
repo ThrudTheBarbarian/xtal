@@ -23,6 +23,7 @@ class Function
     GETSET(String, name, Name);					// Name of the function
     GETSET(StringList, lines, Lines);			// Function content
     GETSET(bool, used, Used);					// Whether this was called
+    GETSET(bool, emitted, Emitted);				// Whether we've output this yet
     
     private:
         
@@ -36,6 +37,18 @@ class Function
         |* Reset a function to be as-new
         \*********************************************************************/
 		void reset(void);
+
+        /*********************************************************************\
+        |* Generate a series of assembly instructions to preserve any regs that
+        |* this function clobbers
+        \*********************************************************************/
+		void enstack(StringList &assembly);
+
+        /*********************************************************************\
+        |* Generate a series of assembly instructions to preserve any regs that
+        |* this function clobbers
+        \*********************************************************************/
+		void destack(StringList &assembly);
 	};
 
 typedef std::map<String, Function> FunctionMap;

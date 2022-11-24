@@ -14,6 +14,8 @@
 #include "properties.h"
 #include "macros.h"
 
+#define CTXMGR					ContextMgr::sharedInstance()
+
 class ContextMgr
 	{
     NON_COPYABLE_NOR_MOVEABLE(ContextMgr)

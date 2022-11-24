@@ -16,7 +16,7 @@
 		lda #$2D				; a literal '-' sign
 		sta (ascii),y			; and place it at the start
 		iny						; bump the store-index
-		_neg32 f0				; convert to a +ve number
+		_neg32 f0,f0			; convert to a +ve number
 		
 	notNegative:
 		sty s0					; preserve where we are
@@ -27,7 +27,7 @@
 		lda #0					; zero the accumulator
 	
 	doShift:
-		_asl32 f0				; shift the bits left...
+		_asl32 f0,f0				; shift the bits left...
 		rol a					; into the accumulator
 		cmp #10					; and see if we are < 10
 		bcc lessThan10			; skip if so, else

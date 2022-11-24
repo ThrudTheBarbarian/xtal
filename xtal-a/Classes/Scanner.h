@@ -53,13 +53,14 @@ class Scanner
 	/*************************************************************************\
     |* Properties
     \*************************************************************************/
-    GETSET(String, src, Src);			// Source code for the compiler
-    GET(int, at);						// Location in the source code
-	GETSET(int, current, Current);		// Current memory location
-	GETSET(MacroMap, macros, Macros);	// Map of macros from assembler
-	GET(BoolList, ifState);				// 'if' state hierarchy
-	GET(String, listing);				// String form of output
-	GET(int, labelId);					// Current numeric label id
+    GETSET(String, src, Src);					// Source code for the compiler
+    GET(int, at);								// Location in the source code
+	GETSET(int, current, Current);				// Current memory location
+	GETSET(MacroMap, macros, Macros);			// Map of macros from assembler
+	GETSET(FunctionMap, functions, Functions);	// Map of funcs from assembler
+	GET(BoolList, ifState);						// 'if' state hierarchy
+	GET(String, listing);						// String form of output
+	GET(int, labelId);							// Current numeric label id
 	
     private:
 		Engine& 	_engine;			// YACC-based expression-parsing engine
@@ -205,6 +206,16 @@ class Scanner
 						int pass);
 
         /*********************************************************************\
+        |* Handle the call/exec opcodes
+        \*********************************************************************/
+		int _handleCall(Token::TokenInfo info,
+						int extent,
+						String args,
+						TokenList &tokens,
+						int pass,
+						bool isCall);
+
+        /*********************************************************************\
         |* Handle any 6502-native opcode
         \*********************************************************************/
 		int _handle6502(Token::TokenInfo info,
@@ -247,11 +258,6 @@ class Scanner
         void insertSymbols(StringList symbols);
 
         /*********************************************************************\
-        |* Add macros to the scanner
-        \*********************************************************************/
-        void insertMacros(MacroMap macros);
-
-        /*********************************************************************\
         |* Reset the scanner to a position
         \*********************************************************************/
         void reset (int to=0);
@@ -265,6 +271,11 @@ class Scanner
         |* Return the engine being used
         \*********************************************************************/
         bool shouldEvaluate(void);
+
+        /*********************************************************************\
+        |* Append any used functions to the end of the source
+        \*********************************************************************/
+        bool appendUsedFunctions(void);
 	};
 
 #endif /* Scanner_h */
