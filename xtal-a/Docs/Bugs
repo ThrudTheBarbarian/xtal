@@ -1,9 +1,5 @@
 Branching
 =========
 
-Still some issues with addresses of labels.
 
-   .byte (possibly all) labels at the end of the test code are off by 2
-		jsr $882 should be jsr $884
-		ascii: is $86E, should be $870
-	_movi16 really doesn't like 'ascii+2', $870 -> $a70 !
+_movi16 really doesn't like 'ascii+2', $870 -> $a70 !

@@ -1,4 +1,4 @@
-.org $600
+.org $4000
 
 .include stdmacros.s
 .include printReg.s
@@ -13,4 +13,4 @@
 	divs.4 r6 r7 r8
 	subs.4 r5 r6 r9
 	call printReg r9
-	brk
+	rts

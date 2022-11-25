@@ -20,7 +20,7 @@
 #include "macros.h"
 #include "structures.h"
 
-
+#define UNDEFINED_VALUE		(100000)		// Outside of 65K address range
 class Engine
 	{
 	/************************************************************************\

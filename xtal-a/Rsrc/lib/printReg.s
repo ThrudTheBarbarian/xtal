@@ -53,20 +53,14 @@
 		pla						; pop a digit off the stack
 		clc						; convert it ..
 		adc #$30				; to ascii
-		sta ascii+2,y				; and write to the string
+		sta ascii,y				; and write to the string
 		iny						; next position in the string
 		dex						; get next ..
 		bne showDigit			; digit, else
 		lda #EOL				; add an ATASCII end-of-line
-		sta ascii+2,y				; and write to the string
+		sta ascii,y				; and write to the string
 	
-	;	_movi16 ascii+2,f0		; put the address of the string into f0
-	lda #$8
-	sta $a1
-	lda #$70
-	sta $a0
-
-
+		_movi16 ascii,f0		; put the address of the string into f0
 		exec printLine 			; and print the string
 		rts
 		

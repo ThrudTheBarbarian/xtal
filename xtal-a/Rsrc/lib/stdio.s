@@ -32,13 +32,14 @@ ICAX1   		= ICHID+10  ;   auxiliary information.  Used by Open .org $600
 	sta ICBAL,x				; and tell CIO
 	lda f0+1				; Get the high byte of the address..
 	sta ICBAH,x				; and tell CIO
-	lda #CMD_PUT_REG		; set command to "print to end of line"
+	lda #CMD_PUT_REC		; set command to "print to end of line"
 	sta ICCOM,x				; and tell CIO
 	lda #0					; set low byte of buffer length...
 	sta ICBLL,x				; and tell CIO
 	lda #$ff				; set high-byte of buffer length
 	sta ICBLH,x				; and tell CIO
 	jsr CIOV				; Jump to the print-to-EOL routine
+	clc
 	rts
 
 .endfunction

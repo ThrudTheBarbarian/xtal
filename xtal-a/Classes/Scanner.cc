@@ -80,12 +80,6 @@ int Scanner::scan(TokenList &tokens, int pass)
 	s		 	= trim(s.substr(0, s.find(";")));
 	String lc	= lcase(s);
 	
-	//if (_current == 0x818)
-	if (pass == 2)
-		printf("%04x : %s\n", _current, s.c_str());
-	if ((_current == 0x7f8) && (pass == 2))
-		printf("yep");
-		
 	/*************************************************************************\
     |* If the string is empty, just return
     \*************************************************************************/
@@ -783,7 +777,7 @@ int Scanner::_handleCall(Token::TokenInfo info,
 	/*************************************************************************\
 	|* Insert the assembly into the current source
 	\*************************************************************************/
-	_src.insert(_at, join(assembly, "\n"));
+	_src.insert(_at, join(assembly, "\n") + "\n");
 
 	/*************************************************************************\
 	|* Mark the function as used
@@ -1104,6 +1098,10 @@ int Scanner::_handle6502(Token::TokenInfo info,
 		{
 		String arg = args.substr(0, args.length()-2);
 		e.eval(arg);
+		if ((pass == 2) && e.result() == UNDEFINED_VALUE)
+			FATAL(ERR_PARSE, "Undefined symbol '%s'\n%s",
+				arg.c_str(), CTXMGR->location().c_str());
+				
 		if (e.result() <= 0xFF)
 			{
 			bytes[0] 	= e.result() & 0xFF;

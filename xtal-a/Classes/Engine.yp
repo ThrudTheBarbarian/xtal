@@ -108,25 +108,10 @@ int yylex ()
 			strncpy(sbuf, s.c_str(), MAX(100, s.length()));
 			}
 		
-//		if ((sbuf[0] == 'r') || (sbuf[0] == 'R'))
-//			{
-//			bool isNumeric = true;
-//			for (int i=1; i<strlen(sbuf) && isNumeric; i++)
-//				if (!isdigit(sbuf[i]))
-//					isNumeric = false;
-//			if (isNumeric)
-//				{
-//				int value;
-//				sscanf(sbuf+1, "%d", &value);
-//				yylval.val = (value % 16) + 0xC0;
-//				return NUMBER;
-//				}
-//			}
-			
 		if (e.symbols().find(sbuf) == e.symbols().end())
 			{
 			e.symbols()[sbuf].type = VAR;
-			e.symbols()[sbuf].value = -1;
+			e.symbols()[sbuf].value = UNDEFINED_VALUE;
 			e.symbols()[sbuf].name = &(String&)e.symbols().find(sbuf)->first;
 			}
 		Engine::Symbol *s = &e.symbols()[sbuf];
