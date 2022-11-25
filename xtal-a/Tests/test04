@@ -1,0 +1,11 @@
+
+.org $600
+
+jsr branch
+brk
+
+@branch:
+lda #45
+sta $c0
+rts
+

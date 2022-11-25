@@ -65,3 +65,29 @@ void OutputBlock::write(FILE *fp)
 		if (fwrite(_data.data(), 1, _data.size(), fp) != _data.size())
 			FATAL(ERR_OUTPUT, "Couldn't write block to file completely");
 	}
+
+/****************************************************************************\
+|* Write hex-data to the provided file
+\****************************************************************************/
+void OutputBlock::writeHex(FILE *fp)
+	{
+	if (_data.size() > 6)
+		{
+		int at = _data[2] + ((int)_data[3]) * 256;
+		
+		for (int i=6; i<_data.size(); i+=8)
+			{
+			fprintf(fp, "%04X:", at);
+			
+			for (int j=0; j<8; j++)
+				{
+				if (i+j < _data.size())
+					{
+					fprintf(fp, " %02X", _data[i+j]);
+					at ++;
+					}
+				}
+			fprintf(fp, "\n");
+			}
+		}
+	}

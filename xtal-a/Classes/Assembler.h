@@ -32,6 +32,7 @@ class Assembler
     GET(StringList, symbols);			// List of provided symbols
     GET(BlockList, blocks);				// List of output blocks
     GET(String, output);				// Output filename
+    GET(String, hexOutput);				// Hex-dump Output filename
     GET(String, listFile);				// Output listing filename
     GET(MacroMap, macros);				// map of named macros
     GET(FunctionMap, functions);		// map of named functions

@@ -57,8 +57,16 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "-oh /tmp/out.hex"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "$PROJECT_DIR/xtal-a/Tests/test03"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "$PROJECT_DIR/xtal-a/Tests/test04"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-D org=$600"

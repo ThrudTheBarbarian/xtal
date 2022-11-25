@@ -45,6 +45,11 @@ class OutputBlock
         |* Write the block to a file
         \********************************************************************/
         void write(FILE *fp);
+        
+        /********************************************************************\
+        |* Write the block to a file as hex data
+        \********************************************************************/
+        void writeHex(FILE *fp);
 	};
 
 typedef std::vector<OutputBlock> BlockList;

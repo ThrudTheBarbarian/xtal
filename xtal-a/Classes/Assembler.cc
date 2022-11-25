@@ -59,6 +59,9 @@ int Assembler::main(int argc, const char *argv[])
     _output					= _ap->stringFor("-o", "--output", "/tmp/out.com",
 										  "General",
 										  "Output filename");
+    _hexOutput				= _ap->stringFor("-oh", "--output-hex", "/tmp/out.hex",
+										  "General",
+										  "Output hex-dump filename");
     _listFile				= _ap->stringFor("-l", "--list", "",
 										  "General",
 										  "Output listing filename");
@@ -262,7 +265,17 @@ int Assembler::_run(std::string source)
 		block.finalise();
 		block.write(fp);
 		}
-	
+	fclose(fp);
+			
+	/*************************************************************************\
+	|* If we're writing hex-dumps, do it from the blocks
+	\*************************************************************************/
+	fp = fopen(_hexOutput.c_str(), "wb");
+	if (fp == NULL)
+		FATAL(ERR_OUTPUT, "Cannot open %s for hex write", _hexOutput.c_str());
+
+	for (OutputBlock& block : _blocks)
+		block.writeHex(fp);
 	fclose(fp);
 	
 	return ok;
