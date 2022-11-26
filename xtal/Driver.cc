@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <filesystem>
+#include <unistd.h>
 
 #include <errno.h>
 
@@ -68,17 +69,17 @@ int Driver::main(int argc, const char *argv[])
 	|* Construct a commandline arg and call the compiler
 	\*************************************************************************/
 	String cCmd = _cCmd();
-	printf("%s\n", cCmd.c_str());
+	//printf("%s\n", cCmd.c_str());
 	
 	int status = system(cCmd.c_str());
 	
 	if  (status == 0)
 		{
 		String aCmd = _aCmd();
-		printf("%s\n", aCmd.c_str());
+		//printf("%s\n", aCmd.c_str());
 		system(aCmd.c_str());
 		}
-	
+	remove(_asmFile.c_str());
 	return ok;
 	}
 
@@ -117,7 +118,7 @@ String Driver::_aCmd(void)
 	String aCmd = buf;
 	if (_symbols.size() > 0)
 		for (String sym : _symbols)
-			aCmd += "-D +'"+sym+"' ";
+			aCmd += "-D '"+sym+"' ";
 			
 	if (_includeDirs.size() > 0)
 		for (String idir : _includeDirs)

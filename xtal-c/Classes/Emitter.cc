@@ -32,7 +32,7 @@ Emitter::Emitter()
 	/*************************************************************************\
 	|* Create default postamble
 	\*************************************************************************/
-	_postamble = "; ----\n; Assembly complete\n\n";
+	_postamble = "rts\n; ----\n; Assembly complete\n\n";
 	}
 
 
@@ -80,6 +80,8 @@ void Emitter::printReg(Register r)
 		{
 		_includes.insert(_printRegFile);
 		_preamble += ".include " + _printRegFile + "\n";
+		_includes.insert(_stdMacrosFile);
+		_preamble += ".include " + _stdMacrosFile + "\n";
 		}
 		
 	std::stringstream ss;

@@ -6,6 +6,22 @@
 	objectVersion = 56;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		F4B808942931A6CA0049B6EB /* all */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F4B808972931A6CA0049B6EB /* Build configuration list for PBXAggregateTarget "all" */;
+			buildPhases = (
+			);
+			dependencies = (
+				F4B808992931A6DB0049B6EB /* PBXTargetDependency */,
+				F4B8089B2931A6DB0049B6EB /* PBXTargetDependency */,
+				F4B8089D2931A6DB0049B6EB /* PBXTargetDependency */,
+			);
+			name = all;
+			productName = all;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		F480EF0C2922B472008584FB /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF0B2922B472008584FB /* main.cc */; };
 		F480EF192922B512008584FB /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF182922B512008584FB /* main.cc */; };
@@ -47,6 +63,30 @@
 		F4B8088E292DDA470049B6EB /* stdio.s in Copy Library Files */ = {isa = PBXBuildFile; fileRef = F4B8088C292DD9B70049B6EB /* stdio.s */; };
 		F4B80893292DE4E10049B6EB /* Function.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B80892292DE4E10049B6EB /* Function.cc */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F4B808982931A6DB0049B6EB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F480EF002922B472008584FB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F480EF072922B472008584FB;
+			remoteInfo = xtal;
+		};
+		F4B8089A2931A6DB0049B6EB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F480EF002922B472008584FB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F480EF202922B564008584FB;
+			remoteInfo = "xtal-a";
+		};
+		F4B8089C2931A6DB0049B6EB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F480EF002922B472008584FB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F480EF152922B512008584FB;
+			remoteInfo = "xtal-c";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		F480EF062922B472008584FB /* Copy Binaries */ = {
@@ -456,6 +496,9 @@
 					F480EF202922B564008584FB = {
 						CreatedOnToolsVersion = 14.1;
 					};
+					F4B808942931A6CA0049B6EB = {
+						CreatedOnToolsVersion = 14.0.1;
+					};
 				};
 			};
 			buildConfigurationList = F480EF032922B472008584FB /* Build configuration list for PBXProject "xtal" */;
@@ -474,6 +517,7 @@
 				F480EF072922B472008584FB /* xtal */,
 				F480EF152922B512008584FB /* xtal-c */,
 				F480EF202922B564008584FB /* xtal-a */,
+				F4B808942931A6CA0049B6EB /* all */,
 			);
 		};
 /* End PBXProject section */
@@ -534,6 +578,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F4B808992931A6DB0049B6EB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F480EF072922B472008584FB /* xtal */;
+			targetProxy = F4B808982931A6DB0049B6EB /* PBXContainerItemProxy */;
+		};
+		F4B8089B2931A6DB0049B6EB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F480EF202922B564008584FB /* xtal-a */;
+			targetProxy = F4B8089A2931A6DB0049B6EB /* PBXContainerItemProxy */;
+		};
+		F4B8089D2931A6DB0049B6EB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F480EF152922B512008584FB /* xtal-c */;
+			targetProxy = F4B8089C2931A6DB0049B6EB /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		F480EF0D2922B472008584FB /* Debug */ = {
@@ -728,6 +790,24 @@
 			};
 			name = Release;
 		};
+		F4B808952931A6CA0049B6EB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S9DMW7WK55;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		F4B808962931A6CA0049B6EB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S9DMW7WK55;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -763,6 +843,15 @@
 			buildConfigurations = (
 				F480EF262922B564008584FB /* Debug */,
 				F480EF272922B564008584FB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F4B808972931A6CA0049B6EB /* Build configuration list for PBXAggregateTarget "all" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F4B808952931A6CA0049B6EB /* Debug */,
+				F4B808962931A6CA0049B6EB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

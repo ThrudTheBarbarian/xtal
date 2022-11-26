@@ -454,7 +454,7 @@ String Assembler::_find(String path)
 	for (String dir : _includeDirs)
 		{
 		candidates.push_back(dir + slash + path);
-		candidates.push_back(dir + slash + path);
+		candidates.push_back(dir + slash + path + ".s");
 		}
 		
 	for (String fullpath : candidates)

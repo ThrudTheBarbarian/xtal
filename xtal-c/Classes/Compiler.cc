@@ -80,7 +80,14 @@ int Compiler::main(int argc, const char *argv[])
 		
 	if (input.length() == 0)
 		FATAL(ERR_NO_SOURCE_FILES, "Cannot read input file(s)");
-	return _run(input);
+		
+	FILE *fp = fopen(output.c_str(), "w");
+	if (fp == NULL)
+		FATAL(ERR_OUTPUT, "Cannot open '%s' for write", output.c_str());
+		
+	int ok = _run(input, fp);
+	fclose(fp);
+	return ok;
 	}
 
 /*****************************************************************************\
@@ -97,7 +104,7 @@ void Compiler::error(int line, std::string msg)
 /*****************************************************************************\
 |* Private method : Generic run method
 \*****************************************************************************/
-int Compiler::_run(std::string source)
+int Compiler::_run(std::string source, FILE *fp)
 	{
 	int ok = 0;
 	
@@ -109,7 +116,7 @@ int Compiler::_run(std::string source)
 	Register r = _emitter->emit(node);
 	_emitter->printReg(r);
 
-	printf("%s\n%s\n%s\n---\n",
+	fprintf(fp, "%s\n%s\n%s\n",
 		_emitter->preamble().c_str(),
 		_emitter->output().c_str(),
 		_emitter->postamble().c_str());

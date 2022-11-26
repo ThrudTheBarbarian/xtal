@@ -54,15 +54,19 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "-l /tmp/out.txt"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-o &apos;/tmp/out.com&apos;  /tmp/t.s"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-oh /tmp/out.hex"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$PROJECT_DIR/xtal-a/Tests/test03"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$PROJECT_DIR/xtal-a/Tests/test04"

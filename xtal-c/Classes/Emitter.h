@@ -26,7 +26,8 @@ class Emitter
 	/*************************************************************************\
     |* Strings used
     \*************************************************************************/
-	const String _printRegFile	= "lib/printReg.s";
+	const String _printRegFile	= "printReg.s";
+	const String _stdMacrosFile	= "stdmacros.s";
 	
 	/*************************************************************************\
     |* Properties
