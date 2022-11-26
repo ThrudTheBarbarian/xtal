@@ -6,11 +6,10 @@
 //
 // Driver code for xtal-c and xlal-a
 
-#include <iostream>
+#include "Driver.h"
 
 int main(int argc, const char * argv[])
 	{
-	// insert code here...
-	std::cout << "Hello, World!\n";
-	return 0;
+	Driver driver;
+	driver.main(argc, argv);
 	}

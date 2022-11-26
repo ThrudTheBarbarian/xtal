@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "F480EF152922B512008584FB"
-               BuildableName = "xtal-c"
-               BlueprintName = "xtal-c"
+               BlueprintIdentifier = "F480EF072922B472008584FB"
+               BuildableName = "xtal"
+               BlueprintName = "xtal"
                ReferencedContainer = "container:xtal.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,19 +45,15 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "F480EF152922B512008584FB"
-            BuildableName = "xtal-c"
-            BlueprintName = "xtal-c"
+            BlueprintIdentifier = "F480EF072922B472008584FB"
+            BuildableName = "xtal"
+            BlueprintName = "xtal"
             ReferencedContainer = "container:xtal.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
             argument = "$PROJECT_DIR/xtal-c/Tests/01/test.01"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-o /var/folders/th/63xq4hqx6yqcx57qgds7ry7r0000gn/T/5PN2qmWq.asm &apos;/Users/simon/src/xtal/xtal-c/Tests/01/test.01&apos;  "
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
@@ -72,9 +68,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "F480EF152922B512008584FB"
-            BuildableName = "xtal-c"
-            BlueprintName = "xtal-c"
+            BlueprintIdentifier = "F480EF072922B472008584FB"
+            BuildableName = "xtal"
+            BlueprintName = "xtal"
             ReferencedContainer = "container:xtal.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

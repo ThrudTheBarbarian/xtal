@@ -71,4 +71,10 @@ std::string replace(const std::string& src,
 					const std::string& replaceWith,
 					bool replaceAll=true);
 	   
+
+/*****************************************************************************\
+|* Return a random string of the specified length
+\*****************************************************************************/
+std::string randomString(size_t length);
+
 #endif /* stringutils_h */
