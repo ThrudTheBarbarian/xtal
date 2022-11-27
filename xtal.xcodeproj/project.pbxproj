@@ -62,6 +62,7 @@
 		F4B53B3B29329D950023B3AB /* Symbol.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B53B3A29329D950023B3AB /* Symbol.cc */; };
 		F4B53B3E29329FBC0023B3AB /* SymbolTable.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B53B3D29329FBC0023B3AB /* SymbolTable.cc */; };
 		F4B53B412932AB8C0023B3AB /* Emitter.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B53B402932AB8C0023B3AB /* Emitter.cc */; };
+		F4B53B492932E9300023B3AB /* Statement.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B53B482932E9300023B3AB /* Statement.cc */; };
 		F4B8088B29272F2A0049B6EB /* ContextMgr.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B8088A29272F2A0049B6EB /* ContextMgr.cc */; };
 		F4B8088E292DDA470049B6EB /* stdio.s in Copy Library Files */ = {isa = PBXBuildFile; fileRef = F4B8088C292DD9B70049B6EB /* stdio.s */; };
 		F4B80893292DE4E10049B6EB /* Function.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B80892292DE4E10049B6EB /* Function.cc */; };
@@ -212,7 +213,10 @@
 		F4B53B3D29329FBC0023B3AB /* SymbolTable.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SymbolTable.cc; path = Classes/SymbolTable.cc; sourceTree = "<group>"; };
 		F4B53B3F2932AB8C0023B3AB /* Emitter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Emitter.h; path = Classes/Emitter.h; sourceTree = "<group>"; };
 		F4B53B402932AB8C0023B3AB /* Emitter.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Emitter.cc; path = Classes/Emitter.cc; sourceTree = "<group>"; };
-		F4B53B422932E0760023B3AB /* test01 */ = {isa = PBXFileReference; lastKnownFileType = text; name = test01; path = 05/test01; sourceTree = "<group>"; };
+		F4B53B442932E8860023B3AB /* test01 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test01; sourceTree = "<group>"; };
+		F4B53B462932E8860023B3AB /* test.01 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.01; sourceTree = "<group>"; };
+		F4B53B472932E9300023B3AB /* Statement.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Statement.h; path = Classes/Statement.h; sourceTree = "<group>"; };
+		F4B53B482932E9300023B3AB /* Statement.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Statement.cc; path = Classes/Statement.cc; sourceTree = "<group>"; };
 		F4B8088929272F2A0049B6EB /* ContextMgr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ContextMgr.h; path = Classes/ContextMgr.h; sourceTree = "<group>"; };
 		F4B8088A29272F2A0049B6EB /* ContextMgr.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ContextMgr.cc; path = Classes/ContextMgr.cc; sourceTree = "<group>"; };
 		F4B8088C292DD9B70049B6EB /* stdio.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = stdio.s; sourceTree = "<group>"; };
@@ -305,6 +309,8 @@
 				F4B53B3A29329D950023B3AB /* Symbol.cc */,
 				F4B53B3C29329FBC0023B3AB /* SymbolTable.h */,
 				F4B53B3D29329FBC0023B3AB /* SymbolTable.cc */,
+				F4B53B472932E9300023B3AB /* Statement.h */,
+				F4B53B482932E9300023B3AB /* Statement.cc */,
 			);
 			path = "xtal-c";
 			sourceTree = "<group>";
@@ -422,8 +428,9 @@
 		F480EF8529231627008584FB /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				F4B53B432932E8860023B3AB /* 05 */,
+				F4B53B452932E8860023B3AB /* 06 */,
 				F480EF8629231627008584FB /* 01 */,
-				F4B53B422932E0760023B3AB /* test01 */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -438,6 +445,22 @@
 				F480EF8B29231627008584FB /* test.01 */,
 			);
 			path = 01;
+			sourceTree = "<group>";
+		};
+		F4B53B432932E8860023B3AB /* 05 */ = {
+			isa = PBXGroup;
+			children = (
+				F4B53B442932E8860023B3AB /* test01 */,
+			);
+			path = 05;
+			sourceTree = "<group>";
+		};
+		F4B53B452932E8860023B3AB /* 06 */ = {
+			isa = PBXGroup;
+			children = (
+				F4B53B462932E8860023B3AB /* test.01 */,
+			);
+			path = 06;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -564,6 +587,7 @@
 				F480EF192922B512008584FB /* main.cc in Sources */,
 				F480EF822922C657008584FB /* Register.cc in Sources */,
 				F4B53B3E29329FBC0023B3AB /* SymbolTable.cc in Sources */,
+				F4B53B492932E9300023B3AB /* Statement.cc in Sources */,
 				F480EF802922C657008584FB /* Scanner.cc in Sources */,
 				F4B53B412932AB8C0023B3AB /* Emitter.cc in Sources */,
 				F480EF812922C657008584FB /* RegisterFile.cc in Sources */,

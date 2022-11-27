@@ -36,6 +36,8 @@ class Register
 			SET_F0FF,
 			SET_UNKNOWN
 			} RegSet;
+		
+		static const int NO_REGISTER		= -1;
 			
 	/************************************************************************\
     |* Properties
@@ -55,7 +57,8 @@ class Register
         |* Constructors and Destructor
         \********************************************************************/
         explicit Register();
-
+		explicit Register(int identifier);
+		
         /********************************************************************\
         |* return a description of the register
         \********************************************************************/

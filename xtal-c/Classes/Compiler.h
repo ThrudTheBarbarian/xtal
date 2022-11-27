@@ -17,6 +17,7 @@
 class ArgParser;
 class Emitter;
 class Scanner;
+class Statement;
 class Token;
 
 class Compiler
@@ -30,21 +31,6 @@ class Compiler
     GET(Emitter *, emitter);		// How we produce assembly
     
     private:
-    
-        /*********************************************************************\
-        |* Ensure the current token is 't', and fetch the next token else
-        |* throw an error
-        \*********************************************************************/
-        void _match(Scanner& scanner,
-				    Token& token,
-				    int tokenType,
-				    int &line,
-				    String info);
-    
-        /*********************************************************************\
-        |* Match a semicolon
-        \*********************************************************************/
-        void _semicolon(Scanner& scanner, Token& token, int& line);
     
         /*********************************************************************\
         |* General run() method

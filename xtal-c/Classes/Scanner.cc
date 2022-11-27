@@ -211,7 +211,7 @@ int Scanner::_keyword(void)
 	switch (lc[0])
 		{
 		case 's':
-			if (lc == "u32")
+			if (lc == "s32")
 				return Token::T_INT;
 			break;
 		

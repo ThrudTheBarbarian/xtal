@@ -22,6 +22,20 @@ Register::Register()
 	}
 
 /****************************************************************************\
+|* Constructor
+\****************************************************************************/
+Register::Register(int identifier)
+		 :_type(UNKNOWN)
+		 ,_page(0)
+		 ,_set(SET_UNKNOWN)
+		 ,_offset(0)
+		 ,_name("unknown_register")
+		 ,_value(0)
+		 ,_identifier(identifier)
+	{
+	}
+
+/****************************************************************************\
 |* Return a string description of the register
 \****************************************************************************/
 String Register::toString(void)

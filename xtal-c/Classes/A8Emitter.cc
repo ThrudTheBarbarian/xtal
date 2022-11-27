@@ -11,6 +11,7 @@
 #include "ASTNode.h"
 #include "A8Emitter.h"
 #include "RegisterFile.h"
+#include "SymbolTable.h"
 
 /*****************************************************************************\
 |* Constructor
@@ -31,26 +32,39 @@ A8Emitter::~A8Emitter()
 /*****************************************************************************\
 |* Emit code
 \*****************************************************************************/
-Register A8Emitter::emit(ASTNode *node)
+Register A8Emitter::emit(ASTNode *node, Register reg)
 	{
 	Register left, right;
+	Register none(Register::NO_REGISTER);
+	
 	
 	if (node->left())
-		left = emit(node->left());
+		left = emit(node->left(), none);
 		
 	if (node->right())
-		right = emit(node->right());
+		right = emit(node->right(), left);
 
 	switch (node->op())
 		{
 		case ASTNode::A_ADD:			return _cgAdd(left, right);
 		case ASTNode::A_SUBTRACT:		return _cgSub(left, right);
 		case ASTNode::A_MULTIPLY:		return _cgMul(left, right);
-		case ASTNode::A_DIVIDE:		return _cgDiv(left, right);
-		case ASTNode::A_INTLIT:		return _cgLoad(node->intValue());
+		case ASTNode::A_DIVIDE:			return _cgDiv(left, right);
+		case ASTNode::A_INTLIT:			return _cgLoadInt(node->intValue());
+		case ASTNode::A_ASSIGN:			return right;
+		case ASTNode::A_IDENT:
+			{
+			auto symbol = SYMTAB[node->identifier()];
+			return _cgLoadGlobal(symbol.name());
+			}
+		case ASTNode::A_LVIDENT:
+			{
+			auto symbol = SYMTAB[node->identifier()];
+			return _cgStoreGlobal(reg, symbol.name());
+			}
 		
 		default:
-			FATAL(ERR_AST_UNKNOWN_OPERATOR, "Unknown operator %d", node->op());
+			FATAL(ERR_AST_UNKNOWN_OPERATOR, "Unknown AST operator %d", node->op());
 		}
 	}
 
@@ -70,7 +84,7 @@ void A8Emitter::printReg(Register r)
 /*****************************************************************************\
 |* Generate a load-value-to-register
 \*****************************************************************************/
-Register A8Emitter::_cgLoad(int val)
+Register A8Emitter::_cgLoadInt(int val)
 	{
 	Register r	= _regs->allocate(Register::SIGNED_4BYTE);
 	String size = r.sizeAsString();

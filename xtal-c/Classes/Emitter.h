@@ -70,7 +70,7 @@ class Emitter
         /*********************************************************************\
         |* Generate the code
         \*********************************************************************/
-        virtual Register emit(ASTNode *node) = 0;
+        virtual Register emit(ASTNode *node, Register reg) = 0;
 
         /*********************************************************************\
         |* Generate the code preamble

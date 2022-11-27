@@ -19,6 +19,7 @@
 #include "RegisterFile.h"
 #include "Stringutils.h"
 #include "Scanner.h"
+#include "Statement.h"
 #include "Token.h"
 
 static int _debugLevel;
@@ -128,21 +129,6 @@ void Compiler::_statements(Scanner& scanner, Token& token, int& line)
 	}
 
 
-/*****************************************************************************\
-|* Private method : Ensure the current token is 't', and fetch the next token
-|* else throw an error
-\*****************************************************************************/
-void Compiler::_match(Scanner& scanner,
-					  Token& token,
-					  int tokenType,
-					  int& line,
-					  String info)
-	{
-	if (token.token() == tokenType)
-		scanner.scan(token, line);
-	else
-		FATAL(ERR_PARSE, "%s expected on line %d", info.c_str(), line);
-	}
 
 /*****************************************************************************\
 |* Private method : Check we're getting a semicolon
@@ -161,10 +147,11 @@ int Compiler::_run(std::string source)
 	
 	Scanner scanner(source);
 	Token t;
-	
+	Statement stmt(scanner, _emitter);
+		
 	scanner.scan(t, _line);
 	_emitter->preamble();
-	_statements(scanner, t, _line);
+	stmt.process(t, _line);
 	_emitter->postamble();
 	
 	

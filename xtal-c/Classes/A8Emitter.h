@@ -32,7 +32,17 @@ class A8Emitter : public Emitter
 		/*********************************************************************\
         |* Generate a register load immediate
         \*********************************************************************/
-        Register _cgLoad(int value);
+        Register _cgLoadInt(int value);
+        
+		/*********************************************************************\
+        |* Fetch a global var
+        \*********************************************************************/
+        Register _cgLoadGlobal(String name);
+        
+		/*********************************************************************\
+        |* Store a global var
+        \*********************************************************************/
+        Register _cgStoreGlobal(Register& reg, String name);
         
          /*********************************************************************\
         |* Add 2 registers
@@ -70,7 +80,7 @@ class A8Emitter : public Emitter
         /*********************************************************************\
         |* Generate the code
         \*********************************************************************/
-        Register emit(ASTNode *node);
+        Register emit(ASTNode *node, Register reg);
 	};
 
 #endif /* ! A8Emitter_h */

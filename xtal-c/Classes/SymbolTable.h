@@ -16,7 +16,7 @@
 
 #include "Symbol.h"
 
-#define SYMTAB					SymbolTable::sharedInstance()
+#define SYMTAB					SymbolTable::sharedInstance()->table()
 
 class SymbolTable
 	{
