@@ -6,6 +6,8 @@
 //
 
 #include "Scanner.h"
+#include "StringUtils.h"
+#include "Symbol.h"
 #include "Token.h"
 
 /*****************************************************************************\
@@ -46,6 +48,14 @@ int Scanner::scan(Token& token, int& line)
 			token.setToken(Token::T_STAR);
 			break;
 		
+		case '=':
+			token.setToken(Token::T_EQUALS);
+			break;
+		
+		case ';':
+			token.setToken(Token::T_SEMICOLON);
+			break;
+				
 		default:
 			if (::isdigit(c))
 				{
@@ -53,7 +63,24 @@ int Scanner::scan(Token& token, int& line)
 				token.setToken(Token::T_INTLIT);
 				break;
 				}
-			
+			else if (::isalpha(c) || ('_' == c))
+				{
+				// Read in a keyword or identifier
+				_scanIdentifier(c, line);
+				
+				// Check to see if it's a known keyword, returns non-zero if so
+				int tokenType = _keyword();
+				if (tokenType)
+					{
+					token.setToken(tokenType);
+					break;
+					}
+				
+				// Not a recognised keyword, so must be an identifier
+				token.setToken(Token::T_IDENT);
+				break;
+				}
+				
 			FATAL(ERR_LEX_BAD_CHAR,
 					"Unrecognised character '%c' on line %d", c, line);
 			break;
@@ -146,4 +173,53 @@ int Scanner::_scanInteger(int c, int& line)
     \*************************************************************************/
 	_putBack();
 	return val;
+	}
+	
+/*****************************************************************************\
+|* Scan an identifier into _text, starting with character 'c'
+\*****************************************************************************/
+int Scanner::_scanIdentifier(int c, int& line)
+	{
+	_text = "";
+	
+	/*************************************************************************\
+    |* Look for digits, underscores and alpha chars
+    \*************************************************************************/
+	while (isalpha(c) || isdigit(c) || '_' == c)
+		{
+		if (_text.length() >= Symbol::TEXTLEN)
+			FATAL(ERR_PARSE, "Symbol too long");
+		_text += c;
+		c = _next(line);
+		}
+
+	/*************************************************************************\
+    |* We hit a non-digit character so put it back and return the value
+    \*************************************************************************/
+	_putBack();
+	return (int) _text.length();
+	}
+	
+/*****************************************************************************\
+|* Check to see if the value in _text is a keyword, return 0 if false else
+|* return the token identifier
+\*****************************************************************************/
+int Scanner::_keyword(void)
+	{
+	String lc = lcase(_text);
+	
+	switch (lc[0])
+		{
+		case 's':
+			if (lc == "u32")
+				return Token::T_INT;
+			break;
+		
+		case 'p':
+			if (lc == "print")
+				return Token::T_PRINT;
+			break;
+		}
+		
+	return 0;
 	}

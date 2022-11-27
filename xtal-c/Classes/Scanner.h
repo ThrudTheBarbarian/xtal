@@ -32,6 +32,7 @@ class Scanner
     \*************************************************************************/
     GET(String, src);				// The source code for the compiler
     GET(int, at);					// Where we're at in the source code
+    GET(String, text);				// Last identifier scanned
     
     private:
         /*********************************************************************\
@@ -58,6 +59,17 @@ class Scanner
         |* Scan an integer, starting with character 'c'
         \*********************************************************************/
         int _scanInteger(int c, int &line);
+       
+        /*********************************************************************\
+        |* Scan an identifier/keyword into '_text', starting with character 'c'
+        \*********************************************************************/
+        int _scanIdentifier(int c, int &line);
+        
+        /*********************************************************************\
+        |* Check to see if the value in _text is a keyword, return 0 if false
+        |* else return the token identifier
+        \*********************************************************************/
+        int _keyword(void);
         
     public:
         /*********************************************************************\

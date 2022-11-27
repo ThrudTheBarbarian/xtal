@@ -16,6 +16,8 @@
 
 class ArgParser;
 class Emitter;
+class Scanner;
+class Token;
 
 class Compiler
 	{
@@ -30,9 +32,29 @@ class Compiler
     private:
     
         /*********************************************************************\
+        |* Ensure the current token is 't', and fetch the next token else
+        |* throw an error
+        \*********************************************************************/
+        void _match(Scanner& scanner,
+				    Token& token,
+				    int tokenType,
+				    int &line,
+				    String info);
+    
+        /*********************************************************************\
+        |* Match a semicolon
+        \*********************************************************************/
+        void _semicolon(Scanner& scanner, Token& token, int& line);
+    
+        /*********************************************************************\
         |* General run() method
         \*********************************************************************/
-        int _run(std::string content, FILE *fp);
+        int _run(std::string content);
+    
+        /*********************************************************************\
+        |* Handle statements
+        \*********************************************************************/
+        void _statements(Scanner& scanner, Token &token, int& line);
         
         /*********************************************************************\
         |* Actual error reporting

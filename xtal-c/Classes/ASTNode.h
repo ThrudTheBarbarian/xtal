@@ -22,12 +22,17 @@ class ASTNode
 	public:
 		enum
 			{
-			A_NONE 			= -1,
-			A_ADD,
-			A_SUBTRACT,
-			A_MULTIPLY,
-			A_DIVIDE,
-			A_INTLIT
+			A_NONE 		= -1,
+			A_ADD,				// Add op
+			A_SUBTRACT,			// Subtract op
+			A_MULTIPLY,			// Multiply op
+			A_DIVIDE,			// Divide op
+			A_INTLIT,			// Integer literal
+			A_IDENT,			// Identifier
+			A_LVIDENT,			// L-value identifier
+			A_ASSIGN,			// Assign operation
+			
+			A_MAXVAL			// Last entry
 			};
 			
 	/*************************************************************************\
@@ -36,7 +41,8 @@ class ASTNode
     GETSET(int, op, Op);				// Operation to perform on this tree
     GETSET(ASTNode *, left, Left);		// Left child node
     GETSET(ASTNode *, right, Right);	// Right child node
-    GETSET(int, intValue, IntValue);	// Value of the integer
+    GETSET(int, intValue, IntValue);	// For A_INTLIT, Value of the integer
+    GETSET(int, identifier, Identifier);// For A_IDENT, Symbol slot number
     
     private:
         

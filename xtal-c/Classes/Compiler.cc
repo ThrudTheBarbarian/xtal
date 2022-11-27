@@ -13,9 +13,10 @@
 
 #include "ArgParser.h"
 #include "ASTNode.h"
-#include "Emitter.h"
+#include "A8Emitter.h"
 #include "Expression.h"
 #include "Register.h"
+#include "RegisterFile.h"
 #include "Stringutils.h"
 #include "Scanner.h"
 #include "Token.h"
@@ -31,7 +32,7 @@ Compiler::Compiler()
 		 ,_line(0)
 	{
 	_hadError 	= false;
-	_emitter	= new Emitter();
+	_emitter	= new A8Emitter();
 	}
 
 /*****************************************************************************\
@@ -84,9 +85,11 @@ int Compiler::main(int argc, const char *argv[])
 	FILE *fp = fopen(output.c_str(), "w");
 	if (fp == NULL)
 		FATAL(ERR_OUTPUT, "Cannot open '%s' for write", output.c_str());
-		
-	int ok = _run(input, fp);
+	_emitter->setOfp(fp);
+	
+	int ok = _run(input);
 	fclose(fp);
+	_emitter->setOfp(nullptr);
 	return ok;
 	}
 
@@ -102,9 +105,57 @@ void Compiler::error(int line, std::string msg)
 
 
 /*****************************************************************************\
+|* Private method : Handle statements
+\*****************************************************************************/
+void Compiler::_statements(Scanner& scanner, Token& token, int& line)
+	{
+	forever
+		{
+		// Match a 'print' as the first token
+		_match(scanner, token, Token::T_PRINT, line, "print");
+		
+		// Parse the following expression and generate the assembly code
+		ASTNode *node = Expression::binary(scanner, token, _line, 0);
+		Register r = _emitter->emit(node);
+		_emitter->printReg(r);
+		RegisterFile::clear();
+		
+		// Match the following semi-colon and stop if we're out of tokens
+		_semicolon(scanner, token, line);
+		if (token.token() == Token::T_NONE)
+			return;
+		}
+	}
+
+
+/*****************************************************************************\
+|* Private method : Ensure the current token is 't', and fetch the next token
+|* else throw an error
+\*****************************************************************************/
+void Compiler::_match(Scanner& scanner,
+					  Token& token,
+					  int tokenType,
+					  int& line,
+					  String info)
+	{
+	if (token.token() == tokenType)
+		scanner.scan(token, line);
+	else
+		FATAL(ERR_PARSE, "%s expected on line %d", info.c_str(), line);
+	}
+
+/*****************************************************************************\
+|* Private method : Check we're getting a semicolon
+\*****************************************************************************/
+void Compiler::_semicolon(Scanner& scanner, Token& token, int& line)
+	{
+	_match(scanner, token, Token::T_SEMICOLON, line, ";");
+	}
+
+/*****************************************************************************\
 |* Private method : Generic run method
 \*****************************************************************************/
-int Compiler::_run(std::string source, FILE *fp)
+int Compiler::_run(std::string source)
 	{
 	int ok = 0;
 	
@@ -112,15 +163,21 @@ int Compiler::_run(std::string source, FILE *fp)
 	Token t;
 	
 	scanner.scan(t, _line);
-	ASTNode *node = Expression::binary(scanner, t, _line, 0);
-	Register r = _emitter->emit(node);
-	_emitter->printReg(r);
-
-	fprintf(fp, "%s\n%s\n%s\n",
-		_emitter->preamble().c_str(),
-		_emitter->output().c_str(),
-		_emitter->postamble().c_str());
+	_emitter->preamble();
+	_statements(scanner, t, _line);
+	_emitter->postamble();
 	
+	
+//	scanner.scan(t, _line);
+//	ASTNode *node = Expression::binary(scanner, t, _line, 0);
+//	Register r = _emitter->emit(node);
+//	_emitter->printReg(r);
+//
+//	fprintf(fp, "%s\n%s\n%s\n",
+//		_emitter->preamble().c_str(),
+//		_emitter->output().c_str(),
+//		_emitter->postamble().c_str());
+//
 	return ok;
 	}
 

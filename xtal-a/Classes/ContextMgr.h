@@ -119,12 +119,7 @@ class ContextMgr
 		String labelValues(void);
 	
         /**********************************************************************\
-        |* This method returns the default global notification center.  You may
-        |* alternatively create your own notification center without using the
-        |* default notification center
-        |*
-        |* notification	: the notification you wish to observe.
-        \**********************************************************************/
+        |* This method returns the default global instance.          \**********************************************************************/
         static std::shared_ptr<ContextMgr> sharedInstance();
 
 	};

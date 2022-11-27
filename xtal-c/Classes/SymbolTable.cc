@@ -1,0 +1,41 @@
+//
+//  SymbolTable.cc
+//  xtal-c
+//
+//  Created by Simon Gornall on 11/26/22.
+//
+
+#include "SymbolTable.h"
+
+/****************************************************************************\
+|* Constructor
+\****************************************************************************/
+SymbolTable::SymbolTable()
+	{
+	}
+
+/****************************************************************************\
+|* Find a global variable and return the slot position or -1
+\****************************************************************************/
+int SymbolTable::find(const String& name)
+	{
+	int idx = -1;
+	for (int i=0; i<_table.size(); i++)
+		if (_table[i].name() == name)
+			{
+			idx = i;
+			break;
+			}
+	return idx;
+	}
+	
+
+/****************************************************************************\
+|* Add a global variable to the symbol table
+\****************************************************************************/
+int SymbolTable::add(const String& name)
+	{
+	Symbol s(name);
+	_table.push_back(s);
+	return (int)(_table.size()-1);
+	}

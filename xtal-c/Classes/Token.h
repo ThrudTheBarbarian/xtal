@@ -23,12 +23,20 @@ class Token
 		enum
 			{
 			T_NONE		= -1,
-			T_PLUS,
-			T_MINUS,
-			T_STAR,
-			T_SLASH,
-			T_INTLIT,
-			T_MAXVAL
+			T_PLUS,				// Plus op
+			T_MINUS,			// Minus op
+			T_STAR,				// Multiply op
+			T_SLASH,			// Divide op
+			T_INTLIT,			// Integer literal
+			T_SEMICOLON,		// Semicolon
+			T_EQUALS,			// Equals (assign)
+			T_IDENT,			// Identifier
+			
+			// Keywords
+			T_PRINT,			// Print command
+			T_INT,				// Integer declaration
+
+			T_MAXVAL,			// Max token value
 			};
 		
 	/*************************************************************************\

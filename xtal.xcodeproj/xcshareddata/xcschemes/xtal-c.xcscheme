@@ -57,8 +57,12 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-o /var/folders/th/63xq4hqx6yqcx57qgds7ry7r0000gn/T/5PN2qmWq.asm &apos;/Users/simon/src/xtal/xtal-c/Tests/01/test.01&apos;  "
+            argument = "$PROJECT_DIR/xtal-c/Tests/05/test01"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-o /var/folders/th/63xq4hqx6yqcx57qgds7ry7r0000gn/T/5PN2qmWq.asm &apos;/Users/simon/src/xtal/xtal-c/Tests/01/test.01&apos;  "
+            isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>

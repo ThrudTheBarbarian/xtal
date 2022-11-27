@@ -69,7 +69,8 @@ ASTNode * Expression::primary(Scanner &scanner,
 
 
 /*****************************************************************************\
-|* Binary expression resolution
+|* Binary expression resolution. Return an AST tree whose root is a binary
+|* operator.
 \*****************************************************************************/
 ASTNode * Expression::binary(Scanner &scanner,
 							     Token &token,
@@ -82,10 +83,10 @@ ASTNode * Expression::binary(Scanner &scanner,
 	ASTNode *left = primary(scanner, token, line);
 	
 	/*************************************************************************\
-    |* If there are no tokens left, just return the left node
+    |* If we hit a semicolon, just return the left node
     \*************************************************************************/
     int tokenType = token.token();
-	if (tokenType == Token::T_NONE)
+	if (tokenType == Token::T_SEMICOLON)
 		return left;
 	
 	/*************************************************************************\
@@ -113,10 +114,11 @@ ASTNode * Expression::binary(Scanner &scanner,
 		left = new ASTNode(tokenToAst(tokenType, line), left, right, 0);
 
 		/*********************************************************************\
-		|* If there are no tokens left, just return the left node
+		|* Update the details of the current token, if we hit a semicolon,
+		|* return just the left node
 		\*********************************************************************/
 		tokenType = token.token();
-		if (tokenType == Token::T_NONE)
+		if (tokenType == Token::T_SEMICOLON)
 			return left;
 		}
 	/*************************************************************************\
