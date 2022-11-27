@@ -57,8 +57,12 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-o &apos;/tmp/out.com&apos;  /tmp/t.s"
+            argument = "-D &apos;org=0x4000&apos; -d -o &apos;/tmp/out.com&apos; /var/folders/88/dgfn4_5s7976s72nnfx1y12w0000gn/T/5PN2qmWq.asm"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-o &apos;/tmp/out.com&apos;  /tmp/t.s"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-oh /tmp/out.hex"

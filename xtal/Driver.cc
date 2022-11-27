@@ -17,6 +17,8 @@ namespace fs = std::filesystem;
 #include "Driver.h"
 #include "Stringutils.h"
 
+#define DEFAULT_ORG		16384
+
 static int _debugLevel;
 
 /****************************************************************************\
@@ -66,20 +68,43 @@ int Driver::main(int argc, const char *argv[])
 										 "Output listing filename");
 	
 	/*************************************************************************\
+	|* Run through the symbols to see if org= has been defined. If not,
+	|* define it to be the default value
+	\*************************************************************************/
+	bool foundOrg = false;
+	for (String symbol : _symbols)
+		{
+		if (lcase(symbol).starts_with("org="))
+			{
+			foundOrg = true;
+			break;
+			}
+		}
+	
+	if (!foundOrg)
+		{
+		char buf[1024];
+		snprintf(buf, 1024, "org=0x%x", DEFAULT_ORG);
+		_symbols.push_back(buf);
+		}
+		
+	/*************************************************************************\
 	|* Construct a commandline arg and call the compiler
 	\*************************************************************************/
 	String cCmd = _cCmd();
-	//printf("%s\n", cCmd.c_str());
+	if (_debugLevel > 0)
+		printf("%s\n", cCmd.c_str());
 	
 	int status = system(cCmd.c_str());
 	
 	if  (status == 0)
 		{
 		String aCmd = _aCmd();
-		//printf("%s\n", aCmd.c_str());
+		if (_debugLevel > 0)
+			printf("%s\n", aCmd.c_str());
 		system(aCmd.c_str());
 		}
-	remove(_asmFile.c_str());
+	//remove(_asmFile.c_str());
 	return ok;
 	}
 
@@ -95,8 +120,8 @@ String Driver::_cCmd(void)
 	snprintf(buf, 1024, "%s/bin/xtal-c ", _baseDir.c_str());
 	String cCmd = buf;
 	
-	if (_debugLevel > 0)
-		cCmd += "-d " + std::to_string(_debugLevel)+ " ";
+	for (int i=0; i<_debugLevel; i++)
+		cCmd += "-d ";
 	
 	_asmFile = fs::temp_directory_path().string() + randomString(8) + ".asm";
 	cCmd += "-o " + _asmFile + " ";
@@ -124,8 +149,8 @@ String Driver::_aCmd(void)
 		for (String idir : _includeDirs)
 			aCmd += "-i '"+idir + "' ";
 
-	if (_debugLevel > 0)
-		aCmd += "-d " + std::to_string(_debugLevel)+ " ";
+	for (int i=0; i<_debugLevel; i++)
+		aCmd += "-d ";
 	
 	aCmd += "-o '" + _output + "' ";
 	

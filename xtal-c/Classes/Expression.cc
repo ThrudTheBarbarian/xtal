@@ -8,6 +8,7 @@
 #include "ASTNode.h"
 #include "Expression.h"
 #include "Scanner.h"
+#include "SymbolTable.h"
 #include "Token.h"
 
 /*****************************************************************************\
@@ -49,22 +50,36 @@ int Expression::tokenToAst(int token, int line)
 /*****************************************************************************\
 |* Primary expression resolution
 \*****************************************************************************/
-ASTNode * Expression::primary(Scanner &scanner,
-								  Token &token,
-								  int &line)
+ASTNode * Expression::primary(Scanner &scanner, Token &token,  int &line)
 	{
 	ASTNode *node;
+	int identifier;
 	
 	switch (token.token())
 		{
 		case Token::T_INTLIT:
 			node = new ASTNode(ASTNode::A_INTLIT, token.intValue());
-			scanner.scan(token, line);
-			return node;
-		
+			break;
+
+		case Token::T_IDENT:
+			// Check that this identifier exists
+			identifier = SYMTAB->find(scanner.text());
+			if (identifier == SymbolTable::NOT_FOUND)
+				FATAL(ERR_PARSE,
+					"Unknown variable [%s] on line %d",
+						scanner.text().c_str(), line);
+
+
+			// Make a leaf AST node for it
+			node = new ASTNode(ASTNode::A_IDENT, identifier);
+			break;
+
 		default:
 			FATAL(ERR_AST_SYNTAX, "Syntax error on line %d", line);
 		}
+		
+	scanner.scan(token, line);
+	return node;
 	}
 
 

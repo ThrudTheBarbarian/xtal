@@ -13,9 +13,9 @@
 #include "Stringutils.h"
 
 /******************************************************************************\
-|* The global notification center
+|* The global instance
 \******************************************************************************/
-std::shared_ptr<ContextMgr> ContextMgr::_instance = NULL;
+std::shared_ptr<ContextMgr> ContextMgr::_instance = nullptr;
 
 /*****************************************************************************\
 |* Constructor

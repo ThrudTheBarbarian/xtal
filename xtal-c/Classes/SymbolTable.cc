@@ -7,6 +7,12 @@
 
 #include "SymbolTable.h"
 
+/******************************************************************************\
+|* The global instance
+\******************************************************************************/
+std::shared_ptr<SymbolTable> SymbolTable::_instance = nullptr;
+
+
 /****************************************************************************\
 |* Constructor
 \****************************************************************************/
@@ -14,12 +20,26 @@ SymbolTable::SymbolTable()
 	{
 	}
 
+/******************************************************************************\
+|* Return the shared instance
+\******************************************************************************/
+std::shared_ptr<SymbolTable> SymbolTable::sharedInstance(void)
+    {
+    static std::mutex mutex;
+    std::lock_guard<std::mutex> lock(mutex);
+    if (!_instance)
+        _instance = std::shared_ptr<SymbolTable>(new SymbolTable);
+
+    return _instance;
+    }
+
+
 /****************************************************************************\
 |* Find a global variable and return the slot position or -1
 \****************************************************************************/
 int SymbolTable::find(const String& name)
 	{
-	int idx = -1;
+	int idx = NOT_FOUND;
 	for (int i=0; i<_table.size(); i++)
 		if (_table[i].name() == name)
 			{

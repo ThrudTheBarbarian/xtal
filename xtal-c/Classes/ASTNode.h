@@ -34,15 +34,21 @@ class ASTNode
 			
 			A_MAXVAL			// Last entry
 			};
-			
+	
+	typedef union
+		{
+		int		intValue;		// For A_INTLIT, Value of the integer
+		int 	identifier;		// For A_IDENT, Symbol slot number
+		} Value;
+	
 	/*************************************************************************\
     |* Properties
     \*************************************************************************/
     GETSET(int, op, Op);				// Operation to perform on this tree
     GETSET(ASTNode *, left, Left);		// Left child node
     GETSET(ASTNode *, right, Right);	// Right child node
-    GETSET(int, intValue, IntValue);	// For A_INTLIT, Value of the integer
-    GETSET(int, identifier, Identifier);// For A_IDENT, Symbol slot number
+    GETSET(Value, value, Value);		// Type-specific value
+										
     
     private:
         

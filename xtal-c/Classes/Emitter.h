@@ -24,12 +24,11 @@ class Emitter
     NON_COPYABLE_NOR_MOVEABLE(Emitter)
     
     public:
-		enum
+		typedef enum
 			{
 			PREAMBLE		= 0,
-			CODEBODY,
 			POSTAMBLE
-			};
+			} Location;
 			
 	/*************************************************************************\
     |* Strings used
@@ -40,6 +39,12 @@ class Emitter
         \*********************************************************************/
 		const String _printRegFile	= "printReg.s";
 		const String _stdMacrosFile	= "stdmacros.s";
+		
+		/*********************************************************************\
+        |* Information to be appended to the preamble or postamble
+        \*********************************************************************/
+		String		_preamble;			// Extra text for the preamble
+		String		_postamble;			// Extra text for the postamble
 		
 		/*********************************************************************\
         |* List of included files already mentioned
@@ -81,6 +86,16 @@ class Emitter
         |* Generate the code postamble
         \*********************************************************************/
         virtual void postamble(void);
+
+        /*********************************************************************\
+        |* Generate a global symbol
+        \*********************************************************************/
+        virtual void genSymbol(const String& name) = 0;
+
+        /*********************************************************************\
+        |* Append text to one of the body parts
+        \*********************************************************************/
+        virtual void append(const String& what, Location where);
 	};
 
 #endif /* Emitter_h */

@@ -235,7 +235,11 @@ void Scanner::insertSymbols(StringList symbols)
 		StringList kv = split(trim(symbol), "=");
 		if (kv.size() == 2)
 			{
-			_engine.eval(kv[1]);
+			String value = trim(kv[1]);
+			if (value.starts_with("0x"))
+				value = "$" + value.substr(2);
+				
+			_engine.eval(value);
 			_engine.updateSymbol(kv[0],_engine.result());
 			}
 		}

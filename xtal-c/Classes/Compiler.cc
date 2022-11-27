@@ -106,39 +106,6 @@ void Compiler::error(int line, std::string msg)
 
 
 /*****************************************************************************\
-|* Private method : Handle statements
-\*****************************************************************************/
-void Compiler::_statements(Scanner& scanner, Token& token, int& line)
-	{
-	forever
-		{
-		// Match a 'print' as the first token
-		_match(scanner, token, Token::T_PRINT, line, "print");
-		
-		// Parse the following expression and generate the assembly code
-		ASTNode *node = Expression::binary(scanner, token, _line, 0);
-		Register r = _emitter->emit(node);
-		_emitter->printReg(r);
-		RegisterFile::clear();
-		
-		// Match the following semi-colon and stop if we're out of tokens
-		_semicolon(scanner, token, line);
-		if (token.token() == Token::T_NONE)
-			return;
-		}
-	}
-
-
-
-/*****************************************************************************\
-|* Private method : Check we're getting a semicolon
-\*****************************************************************************/
-void Compiler::_semicolon(Scanner& scanner, Token& token, int& line)
-	{
-	_match(scanner, token, Token::T_SEMICOLON, line, ";");
-	}
-
-/*****************************************************************************\
 |* Private method : Generic run method
 \*****************************************************************************/
 int Compiler::_run(std::string source)
@@ -154,17 +121,6 @@ int Compiler::_run(std::string source)
 	stmt.process(t, _line);
 	_emitter->postamble();
 	
-	
-//	scanner.scan(t, _line);
-//	ASTNode *node = Expression::binary(scanner, t, _line, 0);
-//	Register r = _emitter->emit(node);
-//	_emitter->printReg(r);
-//
-//	fprintf(fp, "%s\n%s\n%s\n",
-//		_emitter->preamble().c_str(),
-//		_emitter->output().c_str(),
-//		_emitter->postamble().c_str());
-//
 	return ok;
 	}
 

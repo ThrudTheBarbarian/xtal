@@ -94,7 +94,6 @@ StringList ArgParser::listOf(const char *shrt,
 						     const char *group,
 						     const char *help)
 	{
-	_flags.push_back(shrt);
 	if (help && group)
 		_addHelp(help, shrt, lng, group);
 
@@ -118,15 +117,16 @@ StringList ArgParser::remainingArgs(void)
 	bool skip = false;
 	for (int i=1; i<_argc; i++)
 		{
-		if (_argv[i][0] == '-')
+		const char *arg = _argv[i];
+		if (arg[0] == '-')
 			{
-			if (std::find(_flags.begin(), _flags.end(), _argv[i]) == _flags.end())
+			if (std::find(_flags.begin(), _flags.end(), arg) == _flags.end())
 				skip = true;
 			}
 		else if (skip)
 			skip = false;
 		else
-			list.push_back(std::string(_argv[i]));
+			list.push_back(std::string(arg));
 		}
 	return list;
 	}

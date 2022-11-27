@@ -1,5 +1,5 @@
-int fred;
-int jim;
-fred= 5;
-jim= 12;
-print fred + jim;
+s32 hotel;
+hotel= 900;
+s32 peacocks;
+peacocks= 100;
+print peacocks * hotel;

@@ -50,16 +50,19 @@ Register A8Emitter::emit(ASTNode *node, Register reg)
 		case ASTNode::A_SUBTRACT:		return _cgSub(left, right);
 		case ASTNode::A_MULTIPLY:		return _cgMul(left, right);
 		case ASTNode::A_DIVIDE:			return _cgDiv(left, right);
-		case ASTNode::A_INTLIT:			return _cgLoadInt(node->intValue());
 		case ASTNode::A_ASSIGN:			return right;
+		case ASTNode::A_INTLIT:
+			{
+			return _cgLoadInt(node->value().intValue);
+			}
 		case ASTNode::A_IDENT:
 			{
-			auto symbol = SYMTAB[node->identifier()];
+			auto symbol = SYMTAB->table()[node->value().identifier];
 			return _cgLoadGlobal(symbol.name());
 			}
 		case ASTNode::A_LVIDENT:
 			{
-			auto symbol = SYMTAB[node->identifier()];
+			auto symbol = SYMTAB->table()[node->value().identifier];
 			return _cgStoreGlobal(reg, symbol.name());
 			}
 		
@@ -90,6 +93,35 @@ Register A8Emitter::_cgLoadInt(int val)
 	String size = r.sizeAsString();
 	
 	fprintf(_ofp, "\tmove.%d #$%x %s\n", r.size(), val, r.name().c_str());
+	return r;
+	}
+
+/*****************************************************************************\
+|* Generate a load-value-to-register
+\*****************************************************************************/
+Register A8Emitter::_cgLoadGlobal(String name)
+	{
+	Register r	= _regs->allocate(Register::SIGNED_4BYTE);
+	String size = r.sizeAsString();
+	
+	fprintf(_ofp, "\tmove.%d S_%s %s\n",
+				r.size(),
+				name.c_str(),
+				r.name().c_str());
+	return r;
+	}
+
+/*****************************************************************************\
+|* Store a register into a global variable
+\*****************************************************************************/
+Register A8Emitter::_cgStoreGlobal(Register& r, String name)
+	{
+	String size = r.sizeAsString();
+	
+	fprintf(_ofp, "\tmove.%d %s S_%s\n",
+				r.size(),
+				r.name().c_str(),
+				name.c_str());
 	return r;
 	}
 
@@ -184,3 +216,13 @@ Register A8Emitter::_cgDiv(Register r1, Register r2)
 	return r1;
 	}
 
+
+/*****************************************************************************\
+|* Generate a global symbol
+\*****************************************************************************/
+void A8Emitter::genSymbol(const String& name)
+	{
+	char buf[1024];
+	snprintf(buf, 1024, "@S_%s: .word 0,0\n", name.c_str());
+	append(buf, POSTAMBLE);
+	}

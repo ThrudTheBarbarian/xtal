@@ -17,11 +17,11 @@ typedef struct
 static ASTInfo _astNodes[] =
 	{
 		{ASTNode::A_ADD, 			"AST_ADD        "},
-		{ASTNode::A_SUBTRACT, 	"AST_SUBTRACT   "},
-		{ASTNode::A_MULTIPLY, 	"AST_MULTIPLY   "},
+		{ASTNode::A_SUBTRACT, 		"AST_SUBTRACT   "},
+		{ASTNode::A_MULTIPLY, 		"AST_MULTIPLY   "},
 		{ASTNode::A_DIVIDE, 		"AST_DIVIDE     "},
 		{ASTNode::A_INTLIT, 		"AST_INT_LITERAL"},
-		{ASTNode::A_NONE, 		"[None]         "}		// Must be last
+		{ASTNode::A_NONE, 			"[None]         "}		// Must be last
 	};
 
 static std::map<int, ASTInfo> _info;
@@ -33,8 +33,8 @@ ASTNode::ASTNode(int op, ASTNode *left, ASTNode *right, int intValue)
 		:_op(op)
 		,_left(left)
 		,_right(right)
-		,_intValue(intValue)
 	{
+	_value.intValue = intValue;		// Note this sets identifier also
 	}
 
 /*****************************************************************************\
@@ -44,8 +44,8 @@ ASTNode::ASTNode(int op, int intValue)
 		:_op(op)
 		,_left(nullptr)
 		,_right(nullptr)
-		,_intValue(intValue)
 	{
+	_value.intValue = intValue;		// Note this sets identifier also
 	}
 
 /*****************************************************************************\
@@ -55,8 +55,8 @@ ASTNode::ASTNode(int op, ASTNode *left, int intValue)
 		:_op(op)
 		,_left(left)
 		,_right(nullptr)
-		,_intValue(intValue)
 	{
+	_value.intValue = intValue;		// Note this sets identifier also
 	}
 
 
@@ -114,7 +114,7 @@ int ASTNode::interpret(void)
 	int rVal = (_right) ? _right->interpret() : 0;
 	
 	if (_op == A_INTLIT)
-		DBG_DEFAULT("-> int %d", _intValue);
+		DBG_DEFAULT("-> int %d", _value.intValue);
 	else
 		DBG_DEFAULT("%d %s %d", lVal, toString().c_str(), rVal);
 	
@@ -138,7 +138,7 @@ int ASTNode::interpret(void)
 			break;
 		
 		case A_INTLIT:
-			result = _intValue;
+			result = _value.intValue;
 			break;
 		
 		default:

@@ -16,13 +16,23 @@
 
 #include "Symbol.h"
 
-#define SYMTAB					SymbolTable::sharedInstance()->table()
+#define SYMTAB					SymbolTable::sharedInstance()
 
 class SymbolTable
 	{
     NON_COPYABLE_NOR_MOVEABLE(SymbolTable)
  
-	typedef std::vector<Symbol> SymTable;
+	public:
+		/********************************************************************\
+		|* Returned value if we don't find a symbol
+		\********************************************************************/
+		static const int NOT_FOUND = -1;
+		
+
+		/********************************************************************\
+		|* Help out the property definition
+		\********************************************************************/
+		typedef std::vector<Symbol> SymTable;
 	
 	/************************************************************************\
     |* Properties
@@ -41,7 +51,7 @@ class SymbolTable
     public:
 
         /********************************************************************\
-        |* Find a global variable and return the slot position or -1
+        |* Find a global variable and return the slot position or NOT_FOUND
         \********************************************************************/
 		int find(const String& name);
 

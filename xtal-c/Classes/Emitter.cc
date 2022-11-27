@@ -17,7 +17,9 @@
 |* Constructor
 \****************************************************************************/
 Emitter::Emitter()
-		:_ofp(nullptr)
+		:_preamble("")
+		,_postamble("")
+		,_ofp(nullptr)
 	{
 	_regs = new RegisterFile();
 	}
@@ -47,10 +49,12 @@ void Emitter::preamble(void)
 					  "; ---------------\n"
 					  ".include %s\n"
 					  ".include %s\n"
-					  "\n",
+					  "\n"
+					  "%s\n",
 					  __TIME__, __DATE__,
 					  _printRegFile.c_str(),
-					  _stdMacrosFile.c_str());
+					  _stdMacrosFile.c_str(),
+					  _preamble.c_str());
 		}
 	else
 		FATAL(ERR_OUTPUT, "No file handle available for preamble output!");
@@ -65,10 +69,32 @@ void Emitter::postamble(void)
 		{
 		fprintf(_ofp, "\trts\n"
 					  "\n"
+					  "%s\n"
 					  "; ----\n"
-					  "; Assembly ends\n\n");
+					  "; Assembly ends\n\n",
+					  _postamble.c_str());
 		}
 	else
 		FATAL(ERR_OUTPUT, "No file handle available for preamble output!");
 	}
-	
+
+
+/****************************************************************************\
+|* Append text to either preamble or postamble
+\****************************************************************************/
+void Emitter::append(const String &what, Location where)
+	{
+	switch (where)
+		{
+		case PREAMBLE:
+			_preamble += what;
+			break;
+		
+		case POSTAMBLE:
+			_postamble += what;
+			break;
+		
+		default:
+			FATAL(ERR_RUNTIME, "Append requested to unknown destination");
+		}
+	}

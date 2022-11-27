@@ -81,6 +81,11 @@ class A8Emitter : public Emitter
         |* Generate the code
         \*********************************************************************/
         Register emit(ASTNode *node, Register reg);
+
+        /*********************************************************************\
+        |* Generate a global symbol
+        \*********************************************************************/
+        virtual void genSymbol(const String& name);
 	};
 
 #endif /* ! A8Emitter_h */
