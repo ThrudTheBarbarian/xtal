@@ -27,15 +27,24 @@ class Token
 			T_MINUS,			// Minus op
 			T_STAR,				// Multiply op
 			T_SLASH,			// Divide op
+			
+			// Comparisons
+			T_EQ,				// Is equal to
+			T_NE,				// Is not equal to
+			T_LT,				// Is less than
+			T_GT,				// Is greater than
+			T_LE,				// Is less than or equal to
+			T_GE,				// Is greater than or equal to
+			
 			T_INTLIT,			// Integer literal
 			T_SEMICOLON,		// Semicolon
-			T_EQUALS,			// Equals (assign)
+			T_ASSIGN,			// Equals (assign)
 			T_IDENT,			// Identifier
 			
 			// Keywords
 			T_PRINT,			// Print command
 			T_INT,				// Integer declaration
-
+			
 			T_MAXVAL,			// Max token value
 			};
 		

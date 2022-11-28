@@ -11,6 +11,7 @@
 #include "ASTNode.h"
 #include "A8Emitter.h"
 #include "RegisterFile.h"
+#include "Stringutils.h"
 #include "SymbolTable.h"
 
 /*****************************************************************************\
@@ -50,6 +51,12 @@ Register A8Emitter::emit(ASTNode *node, Register reg)
 		case ASTNode::A_SUBTRACT:		return _cgSub(left, right);
 		case ASTNode::A_MULTIPLY:		return _cgMul(left, right);
 		case ASTNode::A_DIVIDE:			return _cgDiv(left, right);
+		case ASTNode::A_EQ:				return _cgEqual(left, right);
+		case ASTNode::A_NE:				return _cgNotEqual(left, right);
+		case ASTNode::A_LT:				return _cgLessThan(left, right);
+		case ASTNode::A_GT:     		return _cgMoreThan(left, right);
+		case ASTNode::A_LE:				return _cgLessOrEq(left, right);
+		case ASTNode::A_GE:				return _cgMoreOrEq(left, right);
 		case ASTNode::A_ASSIGN:			return right;
 		case ASTNode::A_INTLIT:
 			{
@@ -81,6 +88,16 @@ void A8Emitter::printReg(Register r)
 	fprintf(_ofp, "\tcall printReg %s\n", r.name().c_str());
 	}
 	
+
+/*****************************************************************************\
+|* Generate a global symbol
+\*****************************************************************************/
+void A8Emitter::genSymbol(const String& name)
+	{
+	char buf[1024];
+	snprintf(buf, 1024, "@S_%s: .word 0,0\n", name.c_str());
+	append(buf, POSTAMBLE);
+	}
 	
 #pragma mark - Private Methods
 
@@ -218,11 +235,156 @@ Register A8Emitter::_cgDiv(Register r1, Register r2)
 
 
 /*****************************************************************************\
-|* Generate a global symbol
+|* Compare two registers, exiting as soon as possible. We want to return the
+|* value '1' if the specific type of comparison evaluates true, and zero
+|* otherwise.
+|*
+|* This is done by doing a n-bit cmp, then depending on which operation we are
+|* doing, issueing possibly multiple Bxx commands. The following table is
+|* used:
+|*
+|*    Test				Unsigned ints				Signed ints
+|*		==				BEQ there					BEQ there
+|* 		!=				BNE there					BNE there
+|*		<				BCC there					BMI there
+|* 		>				BEQ here					BEQ here
+|*						BCS there					BPL there
+|* 		<=				BCC there					BMI there
+|*						BEQ there					BEQ there
+|*		>=				BCS there					BPL there
+|*
+|* Where 'here' and 'there' are defined thusly:
+|*
+|*		CMP $20			; Accumulator < location $20 ?
+|*		BCC there		; No, continue execution
+|* here:
+|*		...
+|*		CLC
+|* 		BCC done
+|* there:
+|*		...
+|* done:
+|*		...
+|*
 \*****************************************************************************/
-void A8Emitter::genSymbol(const String& name)
+Register A8Emitter::_cgCompare(Register r1, Register r2, int how)
 	{
-	char buf[1024];
-	snprintf(buf, 1024, "@S_%s: .word 0,0\n", name.c_str());
-	append(buf, POSTAMBLE);
+	fprintf(_ofp, "\t_cmp32 %s,%s\n", r1.name().c_str(), r2.name().c_str());
+
+	// Make labels local to this ctx
+	fprintf(_ofp, "\t.push context block cmp_%s 1\n", randomString(8).c_str());
+	switch (how)
+		{
+		case ASTNode::A_EQ:
+			fprintf(_ofp, "\tbeq there\n"
+						  "here:\n"
+						  "\tmove.4 #0 r2\n"
+						  "\tbne done\n"
+						  "there:\n"
+						  "\tmove.4 #1 r2\n"
+						  "done:\n");
+			break;
+		case ASTNode::A_NE:
+			fprintf(_ofp, "\tbne there\n"
+						  "here:\n"
+						  "\tmove.4 #0 r2\n"
+						  "\tbeq done\n"
+						  "there:\n"
+						  "\tmove.4 #1 r2\n"
+						  "done:\n");
+			break;
+		case ASTNode::A_LT:
+			fprintf(_ofp, "\tbmi there\n"
+						  "here:\n"
+						  "\tmove.4 #0 r2\n"
+						  "\tbpl done\n"
+						  "there:\n"
+						  "\tmove.4 #1 r2\n"
+						  "done:\n");
+			break;
+		case ASTNode::A_GT:
+			fprintf(_ofp, "\tbeq here\n"
+					      "\tbpl there\n"
+						  "here:\n"
+						  "\tmove.4 #0 r2\n"
+						  "\tclc\n"
+						  "\tbcc done\n"
+						  "there:\n"
+						  "\tmove.4 #1 r2\n"
+						  "done:\n");
+			break;
+		case ASTNode::A_LE:
+			fprintf(_ofp, "\tbcc here\n"
+					      "\tbeq there\n"
+						  "here:\n"
+						  "\tmove.4 #0 r2\n"
+						  "\tclc\n"
+						  "\tbcc done\n"
+						  "there:\n"
+						  "\tmove.4 #1 r2\n"
+						  "done:\n");
+			break;
+		case ASTNode::A_GE:
+			fprintf(_ofp, "\tbcs there\n"
+						  "here:\n"
+						  "\tmove.4 #0 r2\n"
+						  "\tbcc done\n"
+						  "there:\n"
+						  "\tmove.4 #1 r2\n"
+						  "done:\n");
+			break;
+		}
+	fprintf(_ofp, ".pop context\n");
+	
+	_regs->free(r1);
+	return r2;
 	}
+
+/*****************************************************************************\
+|* Test for equality
+\*****************************************************************************/
+Register A8Emitter::_cgEqual(Register r1, Register r2)
+	{
+	return _cgCompare(r1, r2, ASTNode::A_EQ);
+	}
+
+/*****************************************************************************\
+|* Test for inequality
+\*****************************************************************************/
+Register A8Emitter::_cgNotEqual(Register r1, Register r2)
+	{
+	return _cgCompare(r1, r2, ASTNode::A_NE);
+	}
+
+/*****************************************************************************\
+|* Test for less than
+\*****************************************************************************/
+Register A8Emitter::_cgLessThan(Register r1, Register r2)
+	{
+	return _cgCompare(r1, r2, ASTNode::A_LT);
+	}
+
+/*****************************************************************************\
+|* Test for greater than
+\*****************************************************************************/
+Register A8Emitter::_cgMoreThan(Register r1, Register r2)
+	{
+	return _cgCompare(r1, r2, ASTNode::A_GT);
+	}
+
+/*****************************************************************************\
+|* Test for less than or equal to
+\*****************************************************************************/
+Register A8Emitter::_cgLessOrEq(Register r1, Register r2)
+	{
+	return _cgCompare(r1, r2, ASTNode::A_LE);
+	}
+
+/*****************************************************************************\
+|* Test for greater than or equal to
+\*****************************************************************************/
+Register A8Emitter::_cgMoreOrEq(Register r1, Register r2)
+	{
+	return _cgCompare(r1, r2, ASTNode::A_GE);
+	}
+

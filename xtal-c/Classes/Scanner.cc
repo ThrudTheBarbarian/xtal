@@ -49,9 +49,43 @@ int Scanner::scan(Token& token, int& line)
 			break;
 		
 		case '=':
-			token.setToken(Token::T_EQUALS);
+			if ((c = _next(line)) == '=')
+				token.setToken(Token::T_EQ);
+			else
+				{
+				_putBack();
+				token.setToken(Token::T_ASSIGN);
+				}
 			break;
 		
+		case '!':
+			if ((c = _next(line)) == '=')
+				token.setToken(Token::T_NE);
+			else
+				FATAL(ERR_LEX_BAD_CHAR,
+					"Unrecognised character '%c' on line %d", c, line);
+			break;
+		
+		case '<':
+			if ((c = _next(line)) == '=')
+				token.setToken(Token::T_LE);
+			else
+				{
+				_putBack();
+				token.setToken(Token::T_LT);
+				}
+			break;
+		
+		case '>':
+			if ((c = _next(line)) == '=')
+				token.setToken(Token::T_GE);
+			else
+				{
+				_putBack();
+				token.setToken(Token::T_GT);
+				}
+			break;
+			
 		case ';':
 			token.setToken(Token::T_SEMICOLON);
 			break;

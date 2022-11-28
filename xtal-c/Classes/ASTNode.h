@@ -23,11 +23,23 @@ class ASTNode
 		enum
 			{
 			A_NONE 		= -1,
-			A_ADD,				// Add op
-			A_SUBTRACT,			// Subtract op
-			A_MULTIPLY,			// Multiply op
-			A_DIVIDE,			// Divide op
+			A_ADD		= 1,	// Add  (align with Token::T_PLUS)
+			A_SUBTRACT,			// Subtract
+			A_MULTIPLY,			// Multiply
+			A_DIVIDE,			// Divide
+			
+			A_EQ,				// ==
+			A_NE,				// !=
+			A_LT,				// <
+			A_GT,				// >
+			A_LE,				// <=
+			A_GE,				// >=
+			
 			A_INTLIT,			// Integer literal
+			
+			// Below here, the node types stop aligning with Token::
+			// but we have all the binary operators above
+			
 			A_IDENT,			// Identifier
 			A_LVIDENT,			// L-value identifier
 			A_ASSIGN,			// Assign operation

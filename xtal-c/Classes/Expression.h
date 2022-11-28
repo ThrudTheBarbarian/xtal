@@ -34,11 +34,6 @@ class Expression
         explicit Expression();
 
         /*********************************************************************\
-        |* Convert a Token identifier into an ASTNode identifier
-        \*********************************************************************/
-        static int tokenToAst(int token, int line);
-        
-        /*********************************************************************\
         |* Primary expression resolution
         \*********************************************************************/
         static ASTNode * primary(Scanner &scanner,

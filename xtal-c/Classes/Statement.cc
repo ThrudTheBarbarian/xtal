@@ -121,7 +121,7 @@ void Statement::_assignment(Token& token, int& line)
 	ASTNode *right = new ASTNode(ASTNode::A_LVIDENT, idx);
 
 	// Ensure we have an equals sign
-	_match(token, Token::T_EQUALS, line, "=");
+	_match(token, Token::T_ASSIGN, line, "=");
 
 	// Parse the following expression
 	ASTNode *left = Expression::binary(*_scanner, token, line, 0);

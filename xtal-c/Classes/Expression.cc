@@ -19,35 +19,6 @@ Expression::Expression()
 	}
 
 /*****************************************************************************\
-|* Convert a token identifier to an ASTNode identifier
-\*****************************************************************************/
-int Expression::tokenToAst(int token, int line)
-	{
-	int astType = ASTNode::A_NONE;
-	
-	switch (token)
-		{
-		case Token::T_PLUS:
-			astType = ASTNode::A_ADD;
-			break;
-		case Token::T_MINUS:
-			astType = ASTNode::A_SUBTRACT;
-			break;
-		case Token::T_STAR:
-			astType = ASTNode::A_MULTIPLY;
-			break;
-		case Token::T_SLASH:
-			astType = ASTNode::A_DIVIDE;
-			break;
-		default:
-			FATAL(ERR_AST_UNKNOWN_TOKEN,
-					"Unknown token [%d] on line %d", token, line);
-		}
-	return astType;
-	}
-	
-
-/*****************************************************************************\
 |* Primary expression resolution
 \*****************************************************************************/
 ASTNode * Expression::primary(Scanner &scanner, Token &token,  int &line)
@@ -82,6 +53,15 @@ ASTNode * Expression::primary(Scanner &scanner, Token &token,  int &line)
 	return node;
 	}
 
+/*****************************************************************************\
+|* Helper to determine if it's an arithmetic operation
+\*****************************************************************************/
+static int isArith(int tokentype, int line)
+	{
+	if (tokentype > Token::T_NONE && tokentype < Token::T_INTLIT)
+		return(tokentype);
+	FATAL(ERR_AST_SYNTAX, "Syntax error on line %d, token %d", line, tokentype);
+	}
 
 /*****************************************************************************\
 |* Binary expression resolution. Return an AST tree whose root is a binary
@@ -126,7 +106,7 @@ ASTNode * Expression::binary(Scanner &scanner,
 		/*********************************************************************\
 		|* Join that sub-tree with ours, convert the token into an ASTnode.
 		\*********************************************************************/
-		left = new ASTNode(tokenToAst(tokenType, line), left, right, 0);
+		left = new ASTNode(isArith(tokenType, line), left, right, 0);
 
 		/*********************************************************************\
 		|* Update the details of the current token, if we hit a semicolon,

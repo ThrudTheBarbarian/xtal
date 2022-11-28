@@ -62,6 +62,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$PROJECT_DIR/xtal-c/Tests/06/test.01"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "$PROJECT_DIR/xtal-c/Tests/07/test.01 -d"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
