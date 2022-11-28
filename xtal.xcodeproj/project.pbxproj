@@ -223,6 +223,7 @@
 		F4B8088C292DD9B70049B6EB /* stdio.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = stdio.s; sourceTree = "<group>"; };
 		F4B80891292DE4E10049B6EB /* Function.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Function.h; path = Classes/Function.h; sourceTree = "<group>"; };
 		F4B80892292DE4E10049B6EB /* Function.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Function.cc; path = Classes/Function.cc; sourceTree = "<group>"; };
+		F4B8089E29346EDA0049B6EB /* test.02 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.02; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -468,6 +469,7 @@
 		F4B53B4A29344CF60023B3AB /* 07 */ = {
 			isa = PBXGroup;
 			children = (
+				F4B8089E29346EDA0049B6EB /* test.02 */,
 				F4B53B4B29344CF60023B3AB /* test.01 */,
 			);
 			path = 07;

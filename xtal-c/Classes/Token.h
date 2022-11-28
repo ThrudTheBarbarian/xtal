@@ -23,7 +23,7 @@ class Token
 		enum
 			{
 			T_NONE		= -1,
-			T_PLUS,				// Plus op
+			T_PLUS 		= 1,	// Plus op
 			T_MINUS,			// Minus op
 			T_STAR,				// Multiply op
 			T_SLASH,			// Divide op

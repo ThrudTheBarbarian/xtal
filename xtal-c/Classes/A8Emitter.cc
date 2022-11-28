@@ -243,15 +243,14 @@ Register A8Emitter::_cgDiv(Register r1, Register r2)
 |* doing, issueing possibly multiple Bxx commands. The following table is
 |* used:
 |*
-|*    Test				Unsigned ints				Signed ints
-|*		==				BEQ there					BEQ there
-|* 		!=				BNE there					BNE there
-|*		<				BCC there					BMI there
-|* 		>				BEQ here					BEQ here
-|*						BCS there					BPL there
-|* 		<=				BCC there					BMI there
-|*						BEQ there					BEQ there
-|*		>=				BCS there					BPL there
+|*      Test			Unsigned ints				Signed ints
+|*   -----------+-------------------------------+---------------------------
+|*		 ==		|		BEQ there				|	BEQ there
+|* 		 !=		|		BNE there				|	BNE there
+|*		 <		|		BCC there				|	BMI there
+|* 		 >		|		BEQ here  ; BCS there	|	BEQ here  ; BPL there
+|* 		 <=		|		BCC there ; BEQ there 	|	BMI there ; BEQ there
+|*		 >=		|		BCS there				|	BPL there
 |*
 |* Where 'here' and 'there' are defined thusly:
 |*
@@ -269,72 +268,58 @@ Register A8Emitter::_cgDiv(Register r1, Register r2)
 \*****************************************************************************/
 Register A8Emitter::_cgCompare(Register r1, Register r2, int how)
 	{
-	fprintf(_ofp, "\t_cmp32 %s,%s\n", r1.name().c_str(), r2.name().c_str());
-
-	// Make labels local to this ctx
-	fprintf(_ofp, "\t.push context block cmp_%s 1\n", randomString(8).c_str());
+	String criteria 	= "beq there";
+	String alternate	= "bne done";
+	
 	switch (how)
 		{
 		case ASTNode::A_EQ:
-			fprintf(_ofp, "\tbeq there\n"
-						  "here:\n"
-						  "\tmove.4 #0 r2\n"
-						  "\tbne done\n"
-						  "there:\n"
-						  "\tmove.4 #1 r2\n"
-						  "done:\n");
 			break;
+		
 		case ASTNode::A_NE:
-			fprintf(_ofp, "\tbne there\n"
-						  "here:\n"
-						  "\tmove.4 #0 r2\n"
-						  "\tbeq done\n"
-						  "there:\n"
-						  "\tmove.4 #1 r2\n"
-						  "done:\n");
+			criteria 	= "bne there";
+			alternate	= "beq done";
 			break;
+			
 		case ASTNode::A_LT:
-			fprintf(_ofp, "\tbmi there\n"
-						  "here:\n"
-						  "\tmove.4 #0 r2\n"
-						  "\tbpl done\n"
-						  "there:\n"
-						  "\tmove.4 #1 r2\n"
-						  "done:\n");
+			criteria 	= "bmi there";
+			alternate	= "bpl done";
 			break;
+			
 		case ASTNode::A_GT:
-			fprintf(_ofp, "\tbeq here\n"
-					      "\tbpl there\n"
-						  "here:\n"
-						  "\tmove.4 #0 r2\n"
-						  "\tclc\n"
-						  "\tbcc done\n"
-						  "there:\n"
-						  "\tmove.4 #1 r2\n"
-						  "done:\n");
+			criteria	= "beq here\n\tbpl there";
+			alternate	= "clc\n\tbcc done";
 			break;
+			
 		case ASTNode::A_LE:
-			fprintf(_ofp, "\tbcc here\n"
-					      "\tbeq there\n"
-						  "here:\n"
-						  "\tmove.4 #0 r2\n"
-						  "\tclc\n"
-						  "\tbcc done\n"
-						  "there:\n"
-						  "\tmove.4 #1 r2\n"
-						  "done:\n");
+			criteria	= "bcc there\n\tbeq there";
 			break;
+			
 		case ASTNode::A_GE:
-			fprintf(_ofp, "\tbcs there\n"
-						  "here:\n"
-						  "\tmove.4 #0 r2\n"
-						  "\tbcc done\n"
-						  "there:\n"
-						  "\tmove.4 #1 r2\n"
-						  "done:\n");
+			criteria	= "bcs there";
+			alternate	= "bcc done";
 			break;
+		
+		default:
+			FATAL(ERR_EMIT, "Unknown branch condition [%d]", how);
 		}
-	fprintf(_ofp, ".pop context\n");
+	
+	
+	fprintf(_ofp,	"\t.push context block cmp_%s 1\n"
+					"\t_cmp32 %s,%s\n"
+					"\t%s\n"
+					"here:\n"
+					"\tmove.4 #0 r2\n"
+					"\t%s\n"
+					"there:\n"
+					"\tmove.4 #1 r2\n"
+					"done:\n"
+					"\t.pop context\n\n",
+					randomString(8).c_str(),
+					r1.name().c_str(),
+					r2.name().c_str(),
+					criteria.c_str(),
+					alternate.c_str());
 	
 	_regs->free(r1);
 	return r2;
