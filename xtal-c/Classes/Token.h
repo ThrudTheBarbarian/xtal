@@ -41,9 +41,16 @@ class Token
 			T_ASSIGN,			// Equals (assign)
 			T_IDENT,			// Identifier
 			
+			T_LBRACE,			// Left block		[
+			T_RBRACE,			// Right block		]
+			T_LPAREN,			// Left bracket		(
+			T_RPAREN,			// Right bracket	)
+			
 			// Keywords
 			T_PRINT,			// Print command
 			T_INT,				// Integer declaration
+			T_IF,				// Start an IF block
+			T_ELSE,				// Start an ELSE block
 			
 			T_MAXVAL,			// Max token value
 			};

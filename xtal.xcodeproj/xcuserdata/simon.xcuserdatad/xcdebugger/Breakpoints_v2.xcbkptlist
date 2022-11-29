@@ -39,22 +39,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "4FCE6728-7E68-495E-A08B-8FCBFEF9E08B"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "xtal-c/Classes/Statement.cc"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "121"
-            endingLineNumber = "121"
-            landmarkName = "Statement::_assignment(token, line)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "47DA19F9-C3D0-44CC-AD24-16E8FD3B71C1"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
@@ -62,9 +46,9 @@
             filePath = "xtal-c/Classes/A8Emitter.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "48"
-            endingLineNumber = "48"
-            landmarkName = "A8Emitter::emit(node, reg)"
+            startingLineNumber = "64"
+            endingLineNumber = "64"
+            landmarkName = "A8Emitter::emit(node, reg, parentAstOp)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

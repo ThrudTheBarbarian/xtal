@@ -26,29 +26,56 @@ Statement::Statement(Scanner &scanner, Emitter *emitter)
 /****************************************************************************\
 |* Process the statements we understand
 \****************************************************************************/
-void Statement::process(Token& token, int& line)
+ASTnode * Statement::compoundStatement(Token& token, int& line)
 	{
+	ASTNode *left = nullptr;
+	ASTNode *tree = nullptr;
+	
+	// Require a left block-open
+	_lbrace(token, line);
+	
 	forever
 		{
 		switch (token.token())
 			{
 			case Token::T_PRINT:
-				_print(token, line);
+				tree = _print(token, line);
 				break;
     
 			case Token::T_INT:
 				_declaration(token, line);
+				tree = nullptr;
 				break;
     
 			case Token::T_IDENT:
-				_assignment(token, line);
+				tree = _assignment(token, line);
 				break;
     
-			case Token::T_NONE:
-				return;
+			case Token::T_IF:
+				tree = _if(token, line);
+				break;
     
+			case Token::T_RBRACE:
+				// When we hit the right-brace, skip past it and return
+				// the AST
+				_rbrace(token, line);
+				return left;
+				break;
+        
 			default:
 				FATAL(ERR_PARSE, "Syntax error, token %d", token.token());
+			}
+		
+        /********************************************************************\
+        |* For each new tree, either save it in 'left' if left is empty, or
+        |* glue the left and new tree together
+        \********************************************************************/
+		if (tree)
+			{
+			if (left == nullptr)
+				left = tree;
+			else
+				left = new ASTNode(ASTNode::A_GLUE, left, nullptr, tree, 0);
 			}
 		}
 	}
@@ -83,13 +110,45 @@ void Statement::_identifier(Token& token, int& line)
 	_match(token, Token::T_IDENT, line, "identifier");
 	}
 
+/*****************************************************************************\
+|* Private method : Check we're getting an identifier
+\*****************************************************************************/
+void Statement::_lbrace(Token& token, int& line)
+	{
+	_match(token, Token::T_LBRACE, line, "[");
+	}
+
+/*****************************************************************************\
+|* Private method : Check we're getting an identifier
+\*****************************************************************************/
+void Statement::_rbrace(Token& token, int& line)
+	{
+	_match(token, Token::T_RBRACE, line, "]");
+	}
+
+/*****************************************************************************\
+|* Private method : Check we're getting an identifier
+\*****************************************************************************/
+void Statement::_lparen(Token& token, int& line)
+	{
+	_match(token, Token::T_LPAREN, line, "(");
+	}
+
+/*****************************************************************************\
+|* Private method : Check we're getting an identifier
+\*****************************************************************************/
+void Statement::_rparen(Token& token, int& line)
+	{
+	_match(token, Token::T_RPAREN, line, ")");
+	}
+
 
 #pragma mark - Private methods : statement types
 
 /****************************************************************************\
 |* Private Method: process a print statement
 \****************************************************************************/
-void Statement::_print(Token& token, int& line)
+ASTNode * Statement::_print(Token& token, int& line)
 	{
 	// Match a 'print' as the first token
 	_match(token, Token::T_PRINT, line, "print");
@@ -107,7 +166,7 @@ void Statement::_print(Token& token, int& line)
 /****************************************************************************\
 |* Private Method: process a print statement
 \****************************************************************************/
-void Statement::_assignment(Token& token, int& line)
+ASTNode * Statement::_assignment(Token& token, int& line)
 	{
 	// Ensure we have an identifier
 	_identifier(token, line);
@@ -160,4 +219,39 @@ void Statement::_declaration(Token& token, int& line)
 
 	// Match the following semi-colon and stop if we're out of tokens
 	_semicolon(token, line);
+	}
+
+/****************************************************************************\
+|* Private Method: process an if statement, including an optional 'else'
+\****************************************************************************/
+ASTNode * Statement::_if(Token& token, int& line)
+	{
+	// Looking for an if token followed by a '('
+	_match(token, Token::T_IF, line, "if");
+	_lparen(token, line);
+	
+	// Parse the following expression, and the ')' after that. Ensure the
+	// tree's operation is a comparison
+	ASTNode *condAST = Expression::binary(*_scanner, token, line, 0);
+	
+	if ((condAST->op() < ASTNode::A_EQ) || (condAST->op() > ASTNode::A_GE))
+		FATAL(ERR_AST_SYNTAX, "Bad comparison operator at %d", line);
+	
+	// Close the parentheses
+	_rparen(token, line);
+	
+	// Get the AST for the compound statement
+	ASTNode *trueAST = compoundStatement(token, line);
+	
+	// If we have an 'else', skip over the 'else' and get the AST for the
+	// compound statement
+	ASTNode *falseAST = nullptr;
+	if (token.token() == Token::T_ELSE)
+		{
+		_scanner->scan(token, line);
+		falseAST = compoundStatement(token, line);
+		}
+	
+	// Build and return the AST for this entire IF statement
+	return new ASTNode(ASTNode::IF, condAST, trueAST, falseAST, 0);
 	}

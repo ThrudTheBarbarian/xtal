@@ -33,17 +33,33 @@ A8Emitter::~A8Emitter()
 /*****************************************************************************\
 |* Emit code
 \*****************************************************************************/
-Register A8Emitter::emit(ASTNode *node, Register reg)
+Register A8Emitter::emit(ASTNode *node, Register reg, int parentAstOp)
 	{
 	Register left, right;
 	Register none(Register::NO_REGISTER);
 	
+	// We now have specific AST node handling at the top
+	switch (node->op())
+		{
+		case ASTNode::A_IF:
+			return (_genIfAst(node));
+    
+		case ASTNode::A_GLUE:
+			// Do each child statement, and free the
+			// registers after each child
+			emit(node->left(), none, node->op());
+			RegisterFile::clear();
+			
+			emit(node->right(), none, node->op());
+			RegisterFile::clear();
+			return (none);
+		}
 	
 	if (node->left())
-		left = emit(node->left(), none);
+		left = emit(node->left(), none, node->op());
 		
 	if (node->right())
-		right = emit(node->right(), left);
+		right = emit(node->right(), left, node->op());
 
 	switch (node->op())
 		{
@@ -51,12 +67,17 @@ Register A8Emitter::emit(ASTNode *node, Register reg)
 		case ASTNode::A_SUBTRACT:		return _cgSub(left, right);
 		case ASTNode::A_MULTIPLY:		return _cgMul(left, right);
 		case ASTNode::A_DIVIDE:			return _cgDiv(left, right);
-		case ASTNode::A_EQ:				return _cgEqual(left, right);
-		case ASTNode::A_NE:				return _cgNotEqual(left, right);
-		case ASTNode::A_LT:				return _cgLessThan(left, right);
-		case ASTNode::A_GT:     		return _cgMoreThan(left, right);
-		case ASTNode::A_LE:				return _cgLessOrEq(left, right);
-		case ASTNode::A_GE:				return _cgMoreOrEq(left, right);
+		case ASTNode::A_EQ:
+		case ASTNode::A_NE:
+		case ASTNode::A_LT:
+		case ASTNode::A_GT:
+		case ASTNode::A_LE:
+		case ASTNode::A_GE:
+			if (parentAstOp == ASTNode::A_IF)
+				return _cgCompareAndJump(node->op(), left, right, reg);
+			else
+				return _cgCompareAndSet(node-op(), left, right);
+				
 		case ASTNode::A_ASSIGN:			return right;
 		case ASTNode::A_INTLIT:
 			{
@@ -71,6 +92,12 @@ Register A8Emitter::emit(ASTNode *node, Register reg)
 			{
 			auto symbol = SYMTAB->table()[node->value().identifier];
 			return _cgStoreGlobal(reg, symbol.name());
+			}
+		case ASTNode::A_PRINT:
+			{
+			printReg(left);
+			RegisterFile::clear();
+			return none;
 			}
 		
 		default:

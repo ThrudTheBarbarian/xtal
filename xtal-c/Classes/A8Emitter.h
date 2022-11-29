@@ -115,7 +115,7 @@ class A8Emitter : public Emitter
         /*********************************************************************\
         |* Generate the code
         \*********************************************************************/
-        Register emit(ASTNode *node, Register reg);
+        Register emit(ASTNode *node, Register reg, int parentAstOp);
 
         /*********************************************************************\
         |* Generate a global symbol

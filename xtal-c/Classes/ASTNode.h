@@ -44,6 +44,10 @@ class ASTNode
 			A_LVIDENT,			// L-value identifier
 			A_ASSIGN,			// Assign operation
 			
+			A_PRINT, 			// Print statement node
+			A_GLUE, 			// Weld trees together node
+			A_IF,				// If statement node
+			
 			A_MAXVAL			// Last entry
 			};
 	
@@ -58,6 +62,7 @@ class ASTNode
     \*************************************************************************/
     GETSET(int, op, Op);				// Operation to perform on this tree
     GETSET(ASTNode *, left, Left);		// Left child node
+    GETSET(ASTNode *, mid, Mid);		// Middle child node
     GETSET(ASTNode *, right, Right);	// Right child node
     GETSET(Value, value, Value);		// Type-specific value
 										
@@ -68,10 +73,11 @@ class ASTNode
         /*********************************************************************\
         |* Generic constructor
         \*********************************************************************/
-        explicit ASTNode(int op = A_NONE,
-						 ASTNode *left = nullptr,
+        explicit ASTNode(int op         = A_NONE,
+						 ASTNode *left  = nullptr,
+						 ASTNode *mid   = nullptr,
 						 ASTNode *right = nullptr,
-						 int intValue = 0);
+						 int intValue   = 0);
 		
         /*********************************************************************\
         |* Leaf-node constructor

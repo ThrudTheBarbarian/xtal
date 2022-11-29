@@ -47,7 +47,28 @@ int Scanner::scan(Token& token, int& line)
 		case '*':
 			token.setToken(Token::T_STAR);
 			break;
-		
+
+		case ';':
+			token.setToken(Token::T_SEMICOLON);
+			break;
+				
+		case '[':
+			token.setToken(Token::T_LBRACE);
+			break;
+				
+		case ']':
+			token.setToken(Token::T_RBRACE);
+			break;
+				
+		case '(':
+			token.setToken(Token::T_LPAREN);
+			break;
+				
+		case ')':
+			token.setToken(Token::T_RPAREN);
+			break;
+				
+
 		case '=':
 			if ((c = _next(line)) == '=')
 				token.setToken(Token::T_EQ);
@@ -86,10 +107,6 @@ int Scanner::scan(Token& token, int& line)
 				}
 			break;
 			
-		case ';':
-			token.setToken(Token::T_SEMICOLON);
-			break;
-				
 		default:
 			if (::isdigit(c))
 				{
@@ -252,6 +269,16 @@ int Scanner::_keyword(void)
 		case 'p':
 			if (lc == "print")
 				return Token::T_PRINT;
+			break;
+		
+		case 'i':
+			if (lc == "if")
+				return Token::T_IF;
+			break;
+		
+		case 'e':
+			if (lc == "else")
+				return Token::T_ELSE;
 			break;
 		}
 		
