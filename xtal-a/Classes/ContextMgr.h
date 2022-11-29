@@ -13,6 +13,7 @@
 
 #include "properties.h"
 #include "macros.h"
+#include "sharedDefines.h"
 
 #define CTXMGR					ContextMgr::sharedInstance()
 
@@ -24,21 +25,11 @@ class ContextMgr
     |* Enums etc.
     \*************************************************************************/
 	public:
-		typedef enum
-			{
-			FILE	= 0,
-			MACRO,
-			FUNCTION,
-			CLASS,
-			METHOD,
-			BLOCK,
-			UNKNOWN
-			} Type;
     
 		typedef struct
 			{
 			String name;			// Human-readable name for this context
-			Type type;				// One of the enums for context type
+			ContextType type;		// One of the enums for context type
 			int64_t line;			// Where we are in the context
 			int contextId;			// Incrementing context id
 			} Context;
@@ -68,14 +59,14 @@ class ContextMgr
 		/*********************************************************************\
         |* Return a human-readable version of the type
         \*********************************************************************/
-		String _type(Type type);
+		String _type(ContextType type);
 		
     public:
 
         /*********************************************************************\
         |* Add a context level, of a given type
         \*********************************************************************/
-        Context& push(const String name, Type type, int64_t line = 1);
+        Context& push(const String name, ContextType type, int64_t line = 1);
         Context& push(const String name, String type, int64_t line = 1);
         
         /*********************************************************************\

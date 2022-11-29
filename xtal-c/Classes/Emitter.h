@@ -29,7 +29,10 @@ class Emitter
 			PREAMBLE		= 0,
 			POSTAMBLE
 			} Location;
-			
+
+
+		// These should match what the assembler uses for its context
+		// definitions
 	/*************************************************************************\
     |* Strings used
     \*************************************************************************/
@@ -50,7 +53,6 @@ class Emitter
         |* List of included files already mentioned
         \*********************************************************************/
 		std::set<String>	_includes;
-		
 	
 	/************************************************************************\
     |* Properties

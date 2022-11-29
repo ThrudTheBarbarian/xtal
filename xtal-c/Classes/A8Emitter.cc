@@ -8,6 +8,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include "sharedDefines.h"
+
 #include "ASTNode.h"
 #include "A8Emitter.h"
 #include "RegisterFile.h"
@@ -42,7 +44,7 @@ Register A8Emitter::emit(ASTNode *node, Register reg, int parentAstOp)
 	switch (node->op())
 		{
 		case ASTNode::A_IF:
-			return (_genIfAst(node));
+			return (_cgIfAST(node));
     
 		case ASTNode::A_GLUE:
 			// Do each child statement, and free the
@@ -63,6 +65,7 @@ Register A8Emitter::emit(ASTNode *node, Register reg, int parentAstOp)
 
 	switch (node->op())
 		{
+		case ASTNode::A_ASSIGN:			return right;
 		case ASTNode::A_ADD:			return _cgAdd(left, right);
 		case ASTNode::A_SUBTRACT:		return _cgSub(left, right);
 		case ASTNode::A_MULTIPLY:		return _cgMul(left, right);
@@ -74,11 +77,10 @@ Register A8Emitter::emit(ASTNode *node, Register reg, int parentAstOp)
 		case ASTNode::A_LE:
 		case ASTNode::A_GE:
 			if (parentAstOp == ASTNode::A_IF)
-				return _cgCompareAndJump(node->op(), left, right, reg);
+				return _cgCompareAndJump(left, right, node->op());
 			else
-				return _cgCompareAndSet(node-op(), left, right);
+				return _cgCompareAndSet(left, right, node->op());
 				
-		case ASTNode::A_ASSIGN:			return right;
 		case ASTNode::A_INTLIT:
 			{
 			return _cgLoadInt(node->value().intValue);
@@ -293,7 +295,7 @@ Register A8Emitter::_cgDiv(Register r1, Register r2)
 |*		...
 |*
 \*****************************************************************************/
-Register A8Emitter::_cgCompare(Register r1, Register r2, int how)
+Register A8Emitter::_cgCompareAndSet(Register r1, Register r2, int how)
 	{
 	String criteria 	= "beq there";
 	String alternate	= "bne done";
@@ -353,50 +355,179 @@ Register A8Emitter::_cgCompare(Register r1, Register r2, int how)
 	}
 
 /*****************************************************************************\
-|* Test for equality
+|* Compare two registers and jump based on the result, exiting as soon as
+|* possible.
+|*
+|* This is done by doing a n-bit cmp, then depending on which operation we are
+|* doing, issueing possibly multiple Bxx commands. The same table as above is
+|* used, except that we perform the inverse operation for the test
+|*
+|*      Test			Unsigned ints				Signed ints
+|*   -----------+-------------------------------+---------------------------
+|*		 ==		|		BEQ there				|	BEQ there
+|* 		 !=		|		BNE there				|	BNE there
+|*		 <		|		BCC there				|	BMI there
+|* 		 >		|		BEQ here  ; BCS there	|	BEQ here  ; BPL there
+|* 		 <=		|		BCC there ; BEQ there 	|	BMI there ; BEQ there
+|*		 >=		|		BCS there				|	BPL there
+|*
 \*****************************************************************************/
-Register A8Emitter::_cgEqual(Register r1, Register r2)
+Register A8Emitter::_cgCompareAndJump(Register r1, Register r2, int how)
 	{
-	return _cgCompare(r1, r2, ASTNode::A_EQ);
+	Register none(Register::NO_REGISTER);
+	String criteria 	= "bne ifFalse";
+	
+	switch (how)
+		{
+		case ASTNode::A_EQ:
+			break;
+		
+		case ASTNode::A_NE:
+			criteria 	= "beq ifFalse";
+			break;
+			
+		case ASTNode::A_LT:
+			criteria 	= "bpl ifFalse";
+			break;
+			
+		case ASTNode::A_GT:
+			criteria	= "bmi ifFalse\n\tbeq ifFalse";
+			break;
+			
+		case ASTNode::A_LE:
+			criteria	= "beq skip\n\tbpl ifFalse\nskip:\n";
+			break;
+			
+		case ASTNode::A_GE:
+			criteria	= "bmi there";
+			break;
+		
+		default:
+			FATAL(ERR_EMIT, "Unknown branch condition [%d]", how);
+		}
+	
+	
+	fprintf(_ofp,	"\t_cmp32 %s,%s\n"
+					"\t%s\n",
+					r1.name().c_str(),
+					r2.name().c_str(),
+					criteria.c_str());
+	
+	_regs->free(r1);
+	return none;
 	}
 
 /*****************************************************************************\
-|* Test for inequality
+|* Pop a context
 \*****************************************************************************/
-Register A8Emitter::_cgNotEqual(Register r1, Register r2)
+void A8Emitter::_cgPopContext(void)
 	{
-	return _cgCompare(r1, r2, ASTNode::A_NE);
+	fprintf(_ofp, "\t.pop context\n\n");
 	}
-
+	
 /*****************************************************************************\
-|* Test for less than
+|* Push a context
 \*****************************************************************************/
-Register A8Emitter::_cgLessThan(Register r1, Register r2)
+void A8Emitter::_cgPushContext(int type, String prefix)
 	{
-	return _cgCompare(r1, r2, ASTNode::A_LT);
+	static int idx = 0;
+	
+	idx ++;
+	String ctx = "unknown";
+	
+	switch (type)
+		{
+		case C_FILE:
+			ctx = "file";
+			break;
+		
+		case C_MACRO:
+			ctx = "macro";
+			break;
+		
+		case C_FUNCTION:
+			ctx = "function";
+			break;
+		
+		case C_CLASS:
+			ctx = "class";
+			break;
+		
+		case C_BLOCK:
+			ctx = "block";
+			break;
+		
+		case C_IF:
+			ctx = "if";
+			break;
+		
+		case C_COMPARE:
+			ctx = "compare";
+			break;
+		
+		default:
+			break;
+		}
+		
+	fprintf(_ofp, "\t.push context %s %s_%d 1\n",
+			ctx.c_str(),
+			prefix.c_str(),
+			idx);
 	}
-
-/*****************************************************************************\
-|* Test for greater than
-\*****************************************************************************/
-Register A8Emitter::_cgMoreThan(Register r1, Register r2)
+	
+/****************************************************************************\
+|* Private method - jump to a label
+\****************************************************************************/
+void A8Emitter::_cgJump(String label)
 	{
-	return _cgCompare(r1, r2, ASTNode::A_GT);
+	// FIXME: Can we make this use Bxx ?
+	fprintf(_ofp, "\tjmp %s\n", label.c_str());
 	}
-
-/*****************************************************************************\
-|* Test for less than or equal to
-\*****************************************************************************/
-Register A8Emitter::_cgLessOrEq(Register r1, Register r2)
+	
+/****************************************************************************\
+|* Private method - jump to a label
+\****************************************************************************/
+void A8Emitter::_cgLabel(String label)
 	{
-	return _cgCompare(r1, r2, ASTNode::A_LE);
+	fprintf(_ofp, "\n%s:\n", label.c_str());
 	}
-
-/*****************************************************************************\
-|* Test for greater than or equal to
-\*****************************************************************************/
-Register A8Emitter::_cgMoreOrEq(Register r1, Register r2)
+	
+/****************************************************************************\
+|* Private method - generate an IF-statement AST
+\****************************************************************************/
+Register A8Emitter::_cgIfAST(ASTNode *node)
 	{
-	return _cgCompare(r1, r2, ASTNode::A_GE);
-	}
+	Register none(Register::NO_REGISTER);
 
+	_cgPushContext(C_IF, "if");
+
+	// Generate the condition code followed
+	// by a zero jump to the false label.
+	emit(node->left(), none, node->op());
+	RegisterFile::clear();
+	
+	// Generate the true compound statement
+	emit(node->mid(), none, node->op());
+	RegisterFile::clear();
+
+	// If there is an optional ELSE clause,
+	// generate the jump to skip to the end
+	if (node->right())
+		_cgJump("ifEnd");
+	
+	// Now the false label
+	_cgLabel("ifFalse");
+	
+	// Optional ELSE clause: generate the
+	// false compound statement and the
+	// end label
+	if (node->right())
+		{
+		emit(node->right(), none, node->op());
+		RegisterFile::clear();
+		_cgLabel("ifEnd");
+		}
+	
+	_cgPopContext();
+	return none;
+	}

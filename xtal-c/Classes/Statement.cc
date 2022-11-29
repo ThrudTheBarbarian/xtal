@@ -26,7 +26,7 @@ Statement::Statement(Scanner &scanner, Emitter *emitter)
 /****************************************************************************\
 |* Process the statements we understand
 \****************************************************************************/
-ASTnode * Statement::compoundStatement(Token& token, int& line)
+ASTNode * Statement::compoundStatement(Token& token, int& line)
 	{
 	ASTNode *left = nullptr;
 	ASTNode *tree = nullptr;
@@ -150,17 +150,18 @@ void Statement::_rparen(Token& token, int& line)
 \****************************************************************************/
 ASTNode * Statement::_print(Token& token, int& line)
 	{
+	Register none(Register::NO_REGISTER);
+	
 	// Match a 'print' as the first token
 	_match(token, Token::T_PRINT, line, "print");
 	
 	// Parse the following expression and generate the assembly code
 	ASTNode *node = Expression::binary(*_scanner, token, line, 0);
-	Register r = _emitter->emit(node, Register(Register::NO_REGISTER));
-	_emitter->printReg(r);
-	RegisterFile::clear();
-	
+	ASTNode *tree = new ASTNode(ASTNode::A_PRINT, node, 0);
+
 	// Match the following semi-colon and stop if we're out of tokens
 	_semicolon(token, line);
+	return tree;
 	}
 
 /****************************************************************************\
@@ -168,7 +169,9 @@ ASTNode * Statement::_print(Token& token, int& line)
 \****************************************************************************/
 ASTNode * Statement::_assignment(Token& token, int& line)
 	{
-	// Ensure we have an identifier
+	Register none(Register::NO_REGISTER);
+
+   	// Ensure we have an identifier
 	_identifier(token, line);
 
 	// Check it's been defined then make a leaf node for it
@@ -186,40 +189,14 @@ ASTNode * Statement::_assignment(Token& token, int& line)
 	ASTNode *left = Expression::binary(*_scanner, token, line, 0);
 
 	// Make an assignment AST tree
-	ASTNode *tree = new ASTNode(ASTNode::A_ASSIGN, left, right, 0);
-
-	// Generate the assembly code for the assignment
-	Register r = _emitter->emit(tree, Register(Register::NO_REGISTER));
-	RegisterFile::clear();
+	ASTNode *tree = new ASTNode(ASTNode::A_ASSIGN, left, nullptr, right, 0);
 
 	// Match the following semi-colon and stop if we're out of tokens
 	_semicolon(token, line);
+	
+	return tree;
 	}
 
-#pragma mark - Private methods : declarations
-
-/****************************************************************************\
-|* Private Method: process a print statement. Ensure we have a declarator
-|* token followed by an identifier and a semicolon. Scanner::text() now has
-|* the identifier's name. If all that us ok, add it as a known identifier
-\****************************************************************************/
-void Statement::_declaration(Token& token, int& line)
-	{
-	// Looking for an integer token
-	_match(token, Token::T_INT, line, "s32");
-
-	// Check we have an identifier
-	_identifier(token, line);
-
-	// Add it to the global symbol table
-	SYMTAB->add(_scanner->text());
-
-	// Tell the emitter to reserve space for our variable
-	_emitter->genSymbol(_scanner->text());
-
-	// Match the following semi-colon and stop if we're out of tokens
-	_semicolon(token, line);
-	}
 
 /****************************************************************************\
 |* Private Method: process an if statement, including an optional 'else'
@@ -253,5 +230,30 @@ ASTNode * Statement::_if(Token& token, int& line)
 		}
 	
 	// Build and return the AST for this entire IF statement
-	return new ASTNode(ASTNode::IF, condAST, trueAST, falseAST, 0);
+	return new ASTNode(ASTNode::A_IF, condAST, trueAST, falseAST, 0);
+	}
+
+#pragma mark - Private methods : declarations
+
+/****************************************************************************\
+|* Private Method: process a print statement. Ensure we have a declarator
+|* token followed by an identifier and a semicolon. Scanner::text() now has
+|* the identifier's name. If all that us ok, add it as a known identifier
+\****************************************************************************/
+void Statement::_declaration(Token& token, int& line)
+	{
+	// Looking for an integer token
+	_match(token, Token::T_INT, line, "s32");
+
+	// Check we have an identifier
+	_identifier(token, line);
+
+	// Add it to the global symbol table
+	SYMTAB->add(_scanner->text());
+
+	// Tell the emitter to reserve space for our variable
+	_emitter->genSymbol(_scanner->text());
+
+	// Match the following semi-colon and stop if we're out of tokens
+	_semicolon(token, line);
 	}

@@ -29,12 +29,13 @@ static std::map<int, ASTInfo> _info;
 /*****************************************************************************\
 |* Constructor: generic
 \*****************************************************************************/
-ASTNode::ASTNode(int op, ASTNode *left, ASTNode *right, int intValue)
+ASTNode::ASTNode(int op, ASTNode *left, ASTNode *mid, ASTNode *right, int iVal)
 		:_op(op)
 		,_left(left)
+		,_mid(mid)
 		,_right(right)
 	{
-	_value.intValue = intValue;		// Note this sets identifier also
+	_value.intValue = iVal;		// Note this sets identifier also
 	}
 
 /*****************************************************************************\
@@ -43,6 +44,7 @@ ASTNode::ASTNode(int op, ASTNode *left, ASTNode *right, int intValue)
 ASTNode::ASTNode(int op, int intValue)
 		:_op(op)
 		,_left(nullptr)
+		,_mid(nullptr)
 		,_right(nullptr)
 	{
 	_value.intValue = intValue;		// Note this sets identifier also
@@ -54,6 +56,7 @@ ASTNode::ASTNode(int op, int intValue)
 ASTNode::ASTNode(int op, ASTNode *left, int intValue)
 		:_op(op)
 		,_left(left)
+		,_mid(nullptr)
 		,_right(nullptr)
 	{
 	_value.intValue = intValue;		// Note this sets identifier also

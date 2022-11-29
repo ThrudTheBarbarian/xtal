@@ -224,6 +224,8 @@
 		F4B80891292DE4E10049B6EB /* Function.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Function.h; path = Classes/Function.h; sourceTree = "<group>"; };
 		F4B80892292DE4E10049B6EB /* Function.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Function.cc; path = Classes/Function.cc; sourceTree = "<group>"; };
 		F4B8089E29346EDA0049B6EB /* test.02 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.02; sourceTree = "<group>"; };
+		F4B8089F2935C44C0049B6EB /* sharedDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sharedDefines.h; sourceTree = "<group>"; };
+		F4B808A12935D2F00049B6EB /* test.01 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.01; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -385,6 +387,7 @@
 				F480EF4D2922BB66008584FB /* macros.h */,
 				F480EF4E2922BB66008584FB /* properties.h */,
 				F480EF4F2922BB66008584FB /* structures.h */,
+				F4B8089F2935C44C0049B6EB /* sharedDefines.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -430,6 +433,7 @@
 		F480EF8529231627008584FB /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				F4B808A02935D2F00049B6EB /* 08 */,
 				F4B53B4A29344CF60023B3AB /* 07 */,
 				F4B53B432932E8860023B3AB /* 05 */,
 				F4B53B452932E8860023B3AB /* 06 */,
@@ -473,6 +477,14 @@
 				F4B53B4B29344CF60023B3AB /* test.01 */,
 			);
 			path = 07;
+			sourceTree = "<group>";
+		};
+		F4B808A02935D2F00049B6EB /* 08 */ = {
+			isa = PBXGroup;
+			children = (
+				F4B808A12935D2F00049B6EB /* test.01 */,
+			);
+			path = 08;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

@@ -96,7 +96,7 @@ int Token::precedence(void)
 	
 	auto it = _info.find(_token);
 	if (it == _info.end())
-		FATAL(ERR_AST_PRIORITY, "Cannot find token priority %d in AST", _token);
+		FATAL(ERR_AST_PRIORITY, "Cannot find Token priority %d in AST", _token);
 	
 	return it->second.precedence;
 	}

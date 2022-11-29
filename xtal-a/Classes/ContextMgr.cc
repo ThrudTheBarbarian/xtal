@@ -43,7 +43,7 @@ std::shared_ptr<ContextMgr> ContextMgr::sharedInstance(void)
 |* Create and push the current context
 \******************************************************************************/
 ContextMgr::Context& ContextMgr::push(const String name,
-									  ContextMgr::Type type,
+									  ContextType type,
 									  int64_t line)
 	{
 	_nextContextId ++;
@@ -57,7 +57,7 @@ ContextMgr::Context& ContextMgr::push(const String name,
 	
 	switch (type)
 		{
-		case FILE:
+		case C_FILE:
 			_fileList.push_back(idx);
 			break;
 		
@@ -75,22 +75,24 @@ ContextMgr::Context& ContextMgr::push(const String name,
 									  String type,
 									  int64_t line)
 	{
-	Type typeId = UNKNOWN;
+	ContextType typeId = C_UNKNOWN;
 	String lc = lcase(type);
 	if (lc == "file")
-		typeId = FILE;
+		typeId = C_FILE;
 	else if (lc == "macro")
-		typeId = MACRO;
+		typeId = C_MACRO;
 	else if (lc == "function")
-		typeId = FUNCTION;
+		typeId = C_FUNCTION;
 	else if (lc == "class")
-		typeId = CLASS;
+		typeId = C_CLASS;
 	else if (lc == "method")
-		typeId = METHOD;
+		typeId = C_METHOD;
 	else if (lc == "block")
-		typeId = BLOCK;
+		typeId = C_BLOCK;
+	else if (lc == "if")
+		typeId = C_IF;
 		
-	if (typeId != UNKNOWN)
+	if (typeId != C_UNKNOWN)
 		return push(name, typeId, line);
 	FATAL(ERR_CTX, "Unknown context-type '%s' encountered", type.c_str());
 	}
@@ -147,7 +149,7 @@ void ContextMgr::pop(void)
 		Context ctx = _ctxList.back();
 		switch (ctx.type)
 			{
-			case FILE:
+			case C_FILE:
 				_fileList.pop_back();
 				break;
 				
@@ -282,29 +284,32 @@ String ContextMgr::labelValues(void)
 /******************************************************************************\
 |* Private method : Return a human-readable version of the type
 \******************************************************************************/
-String ContextMgr::_type(ContextMgr::Type type)
+String ContextMgr::_type(ContextType type)
 	{
 	String name = "Unknown";
 	
 	switch (type)
 		{
-		case FILE:
+		case C_FILE:
 			name = "file";
 			break;
-		case MACRO:
+		case C_MACRO:
 			name = "macro";
 			break;
-		case FUNCTION:
+		case C_FUNCTION:
 			name = "function";
 			break;
-		case CLASS:
+		case C_CLASS:
 			name = "class";
 			break;
-		case METHOD:
+		case C_METHOD:
 			name = "method";
 			break;
-		case BLOCK:
+		case C_BLOCK:
 			name = "block";
+			break;
+		case C_IF:
+			name = "if";
 			break;
 		default:
 			FATAL(ERR_CTX, "Asked for unknown context type\n%s",

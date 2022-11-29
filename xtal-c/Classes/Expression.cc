@@ -78,10 +78,10 @@ ASTNode * Expression::binary(Scanner &scanner,
 	ASTNode *left = primary(scanner, token, line);
 	
 	/*************************************************************************\
-    |* If we hit a semicolon, just return the left node
+    |* If we hit a semicolon or ), just return the left node
     \*************************************************************************/
     int tokenType = token.token();
-	if (tokenType == Token::T_SEMICOLON)
+	if ((tokenType == Token::T_SEMICOLON) || (tokenType == Token::T_RPAREN))
 		return left;
 	
 	/*************************************************************************\
@@ -106,14 +106,14 @@ ASTNode * Expression::binary(Scanner &scanner,
 		/*********************************************************************\
 		|* Join that sub-tree with ours, convert the token into an ASTnode.
 		\*********************************************************************/
-		left = new ASTNode(isArith(tokenType, line), left, right, 0);
+		left = new ASTNode(isArith(tokenType, line), left, nullptr, right, 0);
 
 		/*********************************************************************\
 		|* Update the details of the current token, if we hit a semicolon,
 		|* return just the left node
 		\*********************************************************************/
 		tokenType = token.token();
-		if (tokenType == Token::T_SEMICOLON)
+		if ((tokenType == Token::T_SEMICOLON) || (tokenType == Token::T_RPAREN))
 			return left;
 		}
 	/*************************************************************************\
