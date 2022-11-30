@@ -69,6 +69,32 @@ ASTNode * Statement::compoundStatement(Token& token, int& line)
 		}
 	}
 
+/****************************************************************************\
+|* Process a function declaration. Currently void return and arguments
+\****************************************************************************/
+ASTNode * Statement::functionDeclaration(Token& token, int& line)
+	{
+	// Looking for 'void', the identifier, and the '(' ')'. For now don't
+	// do anything with them
+	_match(token, Token::T_VOID, line, "void");
+
+	// Check we have an identifier
+	_identifier(token, line);
+
+	// Add it to the global symbol table
+	int nameSlot = SYMTAB->add(_scanner->text());
+
+	// Parentheses
+	_lparen(token, line);
+	_rparen(token, line);
+	
+	// Get the AST for the compound statement
+	ASTNode *tree = compoundStatement(token, line);
+	
+	// Return the AST node representing a function wrapping the body
+	return new ASTNode(ASTNode::A_FUNCTION, tree, nameSlot);
+	}
+
 #pragma mark - Private methods : matching
 
 /*****************************************************************************\
@@ -149,7 +175,7 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 			break;
 
 		case Token::T_INT:
-			_declaration(token, line);
+			_varDeclaration(token, line);
 			tree = nullptr;
 			break;
 
@@ -194,7 +220,7 @@ ASTNode * Statement::_print(Token& token, int& line)
 	}
 
 /****************************************************************************\
-|* Private Method: process a print statement
+|* Private Method: process an assignment statement
 \****************************************************************************/
 ASTNode * Statement::_assignment(Token& token, int& line)
 	{
@@ -326,11 +352,11 @@ ASTNode * Statement::_for(Token& token, int& line)
 #pragma mark - Private methods : declarations
 
 /****************************************************************************\
-|* Private Method: process a print statement. Ensure we have a declarator
+|* Private Method: process a variable declaration. Ensure we have a declarator
 |* token followed by an identifier and a semicolon. Scanner::text() now has
 |* the identifier's name. If all that us ok, add it as a known identifier
 \****************************************************************************/
-void Statement::_declaration(Token& token, int& line)
+void Statement::_varDeclaration(Token& token, int& line)
 	{
 	// Looking for an integer token
 	_match(token, Token::T_INT, line, "s32");
@@ -347,3 +373,5 @@ void Statement::_declaration(Token& token, int& line)
 	// Match the following semi-colon and stop if we're out of tokens
 	_semicolon(token, line);
 	}
+
+

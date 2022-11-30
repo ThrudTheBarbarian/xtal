@@ -290,6 +290,11 @@ int Scanner::_keyword(void)
 			if (lc == "for")
 				return Token::T_FOR;
 			break;
+		
+		case 'v':
+			if (lc == "void")
+				return Token::T_VOID;
+			break;
 		}
 		
 	return Token::T_NONE;

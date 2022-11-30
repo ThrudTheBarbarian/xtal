@@ -119,8 +119,15 @@ int Compiler::_run(std::string source)
 		
 	scanner.scan(t, _line);
 	_emitter->preamble();
-	ASTNode *tree = stmt.compoundStatement(t, _line);
-	_emitter->emit(tree, none, 0, "");
+	
+	forever
+		{
+		ASTNode *tree = stmt.functionDeclaration(t, _line);
+		_emitter->emit(tree, none, 0, "");
+		if (t.token() == Token::T_NONE)
+			break;
+		}
+		
 	_emitter->postamble();
 	
 	return ok;

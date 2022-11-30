@@ -48,11 +48,13 @@ class Token
 			
 			// Keywords
 			T_PRINT,			// Print command
-			T_INT,				// Integer declaration
 			T_IF,				// Start an IF block
 			T_ELSE,				// Start an ELSE block
 			T_WHILE,			// Start a WHILE loop
 			T_FOR,				// Start a FOR loop
+
+			T_VOID, 			// Void declaration
+			T_INT,				// Integer declaration
 			
 			T_MAXVAL,			// Max token value
 			};

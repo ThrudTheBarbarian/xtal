@@ -62,6 +62,15 @@ Register A8Emitter::emit(ASTNode *node,
 			emit(node->right(), none, node->op(), label);
 			RegisterFile::clear();
 			return (none);
+    
+		case ASTNode::A_FUNCTION:
+			{
+			auto symbol = SYMTAB->table()[node->value().identifier];
+			functionPreamble(symbol.name());
+			emit(node->left(), none, node->op(), "");
+			functionPostamble();
+			return (none);
+			}
 		}
 	
 	if (node->left())

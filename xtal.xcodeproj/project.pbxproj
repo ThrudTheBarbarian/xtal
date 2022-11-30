@@ -228,6 +228,8 @@
 		F4B8089E29346EDA0049B6EB /* test.02 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.02; sourceTree = "<group>"; };
 		F4B8089F2935C44C0049B6EB /* sharedDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sharedDefines.h; sourceTree = "<group>"; };
 		F4B808A12935D2F00049B6EB /* test.01 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.01; sourceTree = "<group>"; };
+		F4B808A329370A400049B6EB /* Functions.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Functions.md; sourceTree = "<group>"; };
+		F4B808A5293722940049B6EB /* test.01 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.01; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -290,6 +292,7 @@
 		F480EF172922B512008584FB /* xtal-c */ = {
 			isa = PBXGroup;
 			children = (
+				F4B808A229370A240049B6EB /* Docs */,
 				F4AE741329317E600000F817 /* xtal-c.entitlements */,
 				F480EF8529231627008584FB /* Tests */,
 				F480EF712922C657008584FB /* ASTNode.cc */,
@@ -442,6 +445,7 @@
 				F4B808A02935D2F00049B6EB /* 08 */,
 				F4B53B4C2936C0800023B3AB /* 09 */,
 				F4B53B4E2936E9F80023B3AB /* 10 */,
+				F4B808A4293722940049B6EB /* 11 */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -505,6 +509,22 @@
 				F4B808A12935D2F00049B6EB /* test.01 */,
 			);
 			path = 08;
+			sourceTree = "<group>";
+		};
+		F4B808A229370A240049B6EB /* Docs */ = {
+			isa = PBXGroup;
+			children = (
+				F4B808A329370A400049B6EB /* Functions.md */,
+			);
+			path = Docs;
+			sourceTree = "<group>";
+		};
+		F4B808A4293722940049B6EB /* 11 */ = {
+			isa = PBXGroup;
+			children = (
+				F4B808A5293722940049B6EB /* test.01 */,
+			);
+			path = 11;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

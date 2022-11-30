@@ -76,7 +76,7 @@ class Statement
         /********************************************************************\
         |* Handle a declaration statement
         \********************************************************************/
-		void _declaration(Token& token, int& line);
+		void _varDeclaration(Token& token, int& line);
 		
         /********************************************************************\
         |* Handle an assign statement
@@ -113,6 +113,11 @@ class Statement
         |* Process the statements we understand
         \********************************************************************/
         ASTNode * compoundStatement(Token& token, int& line);
+
+        /********************************************************************\
+        |* Process the statements we understand
+        \********************************************************************/
+        ASTNode * functionDeclaration(Token& token, int& line);
         
 	};
 

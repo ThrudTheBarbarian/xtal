@@ -16,7 +16,7 @@ The assembler understands the following format:
 	LDA $aa   		(or %xxxxxxxx for binary or @xxx for octal, or decimal)
 	LDA $aa,X
 	lda $aaaa		(as above with numbers)
-	lda $aaaa , X
+	lda $aaaa,X
 	lda $aaaa,Y
 	lda ($aa, X)
 	lda	($aa),Y

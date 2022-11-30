@@ -94,25 +94,9 @@
             filePath = "xtal-c/Classes/A8Emitter.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "148"
-            endingLineNumber = "148"
+            startingLineNumber = "157"
+            endingLineNumber = "157"
             landmarkName = "A8Emitter::_cgLoadInt(val)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "CAA6FD2B-0762-406F-AB1D-B081210EA1BB"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "xtal-a/Classes/Assembler.cc"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "183"
-            endingLineNumber = "183"
-            landmarkName = "Assembler::_run(source)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

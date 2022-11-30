@@ -40,6 +40,8 @@ void Emitter::preamble(void)
 	_includes.insert(_printRegFile);
 	_includes.insert(_stdMacrosFile);
 	
+	RegisterFile::clear();
+	
 	if (_ofp != nullptr)
 		{
 		fprintf(_ofp, "; Assembly code produced at %s on %s\n"
@@ -50,7 +52,9 @@ void Emitter::preamble(void)
 					  ".include %s\n"
 					  ".include %s\n"
 					  "\n"
-					  "%s\n",
+					  "%s\n"
+					  "call main\n"
+					  "rts\n",
 					  __TIME__, __DATE__,
 					  _printRegFile.c_str(),
 					  _stdMacrosFile.c_str(),
@@ -61,23 +65,57 @@ void Emitter::preamble(void)
 	}
 
 /****************************************************************************\
-|* Output a default postamble
+|* Output a function preamble
+\****************************************************************************/
+void Emitter::functionPreamble(String name)
+	{
+	if (_ofp != nullptr)
+		{
+		fprintf(_ofp, "; Begin function\n"
+					  "; --------------\n"
+					  "\n.function %s\n"
+					  ".clobber a,x,y\n"
+					  "@%s:\n",
+					  name.c_str(),
+					  name.c_str()
+					  );
+		}
+	else
+		FATAL(ERR_OUTPUT, "No file handle available for func preamble output!");
+	}
+	
+/****************************************************************************\
+|* Output a function postamble
 \****************************************************************************/
 void Emitter::postamble(void)
 	{
 	if (_ofp != nullptr)
 		{
-		fprintf(_ofp, "\trts\n"
-					  "\n"
-					  "%s\n"
-					  "; ----\n"
+		fprintf(_ofp, "%s\n"
+					  "; -------------\n"
 					  "; Assembly ends\n\n",
 					  _postamble.c_str());
 		}
 	else
-		FATAL(ERR_OUTPUT, "No file handle available for preamble output!");
+		FATAL(ERR_OUTPUT, "No file handle available for postamble output!");
 	}
-
+	
+/****************************************************************************\
+|* Output a default postamble
+\****************************************************************************/
+void Emitter::functionPostamble(void)
+	{
+	if (_ofp != nullptr)
+		{
+		fprintf(_ofp, "\trts\n"
+					  ".endfunction\n"
+					  "; -------------\n"
+					  "; Function ends\n\n");
+		}
+	else
+		FATAL(ERR_OUTPUT, "No file handle available for postamble output!");
+	}
+	
 
 /****************************************************************************\
 |* Append text to either preamble or postamble
