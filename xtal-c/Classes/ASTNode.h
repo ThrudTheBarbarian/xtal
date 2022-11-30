@@ -47,6 +47,7 @@ class ASTNode
 			A_PRINT, 			// Print statement node
 			A_GLUE, 			// Weld trees together node
 			A_IF,				// If statement node
+			A_WHILE,			// While statement node
 			
 			A_MAXVAL			// Last entry
 			};

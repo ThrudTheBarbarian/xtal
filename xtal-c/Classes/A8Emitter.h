@@ -126,9 +126,17 @@ class A8Emitter : public Emitter
 		Register _cgIfAST(ASTNode *node);
 
 		/*********************************************************************\
+        |* Generate a WHILE statement AST.
+		\*********************************************************************/
+		Register _cgWhileAST(ASTNode *node);
+
+		/*********************************************************************\
         |* Handle the compare part of an IF statement
 		\*********************************************************************/
-		Register _cgCompareAndJump(Register r1, Register r2, int how);
+		Register _cgCompareAndJump(Register r1,
+								   Register r2,
+								   int how,
+								   String label);
 
 		/*********************************************************************\
         |* Handle comparisons outside of an IF statement
@@ -152,7 +160,10 @@ class A8Emitter : public Emitter
         /*********************************************************************\
         |* Generate the code
         \*********************************************************************/
-        Register emit(ASTNode *node, Register reg, int parentAstOp);
+        Register emit(ASTNode *node,
+					  Register reg,
+					  int parentAstOp,
+					  String label);
 
         /*********************************************************************\
         |* Generate a global symbol

@@ -57,7 +57,7 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = " -D &apos;org=0x4000&apos; -d -o &apos;/tmp/out.com&apos; /var/folders/88/dgfn4_5s7976s72nnfx1y12w0000gn/T/5PN2qmWq.asm "
+            argument = " -D &apos;org=0x4000&apos; -d -d -o &apos;/tmp/out.com&apos; /var/folders/th/63xq4hqx6yqcx57qgds7ry7r0000gn/T/5PN2qmWq.asm"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

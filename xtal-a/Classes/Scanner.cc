@@ -43,6 +43,7 @@ Scanner::Scanner(String src)
 		  :_src(src)
 		  ,_at(0)
 		  ,_engine(Engine::getInstance())
+		  ,_showListing(false)
 	{
 	reset();
 	}
@@ -60,6 +61,7 @@ void Scanner::reset(int to)
 	_pageIndex[2] 	= 0;
 	_pageIndex[3] 	= 0;
 	_listing		= "";
+
 	ContextMgr::sharedInstance()->reset();
 	
 	for (Elements<String, Function> kv : _functions)
@@ -1189,7 +1191,8 @@ int Scanner::_handle6502(Token::TokenInfo info,
 	if (pass == 2)
 		{
 		t.setAddrMode(amode);
-		//printf("%04x %s\n", _current, t.toString().c_str());
+		if (_showListing)
+			fprintf(stderr, "%04x %s\n", _current, t.toString().c_str());
 		}
 	if (_emit(tokens, t, amode))
 		_current += numbytes;

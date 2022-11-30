@@ -20,6 +20,7 @@ typedef enum
 	C_METHOD,
 	C_BLOCK,
 	C_IF,
+	C_WHILE,
 	C_COMPARE,
 	C_UNKNOWN
 	} ContextType;

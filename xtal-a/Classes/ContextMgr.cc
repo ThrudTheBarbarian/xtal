@@ -91,6 +91,8 @@ ContextMgr::Context& ContextMgr::push(const String name,
 		typeId = C_BLOCK;
 	else if (lc == "if")
 		typeId = C_IF;
+	else if (lc == "while")
+		typeId = C_WHILE;
 		
 	if (typeId != C_UNKNOWN)
 		return push(name, typeId, line);
@@ -310,6 +312,9 @@ String ContextMgr::_type(ContextType type)
 			break;
 		case C_IF:
 			name = "if";
+			break;
+		case C_WHILE:
+			name = "while";
 			break;
 		default:
 			FATAL(ERR_CTX, "Asked for unknown context type\n%s",

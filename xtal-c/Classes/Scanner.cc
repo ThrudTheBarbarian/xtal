@@ -121,7 +121,7 @@ int Scanner::scan(Token& token, int& line)
 				
 				// Check to see if it's a known keyword, returns non-zero if so
 				int tokenType = _keyword();
-				if (tokenType)
+				if (tokenType != Token::T_NONE)
 					{
 					token.setToken(tokenType);
 					break;
@@ -280,7 +280,12 @@ int Scanner::_keyword(void)
 			if (lc == "else")
 				return Token::T_ELSE;
 			break;
+		
+		case 'w':
+			if (lc == "while")
+				return Token::T_WHILE;
+			break;
 		}
 		
-	return 0;
+	return Token::T_NONE;
 	}

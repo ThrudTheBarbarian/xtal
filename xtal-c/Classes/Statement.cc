@@ -55,6 +55,10 @@ ASTNode * Statement::compoundStatement(Token& token, int& line)
 				tree = _if(token, line);
 				break;
     
+			case Token::T_WHILE:
+				tree = _while(token, line);
+				break;
+    
 			case Token::T_RBRACE:
 				// When we hit the right-brace, skip past it and return
 				// the AST
@@ -231,6 +235,32 @@ ASTNode * Statement::_if(Token& token, int& line)
 	
 	// Build and return the AST for this entire IF statement
 	return new ASTNode(ASTNode::A_IF, condAST, trueAST, falseAST, 0);
+	}
+
+/****************************************************************************\
+|* Private Method: process an if statement, including an optional 'else'
+\****************************************************************************/
+ASTNode * Statement::_while(Token& token, int& line)
+	{
+	// Looking for a while token followed by a '('
+	_match(token, Token::T_WHILE, line, "while");
+	_lparen(token, line);
+	
+	// Parse the following expression, and the ')' after that. Ensure the
+	// tree's operation is a comparison
+	ASTNode *condAST = Expression::binary(*_scanner, token, line, 0);
+	
+	if ((condAST->op() < ASTNode::A_EQ) || (condAST->op() > ASTNode::A_GE))
+		FATAL(ERR_AST_SYNTAX, "Bad comparison operator at %d", line);
+	
+	// Close the parentheses
+	_rparen(token, line);
+	
+	// Get the AST for the compound statement
+	ASTNode *bodyAST = compoundStatement(token, line);
+		
+	// Build and return the AST for this entire IF statement
+	return new ASTNode(ASTNode::A_WHILE, condAST, nullptr, bodyAST, 0);
 	}
 
 #pragma mark - Private methods : declarations

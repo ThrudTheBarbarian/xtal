@@ -61,7 +61,7 @@ class Scanner
 	GET(BoolList, ifState);						// 'if' state hierarchy
 	GET(String, listing);						// String form of output
 	GET(int, labelId);							// Current numeric label id
-	
+	GETSET(bool, showListing, ShowListing);		// Show internal listing
     private:
 		Engine& 	_engine;			// YACC-based expression-parsing engine
 		int			_pageIndex[4];		// Current 'page' for banked addresses

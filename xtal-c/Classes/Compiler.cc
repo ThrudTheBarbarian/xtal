@@ -120,7 +120,7 @@ int Compiler::_run(std::string source)
 	scanner.scan(t, _line);
 	_emitter->preamble();
 	ASTNode *tree = stmt.compoundStatement(t, _line);
-	_emitter->emit(tree, none, 0);
+	_emitter->emit(tree, none, 0, "");
 	_emitter->postamble();
 	
 	return ok;

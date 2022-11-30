@@ -77,7 +77,10 @@ class Emitter
         /*********************************************************************\
         |* Generate the code
         \*********************************************************************/
-        virtual Register emit(ASTNode *node, Register reg, int parentAstOp) =0;
+        virtual Register emit(ASTNode *node,
+							  Register reg,
+							  int parentAstOp,
+							  String label) =0;
 
         /*********************************************************************\
         |* Generate the code preamble

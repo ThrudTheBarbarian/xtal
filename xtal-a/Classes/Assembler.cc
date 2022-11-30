@@ -158,8 +158,9 @@ int Assembler::_run(std::string source)
 	|* Set the source
 	\*************************************************************************/
 	scanner.setSrc(source);
-	//fprintf(stderr, "=====\n%s\n=====\n", source.c_str());
-
+	if (_debugLevel > 1)
+		scanner.setShowListing(true);
+		
 	/*************************************************************************\
 	|* Run the first pass of the assembler, so any variables with forward refs
 	|* are picked up correctly
@@ -176,8 +177,12 @@ int Assembler::_run(std::string source)
 		while (scanner.scan(tokens, 1) == Scanner::SCAN_MORE)
 			;
 
-	
-	//scanner.engine().dumpVars();
+	if (_debugLevel > 1)
+		{
+		fprintf(stderr, "\n=====\n\n");
+		scanner.engine().dumpVars();
+		fprintf(stderr, "\n=====\n\n");
+		}
 	
 	/*************************************************************************\
 	|* Run a sanity check on the if blocks being properly closed

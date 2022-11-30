@@ -16,6 +16,7 @@
 #include "Stringutils.h"
 #include "SymbolTable.h"
 
+#define PARENT_IS(x)	(parentAstOp == ASTNode::x)
 /*****************************************************************************\
 |* Constructor
 \*****************************************************************************/
@@ -35,7 +36,10 @@ A8Emitter::~A8Emitter()
 /*****************************************************************************\
 |* Emit code
 \*****************************************************************************/
-Register A8Emitter::emit(ASTNode *node, Register reg, int parentAstOp)
+Register A8Emitter::emit(ASTNode *node,
+						 Register reg,
+						 int parentAstOp,
+						 String label)
 	{
 	Register left, right;
 	Register none(Register::NO_REGISTER);
@@ -46,22 +50,25 @@ Register A8Emitter::emit(ASTNode *node, Register reg, int parentAstOp)
 		case ASTNode::A_IF:
 			return (_cgIfAST(node));
     
+		case ASTNode::A_WHILE:
+			return (_cgWhileAST(node));
+    
 		case ASTNode::A_GLUE:
 			// Do each child statement, and free the
 			// registers after each child
-			emit(node->left(), none, node->op());
+			emit(node->left(), none, node->op(), label);
 			RegisterFile::clear();
 			
-			emit(node->right(), none, node->op());
+			emit(node->right(), none, node->op(), label);
 			RegisterFile::clear();
 			return (none);
 		}
 	
 	if (node->left())
-		left = emit(node->left(), none, node->op());
+		left = emit(node->left(), none, node->op(), label);
 		
 	if (node->right())
-		right = emit(node->right(), left, node->op());
+		right = emit(node->right(), left, node->op(), label);
 
 	switch (node->op())
 		{
@@ -76,8 +83,8 @@ Register A8Emitter::emit(ASTNode *node, Register reg, int parentAstOp)
 		case ASTNode::A_GT:
 		case ASTNode::A_LE:
 		case ASTNode::A_GE:
-			if (parentAstOp == ASTNode::A_IF)
-				return _cgCompareAndJump(left, right, node->op());
+			if (PARENT_IS(A_IF) || PARENT_IS(A_WHILE))
+				return _cgCompareAndJump(left, right, node->op(), label);
 			else
 				return _cgCompareAndSet(left, right, node->op());
 				
@@ -360,7 +367,9 @@ Register A8Emitter::_cgCompareAndSet(Register r1, Register r2, int how)
 |*
 |* This is done by doing a n-bit cmp, then depending on which operation we are
 |* doing, issueing possibly multiple Bxx commands. The same table as above is
-|* used, except that we perform the inverse operation for the test
+|* used. Technically we would normally use the reverse operator, but since the
+|* Bxx commands are so limited in scope, we use the inverse of the inverse, and
+|* combine with a jmp
 |*
 |*      Test			Unsigned ints				Signed ints
 |*   -----------+-------------------------------+---------------------------
@@ -372,10 +381,13 @@ Register A8Emitter::_cgCompareAndSet(Register r1, Register r2, int how)
 |*		 >=		|		BCS there				|	BPL there
 |*
 \*****************************************************************************/
-Register A8Emitter::_cgCompareAndJump(Register r1, Register r2, int how)
+Register A8Emitter::_cgCompareAndJump(Register r1,
+									  Register r2,
+									  int how,
+									  String label)
 	{
 	Register none(Register::NO_REGISTER);
-	String criteria 	= "bne ifFalse";
+	String criteria 	= "beq skip\n";
 	
 	switch (how)
 		{
@@ -383,23 +395,23 @@ Register A8Emitter::_cgCompareAndJump(Register r1, Register r2, int how)
 			break;
 		
 		case ASTNode::A_NE:
-			criteria 	= "beq ifFalse";
+			criteria 	= "bne skip\n";
 			break;
 			
 		case ASTNode::A_LT:
-			criteria 	= "bpl ifFalse";
+			criteria 	= "bmi skip\n";
 			break;
 			
 		case ASTNode::A_GT:
-			criteria	= "bmi ifFalse\n\tbeq ifFalse";
+			criteria	= "beq skip\n\tbpl skip\n";
 			break;
 			
 		case ASTNode::A_LE:
-			criteria	= "beq skip\n\tbpl ifFalse\nskip:\n";
+			criteria	= "beq skip\n\tbmi skip\n";
 			break;
 			
 		case ASTNode::A_GE:
-			criteria	= "bmi there";
+			criteria	= "bpl skip\n";
 			break;
 		
 		default:
@@ -408,10 +420,13 @@ Register A8Emitter::_cgCompareAndJump(Register r1, Register r2, int how)
 	
 	
 	fprintf(_ofp,	"\t_cmp32 %s,%s\n"
-					"\t%s\n",
+					"\t%s\n"
+					"\tjmp %s\n"
+					"skip:\n",
 					r1.name().c_str(),
 					r2.name().c_str(),
-					criteria.c_str());
+					criteria.c_str(),
+					label.c_str());
 	
 	_regs->free(r1);
 	return none;
@@ -465,6 +480,10 @@ void A8Emitter::_cgPushContext(int type, String prefix)
 			ctx = "compare";
 			break;
 		
+		case C_WHILE:
+			ctx = "while";
+			break;
+		
 		default:
 			break;
 		}
@@ -503,11 +522,11 @@ Register A8Emitter::_cgIfAST(ASTNode *node)
 
 	// Generate the condition code followed
 	// by a zero jump to the false label.
-	emit(node->left(), none, node->op());
+	emit(node->left(), none, node->op(), "ifNot");
 	RegisterFile::clear();
 	
 	// Generate the true compound statement
-	emit(node->mid(), none, node->op());
+	emit(node->mid(), none, node->op(), "ifNot");
 	RegisterFile::clear();
 
 	// If there is an optional ELSE clause,
@@ -516,18 +535,47 @@ Register A8Emitter::_cgIfAST(ASTNode *node)
 		_cgJump("ifEnd");
 	
 	// Now the false label
-	_cgLabel("ifFalse");
+	_cgLabel("ifNot");
 	
 	// Optional ELSE clause: generate the
 	// false compound statement and the
 	// end label
 	if (node->right())
 		{
-		emit(node->right(), none, node->op());
+		emit(node->right(), none, node->op(), "ifNot");
 		RegisterFile::clear();
 		_cgLabel("ifEnd");
 		}
 	
+	_cgPopContext();
+	return none;
+	}
+	
+/****************************************************************************\
+|* Private method - generate a WHILE-statement AST
+\****************************************************************************/
+Register A8Emitter::_cgWhileAST(ASTNode *node)
+	{
+	Register none(Register::NO_REGISTER);
+
+	_cgPushContext(C_WHILE, "while");
+	_cgLabel("start");
+
+	// Generate the condition code followed
+	// by a jump to the end label.
+	emit(node->left(), none, node->op(), "end");
+	RegisterFile::clear();
+	
+	// Generate the body compound statement
+	emit(node->right(), none, node->op(), "");
+	RegisterFile::clear();
+
+	// Output the jump back to the start
+	_cgJump("start");
+	
+	// Now the loop-exit label
+	_cgLabel("end");
+		
 	_cgPopContext();
 	return none;
 	}
