@@ -14,6 +14,8 @@
 #include "SymbolTable.h"
 #include "Token.h"
 
+#define IS_OP(x) (tree->op() == ASTNode::x)
+
 /****************************************************************************\
 |* Constructor
 \****************************************************************************/
@@ -23,53 +25,27 @@ Statement::Statement(Scanner &scanner, Emitter *emitter)
 	{
 	}
 
+
 /****************************************************************************\
 |* Process the statements we understand
 \****************************************************************************/
 ASTNode * Statement::compoundStatement(Token& token, int& line)
 	{
 	ASTNode *left = nullptr;
-	ASTNode *tree = nullptr;
 	
 	// Require a left block-open
 	_lbrace(token, line);
 	
 	forever
 		{
-		switch (token.token())
-			{
-			case Token::T_PRINT:
-				tree = _print(token, line);
-				break;
-    
-			case Token::T_INT:
-				_declaration(token, line);
-				tree = nullptr;
-				break;
-    
-			case Token::T_IDENT:
-				tree = _assignment(token, line);
-				break;
-    
-			case Token::T_IF:
-				tree = _if(token, line);
-				break;
-    
-			case Token::T_WHILE:
-				tree = _while(token, line);
-				break;
-    
-			case Token::T_RBRACE:
-				// When we hit the right-brace, skip past it and return
-				// the AST
-				_rbrace(token, line);
-				return left;
-				break;
-        
-			default:
-				FATAL(ERR_PARSE, "Syntax error, token %d", token.token());
-			}
+		ASTNode *tree = _singleStatement(token, line);
 		
+        /********************************************************************\
+        |* Some statements must be followed by a semicolon
+        \********************************************************************/
+		if (tree != nullptr && (IS_OP(A_PRINT) || IS_OP(A_ASSIGN)))
+			_semicolon(token, line);
+
         /********************************************************************\
         |* For each new tree, either save it in 'left' if left is empty, or
         |* glue the left and new tree together
@@ -80,6 +56,15 @@ ASTNode * Statement::compoundStatement(Token& token, int& line)
 				left = tree;
 			else
 				left = new ASTNode(ASTNode::A_GLUE, left, nullptr, tree, 0);
+			}
+			
+        /********************************************************************\
+        |* When we hit a right bracket, skip past it and return the AST
+        \********************************************************************/
+		if (token.token() == Token::T_RBRACE)
+			{
+			_rbrace(token, line);
+			return left;
 			}
 		}
 	}
@@ -147,7 +132,49 @@ void Statement::_rparen(Token& token, int& line)
 	}
 
 
-#pragma mark - Private methods : statement types
+#pragma mark - Private methods : statements
+
+/****************************************************************************\
+|* Process a single statement, without the trailing ; so this method can be
+|* used in for() statements
+\****************************************************************************/
+ASTNode * Statement::_singleStatement(Token& token, int& line)
+	{
+	ASTNode *tree = nullptr;
+	
+	switch (token.token())
+		{
+		case Token::T_PRINT:
+			tree = _print(token, line);
+			break;
+
+		case Token::T_INT:
+			_declaration(token, line);
+			tree = nullptr;
+			break;
+
+		case Token::T_IDENT:
+			tree = _assignment(token, line);
+			break;
+
+		case Token::T_IF:
+			tree = _if(token, line);
+			break;
+
+		case Token::T_WHILE:
+			tree = _while(token, line);
+			break;
+
+		case Token::T_FOR:
+			tree = _for(token, line);
+			break;
+		
+		default:
+			FATAL(ERR_PARSE, "Syntax error, token %d", token.token());
+		}
+		
+	return tree;
+	}
 
 /****************************************************************************\
 |* Private Method: process a print statement
@@ -163,8 +190,6 @@ ASTNode * Statement::_print(Token& token, int& line)
 	ASTNode *node = Expression::binary(*_scanner, token, line, 0);
 	ASTNode *tree = new ASTNode(ASTNode::A_PRINT, node, 0);
 
-	// Match the following semi-colon and stop if we're out of tokens
-	_semicolon(token, line);
 	return tree;
 	}
 
@@ -195,9 +220,6 @@ ASTNode * Statement::_assignment(Token& token, int& line)
 	// Make an assignment AST tree
 	ASTNode *tree = new ASTNode(ASTNode::A_ASSIGN, left, nullptr, right, 0);
 
-	// Match the following semi-colon and stop if we're out of tokens
-	_semicolon(token, line);
-	
 	return tree;
 	}
 
@@ -238,7 +260,7 @@ ASTNode * Statement::_if(Token& token, int& line)
 	}
 
 /****************************************************************************\
-|* Private Method: process an if statement, including an optional 'else'
+|* Private Method: process a while statement
 \****************************************************************************/
 ASTNode * Statement::_while(Token& token, int& line)
 	{
@@ -261,6 +283,44 @@ ASTNode * Statement::_while(Token& token, int& line)
 		
 	// Build and return the AST for this entire IF statement
 	return new ASTNode(ASTNode::A_WHILE, condAST, nullptr, bodyAST, 0);
+	}
+
+/****************************************************************************\
+|* Private Method: process a for statement
+\****************************************************************************/
+ASTNode * Statement::_for(Token& token, int& line)
+	{
+	ASTNode *tree = nullptr;
+	
+	// Looking for a while token followed by a '('
+	_match(token, Token::T_FOR, line, "for");
+	_lparen(token, line);
+
+	// Get the pre-op statement and the ;
+	ASTNode *preOpAST = _singleStatement(token, line);
+	_semicolon(token, line);
+	
+	// Get the condition and the )
+	ASTNode *condAST = Expression::binary(*_scanner, token, line, 0);
+	if ((condAST->op() < ASTNode::A_EQ) || (condAST->op() > ASTNode::A_GE))
+		FATAL(ERR_AST_SYNTAX, "Bad comparison operator at %d", line);
+	_semicolon(token, line);
+	
+	// Get the post-op statement and the ;
+	ASTNode *postOpAST = _singleStatement(token, line);
+	_rparen(token, line);
+
+	// Get the compound statement, which is the body
+	ASTNode *bodyAST = compoundStatement(token, line);
+	
+	// FIXME: For now all 4 sub-trees have to be non-null.
+	tree = new ASTNode(ASTNode::A_GLUE, bodyAST, nullptr, postOpAST, 0);
+	
+	// Make a WHILE loop with the condition and this new body
+	tree = new ASTNode(ASTNode::A_WHILE, condAST, nullptr, tree, 0);
+	
+	// And glue the pre-op to the A_WHILE
+	return new ASTNode(ASTNode::A_GLUE, preOpAST, nullptr, tree, 0);
 	}
 
 #pragma mark - Private methods : declarations

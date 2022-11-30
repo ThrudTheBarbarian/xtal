@@ -285,6 +285,11 @@ int Scanner::_keyword(void)
 			if (lc == "while")
 				return Token::T_WHILE;
 			break;
+		
+		case 'f':
+			if (lc == "for")
+				return Token::T_FOR;
+			break;
 		}
 		
 	return Token::T_NONE;

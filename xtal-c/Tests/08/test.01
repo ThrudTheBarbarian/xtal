@@ -10,4 +10,13 @@
 		[
 		print j;
 		]
+  
+	if (j < i)
+		[
+		print i;
+		]
+	else
+		[
+		print j;
+		]
 	]

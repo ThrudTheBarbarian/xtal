@@ -92,7 +92,17 @@ class Statement
         |* Handle a while statement
         \********************************************************************/
 		ASTNode * _while(Token& token, int& line);
-		
+
+        /********************************************************************\
+        |* Handle a for statement
+        \********************************************************************/
+		ASTNode * _for(Token& token, int& line);
+
+        /********************************************************************\
+        |* Process a single statement
+        \********************************************************************/
+        ASTNode * _singleStatement(Token& token, int& line);
+
     public:
         /********************************************************************\
         |* Constructors and Destructor
@@ -100,7 +110,7 @@ class Statement
         explicit Statement(Scanner &scanner, Emitter *emitter);
 
         /********************************************************************\
-        |* Process a statement
+        |* Process the statements we understand
         \********************************************************************/
         ASTNode * compoundStatement(Token& token, int& line);
         

@@ -51,7 +51,8 @@ class Token
 			T_INT,				// Integer declaration
 			T_IF,				// Start an IF block
 			T_ELSE,				// Start an ELSE block
-			T_WHILE,			// Stare a WHILE loop
+			T_WHILE,			// Start a WHILE loop
+			T_FOR,				// Start a FOR loop
 			
 			T_MAXVAL,			// Max token value
 			};
