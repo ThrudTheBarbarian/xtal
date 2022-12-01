@@ -17,6 +17,8 @@
 #include "SymbolTable.h"
 
 #define PARENT_IS(x)	(parentAstOp == ASTNode::x)
+#define REG				Register::RegType
+
 /*****************************************************************************\
 |* Constructor
 \*****************************************************************************/
@@ -104,12 +106,12 @@ Register A8Emitter::emit(ASTNode *node,
 		case ASTNode::A_IDENT:
 			{
 			auto symbol = SYMTAB->table()[node->value().identifier];
-			return _cgLoadGlobal(symbol.name());
+			return _cgLoadGlobal(symbol);
 			}
 		case ASTNode::A_LVIDENT:
 			{
 			auto symbol = SYMTAB->table()[node->value().identifier];
-			return _cgStoreGlobal(reg, symbol.name());
+			return _cgStoreGlobal(reg, symbol);
 			}
 		case ASTNode::A_PRINT:
 			{
@@ -117,6 +119,9 @@ Register A8Emitter::emit(ASTNode *node,
 			RegisterFile::clear();
 			return none;
 			}
+		case ASTNode::A_WIDEN:
+			//_cgWiden(left, node->left()->type(), node->type());
+			return left;
 		
 		default:
 			FATAL(ERR_AST_UNKNOWN_OPERATOR, "Unknown AST operator %d", node->op());
@@ -137,10 +142,17 @@ void A8Emitter::printReg(Register r)
 /*****************************************************************************\
 |* Generate a global symbol
 \*****************************************************************************/
-void A8Emitter::genSymbol(const String& name)
+void A8Emitter::genSymbol(int idx)
 	{
 	char buf[1024];
-	snprintf(buf, 1024, "@S_%s: .word 0,0\n", name.c_str());
+	
+	Symbol symbol 	= SYMTAB->table()[idx];
+	String name 	= symbol.name();
+	
+	if (symbol.pType() == PT_S32)
+		snprintf(buf, 1024, "@S_%s:.word 0,0\n", name.c_str());
+	else
+		snprintf(buf, 1024, "@S_%s:.byte 0\n", name.c_str());
 	append(buf, POSTAMBLE);
 	}
 	
@@ -151,8 +163,10 @@ void A8Emitter::genSymbol(const String& name)
 \*****************************************************************************/
 Register A8Emitter::_cgLoadInt(int val)
 	{
-	Register r	= _regs->allocate(Register::SIGNED_4BYTE);
-	String size = r.sizeAsString();
+	REG type 	= ((val >= 0) && (val <= 255))
+				? Register::UNSIGNED_1BYTE
+				: Register::SIGNED_4BYTE;
+	Register r	= _regs->allocate(type);
 	
 	fprintf(_ofp, "\tmove.%d #$%x %s\n", r.size(), val, r.name().c_str());
 	return r;
@@ -161,14 +175,21 @@ Register A8Emitter::_cgLoadInt(int val)
 /*****************************************************************************\
 |* Generate a load-value-to-register
 \*****************************************************************************/
-Register A8Emitter::_cgLoadGlobal(String name)
+Register A8Emitter::_cgLoadGlobal(const Symbol& symbol)
 	{
-	Register r	= _regs->allocate(Register::SIGNED_4BYTE);
-	String size = r.sizeAsString();
+	Symbol s 	= (Symbol)symbol;
+	REG size	= (s.pType() == PT_U8) 		? Register::UNSIGNED_1BYTE
+				: (s.pType() == PT_S32)		? Register::SIGNED_4BYTE
+				: Register::UNKNOWN;
+	
+	if (size == Register::UNKNOWN)
+		FATAL(ERR_TYPE, "Unknown type for symbol %s", s.name().c_str());
+		
+	Register r	= _regs->allocate(size);
 	
 	fprintf(_ofp, "\tmove.%d S_%s %s\n",
 				r.size(),
-				name.c_str(),
+				s.name().c_str(),
 				r.name().c_str());
 	return r;
 	}
@@ -176,23 +197,109 @@ Register A8Emitter::_cgLoadGlobal(String name)
 /*****************************************************************************\
 |* Store a register into a global variable
 \*****************************************************************************/
-Register A8Emitter::_cgStoreGlobal(Register& r, String name)
+Register A8Emitter::_cgStoreGlobal(Register& r, const Symbol& symbol)
 	{
-	String size = r.sizeAsString();
+	Symbol s 	= (Symbol)symbol;
+	REG size	= (s.pType() == PT_U8) 		? Register::UNSIGNED_1BYTE
+				: (s.pType() == PT_S32)		? Register::SIGNED_4BYTE
+				: Register::UNKNOWN;
+
+	/*************************************************************************\
+    |* Do some zeroing checks if the register size and the symbol size do not
+    |* match
+    \*************************************************************************/
+	if ((s.pType() == PT_S32) || (s.pType() == PT_S32))
+		{
+		if (r.size() == 1)
+			fprintf(_ofp, "\tlda #0\n"
+						  "\tsta r%d + 3\n"
+						  "\tsta r%d + 2\n"
+						  "\tsta r%d + 1\n",
+						  r.identifier(),
+						  r.identifier(),
+						  r.identifier());
+		else if (r.size() == 2)
+			fprintf(_ofp, "\tlda #0\n"
+						  "\tsta r%d + 3\n"
+						  "\tsta r%d + 2\n",
+						  r.identifier(),
+						  r.identifier());
+		}
+	else if ((s.pType() == PT_S16) || (s.pType() == PT_U16))
+		{
+		if (r.size() == 1)
+			fprintf(_ofp, "\tlda #0\n"
+						  "\tsta r%d + 1\n",
+						  r.identifier());
+		}
+		
+	/*************************************************************************\
+    |* Then store the data
+    \*************************************************************************/
+	switch (size)
+		{
+		case Register::SIGNED_1BYTE:
+		case Register::UNSIGNED_1BYTE:
+			fprintf(_ofp, "\tmove.1 %s S_%s\n",
+						r.name().c_str(),
+						s.name().c_str());
+			break;
+			
+		case Register::SIGNED_2BYTE:
+		case Register::UNSIGNED_2BYTE:
+			fprintf(_ofp, "\tmove.2 %s S_%s\n",
+						r.name().c_str(),
+						s.name().c_str());
+			break;
+			
+		case Register::SIGNED_4BYTE:
+		case Register::UNSIGNED_4BYTE:
+			fprintf(_ofp, "\tmove.4 %s S_%s\n",
+						r.name().c_str(),
+						s.name().c_str());
+			break;
+		
+		default:
+			FATAL(ERR_TYPE, "Unknown type for symbol %s", s.name().c_str());
+		}
 	
-	fprintf(_ofp, "\tmove.%d %s S_%s\n",
-				r.size(),
-				r.name().c_str(),
-				name.c_str());
 	return r;
 	}
+
+        
+/*****************************************************************************\
+|* Widen a register
+\*****************************************************************************/
+void A8Emitter::_cgWiden(Register& reg, int oldWidth, int newWidth)
+	{
+	if (oldWidth != newWidth)
+		{
+		switch (newWidth)
+			{
+			case PT_U8:
+				reg.setType(Register::UNSIGNED_1BYTE);
+				break;
+			
+			case PT_S32:
+				reg.setType(Register::SIGNED_4BYTE);
+				break;
+			
+			default:
+				FATAL(ERR_TYPE, "Unknown type for reg %s", reg.name().c_str());
+			}
+		}
+	}
+
 
 /*****************************************************************************\
 |* Add two registers, and release the first
 \*****************************************************************************/
 Register A8Emitter::_cgAdd(Register r1, Register r2)
 	{
-	Register result	= _regs->allocate(Register::SIGNED_4BYTE);
+	// Make sure they're the same size before we operate
+	_cgSameSize(r1, r2);
+
+	Register result	= _regs->allocate(r1.type());
 
 	String op 		= "\taddu.";
 	int separator	= Register::UNSIGNED_4BYTE;
@@ -216,8 +323,10 @@ Register A8Emitter::_cgAdd(Register r1, Register r2)
 \*****************************************************************************/
 Register A8Emitter::_cgMul(Register r1, Register r2)
 	{
-	std::stringstream ss;
-	Register result	= _regs->allocate(Register::SIGNED_4BYTE);
+	// Make sure they're the same size before we operate
+	_cgSameSize(r1, r2);
+
+	Register result	= _regs->allocate(r1.type());
 
 	String op 		= "\tmulu.";
 	int separator	= Register::UNSIGNED_4BYTE;
@@ -239,7 +348,10 @@ Register A8Emitter::_cgMul(Register r1, Register r2)
 \*****************************************************************************/
 Register A8Emitter::_cgSub(Register r1, Register r2)
 	{
-	Register result	= _regs->allocate(Register::SIGNED_4BYTE);
+	// Make sure they're the same size before we operate
+	_cgSameSize(r1, r2);
+
+	Register result	= _regs->allocate(r1.type());
 
 	String op 		= "\tsubu.";
 	int separator	= Register::UNSIGNED_4BYTE;
@@ -262,7 +374,10 @@ Register A8Emitter::_cgSub(Register r1, Register r2)
 \*****************************************************************************/
 Register A8Emitter::_cgDiv(Register r1, Register r2)
 	{
-	Register left	= _regs->allocate(Register::SIGNED_4BYTE);
+	// Make sure they're the same size before we operate
+	_cgSameSize(r1, r2);
+
+	Register left	= _regs->allocate(r1.type());
 	String op 		= "\tdivu.";
 	int separator	= Register::UNSIGNED_4BYTE;
 	if ((r1.type() > separator) || (r2.type() > separator))
@@ -427,11 +542,19 @@ Register A8Emitter::_cgCompareAndJump(Register r1,
 			FATAL(ERR_EMIT, "Unknown branch condition [%d]", how);
 		}
 	
+	/*************************************************************************\
+	|* If the register widths differ, then use the larger of the two
+	\*************************************************************************/
+	_cgSameSize(r1, r2);
 	
-	fprintf(_ofp,	"\t_cmp32 %s,%s\n"
+	/*************************************************************************\
+	|* Write out the compare logic
+	\*************************************************************************/
+	fprintf(_ofp,	"\t_cmp%d %s,%s\n"
 					"\t%s\n"
 					"\tjmp %s\n"
 					"skip:\n",
+					r1.size()*8,
 					r1.name().c_str(),
 					r2.name().c_str(),
 					criteria.c_str(),
@@ -439,6 +562,47 @@ Register A8Emitter::_cgCompareAndJump(Register r1,
 	
 	_regs->free(r1);
 	return none;
+	}
+
+/*****************************************************************************\
+|* Ensure two registers are the same size
+\*****************************************************************************/
+void A8Emitter::_cgSameSize(Register &r1, Register& r2)
+	{
+	/*************************************************************************\
+	|* If the register widths differ, then use the larger of the two
+	\*************************************************************************/
+	int r1s = r1.size() * 8;
+	int r2s = r2.size() * 8;
+	
+	if (r1s > r2s)
+		{
+		Register r = _regs->allocate(r1.type());
+		fprintf(_ofp, "\t_clr%d r%d\n"
+					  "\t_xfer%d r%d,r%d\n",
+					  r1s,
+					  r.identifier(),
+					  r2s,
+					  r2.identifier(),
+					  r.identifier()
+					  );
+		_regs->free(r2);
+		r2 = r;
+		}
+	else if (r2s > r1s)
+		{
+		Register r = _regs->allocate(r2.type());
+		fprintf(_ofp, "\t_clr%d r%d\n"
+					  "\t_xfer%d r%d,r%d\n",
+					  r2s,
+					  r.identifier(),
+					  r1s,
+					  r1.identifier(),
+					  r.identifier()
+					  );
+		_regs->free(r1);
+		r1 = r;
+		}
 	}
 
 /*****************************************************************************\

@@ -66,6 +66,7 @@
 		F4B8088B29272F2A0049B6EB /* ContextMgr.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B8088A29272F2A0049B6EB /* ContextMgr.cc */; };
 		F4B8088E292DDA470049B6EB /* stdio.s in Copy Library Files */ = {isa = PBXBuildFile; fileRef = F4B8088C292DD9B70049B6EB /* stdio.s */; };
 		F4B80893292DE4E10049B6EB /* Function.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B80892292DE4E10049B6EB /* Function.cc */; };
+		F4B808A829385D550049B6EB /* Types.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B808A729385D550049B6EB /* Types.cc */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -230,6 +231,9 @@
 		F4B808A12935D2F00049B6EB /* test.01 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.01; sourceTree = "<group>"; };
 		F4B808A329370A400049B6EB /* Functions.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Functions.md; sourceTree = "<group>"; };
 		F4B808A5293722940049B6EB /* test.01 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.01; sourceTree = "<group>"; };
+		F4B808A629385D550049B6EB /* Types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Types.h; path = Classes/Types.h; sourceTree = "<group>"; };
+		F4B808A729385D550049B6EB /* Types.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Types.cc; path = Classes/Types.cc; sourceTree = "<group>"; };
+		F4B808AA2938752F0049B6EB /* test.01 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.01; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -299,8 +303,8 @@
 				F480EF772922C657008584FB /* ASTNode.h */,
 				F4B53B3F2932AB8C0023B3AB /* Emitter.h */,
 				F4B53B402932AB8C0023B3AB /* Emitter.cc */,
-				F480EF732922C657008584FB /* A8Emitter.cc */,
 				F480EF7A2922C657008584FB /* A8Emitter.h */,
+				F480EF732922C657008584FB /* A8Emitter.cc */,
 				F480EF702922C657008584FB /* Expression.cc */,
 				F480EF722922C657008584FB /* Expression.h */,
 				F480EF792922C657008584FB /* Register.cc */,
@@ -320,6 +324,8 @@
 				F4B53B3D29329FBC0023B3AB /* SymbolTable.cc */,
 				F4B53B472932E9300023B3AB /* Statement.h */,
 				F4B53B482932E9300023B3AB /* Statement.cc */,
+				F4B808A629385D550049B6EB /* Types.h */,
+				F4B808A729385D550049B6EB /* Types.cc */,
 			);
 			path = "xtal-c";
 			sourceTree = "<group>";
@@ -446,6 +452,7 @@
 				F4B53B4C2936C0800023B3AB /* 09 */,
 				F4B53B4E2936E9F80023B3AB /* 10 */,
 				F4B808A4293722940049B6EB /* 11 */,
+				F4B808A92938752F0049B6EB /* 12 */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -525,6 +532,14 @@
 				F4B808A5293722940049B6EB /* test.01 */,
 			);
 			path = 11;
+			sourceTree = "<group>";
+		};
+		F4B808A92938752F0049B6EB /* 12 */ = {
+			isa = PBXGroup;
+			children = (
+				F4B808AA2938752F0049B6EB /* test.01 */,
+			);
+			path = 12;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -655,6 +670,7 @@
 				F480EF802922C657008584FB /* Scanner.cc in Sources */,
 				F4B53B412932AB8C0023B3AB /* Emitter.cc in Sources */,
 				F480EF812922C657008584FB /* RegisterFile.cc in Sources */,
+				F4B808A829385D550049B6EB /* Types.cc in Sources */,
 				F480EF7E2922C657008584FB /* A8Emitter.cc in Sources */,
 				F480EF512922BB66008584FB /* ArgParser.cc in Sources */,
 				F480EF7F2922C657008584FB /* Token.cc in Sources */,

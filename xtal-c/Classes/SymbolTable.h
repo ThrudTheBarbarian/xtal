@@ -13,6 +13,7 @@
 
 #include "properties.h"
 #include "macros.h"
+#include "sharedDefines.h"
 
 #include "Symbol.h"
 
@@ -33,11 +34,11 @@ class SymbolTable
 		|* Help out the property definition
 		\********************************************************************/
 		typedef std::vector<Symbol> SymTable;
-	
+				
 	/************************************************************************\
     |* Properties
     \************************************************************************/
-    GET(SymTable, table);			// The actual symbol table
+    GET(SymTable, table);						// The actual symbol table
     
     private:
 
@@ -58,7 +59,7 @@ class SymbolTable
         /********************************************************************\
         |* Add a global variable, and return the new slot position
         \********************************************************************/
-		int add(const String& name);
+		int add(const String& name, int pType, StructuralType sType);
 		
         /**********************************************************************\
         |* This method returns the default global instance.          \**********************************************************************/

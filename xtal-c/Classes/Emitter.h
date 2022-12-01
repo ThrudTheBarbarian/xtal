@@ -103,9 +103,9 @@ class Emitter
         virtual void functionPostamble(void);
 
         /*********************************************************************\
-        |* Generate a global symbol
+        |* Generate a global symbol by reference to the symbol table index
         \*********************************************************************/
-        virtual void genSymbol(const String& name) = 0;
+        virtual void genSymbol(int symIdx) = 0;
 
         /*********************************************************************\
         |* Append text to one of the body parts

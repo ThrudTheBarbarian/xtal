@@ -1,0 +1,12 @@
+void main()
+	[
+	s32 val;
+	val = 3;
+	
+	u8 i;
+	for (i=0; i<10; i = i + 1)
+		[
+		val = val - 1;
+		print val;
+		]
+	]

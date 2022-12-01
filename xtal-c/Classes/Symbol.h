@@ -11,8 +11,9 @@
 #include <cstdio>
 #include <string>
 
-#include "properties.h"
 #include "macros.h"
+#include "properties.h"
+#include "sharedDefines.h"
 
 class Symbol
 	{
@@ -25,8 +26,10 @@ class Symbol
 	/************************************************************************\
     |* Properties
     \************************************************************************/
-    GETSET(String, name, Name);			// Symbol name
-    
+    GETSET(String, name, Name);				// Symbol name
+	GETSET(int, pType, PType);				// Primitive type for symbol
+	GETSET(StructuralType, sType, SType);	// Structural type for symbol
+	
     private:
         
     public:
@@ -34,7 +37,7 @@ class Symbol
         |* Constructors and Destructor
         \********************************************************************/
         explicit Symbol();
-		explicit Symbol(const String& name);
+		explicit Symbol(const String& name, int pType, StructuralType sType);
 		
         /********************************************************************\
         |* 

@@ -53,9 +53,9 @@ int SymbolTable::find(const String& name)
 /****************************************************************************\
 |* Add a global variable to the symbol table
 \****************************************************************************/
-int SymbolTable::add(const String& name)
+int SymbolTable::add(const String& name,  int pType, StructuralType sType)
 	{
-	Symbol s(name);
+	Symbol s(name, pType, sType);
 	_table.push_back(s);
 	return (int)(_table.size()-1);
 	}

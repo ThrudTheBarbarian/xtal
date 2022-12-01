@@ -11,8 +11,10 @@
 #include <cstdio>
 #include <string>
 
-#include "properties.h"
 #include "macros.h"
+#include "properties.h"
+#include "sharedDefines.h"
+
 
 class ASTNode
 	{
@@ -49,10 +51,11 @@ class ASTNode
 			A_IF,				// If statement node
 			A_WHILE,			// While statement node
 			A_FUNCTION,			// Function node
+			A_WIDEN,			// Widen the type
 			
-			A_MAXVAL			// Last entry
+			A_MAXVAL			// Last normal entry
 			};
-	
+				
 	typedef union
 		{
 		int		intValue;		// For A_INTLIT, Value of the integer
@@ -67,7 +70,7 @@ class ASTNode
     GETSET(ASTNode *, mid, Mid);		// Middle child node
     GETSET(ASTNode *, right, Right);	// Right child node
     GETSET(Value, value, Value);		// Type-specific value
-										
+	GETSET(int, type, Type);			// Primitive type for this node
     
     private:
         
@@ -75,21 +78,22 @@ class ASTNode
         /*********************************************************************\
         |* Generic constructor
         \*********************************************************************/
-        explicit ASTNode(int op         = A_NONE,
-						 ASTNode *left  = nullptr,
-						 ASTNode *mid   = nullptr,
-						 ASTNode *right = nullptr,
-						 int intValue   = 0);
+        explicit ASTNode(int op         	= A_NONE,
+						 int type			= PT_NONE,
+						 ASTNode *left  	= nullptr,
+						 ASTNode *mid   	= nullptr,
+						 ASTNode *right 	= nullptr,
+						 int intValue   	= 0);
 		
         /*********************************************************************\
         |* Leaf-node constructor
         \*********************************************************************/
-		explicit ASTNode(int op, int intValue);
+		explicit ASTNode(int op, int type, int intValue);
 		
         /*********************************************************************\
         |* Unary-node constructor
         \*********************************************************************/
-		explicit ASTNode(int op, ASTNode *left, int intValue);
+		explicit ASTNode(int op, int type, ASTNode *left, int value);
 		
         /*********************************************************************\
         |* Destructor

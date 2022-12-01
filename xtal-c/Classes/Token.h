@@ -54,7 +54,8 @@ class Token
 			T_FOR,				// Start a FOR loop
 
 			T_VOID, 			// Void declaration
-			T_INT,				// Integer declaration
+			T_S32,				// signed 32-bit value
+			T_U8,				// unsigned 8-bit value
 			
 			T_MAXVAL,			// Max token value
 			};

@@ -29,11 +29,17 @@ static std::map<int, ASTInfo> _info;
 /*****************************************************************************\
 |* Constructor: generic
 \*****************************************************************************/
-ASTNode::ASTNode(int op, ASTNode *left, ASTNode *mid, ASTNode *right, int iVal)
+ASTNode::ASTNode(int op,
+				 int type,
+				 ASTNode *left,
+				 ASTNode *mid,
+				 ASTNode *right,
+				 int iVal)
 		:_op(op)
 		,_left(left)
 		,_mid(mid)
 		,_right(right)
+		,_type(type)
 	{
 	_value.intValue = iVal;		// Note this sets identifier also
 	}
@@ -41,11 +47,12 @@ ASTNode::ASTNode(int op, ASTNode *left, ASTNode *mid, ASTNode *right, int iVal)
 /*****************************************************************************\
 |* Constructor : leaf node
 \*****************************************************************************/
-ASTNode::ASTNode(int op, int intValue)
+ASTNode::ASTNode(int op, int type, int intValue)
 		:_op(op)
 		,_left(nullptr)
 		,_mid(nullptr)
 		,_right(nullptr)
+		,_type(type)
 	{
 	_value.intValue = intValue;		// Note this sets identifier also
 	}
@@ -53,11 +60,12 @@ ASTNode::ASTNode(int op, int intValue)
 /*****************************************************************************\
 |* Constructor : unary node
 \*****************************************************************************/
-ASTNode::ASTNode(int op, ASTNode *left, int intValue)
+ASTNode::ASTNode(int op, int type, ASTNode *left, int intValue)
 		:_op(op)
 		,_left(left)
 		,_mid(nullptr)
 		,_right(nullptr)
+		,_type(type)
 	{
 	_value.intValue = intValue;		// Note this sets identifier also
 	}

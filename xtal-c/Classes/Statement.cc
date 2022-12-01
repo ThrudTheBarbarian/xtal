@@ -13,6 +13,7 @@
 #include "Statement.h"
 #include "SymbolTable.h"
 #include "Token.h"
+#include "Types.h"
 
 #define IS_OP(x) (tree->op() == ASTNode::x)
 
@@ -55,7 +56,12 @@ ASTNode * Statement::compoundStatement(Token& token, int& line)
 			if (left == nullptr)
 				left = tree;
 			else
-				left = new ASTNode(ASTNode::A_GLUE, left, nullptr, tree, 0);
+				left = new ASTNode(ASTNode::A_GLUE,
+								   PT_NONE,
+								   left,
+								   nullptr,
+								   tree,
+								   0);
 			}
 			
         /********************************************************************\
@@ -82,7 +88,7 @@ ASTNode * Statement::functionDeclaration(Token& token, int& line)
 	_identifier(token, line);
 
 	// Add it to the global symbol table
-	int nameSlot = SYMTAB->add(_scanner->text());
+	int nameSlot = SYMTAB->add(_scanner->text(), PT_VOID, ST_FUNCTION);
 
 	// Parentheses
 	_lparen(token, line);
@@ -92,7 +98,7 @@ ASTNode * Statement::functionDeclaration(Token& token, int& line)
 	ASTNode *tree = compoundStatement(token, line);
 	
 	// Return the AST node representing a function wrapping the body
-	return new ASTNode(ASTNode::A_FUNCTION, tree, nameSlot);
+	return new ASTNode(ASTNode::A_FUNCTION, PT_VOID, tree, nameSlot);
 	}
 
 #pragma mark - Private methods : matching
@@ -174,7 +180,8 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 			tree = _print(token, line);
 			break;
 
-		case Token::T_INT:
+		case Token::T_U8:
+		case Token::T_S32:
 			_varDeclaration(token, line);
 			tree = nullptr;
 			break;
@@ -213,10 +220,19 @@ ASTNode * Statement::_print(Token& token, int& line)
 	_match(token, Token::T_PRINT, line, "print");
 	
 	// Parse the following expression and generate the assembly code
-	ASTNode *node = Expression::binary(*_scanner, token, line, 0);
-	ASTNode *tree = new ASTNode(ASTNode::A_PRINT, node, 0);
-
-	return tree;
+	ASTNode *tree = Expression::binary(*_scanner, token, line, 0);
+	
+	int leftType 	= PT_S32;
+	int rightType	= tree->type();
+	if (!Types::areCompatible(leftType, rightType))
+		FATAL(ERR_TYPE, "Types incompatible at line %d", line);
+	
+	// Widen the tree if required
+	if (rightType)
+		tree = new ASTNode(rightType, PT_S32, tree, 0);
+	
+	// Make a 'print' AST node
+	return new ASTNode(ASTNode::A_PRINT, PT_S32, tree, 0);
 	}
 
 /****************************************************************************\
@@ -235,7 +251,8 @@ ASTNode * Statement::_assignment(Token& token, int& line)
 		FATAL(ERR_PARSE, "Undeclared variable '%s' on line %d",
 			_scanner->text().c_str(), line);
 
-	ASTNode *right = new ASTNode(ASTNode::A_LVIDENT, idx);
+	Symbol sym = SYMTAB->table()[idx];
+	ASTNode *right = new ASTNode(ASTNode::A_LVIDENT, sym.pType(), idx);
 
 	// Ensure we have an equals sign
 	_match(token, Token::T_ASSIGN, line, "=");
@@ -243,8 +260,24 @@ ASTNode * Statement::_assignment(Token& token, int& line)
 	// Parse the following expression
 	ASTNode *left = Expression::binary(*_scanner, token, line, 0);
 
+	// Ensure the types are compatible
+	int leftType 	= left->type();
+	int rightType	= right->type();
+	if (!Types::areCompatible(leftType, rightType, true))
+		FATAL(ERR_TYPE, "Types incompatible at line %d", line);
+
+	// Widen the left if required
+	if (leftType)
+		left = new ASTNode(leftType, right->type(), left, 0);
+
 	// Make an assignment AST tree
-	ASTNode *tree = new ASTNode(ASTNode::A_ASSIGN, left, nullptr, right, 0);
+	// FIXME: Ought this always be PT_S32 ?
+	ASTNode *tree = new ASTNode(ASTNode::A_ASSIGN,
+								PT_S32,
+								left,
+								nullptr,
+								right,
+								0);
 
 	return tree;
 	}
@@ -282,7 +315,7 @@ ASTNode * Statement::_if(Token& token, int& line)
 		}
 	
 	// Build and return the AST for this entire IF statement
-	return new ASTNode(ASTNode::A_IF, condAST, trueAST, falseAST, 0);
+	return new ASTNode(ASTNode::A_IF, PT_NONE, condAST, trueAST, falseAST, 0);
 	}
 
 /****************************************************************************\
@@ -308,7 +341,7 @@ ASTNode * Statement::_while(Token& token, int& line)
 	ASTNode *bodyAST = compoundStatement(token, line);
 		
 	// Build and return the AST for this entire IF statement
-	return new ASTNode(ASTNode::A_WHILE, condAST, nullptr, bodyAST, 0);
+	return new ASTNode(ASTNode::A_WHILE, PT_NONE, condAST, nullptr, bodyAST, 0);
 	}
 
 /****************************************************************************\
@@ -340,16 +373,55 @@ ASTNode * Statement::_for(Token& token, int& line)
 	ASTNode *bodyAST = compoundStatement(token, line);
 	
 	// FIXME: For now all 4 sub-trees have to be non-null.
-	tree = new ASTNode(ASTNode::A_GLUE, bodyAST, nullptr, postOpAST, 0);
+	tree = new ASTNode(ASTNode::A_GLUE,
+								PT_NONE,
+								bodyAST,
+								nullptr,
+								postOpAST,
+								0);
 	
 	// Make a WHILE loop with the condition and this new body
-	tree = new ASTNode(ASTNode::A_WHILE, condAST, nullptr, tree, 0);
+	tree = new ASTNode(ASTNode::A_WHILE,
+								PT_NONE,
+								condAST,
+								nullptr,
+								tree,
+								0);
 	
 	// And glue the pre-op to the A_WHILE
-	return new ASTNode(ASTNode::A_GLUE, preOpAST, nullptr, tree, 0);
+	return new ASTNode(ASTNode::A_GLUE,
+								PT_NONE,
+								preOpAST,
+								nullptr,
+								tree,
+								0);
 	}
 
 #pragma mark - Private methods : declarations
+
+int Statement::_parseType(Token& token, int& line)
+	{
+	int type = PT_NONE;
+	
+	switch (token.token())
+		{
+		case Token::T_S32:
+			type = PT_S32;
+			break;
+		
+		case Token::T_U8:
+			type = PT_U8;
+			break;
+		
+		case Token::T_VOID:
+			type = PT_VOID;
+			break;
+		
+		default:
+			FATAL(ERR_PARSE, "Cannot determing type at line %d\n", line);
+		}
+	return type;
+	}
 
 /****************************************************************************\
 |* Private Method: process a variable declaration. Ensure we have a declarator
@@ -358,17 +430,20 @@ ASTNode * Statement::_for(Token& token, int& line)
 \****************************************************************************/
 void Statement::_varDeclaration(Token& token, int& line)
 	{
-	// Looking for an integer token
-	_match(token, Token::T_INT, line, "s32");
+	// Fetch which type of primitive type we're dealing with
+	int pType = _parseType(token, line);
+	
+	// Scan the next token
+	_scanner->scan(token, line);
 
 	// Check we have an identifier
 	_identifier(token, line);
 
 	// Add it to the global symbol table
-	SYMTAB->add(_scanner->text());
+	int symIdx = SYMTAB->add(_scanner->text(), pType, ST_VARIABLE);
 
 	// Tell the emitter to reserve space for our variable
-	_emitter->genSymbol(_scanner->text());
+	_emitter->genSymbol(symIdx);
 
 	// Match the following semi-colon and stop if we're out of tokens
 	_semicolon(token, line);

@@ -19,6 +19,7 @@
 class ASTNode;
 class RegisterFile;
 class Register;
+class Symbol;
 
 class A8Emitter : public Emitter
 	{
@@ -37,12 +38,12 @@ class A8Emitter : public Emitter
 		/*********************************************************************\
         |* Fetch a global var
         \*********************************************************************/
-        Register _cgLoadGlobal(String name);
+        Register _cgLoadGlobal(const Symbol& symbol);
         
 		/*********************************************************************\
         |* Store a global var
         \*********************************************************************/
-        Register _cgStoreGlobal(Register& reg, String name);
+        Register _cgStoreGlobal(Register& reg, const Symbol& symbol);
         
 		/*********************************************************************\
         |* Add 2 registers
@@ -119,6 +120,16 @@ class A8Emitter : public Emitter
         \*********************************************************************/
         void _cgLabel(String label);
         
+		/*********************************************************************\
+        |* Widen a register
+        \*********************************************************************/
+        void _cgWiden(Register& reg, int oldWidth, int newWidth);
+        
+ 			
+		/*********************************************************************\
+        |* Ensure two registers are the same size.
+		\*********************************************************************/
+		void _cgSameSize(Register &r1, Register& r2);
  			
 		/*********************************************************************\
         |* Generate an IF statement AST.
@@ -166,9 +177,9 @@ class A8Emitter : public Emitter
 					  String label);
 
         /*********************************************************************\
-        |* Generate a global symbol
+        |* Generate a global symbol by reference to the symbol table index
         \*********************************************************************/
-        virtual void genSymbol(const String& name);
+        virtual void genSymbol(int symIdx);
 	};
 
 #endif /* ! A8Emitter_h */

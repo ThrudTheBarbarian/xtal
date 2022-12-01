@@ -103,6 +103,11 @@ class Statement
         \********************************************************************/
         ASTNode * _singleStatement(Token& token, int& line);
 
+        /********************************************************************\
+        |* Parse a given type from the token
+        \********************************************************************/
+        int _parseType(Token& token, int& line);
+
     public:
         /********************************************************************\
         |* Constructors and Destructor
