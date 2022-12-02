@@ -96,6 +96,20 @@ r15	= $fc
 ;/*************************************************************************\
 ;|* Type: Basic operation
 ;|*
+;|* Clear 1 bytes of memory, the address pointed to by the argument
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : Address of first memory location
+;\*************************************************************************/
+.macro _clr8
+	LDA #0
+	STA %1
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Basic operation
+;|*
 ;|* Clear 2 bytes of memory, the address pointed to by the argument, and the
 ;|* subsequent address
 ;|*
@@ -527,6 +541,29 @@ r15	= $fc
 ;/*************************************************************************\
 ;|* Type: Shift operation
 ;|*
+;|* Perform an arithmetic shift left on the 8 bit number at location %1
+;|* and store the result at location %2. If %1 and %2 are the same then the
+;|* operation is applied directly to the memory otherwise it is done in the
+;|* accumulator
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : source address to read from
+;|*    %2 : destination address to write to
+;\*************************************************************************/
+.macro _asl8
+	.if (%1 != %2)
+		lda %1
+		asl a
+		sta %2
+	.else
+		asl %1
+	.endif
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Shift operation
+;|*
 ;|* Perform an arithmetic shift left on the 16 bit number at location %1
 ;|* and store the result at location %2. If %1 and %2 are the same then the
 ;|* operation is applied directly to the memory otherwise it is done in the
@@ -651,6 +688,29 @@ r15	= $fc
 	.endif
 .endmacro
 
+
+;/*************************************************************************\
+;|* Type: Shift operation
+;|*
+;|* Perform a logical shift right on the 8 bit number at location %1
+;|* and store the result at location %2. If %1 and %2 are the same then the
+;|* operation is applied directly to the memory otherwise it is done in the
+;|* accumulator
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : source address to read from
+;|*    %2 : destination address to write to
+;\*************************************************************************/
+.macro _lsr8
+	.if (%1 != %2)
+		lda %1
+		lsr a
+		sta %2
+	.else
+		lsr %1
+	.endif
+.endmacro
 
 ;/*************************************************************************\
 ;|* Type: Shift operation
@@ -1134,7 +1194,32 @@ dec0:
 ;|*    %2 : address of source operand #2
 ;|*    %3 : address of destination operand.
 ;\*************************************************************************/
-.macro _mulu16
+.macro _mul8u
+		_clr8 %3
+		ldx #8
+	loop:
+		_lsr8 %1,%1
+		bcc next
+		_add8u %2, %3, %3
+	next:
+		_asl8 %2, %2
+		dex
+		bne loop
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* calculate the 16 bit product of two 16 bit unsigned numbers. Any
+;|* overflow during calculation is lost. The value at %1 is destroyed
+;|*
+;|* Clobbers: A, X
+;|* Arguments:
+;|*    %1 : address of source operand #1
+;|*    %2 : address of source operand #2
+;|*    %3 : address of destination operand.
+;\*************************************************************************/
+.macro _mul16u
 		_clr16 %3
 		ldx #16
 	loop:
@@ -1168,16 +1253,16 @@ dec0:
 		php					; and store for later
 		
 		lda %1				; is num1 negative ?
-		bpl check2		; +ve, so nothing to do here
+		bpl check2			; +ve, so nothing to do here
 		_neg16 %1,%1		; convert to +ve
 	
 	check2:
 		lda %2				; is num2 negative
-		bpl doMul16		; +ve, so nothing to do here
+		bpl doMul16			; +ve, so nothing to do here
 		_neg16 %2,%2
 	
 	doMul16:
-		_mulu16 %1, %2, %3	; Do an unsigned multiply
+		_mul16u %1, %2, %3	; Do an unsigned multiply
 	
 		plp					; Pull the saved state
 		bpl done			; don't need to convert back to -ve
