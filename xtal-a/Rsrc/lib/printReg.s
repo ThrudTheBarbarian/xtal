@@ -14,7 +14,7 @@
 		bit f0+3				; check to see if the number is -ve
 		bpl notNegative			; if not, skip showing the '-'
 		lda #$2D				; a literal '-' sign
-		sta (ascii),y			; and place it at the start
+		sta ascii,y				; and place it at the start
 		iny						; bump the store-index
 		_neg32 f0,f0			; convert to a +ve number
 		
@@ -27,7 +27,7 @@
 		lda #0					; zero the accumulator
 	
 	doShift:
-		_asl32 f0,f0				; shift the bits left...
+		_asl32 f0,f0			; shift the bits left...
 		rol a					; into the accumulator
 		cmp #10					; and see if we are < 10
 		bcc lessThan10			; skip if so, else

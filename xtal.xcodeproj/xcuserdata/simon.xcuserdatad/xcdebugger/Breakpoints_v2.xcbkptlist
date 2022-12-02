@@ -14,10 +14,10 @@
             filePath = "xtal-a/Classes/Scanner.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1103"
-            endingLineNumber = "1103"
-            landmarkName = "Scanner::_handle6502(info, args, tokens, pass)"
-            landmarkType = "7">
+            startingLineNumber = "1051"
+            endingLineNumber = "1051"
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -103,48 +103,48 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "64F6AFDE-4FF0-4626-9A37-8FC34547211C"
-            shouldBeEnabled = "Yes"
+            uuid = "65EC9E40-AF4E-40D9-8C13-242DD911DA22"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "xtal-a/Classes/Scanner.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "223"
-            endingLineNumber = "223"
-            landmarkName = "Scanner::scan(tokens, pass)"
+            startingLineNumber = "1426"
+            endingLineNumber = "1426"
+            landmarkName = "Scanner::_hasLabel(s)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "EA9EA69A-1004-4726-ABAD-1513EED9C47D"
-            shouldBeEnabled = "Yes"
+            uuid = "36E6D55A-E5F6-4A71-847D-E2C5D9307CA6"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "xtal-a/Classes/Scanner.cc"
+            filePath = "xtal-a/Classes/ContextMgr.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "771"
-            endingLineNumber = "771"
-            landmarkName = "Scanner::_handleCall(info, extent, argString, tokens, pass, isCall)"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
+            landmarkName = "ContextMgr::addLabel(label, location)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "CB190544-1FF7-481E-8D0A-D63AA3D8895E"
+            uuid = "8E75227D-7155-4B1B-A1EF-9E2E28D9197C"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "xtal-a/Classes/Scanner.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "881"
-            endingLineNumber = "881"
-            landmarkName = "Scanner::_handleMove(info, extent, argString, tokens, pass)"
+            startingLineNumber = "1100"
+            endingLineNumber = "1100"
+            landmarkName = "Scanner::_handle6502(info, args, tokens, pass)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

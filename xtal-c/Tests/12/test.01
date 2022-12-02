@@ -1,12 +1,11 @@
 void main()
 	[
-	u8 val;
-	val = 3;
+	s32 a;
+	s32 b;
+	s32 c;
 	
-	u8 i;
-	for (i=0; i<10; i = i + 1)
-		[
-		val = val - 1;
-		print val;
-		]
+	a = 4294967295;
+	b = 1;
+	c = a - b;
+	print c;
 	]

@@ -234,6 +234,11 @@
 		F4B808A629385D550049B6EB /* Types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Types.h; path = Classes/Types.h; sourceTree = "<group>"; };
 		F4B808A729385D550049B6EB /* Types.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Types.cc; path = Classes/Types.cc; sourceTree = "<group>"; };
 		F4B808AA2938752F0049B6EB /* test.01 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.01; sourceTree = "<group>"; };
+		F4B808AB2939AB2E0049B6EB /* add8.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = add8.xt; sourceTree = "<group>"; };
+		F4B808AC2939AFA70049B6EB /* add32.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = add32.xt; sourceTree = "<group>"; };
+		F4B808AD2939B3040049B6EB /* add_mix.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = add_mix.xt; sourceTree = "<group>"; };
+		F4B808AE2939B3840049B6EB /* sub8.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = sub8.xt; sourceTree = "<group>"; };
+		F4B808AF2939B3EB0049B6EB /* sub32.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = sub32.xt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -538,6 +543,11 @@
 			isa = PBXGroup;
 			children = (
 				F4B808AA2938752F0049B6EB /* test.01 */,
+				F4B808AB2939AB2E0049B6EB /* add8.xt */,
+				F4B808AC2939AFA70049B6EB /* add32.xt */,
+				F4B808AD2939B3040049B6EB /* add_mix.xt */,
+				F4B808AE2939B3840049B6EB /* sub8.xt */,
+				F4B808AF2939B3EB0049B6EB /* sub32.xt */,
 			);
 			path = 12;
 			sourceTree = "<group>";

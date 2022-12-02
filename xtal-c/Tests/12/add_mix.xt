@@ -1,0 +1,16 @@
+void main()
+	[
+	s32 a;
+	u8 b;
+	s32 c;
+	
+	a = 1000;
+	b = 5;
+	c = a + b;
+
+	if (c != 1005)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	]

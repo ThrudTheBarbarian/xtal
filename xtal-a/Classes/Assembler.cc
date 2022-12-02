@@ -181,6 +181,7 @@ int Assembler::_run(std::string source)
 		{
 		fprintf(stderr, "\n=====\n\n");
 		scanner.engine().dumpVars();
+		fprintf(stderr, "\n=====\n\n%s\n", CTXMGR->labelValues().c_str());
 		fprintf(stderr, "\n=====\n\n");
 		}
 	

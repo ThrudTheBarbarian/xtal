@@ -933,7 +933,7 @@ int Scanner::_handleMove(Token::TokenInfo info,
 		
 		for (int i=0; i<extent; i++)
 			{
-			String arg	= toHexString(addr1-i, "$");
+			String arg	= toHexString(addr1+i, "$");
 			opInfo 		= Token::parsePrefix("lda");
 			_handle6502(opInfo, arg, tokens, pass);
 
@@ -1031,11 +1031,11 @@ int Scanner::_handleMove(Token::TokenInfo info,
 		
 		for (int i=0; i<extent; i++)
 			{
-			String arg	= toHexString(addr1+extent-1-i, "$");
+			String arg	= toHexString(addr1+i, "$");
 			opInfo 		= Token::parsePrefix("lda");
 			_handle6502(opInfo, arg, tokens, pass);
 
-			arg			= toHexString(addr2+extent-1-i, "$");
+			arg			= toHexString(addr2+i, "$");
 			opInfo 		= Token::parsePrefix("sta");
 			_handle6502(opInfo, arg, tokens, pass);
 			}
@@ -1097,19 +1097,17 @@ int Scanner::_handle6502(Token::TokenInfo info,
 		else
 			{
 			bool isJxx = (info.which == P_JMP) || (info.which == P_JSR);
-			e.eval(args);
-			if (isJxx || (e.result() > 0xFF))
+			int addr   = _evaluateLabel(args);
+			if (isJxx || (addr > 0xFF))
 				{
-				amode = A_ABSOLUTE;
-				int to	 = (int) e.result();
-						 
-				bytes[0] = (to	   ) & 0xFF;
-				bytes[1] = (to >> 8) & 0xFF;
+				amode 		= A_ABSOLUTE;
+				bytes[0] 	= (addr	   )  & 0xFF;
+				bytes[1] 	= (addr >> 8) & 0xFF;
 				}
 			else
 				{
 				amode = A_ZEROPAGE;
-				bytes[0] = e.result() & 0xFF;
+				bytes[0] = addr & 0xFF;
 				}
 			}
 		}
@@ -1118,57 +1116,57 @@ int Scanner::_handle6502(Token::TokenInfo info,
 		// Handle indirect addressing
 		if (endsWith(args, ",x)", false))
 			{
-			e.eval(args.substr(1, args.length()-4));
-			bytes[0] 	= e.result() & 0xFF;
+			int addr 	= _evaluateLabel(args.substr(1, args.length()-4));
+			bytes[0] 	= addr & 0xFF;
 			amode 		= A_XINDEX_INDIRECT;
 			}
 		else if (endsWith(args, "),y", false))
 			{
-			e.eval(args.substr(1, args.length()-4));
-			bytes[0] 	= e.result() & 0xFF;
+			int addr 	= _evaluateLabel(args.substr(1, args.length()-4));
+			bytes[0] 	= addr & 0xFF;
 			amode 		= A_INDIRECT_YINDEX;
 			}
 		else
 			{
-			e.eval(args.substr(1, args.length()-2));
-			bytes[0] 	= (e.result())	    & 0xFF;
-			bytes[1] 	= (e.result() >> 8) & 0xFF;
+			int addr 	= _evaluateLabel(args.substr(1, args.length()-2));
+			bytes[0] 	= (addr	    ) & 0xFF;
+			bytes[1] 	= (addr >> 8) & 0xFF;
 			amode 		= A_INDIRECT;
 			}
 		}
 	else if (endsWith(args, ",x", false))
 		{
 		String arg = args.substr(0, args.length()-2);
-		e.eval(arg);
-		if (e.result() <= 0xFF)
+		int addr   = _evaluateLabel(arg);
+		if (addr <= 0xFF)
 			{
-			bytes[0] 	= e.result() & 0xFF;
+			bytes[0] 	= addr & 0xFF;
 			amode 		= A_ZEROPAGE_XINDEX;
 			}
 		else
 			{
-			bytes[0] 	= (e.result())		& 0xFF;
-			bytes[1] 	= (e.result() >> 8) & 0xFF;
+			bytes[0] 	= (addr     ) & 0xFF;
+			bytes[1] 	= (addr >> 8) & 0xFF;
 			amode 		= A_ABSOLUTE_XINDEX;
 			}
 		}
 	else if (endsWith(args, ",y", false))
 		{
 		String arg = args.substr(0, args.length()-2);
-		e.eval(arg);
-		if ((pass == 2) && e.result() == UNDEFINED_VALUE)
+		int addr   = _evaluateLabel(arg);
+		if ((pass == 2) && addr == UNDEFINED_VALUE)
 			FATAL(ERR_PARSE, "Undefined symbol '%s'\n%s",
 				arg.c_str(), CTXMGR->location().c_str());
 				
-		if (e.result() <= 0xFF)
+		if (addr <= 0xFF)
 			{
-			bytes[0] 	= e.result() & 0xFF;
+			bytes[0] 	= addr & 0xFF;
 			amode = A_ZEROPAGE_YINDEX;
 			}
 		else
 			{
-			bytes[0] 	= (e.result())		& 0xFF;
-			bytes[1] 	= (e.result() >> 8) & 0xFF;
+			bytes[0] 	= (addr     ) & 0xFF;
+			bytes[1] 	= (addr >> 8) & 0xFF;
 			amode = A_ABSOLUTE_YINDEX;
 			}
 		}
