@@ -141,6 +141,25 @@ r15	= $fc
 ;|*    %1 : source address
 ;|*    %2 : destination address
 ;\*************************************************************************/
+.macro _xfer8
+	.if (%1 != %2)
+		lda %1
+		sta %2
+	.endif
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Basic operation
+;|*
+;|* Transfer two bytes from one memory location to another. The order in
+;|* which they are moved depends on the relative positions of src and dst.
+;|* If src and dst are the same, then no code is generated
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : source address
+;|*    %2 : destination address
+;\*************************************************************************/
 .macro _xfer16
 	.if (%1 != %2)
 		.if (%1 > %2)
@@ -842,6 +861,31 @@ dec0:
 ;/*************************************************************************\
 ;|* Type: Arithmetic operation
 ;|*
+;|* add the 8-bit unsigned value at location %1 to the 8-bit unsigned value
+;|* at %2, storing the result in %3
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : address of source operand #1
+;|*    %2 : address of source operand #2
+;|*    %3 : address of destination operand
+;\*************************************************************************/
+.macro _add8u
+	.if %1 != %2
+		clc
+        lda %1
+       	adc %2
+       	sta %3
+	.else
+        lda %1
+       	asl a
+       	sta %3
+	.endif
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
 ;|* add the 16-bit value at location %1 to the 16-bit value at %2, storing
 ;|* the result in %3
 ;|*
@@ -898,6 +942,30 @@ dec0:
 	.endif
 .endmacro
 
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* subtract the 8-bit unsigned value at location %1 from the 8-bit unsigned
+;|* value at %2, storing the result in %3
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : address of source operand #1
+;|*    %2 : address of source operand #2
+;|*    %3 : address of destination operand
+;\*************************************************************************/
+.macro _sub8u
+	.if %1 != %2
+		sec
+        lda %1
+       	sbc %2
+       	sta %3
+	.else
+		lda #0
+		sta %3
+	.endif
+.endmacro
 
 ;/*************************************************************************\
 ;|* Type: Arithmetic operation
@@ -1379,6 +1447,22 @@ sdv8:
 		clc					; set status = no error
 done:
 
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Comparison operation
+;|*
+;|* Compare an 8-bit quantity at %1 to another at %2.
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : location of value 1
+;|*    %2 : location of value 2
+;\*************************************************************************/
+.macro _cmp8
+		lda %1
+		cmp %2
+	done:
 .endmacro
 
 ;/*************************************************************************\

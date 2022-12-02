@@ -61,7 +61,10 @@ void Scanner::reset(int to)
 	_pageIndex[2] 	= 0;
 	_pageIndex[3] 	= 0;
 	_listing		= "";
-
+	
+	_regSize.clear();
+	_regSigned.clear();
+	
 	ContextMgr::sharedInstance()->reset();
 	
 	for (Elements<String, Function> kv : _functions)
@@ -674,6 +677,13 @@ int Scanner::_handleMath(String word,
 	if (!IS_REG(t3))
 		FATAL(ERR_META, "Argument 3 to %s must be register\n%s",
 			  op.c_str(), CTXMGR->location().c_str());
+	
+	/*************************************************************************\
+	|* Infer any new register sizes
+	\*************************************************************************/
+	_regSize[arg1] = extent;
+	_regSize[arg2] = extent;
+	_regSize[arg3] = extent;
 
 	/*************************************************************************\
 	|* Make sure any registers that need banks remapped, have that happen
@@ -757,13 +767,42 @@ int Scanner::_handleCall(Token::TokenInfo info,
 
 	/*************************************************************************\
 	|* If we have arguments then move them over to the fnx locations.
-	|* This is just a convenience interface
 	\*************************************************************************/
 	if (args.size() > 1)
 		{
+        /********************************************************************\
+        |* Add a token into the block
+        \********************************************************************/
 		for (int i=1; i<args.size(); i++)
 			{
-			snprintf(buf, 1024, "_xfer32 %s,f%d\n", args[i].c_str(), i-1);
+			/****************************************************************\
+			|* Look up the registers being passed, and see if we need to sign
+			|* or zero-extend them
+			\****************************************************************/
+			switch (_regSize[args[i]])
+				{
+				case 4:
+					snprintf(buf, 1024, "_xfer32 %s,f%d\n",
+										args[i].c_str(), i-1);
+					break;
+					
+				case 2:
+					snprintf(buf, 1024, "_xfer16 %s,f%d\n"
+										"\tlda #$0\n"
+										"\tsta f%d+2\n"
+										"\tsta f%d+3\n",
+										args[i].c_str(), i-1, i-1, i-1);
+					break;
+				case 1:
+					snprintf(buf, 1024, "lda %s\n"
+										"\tsta f%d\n"
+										"\tlda #$0\n"
+										"\tsta f%d+1\n"
+										"\tsta f%d+2\n"
+										"\tsta f%d+3\n",
+										args[i].c_str(), i-1, i-1, i-1, i-1);
+					break;
+				}
 			assembly.push_back(buf);
 			}
 		}
@@ -847,8 +886,12 @@ int Scanner::_handleMove(Token::TokenInfo info,
 	Token::TokenInfo opInfo;
 	if (IS_REG(t1) && IS_REG(t2))
 		{
+		// Update the current register size
+		_regSize[arg1] = extent;
+		_regSize[arg2] = extent;
+	
         /*********************************************************************\
-        |* Copy the correct number of bytes across. Bytes are right-justified
+        |* Copy the correct number of bytes across. Bytes are left-justified
         |* in the 4-byte range
         \*********************************************************************/
 		int base1	= (t1 == REG_MAIN)	? REGMAIN_BASE
@@ -858,15 +901,15 @@ int Scanner::_handleMove(Token::TokenInfo info,
 					: (t2 == REG_FN)	? REGFN_BASE
 					:					  REGSCRATCH_BASE;
 					
-		int addr1	= base1 + ((v1 % 16) * 4) + 3;
-		int addr2	= base2 + ((v2 % 16) * 4) + 3;
+		int addr1	= base1 + ((v1 % 16) * 4);
+		int addr2	= base2 + ((v2 % 16) * 4);
 		for (int i=0; i<extent; i++)
 			{
-			String arg	= toHexString(addr1-i, "$");
+			String arg	= toHexString(addr1+i, "$");
 			opInfo 		= Token::parsePrefix("lda");
 			_handle6502(opInfo, arg, tokens, pass);
 
-			arg			= toHexString(addr2-i, "$");
+			arg			= toHexString(addr2+i, "$");
 			opInfo 		= Token::parsePrefix("sta");
 			_handle6502(opInfo, arg, tokens, pass);
 			}
@@ -877,12 +920,15 @@ int Scanner::_handleMove(Token::TokenInfo info,
 	\*************************************************************************/
 	else if (IS_REG(t1) && (t2 == ABSOLUTE))
 		{
+		// Update the current register size
+		_regSize[arg1] = extent;
+		
 		int base1	= (t1 == REG_MAIN)	? REGMAIN_BASE
 					: (t1 == REG_FN)	? REGFN_BASE
 					:					  REGSCRATCH_BASE;
 	
 		_engine.eval(arg2);
-		int addr1	= base1 + ((v1 % 16) * 4) + 3;
+		int addr1	= base1 + ((v1 % 16) * 4);
 		int addr2 	= (int) _engine.result();
 		
 		for (int i=0; i<extent; i++)
@@ -891,7 +937,7 @@ int Scanner::_handleMove(Token::TokenInfo info,
 			opInfo 		= Token::parsePrefix("lda");
 			_handle6502(opInfo, arg, tokens, pass);
 
-			arg			= toHexString(addr2+extent-1-i, "$");
+			arg			= toHexString(addr2+i, "$");
 			opInfo 		= Token::parsePrefix("sta");
 			_handle6502(opInfo, arg, tokens, pass);
 			}
@@ -902,6 +948,9 @@ int Scanner::_handleMove(Token::TokenInfo info,
 	\*************************************************************************/
 	else if ((t1 == IMMEDIATE) && (IS_REG(t2)))
 		{
+		// Update the current register size
+		_regSize[arg2] = extent;
+		
 		_engine.eval(arg1.substr(1));		// Trim off the preceding #
 		int64_t value	= _engine.result();
 		
@@ -946,21 +995,24 @@ int Scanner::_handleMove(Token::TokenInfo info,
 	\*************************************************************************/
 	else if ((t1 == ABSOLUTE) && (IS_REG(t2)))
 		{
+		// Update the current register size
+		_regSize[arg2] = extent;
+
 		int base2	= (t2 == REG_MAIN)	? REGMAIN_BASE
 					: (t2 == REG_FN)	? REGFN_BASE
 					:					  REGSCRATCH_BASE;
 	
 		_engine.eval(arg1);
 		int addr1 	= (int) _engine.result();
-		int addr2	= base2 + ((v2 % 16) * 4) + 3;
+		int addr2	= base2 + ((v2 % 16) * 4);
 		
 		for (int i=0; i<extent; i++)
 			{
-			String arg	= toHexString(addr1+extent-1-i, "$");
+			String arg	= toHexString(addr1+i, "$");
 			opInfo 		= Token::parsePrefix("lda");
 			_handle6502(opInfo, arg, tokens, pass);
 
-			arg			= toHexString(addr2-i, "$");
+			arg			= toHexString(addr2+i, "$");
 			opInfo 		= Token::parsePrefix("sta");
 			_handle6502(opInfo, arg, tokens, pass);
 			}
@@ -1359,6 +1411,10 @@ Token Scanner::_hasLabel(String& s)
 		{
 		label += s[idx];
 		idx ++;
+		
+		// In case there's no ' ' after the ':'
+		if (label.back() == ':')
+			break;
 		}
 	
 	/*************************************************************************\

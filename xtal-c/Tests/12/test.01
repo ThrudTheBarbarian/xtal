@@ -1,6 +1,6 @@
 void main()
 	[
-	s32 val;
+	u8 val;
 	val = 3;
 	
 	u8 i;

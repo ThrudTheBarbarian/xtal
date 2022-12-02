@@ -39,8 +39,10 @@ class Scanner
 			IMMEDIATE
 			} TargetType;
  
-	typedef std::vector<Token> TokenList;
-	typedef std::vector<bool> BoolList;
+	typedef std::vector<Token> 		TokenList;
+	typedef std::vector<bool> 		BoolList;
+	typedef std::map<String, int> 	IntMap;
+	typedef std::map<String, bool>	BoolMap;
 	
 	static const int PAGEIDX0			= 0x80;
 	static const int PAGEIDX1			= 0x81;
@@ -62,9 +64,16 @@ class Scanner
 	GET(String, listing);						// String form of output
 	GET(int, labelId);							// Current numeric label id
 	GETSET(bool, showListing, ShowListing);		// Show internal listing
+	
     private:
 		Engine& 	_engine;			// YACC-based expression-parsing engine
 		int			_pageIndex[4];		// Current 'page' for banked addresses
+
+        /*********************************************************************\
+        |* Infer the types and sizes of the registers being used
+        \*********************************************************************/
+		IntMap 		_regSize;			// Map of byte-count to register name
+		BoolMap		_regSigned;			// true == signed arithmetic
 		
         /*********************************************************************\
         |* Get the next character in the input stream
