@@ -10,6 +10,8 @@
 #include "Symbol.h"
 #include "Token.h"
 
+static Token _rejected;				// Token we scanned and no longer need
+
 /*****************************************************************************\
 |* Constructor
 \*****************************************************************************/
@@ -17,6 +19,7 @@ Scanner::Scanner(String src)
 		:_src(src)
 		,_at(0)
 	{
+	_rejected.setValid(false);
 	}
 
 /*****************************************************************************\
@@ -24,6 +27,19 @@ Scanner::Scanner(String src)
 \*****************************************************************************/
 int Scanner::scan(Token& token, int& line)
 	{
+	/*************************************************************************\
+    |* First see if we have a previously-rejected token, and if so return it
+    \*************************************************************************/
+	if (_rejected.valid())
+		{
+		token = _rejected;
+		_rejected.setValid(false);
+		return SCAN_MORE;
+		}
+	
+	/*************************************************************************\
+    |* Carry on with the normal parsing
+    \*************************************************************************/
 	int c = _skipWhitespace(line);
 	
 	switch (c)
@@ -138,9 +154,22 @@ int Scanner::scan(Token& token, int& line)
 		}
 	return SCAN_MORE;
 	}
-	
-#pragma mark - Private Methods
 
+
+/*****************************************************************************\
+|* Reject a token
+\*****************************************************************************/
+void Scanner::reject(Token &t)
+	{
+	if (_rejected.valid())
+		FATAL(ERR_TOKEN, "Can't reject a token twice!");
+		
+	_rejected = t;
+	_rejected.setValid(true);
+	}
+
+#pragma mark - Private Methods
+	
 /*****************************************************************************\
 |* Are we at the end of the stream
 \*****************************************************************************/

@@ -36,17 +36,20 @@ class Expression
         /*********************************************************************\
         |* Primary expression resolution
         \*********************************************************************/
-        static ASTNode * primary(Scanner &scanner,
-								   Token &token,
-								   int &line);
+        static ASTNode * primary(Scanner &scanner, Token &token, int &line);
 
         /*********************************************************************\
         |* Binary expression resolution using Pratt precedence
         \*********************************************************************/
         static ASTNode * binary(Scanner &scanner,
-								  Token &token,
-								  int &line,
-								  int previousPrecedence);
+								Token &token,
+								int &line,
+								int previousPrecedence);
+		
+        /*********************************************************************\
+        |* Function call recognition
+        \*********************************************************************/
+        static ASTNode * funcCall(Scanner &scanner, Token &token, int &line);
 		
 	};
 

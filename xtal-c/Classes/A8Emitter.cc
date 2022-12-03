@@ -122,7 +122,12 @@ Register A8Emitter::emit(ASTNode *node,
 		case ASTNode::A_WIDEN:
 			//_cgWiden(left, node->left()->type(), node->type());
 			return left;
-		
+		case ASTNode::A_RETURN:
+			_cgReturn(left, SYMTAB->functionId());
+			return left;
+		case ASTNode::A_FUNCCALL:
+			return _cgCall(left, node->value().identifier);
+			
 		default:
 			FATAL(ERR_AST_UNKNOWN_OPERATOR, "Unknown AST operator %d", node->op());
 		}
@@ -771,4 +776,13 @@ Register A8Emitter::_cgWhileAST(ASTNode *node)
 		
 	_cgPopContext();
 	return none;
+	}
+
+/*****************************************************************************\
+|* Call a function
+\*****************************************************************************/
+Register A8Emitter::_cgCall(Register r1, int identifier)
+	{
+	Register r = _regs->allocate(r1.type());
+	
 	}

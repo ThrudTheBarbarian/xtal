@@ -59,3 +59,13 @@ int SymbolTable::add(const String& name,  int pType, StructuralType sType)
 	_table.push_back(s);
 	return (int)(_table.size()-1);
 	}
+
+/****************************************************************************\
+|* Add a global variable to the symbol table
+\****************************************************************************/
+Symbol SymbolTable::currentFunction(void)
+	{
+	if ((_functionId >= 0) && (_functionId < _table.size()))
+		return _table[_functionId];
+	FATAL(ERR_FUNCTION, "Attempt to find non-existent function");
+	}

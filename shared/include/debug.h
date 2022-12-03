@@ -139,6 +139,7 @@ enum
 	ERR_CTX,
 	ERR_FUNCTION,
 	ERR_TYPE,
+	ERR_TOKEN,
 	ERR_MAX
 	};
 

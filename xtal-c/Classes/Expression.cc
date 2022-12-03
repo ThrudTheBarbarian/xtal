@@ -8,6 +8,7 @@
 #include "ASTNode.h"
 #include "Expression.h"
 #include "Scanner.h"
+#include "Statement.h"
 #include "SymbolTable.h"
 #include "Token.h"
 #include "Types.h"
@@ -40,6 +41,17 @@ ASTNode * Expression::primary(Scanner &scanner, Token &token,  int &line)
 
 		case Token::T_IDENT:
 			{
+			// This could be a variable or a function, scan in the next
+			// token to find out
+			scanner.scan(token, line);
+			
+			// If it's a '(' then we have a function call
+			if (token.token() == Token::T_LPAREN)
+				return funcCall(scanner, token, line);
+			
+			// It wasn't, so reject this just-scanned token for next time
+			scanner.reject(token);
+			
 			// Check that this identifier exists
 			identifier = SYMTAB->find(scanner.text());
 			if (identifier == SymbolTable::NOT_FOUND)
@@ -117,7 +129,7 @@ ASTNode * Expression::binary(Scanner &scanner,
 		\*********************************************************************/
 		int leftType 	= left->type();
 		int rightType 	= right->type();
-		if (! Types::areCompatible(leftType, rightType))
+		if (! Types::areCompatible(line, leftType, rightType))
 			FATAL(ERR_TYPE, "Incompatible types at line %d", line);
 		
  		/*********************************************************************\
@@ -151,3 +163,47 @@ ASTNode * Expression::binary(Scanner &scanner,
     \*************************************************************************/
 	return left;
 	}
+
+/*****************************************************************************\
+|* function call resolution. Return an AST tree whose root is a binary
+|* operator.
+\*****************************************************************************/
+ASTNode * Expression::funcCall(Scanner &scanner, Token &token, int &line)
+	{
+	/*************************************************************************\
+    |* Find the function
+    |* FIXME: Check the structural type as well
+    \*************************************************************************/
+	String funcName = scanner.text();
+	int identifier 	= SYMTAB->find(scanner.text());
+	if (identifier == SymbolTable::NOT_FOUND)
+		FATAL(ERR_PARSE, "Unknown function [%s] on line %d",
+						funcName.c_str(), line);
+	
+	/*************************************************************************\
+    |* Eat the left parenthesis
+    \*************************************************************************/
+    Statement::leftParen(scanner, token, line);
+    
+	/*************************************************************************\
+    |* Pase the following expression
+    \*************************************************************************/
+	ASTNode *tree = binary(scanner, token, line, 0);
+	
+	/*************************************************************************\
+    |* Build the function-call AST node, store the function's return type as
+    |* this node's type. Also record the function's symbol-id
+    \*************************************************************************/
+	Symbol s	= SYMTAB->table()[identifier];
+	tree 		= new ASTNode(ASTNode::A_FUNCCALL,
+							  s.pType(),
+							  tree,
+							  identifier);
+	/*************************************************************************\
+    |* Eat the right parenthesis
+    \*************************************************************************/
+    Statement::rightParen(scanner, token, line);
+    
+	return tree;
+	}
+	

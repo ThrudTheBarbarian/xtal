@@ -38,8 +38,9 @@ class SymbolTable
 	/************************************************************************\
     |* Properties
     \************************************************************************/
-    GET(SymTable, table);						// The actual symbol table
-    
+    GET(SymTable, table);					// The actual symbol table
+ 	GETSET(int, functionId, FunctionId);	// Which function we're in now
+   
     private:
 
         static std::shared_ptr<SymbolTable> _instance;	// Shared instance
@@ -55,6 +56,11 @@ class SymbolTable
         |* Find a global variable and return the slot position or NOT_FOUND
         \********************************************************************/
 		int find(const String& name);
+
+        /********************************************************************\
+        |* Return the symbol for the current function
+        \********************************************************************/
+		Symbol currentFunction(void);
 
         /********************************************************************\
         |* Add a global variable, and return the new slot position

@@ -52,7 +52,8 @@ class Token
 			T_ELSE,				// Start an ELSE block
 			T_WHILE,			// Start a WHILE loop
 			T_FOR,				// Start a FOR loop
-
+			T_RETURN,			// Return from a function
+			
 			T_VOID, 			// Void declaration
 			T_S32,				// signed 32-bit value
 			T_S8,				// signed 8-bit value
@@ -66,6 +67,7 @@ class Token
     \*************************************************************************/
     GETSET(int, token, Token);				// Token type
     GETSET(int, intValue, IntValue);		// Integer value
+    GETSET(bool, valid, Valid);				// Used in rejection test
     
     private:
         

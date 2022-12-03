@@ -24,6 +24,10 @@ class Types
     \*************************************************************************/
     
     private:
+        /*********************************************************************\
+        |* Return the size of a given type
+        \*********************************************************************/
+        static int _typeSize(int type, int line);
         
     public:
         /*********************************************************************\
@@ -34,7 +38,8 @@ class Types
         /*********************************************************************\
         |* Check whether two types are compatible
         \*********************************************************************/
-        static bool areCompatible(int& left,
+        static bool areCompatible(int line,
+								  int& left,
 								  int& right,
 								  bool onlyRight = false);
 							

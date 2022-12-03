@@ -34,7 +34,8 @@ class Scanner
     GET(int, at);					// Where we're at in the source code
     GET(String, text);				// Last identifier scanned
     
-    private:
+    private:    
+    
         /*********************************************************************\
         |* Get the next character in the input stream
         \*********************************************************************/
@@ -70,7 +71,7 @@ class Scanner
         |* else return the token identifier
         \*********************************************************************/
         int _keyword(void);
-        
+      
     public:
         /*********************************************************************\
         |* Constructors and Destructor
@@ -81,6 +82,11 @@ class Scanner
         |* Scan for tokens
         \*********************************************************************/
         int scan(Token &token, int& line);
+         
+        /*********************************************************************\
+        |* Reject a token as no longer needed, store it for later
+        \*********************************************************************/
+        void reject(Token& t);
 	};
 
 #endif /* Scanner_h */

@@ -32,14 +32,14 @@ enum
 	
 	PT_NONE 	= 1,		// This AST node doesn't have a type
 	PT_VOID,				// Void data type
-	PT_S32,					// signed int, 32 bits
-	PT_U32,					// unsigned int, 32 bits
-	PT_S16,					// signed int, 16 bits
-	PT_U16,					// unsigned int, 16 bits
 	PT_S8,					// signed int, 8 bits
 	PT_U8,					// unsigned char, 8 bits
+	PT_S16,					// signed int, 16 bits
+	PT_U16,					// unsigned int, 16 bits
+	PT_S32,					// signed int, 32 bits
+	PT_U32,					// unsigned int, 32 bits
 	
-	P_MAXVAL				// Last entry
+	PT_MAXVAL				// Last entry
 	};
 
 // Structural types (function or variable)

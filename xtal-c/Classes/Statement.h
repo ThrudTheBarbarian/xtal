@@ -35,37 +35,22 @@ class Statement
         |* Ensure the current token is 't', and fetch the next token else
         |* throw an error
         \*********************************************************************/
-        void _match(Token& token, int tokenType, int &line, String info);
+        static void _match(Scanner& scanner,
+						   Token& token,
+						   int tokenType,
+						   int &line,
+						   String info);
     
         /*********************************************************************\
         |* Match a semicolon
         \*********************************************************************/
-        void _semicolon(Token& token, int& line);
+        void _semicolon(Scanner& scanner, Token& token, int& line);
 
         /*********************************************************************\
         |* Match an identifier
         \*********************************************************************/
-        void _identifier(Token& token, int& line);
+        void _identifier(Scanner& scanner, Token& token, int& line);
 
-        /*********************************************************************\
-        |* Match a left bracket '['
-        \*********************************************************************/
-        void _lbrace(Token& token, int& line);
-
-        /*********************************************************************\
-        |* Match a right bracket ']'
-        \*********************************************************************/
-        void _rbrace(Token& token, int& line);
-
-        /*********************************************************************\
-        |* Match a left parentheses '('
-        \*********************************************************************/
-        void _lparen(Token& token, int& line);
-
-        /*********************************************************************\
-        |* Match a right parentheses ')'
-        \*********************************************************************/
-        void _rparen(Token& token, int& line);
 
 
         /********************************************************************\
@@ -120,10 +105,36 @@ class Statement
         ASTNode * compoundStatement(Token& token, int& line);
 
         /********************************************************************\
-        |* Process the statements we understand
+        |* Process a function declaration
         \********************************************************************/
         ASTNode * functionDeclaration(Token& token, int& line);
-        
+     
+        /********************************************************************\
+        |* Process a return statement
+        \********************************************************************/
+        ASTNode * returnStatement(Token& token, int& line);
+     
+     
+     
+        /*********************************************************************\
+        |* Match a left bracket '['
+        \*********************************************************************/
+        static void leftBrace(Scanner& scanner, Token& token, int& line);
+
+        /*********************************************************************\
+        |* Match a right bracket ']'
+        \*********************************************************************/
+        static void rightBrace(Scanner& scanner, Token& token, int& line);
+
+        /*********************************************************************\
+        |* Match a left parentheses '('
+        \*********************************************************************/
+        static void leftParen(Scanner& scanner, Token& token, int& line);
+
+        /*********************************************************************\
+        |* Match a right parentheses ')'
+        \*********************************************************************/
+        static void rightParen(Scanner& scanner, Token& token, int& line);
 	};
 
 #endif /* Statement_h */
