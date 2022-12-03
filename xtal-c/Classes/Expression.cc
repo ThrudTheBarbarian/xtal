@@ -32,6 +32,8 @@ ASTNode * Expression::primary(Scanner &scanner, Token &token,  int &line)
 		case Token::T_INTLIT:
 			if ((token.intValue() >= 0) && (token.intValue() <= 255))
 				node = new ASTNode(ASTNode::A_INTLIT, PT_U8, token.intValue());
+			else if ((token.intValue() >= -128) && (token.intValue() <= 127))
+				node = new ASTNode(ASTNode::A_INTLIT, PT_S8, token.intValue());
 			else
 				node = new ASTNode(ASTNode::A_INTLIT, PT_S32, token.intValue());
 			break;

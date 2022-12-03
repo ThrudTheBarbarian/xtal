@@ -173,14 +173,36 @@ Register A8Emitter::_cgLoadInt(int val)
 	}
 
 /*****************************************************************************\
+|* Determine the size of a symbol
+\*****************************************************************************/
+static Register::RegType _symbolType(const Symbol& symbol)
+	{
+	Symbol s 	= (Symbol)symbol;
+	Register::RegType type = Register::UNKNOWN;
+	
+	switch (s.pType())
+		{
+		case PT_U8:
+			type = Register::UNSIGNED_1BYTE;
+			break;
+		case PT_S8:
+			type = Register::SIGNED_1BYTE;
+			break;
+		case PT_S32:
+			type = Register::SIGNED_4BYTE;
+			break;
+		}
+	
+	return type;
+	}
+
+/*****************************************************************************\
 |* Generate a load-value-to-register
 \*****************************************************************************/
 Register A8Emitter::_cgLoadGlobal(const Symbol& symbol)
 	{
 	Symbol s 	= (Symbol)symbol;
-	REG size	= (s.pType() == PT_U8) 		? Register::UNSIGNED_1BYTE
-				: (s.pType() == PT_S32)		? Register::SIGNED_4BYTE
-				: Register::UNKNOWN;
+	REG size	= _symbolType(symbol);
 	
 	if (size == Register::UNKNOWN)
 		FATAL(ERR_TYPE, "Unknown type for symbol %s", s.name().c_str());
@@ -200,9 +222,7 @@ Register A8Emitter::_cgLoadGlobal(const Symbol& symbol)
 Register A8Emitter::_cgStoreGlobal(Register& r, const Symbol& symbol)
 	{
 	Symbol s 	= (Symbol)symbol;
-	REG size	= (s.pType() == PT_U8) 		? Register::UNSIGNED_1BYTE
-				: (s.pType() == PT_S32)		? Register::SIGNED_4BYTE
-				: Register::UNKNOWN;
+	REG size	= _symbolType(symbol);
 
 	/*************************************************************************\
     |* Do some zeroing checks if the register size and the symbol size do not

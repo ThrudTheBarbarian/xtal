@@ -154,8 +154,7 @@ class A8Emitter : public Emitter
 		\*********************************************************************/
 		Register _cgCompareAndSet(Register r1, Register r2, int how);
 
-
-
+		
     public:
         /*********************************************************************\
         |* Constructors and Destructor

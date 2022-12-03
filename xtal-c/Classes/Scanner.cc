@@ -264,6 +264,8 @@ int Scanner::_keyword(void)
 		case 's':
 			if (lc == "s32")
 				return Token::T_S32;
+			else if (lc == "s8")
+				return Token::T_S8;
 			break;
 
 		case 'u':

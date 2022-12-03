@@ -36,13 +36,13 @@ bool Types::areCompatible(int &left, int &right, bool onlyRight)
 		}
 	
 	// Widen PT_?8 to PT_?32 as appropriate
-	if ((left == PT_U8) && (right == PT_S32))
+	if (((left == PT_U8) || (left == PT_S8)) && (right == PT_S32))
 		{
 		left = ASTNode::A_WIDEN;
 		right = PT_OK;
 		return true;
 		}
-	else if ((left == PT_S32) && (right == PT_U8))
+	else if ((left == PT_S32) && ((right == PT_U8) || (right == PT_S8)))
 		{
 		if (onlyRight)
 			return false;
