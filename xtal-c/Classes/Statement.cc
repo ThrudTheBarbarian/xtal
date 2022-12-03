@@ -28,6 +28,23 @@ Statement::Statement(Scanner &scanner, Emitter *emitter)
 
 
 /****************************************************************************\
+|* Determine if a statement needs a ';' after it
+\****************************************************************************/
+bool Statement::_needsSemicolon(int op)
+	{
+	switch (op)
+		{
+		case ASTNode::A_PRINT:
+		case ASTNode::A_ASSIGN:
+		case ASTNode::A_RETURN:
+		case ASTNode::A_FUNCCALL:
+			return true;
+		default:
+			return false;
+		}
+	}
+	
+/****************************************************************************\
 |* Process the statements we understand
 \****************************************************************************/
 ASTNode * Statement::compoundStatement(Token& token, int& line)
@@ -44,8 +61,9 @@ ASTNode * Statement::compoundStatement(Token& token, int& line)
         /********************************************************************\
         |* Some statements must be followed by a semicolon
         \********************************************************************/
-		if (tree != nullptr && (IS_OP(A_PRINT) || IS_OP(A_ASSIGN)))
-			_semicolon(*_scanner, token, line);
+		if (tree != nullptr)
+			if (_needsSemicolon(tree->op()))
+				_semicolon(*_scanner, token, line);
 
         /********************************************************************\
         |* For each new tree, either save it in 'left' if left is empty, or
@@ -67,7 +85,7 @@ ASTNode * Statement::compoundStatement(Token& token, int& line)
         /********************************************************************\
         |* When we hit a right bracket, skip past it and return the AST
         \********************************************************************/
-		if (token.token() == Token::T_LPAREN)
+		if (token.token() == Token::T_RBRACE)
 			{
 			rightBrace(*_scanner, token, line);
 			return left;
@@ -89,7 +107,7 @@ ASTNode * Statement::functionDeclaration(Token& token, int& line)
 	_identifier(*_scanner, token, line);
 
 	// Add it to the global symbol table
-	int nameSlot = SYMTAB->add(_scanner->text(), PT_VOID, ST_FUNCTION);
+	int nameSlot = SYMTAB->add(_scanner->text(), type, ST_FUNCTION);
 	SYMTAB->setFunctionId(nameSlot);
 	
 	// Parentheses
@@ -277,6 +295,9 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 			tree = _for(token, line);
 			break;
 		
+		case Token::T_RETURN:
+			return returnStatement(token, line);
+			
 		default:
 			FATAL(ERR_PARSE, "Syntax error, token %d", token.token());
 		}

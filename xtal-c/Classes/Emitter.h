@@ -100,7 +100,7 @@ class Emitter
         /*********************************************************************\
         |* Generate the code postamble
         \*********************************************************************/
-        virtual void functionPostamble(void);
+        virtual void functionPostamble(int funcId);
 
         /*********************************************************************\
         |* Generate a global symbol by reference to the symbol table index
@@ -111,6 +111,11 @@ class Emitter
         |* Append text to one of the body parts
         \*********************************************************************/
         virtual void append(const String& what, Location where);
+
+		/*********************************************************************\
+        |* Emit a jump-to-a-label command
+        \*********************************************************************/
+        virtual void cgLabel(String label) = 0;
 	};
 
 #endif /* Emitter_h */

@@ -246,6 +246,7 @@
 		F4BE0802293ADE7C00004A8D /* sub_mix.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = sub_mix.xt; sourceTree = "<group>"; };
 		F4BE0803293ADF5F00004A8D /* mul_mix.xt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mul_mix.xt; sourceTree = "<group>"; };
 		F4BE0804293ADFCF00004A8D /* div_mix.xt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = div_mix.xt; sourceTree = "<group>"; };
+		F4BE0806293BD9E100004A8D /* simpleFunc.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = simpleFunc.xt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -465,6 +466,7 @@
 				F4B53B4E2936E9F80023B3AB /* 10 */,
 				F4B808A4293722940049B6EB /* 11 */,
 				F4B808A92938752F0049B6EB /* 12 */,
+				F4BE0805293BD9BE00004A8D /* 13 */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -564,6 +566,14 @@
 				F4BE0804293ADFCF00004A8D /* div_mix.xt */,
 			);
 			path = 12;
+			sourceTree = "<group>";
+		};
+		F4BE0805293BD9BE00004A8D /* 13 */ = {
+			isa = PBXGroup;
+			children = (
+				F4BE0806293BD9E100004A8D /* simpleFunc.xt */,
+			);
+			path = 13;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

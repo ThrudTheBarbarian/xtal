@@ -12,6 +12,7 @@
 #include "ASTNode.h"
 #include "Emitter.h"
 #include "RegisterFile.h"
+#include "SymbolTable.h"
 
 /****************************************************************************\
 |* Constructor
@@ -101,19 +102,22 @@ void Emitter::postamble(void)
 	}
 	
 /****************************************************************************\
-|* Output a default postamble
+|* Output a function postamble
 \****************************************************************************/
-void Emitter::functionPostamble(void)
+void Emitter::functionPostamble(int funcId)
 	{
 	if (_ofp != nullptr)
 		{
+		Symbol s = SYMTAB->table()[funcId];
+		cgLabel(s.endLabel());
+		
 		fprintf(_ofp, "\trts\n"
 					  ".endfunction\n"
 					  "; -------------\n"
 					  "; Function ends\n\n");
 		}
 	else
-		FATAL(ERR_OUTPUT, "No file handle available for postamble output!");
+		FATAL(ERR_OUTPUT, "No file handle available for fn postamble output!");
 	}
 	
 

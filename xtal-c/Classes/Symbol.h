@@ -29,6 +29,7 @@ class Symbol
     GETSET(String, name, Name);				// Symbol name
 	GETSET(int, pType, PType);				// Primitive type for symbol
 	GETSET(StructuralType, sType, SType);	// Structural type for symbol
+	GETSET(String, endLabel, EndLabel);		// Label at the end of the function
 	
     private:
         
@@ -37,11 +38,10 @@ class Symbol
         |* Constructors and Destructor
         \********************************************************************/
         explicit Symbol();
-		explicit Symbol(const String& name, int pType, StructuralType sType);
-		
-        /********************************************************************\
-        |* 
-        \********************************************************************/
+		explicit Symbol(const String& name,
+						int pType,
+						StructuralType sType,
+						String endLabel = "endFunc");
 	};
 
 #endif /* Symbol_h */

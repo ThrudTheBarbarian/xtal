@@ -290,6 +290,31 @@ int Scanner::_keyword(void)
 	
 	switch (lc[0])
 		{
+		case 'e':
+			if (lc == "else")
+				return Token::T_ELSE;
+			break;
+		
+		case 'f':
+			if (lc == "for")
+				return Token::T_FOR;
+			break;
+		
+		case 'i':
+			if (lc == "if")
+				return Token::T_IF;
+			break;
+		
+		case 'p':
+			if (lc == "print")
+				return Token::T_PRINT;
+			break;
+		
+		case 'r':
+			if (lc == "return")
+				return Token::T_RETURN;
+			break;
+
 		case 's':
 			if (lc == "s32")
 				return Token::T_S32;
@@ -301,35 +326,15 @@ int Scanner::_keyword(void)
 			if (lc == "u8")
 				return Token::T_U8;
 			break;
-
-		case 'p':
-			if (lc == "print")
-				return Token::T_PRINT;
-			break;
 		
-		case 'i':
-			if (lc == "if")
-				return Token::T_IF;
-			break;
-		
-		case 'e':
-			if (lc == "else")
-				return Token::T_ELSE;
+		case 'v':
+			if (lc == "void")
+				return Token::T_VOID;
 			break;
 		
 		case 'w':
 			if (lc == "while")
 				return Token::T_WHILE;
-			break;
-		
-		case 'f':
-			if (lc == "for")
-				return Token::T_FOR;
-			break;
-		
-		case 'v':
-			if (lc == "void")
-				return Token::T_VOID;
 			break;
 		}
 		

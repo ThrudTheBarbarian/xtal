@@ -15,6 +15,7 @@
 #include "RegisterFile.h"
 #include "Stringutils.h"
 #include "SymbolTable.h"
+#include "Types.h"
 
 #define PARENT_IS(x)	(parentAstOp == ASTNode::x)
 #define REG				Register::RegType
@@ -67,10 +68,11 @@ Register A8Emitter::emit(ASTNode *node,
     
 		case ASTNode::A_FUNCTION:
 			{
-			auto symbol = SYMTAB->table()[node->value().identifier];
+			int funcId  = node->value().identifier;
+			auto symbol = SYMTAB->table()[funcId];
 			functionPreamble(symbol.name());
 			emit(node->left(), none, node->op(), "");
-			functionPostamble();
+			functionPostamble(funcId);
 			return (none);
 			}
 		}
@@ -133,6 +135,14 @@ Register A8Emitter::emit(ASTNode *node,
 		}
 	}
 
+	
+/****************************************************************************\
+|* Method - jump to a label
+\****************************************************************************/
+void A8Emitter::cgLabel(String label)
+	{
+	fprintf(_ofp, "\n%s:\n", label.c_str());
+	}
 	
 /*****************************************************************************\
 |* Dump a register to CIO0
@@ -702,14 +712,6 @@ void A8Emitter::_cgJump(String label)
 	}
 	
 /****************************************************************************\
-|* Private method - jump to a label
-\****************************************************************************/
-void A8Emitter::_cgLabel(String label)
-	{
-	fprintf(_ofp, "\n%s:\n", label.c_str());
-	}
-	
-/****************************************************************************\
 |* Private method - generate an IF-statement AST
 \****************************************************************************/
 Register A8Emitter::_cgIfAST(ASTNode *node)
@@ -733,7 +735,7 @@ Register A8Emitter::_cgIfAST(ASTNode *node)
 		_cgJump("ifEnd");
 	
 	// Now the false label
-	_cgLabel("ifNot");
+	cgLabel("ifNot");
 	
 	// Optional ELSE clause: generate the
 	// false compound statement and the
@@ -742,7 +744,7 @@ Register A8Emitter::_cgIfAST(ASTNode *node)
 		{
 		emit(node->right(), none, node->op(), "ifNot");
 		RegisterFile::clear();
-		_cgLabel("ifEnd");
+		cgLabel("ifEnd");
 		}
 	
 	_cgPopContext();
@@ -757,7 +759,7 @@ Register A8Emitter::_cgWhileAST(ASTNode *node)
 	Register none(Register::NO_REGISTER);
 
 	_cgPushContext(C_WHILE, "while");
-	_cgLabel("start");
+	cgLabel("start");
 
 	// Generate the condition code followed
 	// by a jump to the end label.
@@ -772,7 +774,7 @@ Register A8Emitter::_cgWhileAST(ASTNode *node)
 	_cgJump("start");
 	
 	// Now the loop-exit label
-	_cgLabel("end");
+	cgLabel("end");
 		
 	_cgPopContext();
 	return none;
@@ -783,6 +785,71 @@ Register A8Emitter::_cgWhileAST(ASTNode *node)
 \*****************************************************************************/
 Register A8Emitter::_cgCall(Register r1, int identifier)
 	{
+	// Get a new out-register
 	Register r = _regs->allocate(r1.type());
 	
+	auto symbol = SYMTAB->table()[identifier];
+	fprintf(_ofp, "\tcall %s\n", symbol.name().c_str());
+	
+	// Move the returned value of the function to the register we created
+	int fId = 0;
+	const char *reg = r.name().c_str();
+	
+	// Zero-fill the values in case they're used later
+	switch (r1.size())
+		{
+		case 4:
+			fprintf(_ofp, "\t_xfer32 f%d, %s\n", fId, reg);
+			break;
+			
+		case 2:
+			fprintf(_ofp, "\t_xfer16 f%d, %s\n"
+						  "\tlda #$0\n"
+						  "\tsta %s+2\n"
+						  "\tsta %s+3\n",
+						  fId, reg, reg, reg);
+			break;
+		case 1:
+			fprintf(_ofp, "\tlda f%d\n"
+						  "\tsta %s\n"
+						  "\tlda #$0\n"
+						  "\tsta %s+1\n"
+						  "\tsta %s+2\n"
+						  "\tsta %s+3\n",
+						  fId, reg, reg, reg, reg);
+			break;
+		}
+	_regs->free(r1);
+	return r;
+	}
+
+/*****************************************************************************\
+|* Return a value from a function
+\*****************************************************************************/
+void A8Emitter::_cgReturn(Register r1, int funcId)
+	{
+	Symbol s = SYMTAB->table()[funcId];
+	
+	switch (s.pType())
+		{
+		case PT_U8:
+		case PT_S8:
+			fprintf(_ofp, "\tmove.1 %s f0\n", r1.name().c_str());
+			break;
+		
+		case PT_U16:
+		case PT_S16:
+			fprintf(_ofp, "\tmove.2 %s f0\n", r1.name().c_str());
+			break;
+		
+		case PT_U32:
+		case PT_S32:
+			fprintf(_ofp, "\tmove.4 %s f0\n", r1.name().c_str());
+			break;
+		
+		default:
+			FATAL(ERR_FUNCTION, "Incorrect return type");
+			break;
+		}
+	_cgJump(s.endLabel());
 	}

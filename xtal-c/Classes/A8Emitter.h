@@ -116,11 +116,6 @@ class A8Emitter : public Emitter
         void _cgJump(String label);
         
 		/*********************************************************************\
-        |* Emit a jump-to-a-label command
-        \*********************************************************************/
-        void _cgLabel(String label);
-        
-		/*********************************************************************\
         |* Widen a register
         \*********************************************************************/
         void _cgWiden(Register& reg, int oldWidth, int newWidth);
@@ -189,6 +184,12 @@ class A8Emitter : public Emitter
         |* Generate a global symbol by reference to the symbol table index
         \*********************************************************************/
         virtual void genSymbol(int symIdx);
+
+		/*********************************************************************\
+        |* Emit a jump-to-a-label command
+        \*********************************************************************/
+        void cgLabel(String label);
+        
 	};
 
 #endif /* ! A8Emitter_h */

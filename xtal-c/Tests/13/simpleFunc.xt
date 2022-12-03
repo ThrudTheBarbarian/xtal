@@ -1,0 +1,11 @@
+s32 fred()
+	[
+	return (2000);
+	]
+
+void main()
+	[
+	s32 result;
+	result = fred(10);
+	print result;
+	]

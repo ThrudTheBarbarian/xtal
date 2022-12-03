@@ -31,9 +31,11 @@ Types::Types()
 
 
 /*****************************************************************************\
-|* Given two primitive types, return true if they are compatible, false
-|* otherwise. Also return either zero or an A_WIDEN operation if one has to
-|* be widened to match the other.
+|* Static method -  Given two primitive types, return true if they are
+|* compatible, false otherwise.
+|*
+|* Also return either zero or an A_WIDEN operation if one has to be widened to
+|* match the other.
 |*
 |* If onlyright is true, only widen left to right
 \*****************************************************************************/
@@ -47,8 +49,8 @@ bool Types::areCompatible(int line, int &left, int &right, bool onlyRight)
 		}
 
 	// Get the sizes for each type
-	int leftSize	= _typeSize(left, line);
-	int rightSize	= _typeSize(right, line);
+	int leftSize	= typeSize(left, line);
+	int rightSize	= typeSize(right, line);
 
 	// Types with zero-size are not compativle
 	if ((leftSize == 0) || (rightSize == 0))
@@ -75,14 +77,21 @@ bool Types::areCompatible(int line, int &left, int &right, bool onlyRight)
 	return true;
 	}
 
-#pragma mark - Private methods
-
 /*****************************************************************************\
-|* Private method - return a type's size in bytes
+|* Static method - return a type's size in bytes
 \*****************************************************************************/
-int Types::_typeSize(int type, int line)
+int Types::typeSize(int type, int line)
 	{
 	if ((type < PT_VOID) || (type >= PT_MAXVAL))
-		FATAL(ERR_TYPE, "Illegal type %d at line %d", type, line);
+		{
+		if (line > 0)
+			{
+			FATAL(ERR_TYPE, "Illegal type %d at line %d", type, line);
+			}
+		else
+			{
+			FATAL(ERR_TYPE, "Illegal type %d", type);
+			}
+		}
 	return _sizes[type];
 	}
