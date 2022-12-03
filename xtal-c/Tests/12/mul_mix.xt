@@ -6,16 +6,16 @@ void main()
 	
 	a = 1000;
 	b = 5;
-	c = a + b;
+	c = a * b;
 
-	if (c != 1005)
+	if (c != 5000)
 		[ print 0; ]
 	else
 		[ print 1; ]
 	
-	c = b + a;
+	c = b * a;
 
-	if (c != 1005)
+	if (c != 5000)
 		[ print 0; ]
 	else
 		[ print 1; ]

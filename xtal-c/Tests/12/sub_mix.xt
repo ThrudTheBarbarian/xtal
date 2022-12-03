@@ -1,3 +1,4 @@
+
 void main()
 	[
 	s32 a;
@@ -6,18 +7,17 @@ void main()
 	
 	a = 1000;
 	b = 5;
-	c = a + b;
+	c = a - b;
 
-	if (c != 1005)
+	if (c != 995 )
 		[ print 0; ]
 	else
 		[ print 1; ]
 	
-	c = b + a;
+	c = b -a ;
 
-	if (c != 1005)
-		[ print 0; ]
+	if (c != 4294966301 )
+		[ print c; ]
 	else
 		[ print 1; ]
-
 	]

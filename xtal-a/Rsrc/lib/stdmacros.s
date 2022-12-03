@@ -628,6 +628,29 @@ r15	= $fc
 ;/*************************************************************************\
 ;|* Type: Shift operation
 ;|*
+;|* Perform a left rotation on the 8 bit number at location %1
+;|* and store the result at location %2. If %1 and %2 are the same then the
+;|* operation is applied directly to the memory otherwise it is done in the
+;|* accumulator
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : source address to read from
+;|*    %2 : destination address to write to
+;\*************************************************************************/
+.macro _rol8
+	.if (%1 != %2)
+		lda %1
+		rol a
+		sta %2
+	.else
+		rol %1
+	.endif
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Shift operation
+;|*
 ;|* Perform a left rotation on the 16 bit number at location %1
 ;|* and store the result at location %2. If %1 and %2 are the same then the
 ;|* operation is applied directly to the memory otherwise it is done in the
@@ -1082,6 +1105,24 @@ dec0:
 ;/*************************************************************************\
 ;|* Type: Arithmetic operation
 ;|*
+;|* negate the signed 8-bit number at location %1 and store the result at
+;|* location %2. Both %1 and %2 can be the same
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : address of source operand #1
+;|*    %2 : address of destination operand. Can be same as %1
+;\*************************************************************************/
+.macro _neg8
+		sec
+        lda #0
+        sbc %1
+       	sta %2
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
 ;|* negate the signed 16-bit number at location %1 and store the result at
 ;|* location %2. Both %1 and %2 can be the same
 ;|*
@@ -1451,6 +1492,132 @@ dec0:
 		_rol16 %3, %3
 		dex
 		bpl loop
+.endmacro
+
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Divide a signed 8-bit value at location %1 by a signed 8-bit value %2
+;|* and store the 8-bit remainder in location %3, surface the result in %1
+;|*
+;|* Clobbers: A, X, Y
+;|* Arguments:
+;|*    %1 : location of dividend and final result
+;|*    %2 : location of divisor
+;|*    %3 : location of remainder
+;\*************************************************************************/
+.macro _div8
+		lda %2  			; Get the upper byte of the divisor
+		pha					; and store in the scratch registor
+		eor %1  			; EOR with sign of dividend
+		pha					; and store for later
+
+		lda %1				; Check if the dividend needs to be negated
+		bpl skp1			; If it's +ve, skip the negation
+		_neg8 %1,%1			; otherwise negate
+
+skp1:
+		lda %2  			; Check if the divisor needs to be negated
+		bpl skp2			; If it's +ve, skip the negation
+		_neg8 %2,%2
+
+skp2:
+		_clr8 %3			; Clear the accumulator
+		
+		lda %2				; Check for divide-by-zero error
+		bne ok
+		pla
+		pla
+		sec					; set error status
+		bcs error
+ok:
+		ldy #$8		  	    ; Number of bits to rotate through
+
+sdv_loop:
+		_asl8 %1,%1			; left-shift dividend
+		_rol8 %3,%3			; and rotate into 'accumulator'
+		
+		_sub8u %3,%2,%3		; subtract divisor from accumulator
+		bcs sdv4			; if carry is set, r0 is +ve, skip add-back
+		
+		_add8u %3,%2,%3		; get r0 +ve again by adding back r2
+		clc					; then always branch to next-bit routine
+		bcc sdv5
+
+sdv4:
+		inc %1				; increment the results bit
+		bcs sdv5			; and allow space for a longer bcs for error
+
+error:
+		bcs done
+	
+sdv5:
+		dey					; Go to the next bit
+		bne sdv_loop		; ... for 32 times
+
+		pla					; check remainder sign,
+		bpl sdv6			; skip negation if +ve
+		_neg8 %1,%1
+		
+sdv6:
+		pla					; check quotient sign
+		bpl sdv8			; skip negation if +ve
+		_neg8 %3,%3
+
+sdv8:
+		clc					; set status = no error
+done:
+
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Divide a (possibly signed) 8-bit value at location %1 by a (possibly
+;|* signed) 8-bit value %2 and store the 8-bit remainder in location %3
+;|* and surface the result in %1
+;|*
+;|* Clobbers: A, X, Y
+;|* Arguments:
+;|*    %1 : location of dividend and final result
+;|*    %2 : location of divisor
+;|*    %3 : location of remainder
+;\*************************************************************************/
+.macro _div8u
+		_clr8 %3			; Clear the accumulator
+		
+		lda %2				; Check for divide-by-zero error
+		bne ok
+		sec					; set error status
+		bcs error
+ok:
+		ldy #$8		  	    ; Number of bits to rotate through
+
+sdv_loop:
+		_asl8 %1,%1			; left-shift dividend
+		_rol8 %3,%3			; and rotate into 'accumulator'
+		
+		_sub8u %3,%2,%3		; subtract divisor from accumulator
+		bcs sdv4			; if carry is set, r0 is +ve, skip add-back
+		
+		_add8u %3,%2,%3		; get r0 +ve again by adding back r2
+		clc					; then always branch to next-bit routine
+		bcc sdv5
+
+sdv4:
+		inc %1				; increment the results bit
+		bcs sdv5			; and allow space for a longer bcs for error
+
+error:
+		bcs done
+	
+sdv5:
+		dey					; Go to the next bit
+		bne sdv_loop		; ... for 32 times
+		clc					; set status = no error
+done:
+
 .endmacro
 
 
