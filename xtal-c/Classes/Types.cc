@@ -83,7 +83,9 @@ bool Types::areCompatible(int line, int &left, int &right, bool onlyRight)
 \*****************************************************************************/
 int Types::typeSize(int type, int line)
 	{
-	if ((type < PT_VOID) || (type >= PT_MAXVAL))
+	int range = type & 0xFF;
+	
+	if ((range < PT_VOID) || (range >= PT_MAXVAL))
 		{
 		if (line > 0)
 			{
@@ -94,6 +96,9 @@ int Types::typeSize(int type, int line)
 			FATAL(ERR_TYPE, "Illegal type %d", type);
 			}
 		}
+	if (type >= 0x100)
+		return 4;
+		
 	return _sizes[type];
 	}
 

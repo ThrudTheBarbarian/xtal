@@ -57,6 +57,10 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "$PROJECT_DIR/xtal-c/Tests/15/ptr.xt -d"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "$PROJECT_DIR/xtal-c/Tests/05/test01"
             isEnabled = "NO">
          </CommandLineArgument>
@@ -78,7 +82,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-o /tmp/out.asm &apos;/Users/simon/src/xtal/xtal-c/Tests/15/ptr.xt&apos;"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>

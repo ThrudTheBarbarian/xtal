@@ -2,12 +2,19 @@
 s32 main()
 	[
 	u8 a; u8 *b; u8 c;
+	s32 d; s32 *e; s32 f;
 	
 	a =42;
 	print a;
 	b = &a;
 	c = *b;
 	print c;
+	
+	d =420000;
+	print d;
+	e = &d;
+	f = *e;
+	print f;
 	
 	return (0);
 	]

@@ -159,6 +159,36 @@ void A8Emitter::printReg(Register r)
 	
 
 /*****************************************************************************\
+|* Determine the size of a symbol
+\*****************************************************************************/
+static Register::RegType _symbolSize(const Symbol& symbol)
+	{
+	Symbol s 	= (Symbol)symbol;
+	int symType	= s.pType();
+	Register::RegType type = Register::UNKNOWN;
+	
+	switch (Types::typeSize(symType))
+		{
+		case 1:
+			type = Register::UNSIGNED_1BYTE;
+			break;
+		case 2:
+			type = Register::UNSIGNED_2BYTE;
+			break;
+		case 4:
+			type = Register::SIGNED_4BYTE;
+			break;
+		
+		default:
+			if (symType > 0xff)
+				type = Register::SIGNED_4BYTE;	// pointer
+			break;
+		}
+	
+	return type;
+	}
+
+/*****************************************************************************\
 |* Generate a global symbol
 \*****************************************************************************/
 void A8Emitter::genSymbol(int idx)
@@ -167,11 +197,23 @@ void A8Emitter::genSymbol(int idx)
 	
 	Symbol symbol 	= SYMTAB->table()[idx];
 	String name 	= symbol.name();
-	
-	if (symbol.pType() == PT_S32)
-		snprintf(buf, 1024, "@S_%s:.word 0,0\n", name.c_str());
-	else
-		snprintf(buf, 1024, "@S_%s:.byte 0\n", name.c_str());
+	switch (_symbolSize(symbol))
+		{
+		case Register::SIGNED_4BYTE:
+			snprintf(buf, 1024, "@S_%s:.word 0,0\n", name.c_str());
+			break;
+		case Register::UNSIGNED_2BYTE:
+			snprintf(buf, 1024, "@S_%s:.word 0\n", name.c_str());
+			break;
+		case Register::UNSIGNED_1BYTE:
+			snprintf(buf, 1024, "@S_%s:.byte 0\n", name.c_str());
+			break;
+		default:
+			{
+			FATAL(ERR_TYPE, "Unknown size for symbol %s", symbol.name().c_str());
+			}
+		}
+
 	append(buf, POSTAMBLE);
 	}
 	
@@ -192,36 +234,12 @@ Register A8Emitter::_cgLoadInt(int val)
 	}
 
 /*****************************************************************************\
-|* Determine the size of a symbol
-\*****************************************************************************/
-static Register::RegType _symbolType(const Symbol& symbol)
-	{
-	Symbol s 	= (Symbol)symbol;
-	Register::RegType type = Register::UNKNOWN;
-	
-	switch (s.pType())
-		{
-		case PT_U8:
-			type = Register::UNSIGNED_1BYTE;
-			break;
-		case PT_S8:
-			type = Register::SIGNED_1BYTE;
-			break;
-		case PT_S32:
-			type = Register::SIGNED_4BYTE;
-			break;
-		}
-	
-	return type;
-	}
-
-/*****************************************************************************\
 |* Generate a load-value-to-register
 \*****************************************************************************/
 Register A8Emitter::_cgLoadGlobal(const Symbol& symbol)
 	{
 	Symbol s 	= (Symbol)symbol;
-	REG size	= _symbolType(symbol);
+	REG size	= _symbolSize(symbol);
 	
 	if (size == Register::UNKNOWN)
 		FATAL(ERR_TYPE, "Unknown type for symbol %s", s.name().c_str());
@@ -241,7 +259,7 @@ Register A8Emitter::_cgLoadGlobal(const Symbol& symbol)
 Register A8Emitter::_cgStoreGlobal(Register& r, const Symbol& symbol)
 	{
 	Symbol s 	= (Symbol)symbol;
-	REG size	= _symbolType(symbol);
+	REG size	= _symbolSize(symbol);
 
 	/*************************************************************************\
     |* Do some zeroing checks if the register size and the symbol size do not
@@ -907,18 +925,16 @@ Register A8Emitter::_cgAddress(int identifier)
 \*****************************************************************************/
 Register A8Emitter::_cgDeref(Register r1, int type)
 	{
-	// Make the register match the thing the symbol is pointing to
-	r1.setPrimitiveType(Types::valueAt(type));
 	
-	fprintf(_ofp, "\t.push context block deref_%s\n", randomString(8).c_str());
+	fprintf(_ofp, "\t.push context block deref_%s 1\n", randomString(8).c_str());
 	
-	fprintf(_ofp, "\tldy #%d\n"
-				  "\tldx #0\n"
+	fprintf(_ofp, "\tldx #%d\n"
+				  "\tldy #0\n"
 				  "deref:\n"
-				  "\tlda (%s),X\n"
+				  "\tlda (%s),y\n"
 				  "\tpha\n"
-				  "\tinx\n"
-				  "\tdey\n"
+				  "\tiny\n"
+				  "\tdex\n"
 				  "\tbne deref\n",
 				  r1.size(), r1.name().c_str());
 
@@ -927,9 +943,14 @@ Register A8Emitter::_cgDeref(Register r1, int type)
 				  "\tpla\n"
 				  "\tsta %s,X\n"
 				  "\tdex\n"
-				  "\tbpl deref\n",
+				  "\tbpl store\n",
 				  r1.name().c_str());
 
 	fprintf(_ofp, "\t.pop context\n");
+
+
+	// Make the register match the thing the symbol is pointing to
+	r1.setPrimitiveType(Types::valueAt(type));
+
 	return r1;
 	}
