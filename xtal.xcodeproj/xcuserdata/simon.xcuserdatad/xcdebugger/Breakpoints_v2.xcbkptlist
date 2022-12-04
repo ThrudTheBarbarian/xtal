@@ -14,10 +14,10 @@
             filePath = "xtal-a/Classes/Scanner.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1051"
-            endingLineNumber = "1051"
-            landmarkName = "Scanner::_handleCall(info, extent, argString, tokens, pass, isCall)"
-            landmarkType = "7">
+            startingLineNumber = "1055"
+            endingLineNumber = "1055"
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -71,22 +71,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "50F2F2C7-A023-4B33-86BA-63F136AFABEC"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "xtal-c/Classes/A8Emitter.cc"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "305"
-            endingLineNumber = "305"
-            landmarkName = "unknown"
-            landmarkType = "0">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "65EC9E40-AF4E-40D9-8C13-242DD911DA22"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -94,9 +78,9 @@
             filePath = "xtal-a/Classes/Scanner.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1426"
-            endingLineNumber = "1426"
-            landmarkName = "Scanner::_handleCall(info, extent, argString, tokens, pass, isCall)"
+            startingLineNumber = "1430"
+            endingLineNumber = "1430"
+            landmarkName = "Scanner::_hasLabel(s)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -119,22 +103,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "8E75227D-7155-4B1B-A1EF-9E2E28D9197C"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "xtal-a/Classes/Scanner.cc"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1100"
-            endingLineNumber = "1100"
-            landmarkName = "Scanner::_handleCall(info, extent, argString, tokens, pass, isCall)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "E467A4CF-B028-4D8C-8A51-E6F0C9360D9B"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
@@ -151,16 +119,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "85D52336-1809-4331-AAF0-0B65AB135E34"
+            uuid = "6E432EFF-A74E-486C-8CA0-8823815A6EB0"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "xtal-c/Classes/Types.cc"
+            filePath = "xtal-a/Classes/Scanner.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "93"
-            endingLineNumber = "93"
-            landmarkName = "Types::typeSize(type, line)"
+            startingLineNumber = "909"
+            endingLineNumber = "909"
+            landmarkName = "Scanner::_handleMove(info, extent, argString, tokens, pass)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

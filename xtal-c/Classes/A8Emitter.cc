@@ -122,7 +122,7 @@ Register A8Emitter::emit(ASTNode *node,
 			return none;
 			}
 		case ASTNode::A_WIDEN:
-			//_cgWiden(left, node->left()->type(), node->type());
+			_cgWiden(left, node->left()->type(), node->type());
 			return left;
 		case ASTNode::A_RETURN:
 			_cgReturn(left, SYMTAB->functionId());
@@ -307,15 +307,40 @@ Register A8Emitter::_cgStoreGlobal(Register& r, const Symbol& symbol)
 \*****************************************************************************/
 void A8Emitter::_cgWiden(Register& reg, int oldWidth, int newWidth)
 	{
+	int oSize = Types::typeSize(oldWidth);
+	const char *regName = reg.name().c_str();
+	
 	if (oldWidth != newWidth)
 		{
 		switch (newWidth)
 			{
 			case PT_U8:
+			case PT_S8:
 				reg.setType(Register::UNSIGNED_1BYTE);
 				break;
 			
+			case PT_U16:
+			case PT_S16:
+				if (oSize == 1)
+					fprintf(_ofp, "\tlda #0\n"
+								  "\tsta %s+1\n",
+								  regName);
+				reg.setType(Register::SIGNED_2BYTE);
+				break;
+			
+			case PT_U32:
 			case PT_S32:
+				if (oSize == 1)
+					fprintf(_ofp, "\tlda #0\n"
+								  "\tsta %s+1\n"
+								  "\tsta %s+2\n"
+								  "\tsta %s+3\n",
+								  regName, regName, regName);
+				else if (oSize == 2)
+					fprintf(_ofp, "\tlda #0\n"
+								  "\tsta %s+2\n"
+								  "\tsta %s+3\n",
+								  regName, regName);
 				reg.setType(Register::SIGNED_4BYTE);
 				break;
 			
@@ -796,7 +821,7 @@ Register A8Emitter::_cgCall(Register r1, int identifier)
 	const char *reg = r.name().c_str();
 	
 	// Zero-fill the values in case they're used later
-	switch (r1.size())
+	switch (Types::typeSize(symbol.pType()))
 		{
 		case 4:
 			fprintf(_ofp, "\t_xfer32 f%d, %s\n", fId, reg);
@@ -820,6 +845,8 @@ Register A8Emitter::_cgCall(Register r1, int identifier)
 			break;
 		}
 	_regs->free(r1);
+
+	r.setPrimitiveType(symbol.pType());
 	return r;
 	}
 

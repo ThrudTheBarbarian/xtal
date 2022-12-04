@@ -11,6 +11,7 @@
 static int _sizes[] =
 				{
 				0,		// PT_OK,
+				0,		// PT_NONE
 				0,		// PT_VOID
 				1,		// PT_S8,
 				1,		// PT_S_8
@@ -58,7 +59,7 @@ bool Types::areCompatible(int line, int &left, int &right, bool onlyRight)
 
 	// Widen PT_?8 to PT_?32 as appropriate
 	if (leftSize < rightSize)
-				{
+		{
 		left = ASTNode::A_WIDEN;
 		right = PT_OK;
 		return true;

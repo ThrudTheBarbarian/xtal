@@ -371,10 +371,14 @@ Scanner::TargetType Scanner::_determineTarget(String s, int64_t &val)
 					: (s.starts_with("s"))		? REG_SCRATCH
 					: (s.starts_with("#"))  	? IMMEDIATE
 												: ABSOLUTE;
-	
-	_engine.eval(s.substr(_ttSizes[type]));
-	val = _engine.result();
-	
+	String expr = s.substr(_ttSizes[type]);
+	val = 0;
+	if (expr.length() > 0)
+		{
+		_engine.eval(expr);
+		val = _engine.result();
+		}
+		
 	if (val > 0)
 		{
 		if ((type == REG_MAIN) && (val >= 1024))

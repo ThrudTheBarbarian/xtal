@@ -174,7 +174,7 @@ ASTNode * Statement::returnStatement(Token& token, int& line)
     |* Widen the left if required
     \*************************************************************************/
 	if (returnType == ASTNode::A_WIDEN)
-		tree = new ASTNode(returnType, funcType, tree, 0);
+		tree = new ASTNode(returnType, sym.pType(), tree, 0);
 	
 	/*************************************************************************\
     |* Add on the A_RETURN node

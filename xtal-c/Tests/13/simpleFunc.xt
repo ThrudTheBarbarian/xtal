@@ -1,11 +1,13 @@
-s32 fred()
+u8 fred()
 	[
-	return (2000);
+	return (20);
 	]
 
 void main()
 	[
 	s32 result;
+	print 10;
 	result = fred(10);
 	print result;
+	print fred(30)+10;
 	]

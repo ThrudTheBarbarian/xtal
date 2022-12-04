@@ -31,3 +31,4 @@ Symbol::Symbol(const String& name,
 	   ,_endLabel(endLabel)
 	{
 	}
+	
