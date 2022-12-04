@@ -101,7 +101,6 @@ ASTNode * Statement::functionDeclaration(Token& token, int& line)
 	// Looking for the type, the identifier, and the '(' ')'. For now don't
 	// do anything with them
 	int type = _parseType(token, line);
-	_scanner->scan(token, line);
 
 	// Check we have an identifier
 	_identifier(*_scanner, token, line);
@@ -526,6 +525,17 @@ int Statement::_parseType(Token& token, int& line)
 		default:
 			FATAL(ERR_PARSE, "Cannot determing type at line %d\n", line);
 		}
+
+	// Scan in one or more further '*' tokens
+	// and determine the correct pointer type
+	while (1)
+		{
+		_scanner->scan(token, line);
+		if (token.token() != Token::T_STAR)
+			break;
+		type = Types::pointerTo(type);
+		}
+
 	return type;
 	}
 
@@ -539,9 +549,6 @@ void Statement::_varDeclaration(Token& token, int& line)
 	// Fetch which type of primitive type we're dealing with
 	int pType = _parseType(token, line);
 	
-	// Scan the next token
-	_scanner->scan(token, line);
-
 	// Check we have an identifier
 	_identifier(*_scanner, token, line);
 

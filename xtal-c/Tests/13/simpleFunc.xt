@@ -1,4 +1,4 @@
-u8 fred()
+u8 dummy()
 	[
 	return (20);
 	]
@@ -7,7 +7,7 @@ void main()
 	[
 	s32 result;
 	print 10;
-	result = fred(10);
+	result = dummy(10);
 	print result;
-	print fred(30)+10;
+	print dummy(30)+10;
 	]

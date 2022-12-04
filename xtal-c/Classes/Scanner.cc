@@ -122,7 +122,17 @@ int Scanner::scan(Token& token, int& line)
 				token.setToken(Token::T_GT);
 				}
 			break;
-			
+
+		case '&':
+			if ((c = _next(line)) == '&')
+				token.setToken(Token::T_LOGAND);
+			else
+				{
+				_putBack();
+				token.setToken(Token::T_AMPER);
+				}
+			break;
+
 		default:
 			if (::isdigit(c))
 				{
@@ -335,7 +345,7 @@ int Scanner::_keyword(void)
 		case 'w':
 			if (lc == "while")
 				return Token::T_WHILE;
-			break;
+			break;		
 		}
 		
 	return Token::T_NONE;

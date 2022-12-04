@@ -56,6 +56,9 @@ class ASTNode
 			A_FUNCCALL,			// Call-point for a function
 			A_RETURN,			// Function return opcode
 			
+			A_DEREF, 			// Dereference op
+			A_ADDR,				// Address-of op
+			
 			A_MAXVAL			// Last normal entry
 			};
 				

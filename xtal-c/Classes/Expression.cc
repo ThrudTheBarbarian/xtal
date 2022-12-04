@@ -13,6 +13,8 @@
 #include "Token.h"
 #include "Types.h"
 
+#define IS_OP(x)	(tree->op() != ASTNode::x)
+
 /*****************************************************************************\
 |* Constructor
 \*****************************************************************************/
@@ -94,9 +96,9 @@ ASTNode * Expression::binary(Scanner &scanner,
 								 int previousPrecedence)
 	{
 	/*************************************************************************\
-    |* Get the integer literal on the left
+    |* Get the next token and parse it recursively as a prefix expression
     \*************************************************************************/
-	ASTNode *left = primary(scanner, token, line);
+	ASTNode *left = prefix(scanner, token, line);
 	
 	/*************************************************************************\
     |* If we hit a semicolon or ), just return the left node
@@ -207,3 +209,51 @@ ASTNode * Expression::funcCall(Scanner &scanner, Token &token, int &line)
 	return tree;
 	}
 	
+/*****************************************************************************\
+|* Parse a prefix expression and return a sub-tree representing it. Used for
+|* pointers and de-refs
+\*****************************************************************************/
+ASTNode * Expression::prefix(Scanner &scanner, Token &token, int &line)
+	{
+  	ASTNode *tree;
+  
+	switch (token.token())
+		{
+		case Token::T_AMPER:
+			// Get the next token and parse it recursively as a prefix
+			scanner.scan(token, line);
+			tree = prefix(scanner, token, line);
+
+			// Ensure that it's an identifier
+			if (tree->op() != ASTNode::A_IDENT)
+				FATAL(ERR_PARSE, "& operator must be followed "
+								 "by an identifier at line %d", line);
+
+			// Now change the operator to A_ADDR and the type to
+			// a pointer to the original type
+			tree->setOp(ASTNode::A_ADDR);
+			tree->setType(Types::pointerTo(tree->type()));
+			break;
+    
+		case Token::T_STAR:
+			// Get the next token and parse it recursively as a prefix
+			scanner.scan(token, line);
+			tree = prefix(scanner, token, line);
+
+			// For now, ensure it's either another deref or an identifier
+			if (!(IS_OP(A_IDENT) || IS_OP(A_DEREF)))
+				FATAL(ERR_PARSE, "* operator must be followed "
+								 "by an identifier or * at line %d", line);
+
+			// Prepend an A_DEREF operation to the tree
+			tree = new ASTNode(ASTNode::A_DEREF,
+							   Types::valueAt(tree->type()),
+							   tree,
+							   0);
+			break;
+			
+		default:
+			tree = primary(scanner, token, line);
+		}
+	return (tree);
+	}

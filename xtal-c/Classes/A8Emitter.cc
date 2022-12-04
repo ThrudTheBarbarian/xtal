@@ -129,6 +129,10 @@ Register A8Emitter::emit(ASTNode *node,
 			return left;
 		case ASTNode::A_FUNCCALL:
 			return _cgCall(left, node->value().identifier);
+		case ASTNode::A_ADDR:
+			return _cgAddress(node->value().identifier);
+		case ASTNode::A_DEREF:
+			return _cgDeref(left, node->left()->type());
 			
 		default:
 			FATAL(ERR_AST_UNKNOWN_OPERATOR, "Unknown AST operator %d", node->op());
@@ -879,4 +883,53 @@ void A8Emitter::_cgReturn(Register r1, int funcId)
 			break;
 		}
 	_cgJump(s.endLabel());
+	}
+
+/*****************************************************************************\
+|* Generate code to load the address of a global identifier into a register
+\*****************************************************************************/
+Register A8Emitter::_cgAddress(int identifier)
+	{
+	// Get a new out-register
+	Register r 	= _regs->allocate(Register::SIGNED_4BYTE);
+	
+	// Fetch the symbol
+	Symbol s 	= SYMTAB->table()[identifier];
+	
+	fprintf(_ofp, "\tmove.4 #S_%s %s\n",
+					s.name().c_str(),
+					r.name().c_str());
+	return r;
+	}
+
+/*****************************************************************************\
+|* Generate code to load the value of the pointer into the same register
+\*****************************************************************************/
+Register A8Emitter::_cgDeref(Register r1, int type)
+	{
+	// Make the register match the thing the symbol is pointing to
+	r1.setPrimitiveType(Types::valueAt(type));
+	
+	fprintf(_ofp, "\t.push context block deref_%s\n", randomString(8).c_str());
+	
+	fprintf(_ofp, "\tldy #%d\n"
+				  "\tldx #0\n"
+				  "deref:\n"
+				  "\tlda (%s),X\n"
+				  "\tpha\n"
+				  "\tinx\n"
+				  "\tdey\n"
+				  "\tbne deref\n",
+				  r1.size(), r1.name().c_str());
+
+	fprintf(_ofp, "\tldx #3\n"
+				  "store:\n"
+				  "\tpla\n"
+				  "\tsta %s,X\n"
+				  "\tdex\n"
+				  "\tbpl deref\n",
+				  r1.name().c_str());
+
+	fprintf(_ofp, "\t.pop context\n");
+	return r1;
 	}

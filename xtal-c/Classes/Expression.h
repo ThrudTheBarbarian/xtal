@@ -45,6 +45,12 @@ class Expression
 								Token &token,
 								int &line,
 								int previousPrecedence);
+								
+        /*********************************************************************\
+        |* Prefix resolution - pointers and de-refs
+        \*********************************************************************/
+        static ASTNode * prefix(Scanner &scanner, Token &token, int &line);
+
 		
         /*********************************************************************\
         |* Function call recognition

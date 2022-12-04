@@ -45,7 +45,10 @@ class Token
 			T_RBRACE,			// Right block		]
 			T_LPAREN,			// Left bracket		(
 			T_RPAREN,			// Right bracket	)
-			
+
+			T_AMPER, 			// Address-of operator
+			T_LOGAND,			// Logical AND
+
 			// Keywords
 			T_PRINT,			// Print command
 			T_IF,				// Start an IF block

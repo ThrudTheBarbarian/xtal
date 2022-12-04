@@ -159,6 +159,18 @@ class A8Emitter : public Emitter
 		\*********************************************************************/
 		Register _cgCompareAndSet(Register r1, Register r2, int how);
 
+		/*********************************************************************\
+        |* Generate code to load the address of a global identifier into a
+        |* register
+		\*********************************************************************/
+		Register _cgAddress(int identifier);
+
+		/*********************************************************************\
+        |* Dereference a pointer to get the value pointed to, and place in the
+        |* same register
+		\*********************************************************************/
+		Register _cgDeref(Register r1, int type);
+
 		
     public:
         /*********************************************************************\
