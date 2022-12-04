@@ -224,8 +224,8 @@ void A8Emitter::genSymbol(int idx)
 \*****************************************************************************/
 Register A8Emitter::_cgLoadInt(int val)
 	{
-	REG type 	= ((val >= 0) && (val <= 255))
-				? Register::UNSIGNED_1BYTE
+	REG type 	= ((val >= 0) && (val <= 255))   ? Register::UNSIGNED_1BYTE
+				: ((val >= 0) && (val <= 65535)) ? Register::UNSIGNED_2BYTE
 				: Register::SIGNED_4BYTE;
 	Register r	= _regs->allocate(type);
 	
@@ -265,28 +265,52 @@ Register A8Emitter::_cgStoreGlobal(Register& r, const Symbol& symbol)
     |* Do some zeroing checks if the register size and the symbol size do not
     |* match
     \*************************************************************************/
-	if ((s.pType() == PT_S32) || (s.pType() == PT_S32))
+	if ((s.pType() == PT_S32) || (s.pType() == PT_U32))
 		{
 		if (r.size() == 1)
-			fprintf(_ofp, "\tlda #0\n"
+			fprintf(_ofp, "\t.push context block extend_%s 1\n"
+						  "\tlda #0\n"
+						  "\tbit r%d\n"
+						  "\tbpl zeroExtend\n"
+						  "\tlda #$ff\n"
+						  "zeroExtend:\n"
 						  "\tsta r%d + 3\n"
 						  "\tsta r%d + 2\n"
-						  "\tsta r%d + 1\n",
+						  "\tsta r%d + 1\n"
+						  "\t.pop context\n",
+						  randomString(6).c_str(),
+						  r.identifier(),
 						  r.identifier(),
 						  r.identifier(),
 						  r.identifier());
 		else if (r.size() == 2)
-			fprintf(_ofp, "\tlda #0\n"
+			fprintf(_ofp, "\t.push context block extend_%s 1\n"
+						  "\tlda #0\n"
+						  "\tbit r%d+1\n"
+						  "\tbpl zeroExtend\n"
+						  "\tlda #$ff\n"
+						  "zeroExtend:\n"
+						  "\tsta r%d + 2\n"
 						  "\tsta r%d + 3\n"
-						  "\tsta r%d + 2\n",
+						  "\t.pop context\n",
+						  randomString(6).c_str(),
+						  r.identifier(),
 						  r.identifier(),
 						  r.identifier());
 		}
 	else if ((s.pType() == PT_S16) || (s.pType() == PT_U16))
 		{
 		if (r.size() == 1)
-			fprintf(_ofp, "\tlda #0\n"
-						  "\tsta r%d + 1\n",
+			fprintf(_ofp, "\t.push context block extend_%s 1\n"
+						  "\tlda #0\n"
+						  "\tbit r%d\n"
+						  "\tbpl zeroExtend\n"
+						  "\tlda #$ff\n"
+						  "zeroExtend:\n"
+						  "\tsta r%d + 1\n"
+						  "\t.pop context\n",
+						  randomString(6).c_str(),
+						  r.identifier(),
 						  r.identifier());
 		}
 		
@@ -342,27 +366,66 @@ void A8Emitter::_cgWiden(Register& reg, int oldWidth, int newWidth)
 				break;
 			
 			case PT_U16:
-			case PT_S16:
 				if (oSize == 1)
-					fprintf(_ofp, "\tlda #0\n"
+					fprintf(_ofp, "\tlda #0; 1->2u\n"
 								  "\tsta %s+1\n",
 								  regName);
+				reg.setType(Register::UNSIGNED_2BYTE);
+				break;
+			case PT_S16:
+				if (oSize == 1)
+					fprintf(_ofp, "\t.push context block extend_%s 1\n"
+								  "\tlda #0; 1->2s\n"
+								  "\tbit %s\n"
+								  "\tbpl zeroExtend\n"
+								  "\tlda #$ff\n"
+								  "zeroExtend:\n"
+							      "\tsta %s+1\n"
+								  "\t.pop context\n",
+								  randomString(6).c_str(),
+								  regName, regName);
 				reg.setType(Register::SIGNED_2BYTE);
 				break;
 			
 			case PT_U32:
-			case PT_S32:
 				if (oSize == 1)
-					fprintf(_ofp, "\tlda #0\n"
+					fprintf(_ofp, "\tlda #0; 1->4u\n"
 								  "\tsta %s+1\n"
 								  "\tsta %s+2\n"
 								  "\tsta %s+3\n",
 								  regName, regName, regName);
 				else if (oSize == 2)
-					fprintf(_ofp, "\tlda #0\n"
+					fprintf(_ofp, "\tlda #0; 2->4u\n"
 								  "\tsta %s+2\n"
 								  "\tsta %s+3\n",
 								  regName, regName);
+				reg.setType(Register::UNSIGNED_4BYTE);
+			case PT_S32:
+				if (oSize == 1)
+					fprintf(_ofp, "\t.push context block extend_%s 1\n"
+								  "\tlda #0; 1->4s\n"
+								  "\tbit %s\n"
+								  "\tbpl zeroExtend\n"
+								  "\tlda #$ff\n"
+								  "zeroExtend:\n"
+								  "\tsta %s+1\n"
+							      "\tsta %s+2\n"
+								  "\tsta %s+3\n"
+								  "\t.pop context\n",
+								  randomString(6).c_str(),
+								  regName, regName, regName, regName);
+				else if (oSize == 2)
+					fprintf(_ofp, "\t.push context block extend_%s 1\n"
+								  "\tlda #0; 2->4s\n"
+								  "\tbit %s+1\n"
+								  "\tbpl zeroExtend\n"
+								  "\tlda #$ff\n"
+								  "zeroExtend:\n"
+							      "\tsta %s+2\n"
+								  "\tsta %s+3\n"
+								  "\t.pop context\n",
+								  randomString(6).c_str(),
+								  regName, regName, regName);
 				reg.setType(Register::SIGNED_4BYTE);
 				break;
 			

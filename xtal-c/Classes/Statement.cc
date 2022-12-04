@@ -273,6 +273,7 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 
 		case Token::T_U8:
 		case Token::T_S8:
+		case Token::T_U16:
 		case Token::T_S32:
 			_varDeclaration(token, line);
 			tree = nullptr;
@@ -512,6 +513,10 @@ int Statement::_parseType(Token& token, int& line)
 		
 		case Token::T_U8:
 			type = PT_U8;
+			break;
+		
+		case Token::T_U16:
+			type = PT_U16;
 			break;
 		
 		case Token::T_S8:

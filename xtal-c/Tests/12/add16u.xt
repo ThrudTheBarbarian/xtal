@@ -1,0 +1,31 @@
+void main()
+	[
+	u16 a;
+	u16 b;
+	u16 c;
+	
+	a = 1;
+	b = 2;
+	c = a + b;
+	if (c != 3)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	a = 65535;
+	b = 2;
+	c = a + b;
+	if (c != 1)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	a = 65535;
+	b = 65535;
+	c = a + b;
+	if (c != 65534)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	]
+

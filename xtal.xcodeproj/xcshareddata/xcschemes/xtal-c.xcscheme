@@ -58,6 +58,14 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$PROJECT_DIR/xtal-c/Tests/15/ptr.xt -d"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "$PROJECT_DIR/xtal-c/Tests/12/add16u.xt -d"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "$PROJECT_DIR/xtal-c/Tests/12/test.01 -d -o /var/folders/88/dgfn4_5s7976s72nnfx1y12w0000gn/T/5PN2qmWq.asm"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

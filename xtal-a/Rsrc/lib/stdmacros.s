@@ -978,7 +978,7 @@ dec0:
 ;|*    %2 : address of source operand #2
 ;|*    %3 : address of destination operand
 ;\*************************************************************************/
-.macro _add16
+.macro _add16u
 	.if %1 != %2
 		clc
         lda %1
@@ -1062,7 +1062,7 @@ dec0:
 ;|*    %2 : address of source operand #2
 ;|*    %3 : address of destination operand
 ;\*************************************************************************/
-.macro _sub16
+.macro _sub16u
 		sec
         lda %1
        	sbc %2
@@ -1266,7 +1266,7 @@ dec0:
 	loop:
 		_lsr16 %1,%1
 		bcc next
-		_add16 %2, %3, %3
+		_add16u %2, %3, %3
 	next:
 		_asl16 %2, %2
 		dex
@@ -1332,7 +1332,7 @@ dec0:
 		_asl32 %3,%3
 		_asl32 %1,%1
 		bcc next
-		_add16 %2, %3, %3
+		_add16u %2, %3, %3
 		bcc next
 		_inc16 %3+2
 	next:
@@ -1368,7 +1368,7 @@ dec0:
 		_asl16 %3, %3
 	.endif
 	.if (%2 & $0001)
-		_add16 %1, %3, %3
+		_add16u %1, %3, %3
 	.endif
 .endmacro
 
@@ -1456,9 +1456,9 @@ dec0:
 	loop:
 		_asl16 %1, %1
 		_rol16 %4, %4
-		_sub16 %4, %2, %4
+		_sub16u %4, %2, %4
 		bcs next
-		_add16 %4, %2, %4
+		_add16u %4, %2, %4
 	next:
 		_rol16 %3, %3
 		dex
@@ -1469,7 +1469,7 @@ dec0:
 ;/*************************************************************************\
 ;|* Type: Arithmetic operation
 ;|*
-;|* Divide a 32-bit value at location %1 by a 16-bit value %2 and
+;|* Divide a 16-bit value at location %1 by a 16-bit value %2 and
 ;|* store 16-bit result in location %3 and the 16-bit remainder in %4
 ;|*
 ;|* Clobbers: A, X
@@ -1485,9 +1485,9 @@ dec0:
 	loop:
 		_asl32 %1, %1
 		_rol16 %4, %4
-		_sub16 %4, %2, %4
+		_sub16u %4, %2, %4
 		bcs next
-		_add16 %4, %2, %4
+		_add16u %4, %2, %4
 	next:
 		_rol16 %3, %3
 		dex
