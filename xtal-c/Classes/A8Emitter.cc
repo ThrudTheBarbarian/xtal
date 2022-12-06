@@ -268,23 +268,42 @@ Register A8Emitter::_cgStoreGlobal(Register& r, const Symbol& symbol)
 	if ((s.pType() == PT_S32) || (s.pType() == PT_U32))
 		{
 		if (r.size() == 1)
-			fprintf(_ofp, "\t.push context block extend_%s 1\n"
-						  "\tlda #0\n"
-						  "\tbit r%d\n"
-						  "\tbpl zeroExtend\n"
-						  "\tlda #$ff\n"
-						  "zeroExtend:\n"
-						  "\tsta r%d + 3\n"
-						  "\tsta r%d + 2\n"
-						  "\tsta r%d + 1\n"
-						  "\t.pop context\n",
-						  randomString(6).c_str(),
-						  r.identifier(),
-						  r.identifier(),
-						  r.identifier(),
-						  r.identifier());
+			{
+			if (r.type() > 0xFF)	// Signed!
+				{
+				fprintf(_ofp, "\t.push context block extend_%s 1\n"
+							  "\tlda #0\n"
+							  "\tbit r%d\n"
+							  "\tbpl zeroExtend\n"
+							  "\tlda #$ff\n"
+							  "zeroExtend:\n"
+							  "\tsta r%d + 3\n"
+							  "\tsta r%d + 2\n"
+							  "\tsta r%d + 1\n"
+							  "\t.pop context\n",
+							  randomString(6).c_str(),
+							  r.identifier(),
+							  r.identifier(),
+							  r.identifier(),
+							  r.identifier());
+				}
+			else
+				{
+				fprintf(_ofp, "\tlda #0\n"
+							  "\tsta r%d + 3\n"
+							  "\tsta r%d + 2\n"
+							  "\tsta r%d + 1\n",
+							  r.identifier(),
+							  r.identifier(),
+							  r.identifier());
+				}
+			}
+			
 		else if (r.size() == 2)
-			fprintf(_ofp, "\t.push context block extend_%s 1\n"
+			{
+			if (r.type() > 0xFF)
+				{
+				fprintf(_ofp, "\t.push context block extend_%s 1\n"
 						  "\tlda #0\n"
 						  "\tbit r%d+1\n"
 						  "\tbpl zeroExtend\n"
@@ -297,21 +316,42 @@ Register A8Emitter::_cgStoreGlobal(Register& r, const Symbol& symbol)
 						  r.identifier(),
 						  r.identifier(),
 						  r.identifier());
+				}
+			else
+				{
+				fprintf(_ofp, "\tlda #0\n"
+						      "\tsta r%d + 2\n"
+						      "\tsta r%d + 3\n",
+						      r.identifier(),
+						      r.identifier());
+				}
+			}
 		}
 	else if ((s.pType() == PT_S16) || (s.pType() == PT_U16))
 		{
 		if (r.size() == 1)
-			fprintf(_ofp, "\t.push context block extend_%s 1\n"
-						  "\tlda #0\n"
-						  "\tbit r%d\n"
-						  "\tbpl zeroExtend\n"
-						  "\tlda #$ff\n"
-						  "zeroExtend:\n"
-						  "\tsta r%d + 1\n"
-						  "\t.pop context\n",
-						  randomString(6).c_str(),
-						  r.identifier(),
-						  r.identifier());
+			{
+			if (r.type() > 0xFF)	// Signed!
+				{
+				fprintf(_ofp, "\t.push context block extend_%s 1\n"
+							  "\tlda #0\n"
+							  "\tbit r%d\n"
+							  "\tbpl zeroExtend\n"
+							  "\tlda #$ff\n"
+							  "zeroExtend:\n"
+							  "\tsta r%d + 1\n"
+							  "\t.pop context\n",
+							  randomString(6).c_str(),
+							  r.identifier(),
+							  r.identifier());
+				}
+			else
+				{
+				fprintf(_ofp, "\tlda #0\n"
+							  "\tsta r%d + 1\n",
+							  r.identifier());
+				}
+			}
 		}
 		
 	/*************************************************************************\
@@ -355,7 +395,13 @@ void A8Emitter::_cgWiden(Register& reg, int oldWidth, int newWidth)
 	{
 	int oSize = Types::typeSize(oldWidth);
 	const char *regName = reg.name().c_str();
-	
+	bool isSigned		= (oldWidth == PT_S8)
+					   || (oldWidth == PT_S16)
+					   || (oldWidth == PT_S32)/*
+					   || (newWidth == PT_S8)
+					   || (newWidth == PT_S16)
+					   || (newWidth == PT_S32)*/;
+					   
 	if (oldWidth != newWidth)
 		{
 		switch (newWidth)
@@ -365,17 +411,15 @@ void A8Emitter::_cgWiden(Register& reg, int oldWidth, int newWidth)
 				reg.setType(Register::UNSIGNED_1BYTE);
 				break;
 			
+			case PT_S16:
 			case PT_U16:
-				if (oSize == 1)
-					fprintf(_ofp, "\tlda #0; 1->2u\n"
+				if (isSigned == false)
+					fprintf(_ofp, "\tlda #$0 ; 1u->2*\n"
 								  "\tsta %s+1\n",
 								  regName);
-				reg.setType(Register::UNSIGNED_2BYTE);
-				break;
-			case PT_S16:
-				if (oSize == 1)
-					fprintf(_ofp, "\t.push context block extend_%s 1\n"
-								  "\tlda #0; 1->2s\n"
+				else
+					fprintf(_ofp, "\t.push context block widen_%s 1\n"
+								  "\tlda #0 ; 1s -> 2*\n"
 								  "\tbit %s\n"
 								  "\tbpl zeroExtend\n"
 								  "\tlda #$ff\n"
@@ -384,49 +428,58 @@ void A8Emitter::_cgWiden(Register& reg, int oldWidth, int newWidth)
 								  "\t.pop context\n",
 								  randomString(6).c_str(),
 								  regName, regName);
-				reg.setType(Register::SIGNED_2BYTE);
+				reg.setType(newWidth == PT_S16 ? Register::SIGNED_2BYTE
+											   : Register::UNSIGNED_2BYTE);
 				break;
+				
 			
 			case PT_U32:
-				if (oSize == 1)
-					fprintf(_ofp, "\tlda #0; 1->4u\n"
-								  "\tsta %s+1\n"
-								  "\tsta %s+2\n"
-								  "\tsta %s+3\n",
-								  regName, regName, regName);
-				else if (oSize == 2)
-					fprintf(_ofp, "\tlda #0; 2->4u\n"
-								  "\tsta %s+2\n"
-								  "\tsta %s+3\n",
-								  regName, regName);
-				reg.setType(Register::UNSIGNED_4BYTE);
 			case PT_S32:
 				if (oSize == 1)
-					fprintf(_ofp, "\t.push context block extend_%s 1\n"
-								  "\tlda #0; 1->4s\n"
-								  "\tbit %s\n"
-								  "\tbpl zeroExtend\n"
-								  "\tlda #$ff\n"
-								  "zeroExtend:\n"
-								  "\tsta %s+1\n"
-							      "\tsta %s+2\n"
-								  "\tsta %s+3\n"
-								  "\t.pop context\n",
-								  randomString(6).c_str(),
-								  regName, regName, regName, regName);
+					{
+					if (isSigned == false)
+						fprintf(_ofp, "\tlda #0 ; 1u->4*\n"
+									  "\tsta %s+1\n"
+									  "\tsta %s+2\n"
+									  "\tsta %s+3\n",
+									  regName, regName, regName);
+
+					else
+						fprintf(_ofp, "\t.push context block widen_%s 1\n"
+									  "\tlda #0 ; 1s->4*\n"
+									  "\tbit %s\n"
+									  "\tbpl zeroExtend\n"
+									  "\tlda #$ff\n"
+									  "zeroExtend:\n"
+									  "\tsta %s+1\n"
+									  "\tsta %s+2\n"
+									  "\tsta %s+3\n"
+									  "\t.pop context\n",
+									  randomString(6).c_str(),
+									  regName, regName, regName, regName);
+					}
 				else if (oSize == 2)
-					fprintf(_ofp, "\t.push context block extend_%s 1\n"
-								  "\tlda #0; 2->4s\n"
-								  "\tbit %s+1\n"
-								  "\tbpl zeroExtend\n"
-								  "\tlda #$ff\n"
-								  "zeroExtend:\n"
-							      "\tsta %s+2\n"
-								  "\tsta %s+3\n"
-								  "\t.pop context\n",
-								  randomString(6).c_str(),
-								  regName, regName, regName);
-				reg.setType(Register::SIGNED_4BYTE);
+					{
+					if (isSigned == false)
+						fprintf(_ofp, "\tlda #0 ; 2u->4*\n"
+								      "\tsta %s+2\n"
+								      "\tsta %s+3\n",
+								      regName, regName);
+					else
+						fprintf(_ofp, "\t.push context block widen_%s 1\n"
+								      "\tlda #0; 2s->4*\n"
+								      "\tbit %s+1\n"
+								      "\tbpl zeroExtend\n"
+								      "\tlda #$ff\n"
+								      "zeroExtend:\n"
+							          "\tsta %s+2\n"
+								      "\tsta %s+3\n"
+								      "\t.pop context\n",
+								      randomString(6).c_str(),
+								      regName, regName, regName);
+					}
+				reg.setType(newWidth == PT_S32 ? Register::SIGNED_4BYTE
+											   : Register::UNSIGNED_4BYTE);
 				break;
 			
 			default:

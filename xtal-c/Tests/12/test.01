@@ -11,10 +11,5 @@ void main()
 	
 	
 	
-	c = a - d;
-
-	if (c != 4294918296 )
-		[ print c; ]
-	else
-		[ print 1; ]
+	c = b - d ;
 	]

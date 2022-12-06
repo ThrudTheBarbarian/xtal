@@ -65,7 +65,7 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/12/test.01 -d -o /var/folders/88/dgfn4_5s7976s72nnfx1y12w0000gn/T/5PN2qmWq.asm"
+            argument = "$PROJECT_DIR/xtal-c/Tests/12/test.01 -d -o /var/folders/th/63xq4hqx6yqcx57qgds7ry7r0000gn/T/5PN2qmWq.asm"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

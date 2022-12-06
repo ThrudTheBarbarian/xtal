@@ -64,6 +64,7 @@ class Scanner
 	GET(String, listing);						// String form of output
 	GET(int, labelId);							// Current numeric label id
 	GETSET(bool, showListing, ShowListing);		// Show internal listing
+	GETSET(String, currentLine, CurrentLine);	// Current source line
 	
     private:
 		Engine& 	_engine;			// YACC-based expression-parsing engine

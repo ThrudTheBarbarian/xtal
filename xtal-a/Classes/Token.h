@@ -26,6 +26,7 @@ typedef enum
 	P_WORD,
 	P_ADDR,
 	P_ORG,
+	P_SRCREF,
 	P_MOVE,
 	P_ADD,
 	P_DIV,

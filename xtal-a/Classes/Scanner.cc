@@ -79,17 +79,26 @@ void Scanner::reset(int to)
 \*****************************************************************************/
 int Scanner::scan(TokenList &tokens, int pass)
 	{
-	int state 	= SCAN_MORE;
+	int state 		= SCAN_MORE;
 	
-	String s	= _nextLine(state);
-	s		 	= trim(s.substr(0, s.find(";")));
-	String lc	= lcase(s);
+	String s		= _nextLine(state);
+	_currentLine	= s;
+	s		 		= trim(s.substr(0, s.find(";")));
+	String lc		= lcase(s);
 	
 	/*************************************************************************\
     |* If the string is empty, just return
     \*************************************************************************/
 	if (s.length() == 0)
 		return state;
+	
+	/*************************************************************************\
+    |* Insert a pseudo-token for the line-content
+    \*************************************************************************/
+	if (_showListing && (pass == 2))
+		{
+		fprintf(stderr, "; [%s]\n", trim(s).c_str());
+		}
 		
 	/*************************************************************************\
     |* Check for labels, and if one is there, find, process and remove

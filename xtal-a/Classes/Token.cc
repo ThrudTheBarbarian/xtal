@@ -20,6 +20,7 @@ static Token::TokenInfo _tokens[] = {
 	{T_DIRECTIVE, 	P_WORD,		"TOKEN_WORD   ", ".word"   , 5},
 	{T_DIRECTIVE, 	P_ADDR,		"TOKEN_ADDR   ", ".addr"   , 5},
 	{T_DIRECTIVE, 	P_ORG,		"TOKEN_ORG    ", ".org"	   , 4},
+	{T_DIRECTIVE, 	P_SRCREF,	"TOKEN_SRCREF ", ""		   , 0},
 	
 	{T_META, 		P_MOVE,		"TOKEN_MOVE   ", "move"	   , 4},
 	{T_META, 		P_ADD,		"TOKEN_ADD    ", "add"	   , 3},
@@ -346,6 +347,8 @@ String Token::toString(int64_t at)
 		}
 	else if ((_which == P_LABEL) || (_which == P_LLABEL))
 		info += "\n" + _arg1+":";
+	else if (_which == P_SRCREF)
+		info += "\n; " + _arg1+"::";
 	else
 		info += it->second.prefix;
 	
@@ -441,8 +444,9 @@ Token::TokenInfo Token::parsePrefix(String s)
 	_populateMap();
 	
 	for (Elements<PseudoOp, Token::TokenInfo> kv : _info)
-		if (s.substr(0, kv.value.length) == kv.value.prefix)
-			return kv.value;
+		if (kv.value.length > 0)
+			if (s.substr(0, kv.value.length) == kv.value.prefix)
+				return kv.value;
 		
 	return _info[P_NONE];
 	}
