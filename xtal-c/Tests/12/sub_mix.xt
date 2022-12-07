@@ -42,7 +42,7 @@ void main()
 	
 	c = b - d ;
 
-	if (c != 4294917301 )
+	if (c != 15541 )
 		[ print c; ]
 	else
 		[ print 1; ]

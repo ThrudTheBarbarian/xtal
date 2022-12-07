@@ -1620,6 +1620,55 @@ done:
 
 .endmacro
 
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Divide an unsigned 16-bit value at location %1 by an unsigned 8-bit
+;|* value %2 and store the 8-bit remainder in location %3 and surface the
+;|* result in %1
+;|*
+;|* Clobbers: A, X, Y
+;|* Arguments:
+;|*    %1 : location of dividend and final result
+;|*    %2 : location of divisor
+;|*    %3 : location of remainder
+;\*************************************************************************/
+.macro _div16u
+		_clr16 %3			; Clear the accumulator
+		
+		lda %2				; Check for divide-by-zero error
+		bne ok
+		sec					; set error status
+		bcs error
+ok:
+		ldy #16		  	    ; Number of bits to rotate through
+
+sdv_loop:
+		_asl16 %1,%1		; left-shift dividend
+		_rol16 %3,%3		; and rotate into 'accumulator'
+		
+		_sub16u %3,%2,%3	; subtract divisor from accumulator
+		bcs sdv4			; if carry is set, r0 is +ve, skip add-back
+		
+		_add16u %3,%2,%3	; get r0 +ve again by adding back r2
+		clc					; then always branch to next-bit routine
+		bcc sdv5
+
+sdv4:
+		inc %1				; increment the results bit
+		bcs sdv5			; and allow space for a longer bcs for error
+
+error:
+		bcs done
+	
+sdv5:
+		dey					; Go to the next bit
+		bne sdv_loop		; ... for 16 times
+		clc					; set status = no error
+done:
+
+.endmacro
+
 
 ;/*************************************************************************\
 ;|* Type: Arithmetic operation

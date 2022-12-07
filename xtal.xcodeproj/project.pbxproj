@@ -250,6 +250,8 @@
 		F4BE0804293ADFCF00004A8D /* div_mix.xt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = div_mix.xt; sourceTree = "<group>"; };
 		F4BE0806293BD9E100004A8D /* simpleFunc.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = simpleFunc.xt; sourceTree = "<group>"; };
 		F4BE0808293C309D00004A8D /* ptr.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ptr.xt; sourceTree = "<group>"; };
+		F4BE0809294026EE00004A8D /* mul16u.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = mul16u.xt; sourceTree = "<group>"; };
+		F4BE080A294027E100004A8D /* div16u.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = div16u.xt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -566,10 +568,12 @@
 				F4BE0802293ADE7C00004A8D /* sub_mix.xt */,
 				F4BE07FE293A5E7000004A8D /* mul32s.xt */,
 				F4BE07FF293A647E00004A8D /* mul8u.xt */,
+				F4BE0809294026EE00004A8D /* mul16u.xt */,
 				F4BE0803293ADF5F00004A8D /* mul_mix.xt */,
 				F4BE0800293AD97900004A8D /* div32s.xt */,
 				F4BE0801293AD9F700004A8D /* div8u.xt */,
 				F4BE0804293ADFCF00004A8D /* div_mix.xt */,
+				F4BE080A294027E100004A8D /* div16u.xt */,
 			);
 			path = 12;
 			sourceTree = "<group>";
