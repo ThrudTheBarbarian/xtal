@@ -83,7 +83,11 @@ int Scanner::scan(Token& token, int& line)
 		case ')':
 			token.setToken(Token::T_RPAREN);
 			break;
-				
+
+		case ',':
+ 			token.setToken(Token::T_COMMA);
+			break;
+
 
 		case '=':
 			if ((c = _next(line)) == '=')

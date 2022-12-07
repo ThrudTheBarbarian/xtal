@@ -96,19 +96,16 @@ ASTNode * Statement::compoundStatement(Token& token, int& line)
 /****************************************************************************\
 |* Process a function declaration. Currently void return and arguments
 \****************************************************************************/
-ASTNode * Statement::functionDeclaration(Token& token, int& line)
+ASTNode * Statement::_functionDeclaration(Token& token, int& line, int type)
 	{
-	// Looking for the type, the identifier, and the '(' ')'. For now don't
-	// do anything with them
-	int type = _parseType(token, line);
+	// the text() accessor gives access to the name of the
+	// symbol that has been scanned, and we have the type passed in
+	int symIdx = SYMTAB->add(_scanner->text(), type, ST_FUNCTION);
+	SYMTAB->setFunctionId(symIdx);
 
-	// Check we have an identifier
-	_identifier(*_scanner, token, line);
+	// Tell the emitter to reserve space for our variable
+	_emitter->genSymbol(symIdx);
 
-	// Add it to the global symbol table
-	int nameSlot = SYMTAB->add(_scanner->text(), type, ST_FUNCTION);
-	SYMTAB->setFunctionId(nameSlot);
-	
 	// Parentheses
 	leftParen(*_scanner, token, line);
 	rightParen(*_scanner, token, line);
@@ -121,6 +118,9 @@ ASTNode * Statement::functionDeclaration(Token& token, int& line)
 	// was a return statement
 	if (type != PT_VOID)
 		{
+		if (tree == nullptr)
+			FATAL(ERR_FUNCTION, "No statements in function with non-void type");
+
 		ASTNode *lastStmt = (tree->op() == ASTNode::A_GLUE)
 						   ? tree->right()
 						   : tree;
@@ -130,7 +130,7 @@ ASTNode * Statement::functionDeclaration(Token& token, int& line)
 
 	
 	// Return the AST node representing a function wrapping the body
-	return new ASTNode(ASTNode::A_FUNCTION, PT_VOID, tree, nameSlot);
+	return new ASTNode(ASTNode::A_FUNCTION, type, tree, symIdx);
 	}
 
 
@@ -187,6 +187,37 @@ ASTNode * Statement::returnStatement(Token& token, int& line)
 	
 	return tree;
 	}
+
+
+/****************************************************************************\
+|* Global declaration - either function or variable
+\****************************************************************************/
+void Statement::globalDeclaration(Token& token, int&line)
+	{
+	Register none(Register::NO_REGISTER);
+	ASTNode *tree = nullptr;
+	
+	forever
+		{
+		// Fetch which type of primitive type we're dealing with
+		int type = _parseType(token, line);
+		
+		// Check we have an identifier
+		_identifier(*_scanner, token, line);
+		
+		if (token.token() == Token::T_LPAREN)
+			{
+			tree = _functionDeclaration(token, line, type);
+			_emitter->emit(tree, none, 0, "");
+			}
+		else
+			_varDeclaration(token, line, type);
+		
+		if (token.token() == Token::T_NONE)
+			break;
+		}
+	}
+
 
 #pragma mark - static methods : matching
 
@@ -263,7 +294,8 @@ void Statement::rightParen(Scanner& scanner, Token& token, int& line)
 \****************************************************************************/
 ASTNode * Statement::_singleStatement(Token& token, int& line)
 	{
-	ASTNode *tree = nullptr;
+	ASTNode *tree 	= nullptr;
+	int type	 	= -1;
 	
 	switch (token.token())
 		{
@@ -275,7 +307,14 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 		case Token::T_S8:
 		case Token::T_U16:
 		case Token::T_S32:
-			_varDeclaration(token, line);
+			// Parse the type
+			type = _parseType(token, line);
+			
+			// Check we have an identifier
+			_identifier(*_scanner, token, line);
+			
+			// Declare the variable
+			_varDeclaration(token, line, type);
 			tree = nullptr;
 			break;
 
@@ -549,22 +588,36 @@ int Statement::_parseType(Token& token, int& line)
 |* token followed by an identifier and a semicolon. Scanner::text() now has
 |* the identifier's name. If all that us ok, add it as a known identifier
 \****************************************************************************/
-void Statement::_varDeclaration(Token& token, int& line)
+void Statement::_varDeclaration(Token& token, int& line, int type)
 	{
-	// Fetch which type of primitive type we're dealing with
-	int pType = _parseType(token, line);
-	
-	// Check we have an identifier
-	_identifier(*_scanner, token, line);
+	forever
+		{
+		// the text() accessor gives access to the name of the
+		// symbol that has been scanned, and we have the type passed in
+		int symIdx = SYMTAB->add(_scanner->text(), type, ST_VARIABLE);
 
-	// Add it to the global symbol table
-	int symIdx = SYMTAB->add(_scanner->text(), pType, ST_VARIABLE);
+		// Tell the emitter to reserve space for our variable
+		_emitter->genSymbol(symIdx);
 
-	// Tell the emitter to reserve space for our variable
-	_emitter->genSymbol(symIdx);
-
-	// Match the following semi-colon and stop if we're out of tokens
-	_semicolon(*_scanner, token, line);
+		// Match the following semi-colon and stop if we're out of tokens
+		if (token.token() == Token::T_SEMICOLON)
+			{
+			_scanner->scan(token, line);
+			return;
+			}
+		
+		// If the next token is a comma, skip it, get the identifier, and
+		// loop back around
+		if (token.token() == Token::T_COMMA)
+			{
+			_scanner->scan(token, line);
+			_identifier(*_scanner, token, line);
+			continue;
+			}
+			
+		// Should never get here, so error out if we do
+		FATAL(ERR_PARSE, "Missing ; or , after identifier");
+		}
 	}
 
 

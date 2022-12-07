@@ -119,15 +119,7 @@ int Compiler::_run(std::string source)
 		
 	scanner.scan(t, _line);
 	_emitter->preamble();
-	
-	forever
-		{
-		ASTNode *tree = stmt.functionDeclaration(t, _line);
-		_emitter->emit(tree, none, 0, "");
-		if (t.token() == Token::T_NONE)
-			break;
-		}
-		
+	stmt.globalDeclaration(t, _line);
 	_emitter->postamble();
 	
 	return ok;

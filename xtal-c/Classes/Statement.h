@@ -61,8 +61,13 @@ class Statement
         /********************************************************************\
         |* Handle a declaration statement
         \********************************************************************/
-		void _varDeclaration(Token& token, int& line);
-		
+		void _varDeclaration(Token& token, int& line, int type);
+
+        /********************************************************************\
+        |* Process a function declaration
+        \********************************************************************/
+        ASTNode * _functionDeclaration(Token& token, int& line, int type);
+
         /********************************************************************\
         |* Handle an assign statement
         \********************************************************************/
@@ -110,10 +115,11 @@ class Statement
         \********************************************************************/
         ASTNode * compoundStatement(Token& token, int& line);
 
+
         /********************************************************************\
-        |* Process a function declaration
+        |* Process a global function or variable declaration
         \********************************************************************/
-        ASTNode * functionDeclaration(Token& token, int& line);
+		void globalDeclaration(Token& token, int&line);
      
         /********************************************************************\
         |* Process a return statement

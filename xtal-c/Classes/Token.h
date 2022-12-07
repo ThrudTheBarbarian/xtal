@@ -48,6 +48,7 @@ class Token
 
 			T_AMPER, 			// Address-of operator
 			T_LOGAND,			// Logical AND
+			T_COMMA,			// Comma operator
 
 			// Keywords
 			T_PRINT,			// Print command
