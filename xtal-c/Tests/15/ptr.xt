@@ -3,6 +3,7 @@ s32 main()
 	[
 	u8 a; u8 *b; u8 c;
 	s32 d; s32 *e; s32 f;
+	u16 h; u16 *i; u16 j;
 	
 	a =42;
 	print a;
@@ -15,6 +16,12 @@ s32 main()
 	e = &d;
 	f = *e;
 	print f;
+	
+	h = 50000;
+	print h;
+	i = &h;
+	j = *i;
+	print j;
 	
 	return (0);
 	]

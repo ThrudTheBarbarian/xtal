@@ -200,7 +200,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "1FFBF0C3-635B-4CEA-9C00-214BBC40091D"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "xtal-c/Classes/A8Emitter.cc"
@@ -209,6 +209,22 @@
             startingLineNumber = "405"
             endingLineNumber = "405"
             landmarkName = "A8Emitter::_cgWiden(reg, oldWidth, newWidth)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "524DCAD3-949D-4962-8093-5D00A28DD727"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "xtal-c/Classes/RegisterFile.cc"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "81"
+            endingLineNumber = "81"
+            landmarkName = "RegisterFile::allocate(type)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

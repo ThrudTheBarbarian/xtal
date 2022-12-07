@@ -181,7 +181,7 @@ static Register::RegType _symbolSize(const Symbol& symbol)
 		
 		default:
 			if (symType > 0xff)
-				type = Register::SIGNED_4BYTE;	// pointer
+				type = Register::UNSIGNED_2BYTE;	// pointer
 			break;
 		}
 	
@@ -1030,7 +1030,7 @@ Register A8Emitter::_cgAddress(int identifier)
 	// Fetch the symbol
 	Symbol s 	= SYMTAB->table()[identifier];
 	
-	fprintf(_ofp, "\tmove.4 #S_%s %s\n",
+	fprintf(_ofp, "\tmove.2 #S_%s %s\n",
 					s.name().c_str(),
 					r.name().c_str());
 	return r;
@@ -1041,32 +1041,46 @@ Register A8Emitter::_cgAddress(int identifier)
 \*****************************************************************************/
 Register A8Emitter::_cgDeref(Register r1, int type)
 	{
-	
-	fprintf(_ofp, "\t.push context block deref_%s 1\n", randomString(8).c_str());
-	
-	fprintf(_ofp, "\tldx #%d\n"
-				  "\tldy #0\n"
-				  "deref:\n"
-				  "\tlda (%s),y\n"
-				  "\tpha\n"
-				  "\tiny\n"
-				  "\tdex\n"
-				  "\tbne deref\n",
-				  r1.size(), r1.name().c_str());
+	// Get a new out-register
+	Register r 	= _regs->allocate(Register::UNSIGNED_2BYTE);
+	r.setPrimitiveType(Types::valueAt(type));
 
-	fprintf(_ofp, "\tldx #3\n"
-				  "store:\n"
-				  "\tpla\n"
-				  "\tsta %s,X\n"
-				  "\tdex\n"
-				  "\tbpl store\n",
-				  r1.name().c_str());
+	fprintf(_ofp, "\tldy #0\n");
+	for (int i=0; i<r1.size(); i++)
+		{
+		fprintf(_ofp, "\tlda (%s),y\n"
+					  "\tsta %s+%d\n",
+					  r1.name().c_str(),
+					  r.name().c_str(),
+					  i);
+		if (i < r1.size()-1)
+			fprintf(_ofp, "\tiny\n");
+		}
+//
+//	fprintf(_ofp, "\t.push context block deref_%s 1\n", randomString(8).c_str());
+//
+//
+//
+//	fprintf(_ofp, "\tldx #%d\n"
+//				  "\tldy #0\n"
+//				  "deref:\n"
+//				  "\tlda (%s),y\n"
+//				  "\tpha\n"
+//				  "\tiny\n"
+//				  "\tdex\n"
+//				  "\tbne deref\n",
+//				  r1.size(), r1.name().c_str());
+//
+//	fprintf(_ofp, "\tldx #3\n"
+//				  "store:\n"
+//				  "\tpla\n"
+//				  "\tsta %s,X\n"
+//				  "\tdex\n"
+//				  "\tbpl store\n",
+//				  r1.name().c_str());
+//
+//	fprintf(_ofp, "\t.pop context\n");
 
-	fprintf(_ofp, "\t.pop context\n");
-
-
-	// Make the register match the thing the symbol is pointing to
-	r1.setPrimitiveType(Types::valueAt(type));
-
-	return r1;
+	_regs->free(r1);
+	return r;
 	}
