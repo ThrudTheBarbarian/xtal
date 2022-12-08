@@ -25,7 +25,8 @@ class ASTNode
 		enum
 			{
 			A_NONE 		= -1,
-			A_ADD		= 1,	// Add  (align with Token::T_PLUS)
+			A_ASSIGN	= 1,	// Assign operation (must = Token::T_ASSIGN)
+			A_ADD,				// Add  (align with Token::T_PLUS)
 			A_SUBTRACT,			// Subtract
 			A_MULTIPLY,			// Multiply
 			A_DIVIDE,			// Divide
@@ -43,8 +44,6 @@ class ASTNode
 			// but we have all the binary operators above
 			
 			A_IDENT,			// Identifier
-			A_LVIDENT,			// L-value identifier
-			A_ASSIGN,			// Assign operation
 			
 			A_PRINT, 			// Print statement node
 			A_GLUE, 			// Weld trees together node
@@ -79,6 +78,7 @@ class ASTNode
     GETSET(ASTNode *, right, Right);	// Right child node
     GETSET(Value, value, Value);		// Type-specific value
 	GETSET(int, type, Type);			// Primitive type for this node
+    GETSET(bool, isRValue, IsRValue);	// Whether this is an r-value node
     
     private:
         
@@ -112,6 +112,11 @@ class ASTNode
         |* Interpret the AST node using left->right traversal of the tree
         \*********************************************************************/
 		int interpret(void);
+		
+        /*********************************************************************\
+        |* Dump out the tree from this node down
+        \*********************************************************************/
+		void dump(ASTNode *node = nullptr, int label = 0, int level = 0);
 		
         /*********************************************************************\
         |* Return a string representation of the AST node

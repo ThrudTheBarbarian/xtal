@@ -47,6 +47,11 @@ class A8Emitter : public Emitter
         Register _cgStoreGlobal(Register& reg, const Symbol& symbol);
         
 		/*********************************************************************\
+        |* Store through a dereference of a pointer
+        \*********************************************************************/
+        Register _cgStoreDeref(Register& reg, Register &r2, int type);
+        
+		/*********************************************************************\
         |* Add 2 registers
         \*********************************************************************/
         Register _cgAdd(Register r1, Register r2);

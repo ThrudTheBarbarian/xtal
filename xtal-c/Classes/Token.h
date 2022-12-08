@@ -23,7 +23,8 @@ class Token
 		enum
 			{
 			T_NONE		= -1,
-			T_PLUS 		= 1,	// Plus op
+			T_ASSIGN	= 1,	// Equals (assign, lowest priority)
+			T_PLUS,				// Plus op
 			T_MINUS,			// Minus op
 			T_STAR,				// Multiply op
 			T_SLASH,			// Divide op
@@ -35,10 +36,15 @@ class Token
 			T_GT,				// Is greater than
 			T_LE,				// Is less than or equal to
 			T_GE,				// Is greater than or equal to
+
+			T_VOID, 			// Void declaration
+			T_S32,				// signed 32-bit value
+			T_S8,				// signed 8-bit value
+			T_U8,				// unsigned 8-bit value
+			T_U16,				// unsigned 16-bit value
 			
 			T_INTLIT,			// Integer literal
 			T_SEMICOLON,		// Semicolon
-			T_ASSIGN,			// Equals (assign)
 			T_IDENT,			// Identifier
 			
 			T_LBRACE,			// Left block		[
@@ -57,12 +63,6 @@ class Token
 			T_WHILE,			// Start a WHILE loop
 			T_FOR,				// Start a FOR loop
 			T_RETURN,			// Return from a function
-			
-			T_VOID, 			// Void declaration
-			T_S32,				// signed 32-bit value
-			T_S8,				// signed 8-bit value
-			T_U8,				// unsigned 8-bit value
-			T_U16,				// unsigned 16-bit value
 			
 			T_MAXVAL,			// Max token value
 			};

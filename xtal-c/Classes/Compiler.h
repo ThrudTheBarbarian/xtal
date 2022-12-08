@@ -29,6 +29,7 @@ class Compiler
     GET(bool, hadError);			// Whether we've seen a syntax error
     GET(int, line);					// The current line number
     GET(Emitter *, emitter);		// How we produce assembly
+    GET(bool, dumpAST);				// Whether to dump the AST tree
     
     private:
     

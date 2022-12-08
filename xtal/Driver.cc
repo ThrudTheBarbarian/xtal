@@ -66,7 +66,18 @@ int Driver::main(int argc, const char *argv[])
     _listFile		= _ap->stringFor("-l", "--list", "",
 										"General",
 										 "Output listing filename");
-	
+    _dumpTree		= _ap->flagFor("-T", "--dump-ast", false,
+										"General",
+										 "Output Abstract Syntax Tree");
+
+	/*************************************************************************\
+	|* Check for help
+	\*************************************************************************/
+	bool help		= _ap->flagFor("-h", "--help", false,
+									"General", "Show this wonderful help");
+	if (help)
+		_ap->usage(true);
+		
 	/*************************************************************************\
 	|* Run through the symbols to see if org= has been defined. If not,
 	|* define it to be the default value
@@ -123,6 +134,9 @@ String Driver::_cCmd(void)
 	for (int i=0; i<_debugLevel; i++)
 		cCmd += "-d ";
 	
+	if (_dumpTree)
+		cCmd += "-T ";
+		
 	_asmFile = fs::temp_directory_path().string() + randomString(8) + ".asm";
 	cCmd += "-o " + _asmFile + " ";
 	

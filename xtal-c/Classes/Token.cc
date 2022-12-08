@@ -19,16 +19,17 @@ typedef struct
 
 static TokenInfo _tokens[] =
 	{
-		{Token::T_PLUS, 	"TOKEN_PLUS       ", 10},
-		{Token::T_MINUS, 	"TOKEN_MINUS      ", 10},
-		{Token::T_STAR, 	"TOKEN_STAR       ", 20},
-		{Token::T_SLASH, 	"TOKEN_SLASH      ", 20},
-		{Token::T_EQ,		"TOKEN_EQUALS     ", 30},
-		{Token::T_NE,		"TOKEN_NOT_EQUALS ", 30},
-		{Token::T_LT,		"TOKEN_LESS_THAN  ", 40},
-		{Token::T_GT,		"TOKEN_MORE_THAN  ", 40},
-		{Token::T_LE,		"TOKEN_LESS/EQUAL ", 40},
-		{Token::T_GE,		"TOKEN_MORE/EQUAL ", 40},
+		{Token::T_ASSIGN, 	"TOKEN_ASSIGN     ", 10},
+		{Token::T_PLUS, 	"TOKEN_PLUS       ", 20},
+		{Token::T_MINUS, 	"TOKEN_MINUS      ", 20},
+		{Token::T_STAR, 	"TOKEN_STAR       ", 30},
+		{Token::T_SLASH, 	"TOKEN_SLASH      ", 30},
+		{Token::T_EQ,		"TOKEN_EQUALS     ", 40},
+		{Token::T_NE,		"TOKEN_NOT_EQUALS ", 40},
+		{Token::T_LT,		"TOKEN_LESS_THAN  ", 50},
+		{Token::T_GT,		"TOKEN_MORE_THAN  ", 50},
+		{Token::T_LE,		"TOKEN_LESS/EQUAL ", 50},
+		{Token::T_GE,		"TOKEN_MORE/EQUAL ", 50},
 		{Token::T_INTLIT, 	"TOKEN_INT_LITERAL", 0},
 		{Token::T_NONE, 	"[None]           ", 0}		// Must be last
 	};

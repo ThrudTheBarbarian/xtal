@@ -185,7 +185,7 @@ ASTNode * Statement::returnStatement(Token& token, int& line)
 /****************************************************************************\
 |* Global declaration - either function or variable
 \****************************************************************************/
-void Statement::globalDeclaration(Token& token, int&line)
+ASTNode * Statement::globalDeclaration(Token& token, int&line)
 	{
 	Register none(Register::NO_REGISTER);
 	ASTNode *tree = nullptr;
@@ -209,6 +209,8 @@ void Statement::globalDeclaration(Token& token, int&line)
 		if (token.token() == Token::T_NONE)
 			break;
 		}
+	
+	return tree;
 	}
 
 
@@ -311,10 +313,6 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 			tree = nullptr;
 			break;
 
-		case Token::T_IDENT:
-			tree = _assignment(token, line);
-			break;
-
 		case Token::T_IF:
 			tree = _if(token, line);
 			break;
@@ -331,7 +329,8 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 			return returnStatement(token, line);
 			
 		default:
-			FATAL(ERR_PARSE, "Syntax error, token %d", token.token());
+			// Catch assignments, for now
+			return Expression::binary(*_scanner, token, line, 0);
 		}
 		
 	return tree;
@@ -357,54 +356,6 @@ ASTNode * Statement::_print(Token& token, int& line)
 	
 	// Make a 'print' AST node
 	return new ASTNode(ASTNode::A_PRINT, PT_S32, tree, 0);
-	}
-
-/****************************************************************************\
-|* Private Method: process an assignment statement
-\****************************************************************************/
-ASTNode * Statement::_assignment(Token& token, int& line)
-	{
-	Register none(Register::NO_REGISTER);
-
-   	// Ensure we have an identifier
-	_identifier(*_scanner, token, line);
-
-	// This could be a variable or a function call. If the next tokens is
-	// a '(', its a function call
-	if (token.token() == Token::T_LPAREN)
-		return Expression::funcCall(*_scanner, token, line);
-
-	// Not a function call, so check it's been defined then make a
-	// leaf node for it
-	int idx;
-	if ((idx = SYMTAB->find(_scanner->text())) == SymbolTable::NOT_FOUND)
-		FATAL(ERR_PARSE, "Undeclared variable '%s' on line %d",
-			_scanner->text().c_str(), line);
-
-	Symbol sym = SYMTAB->table()[idx];
-	ASTNode *right = new ASTNode(ASTNode::A_LVIDENT, sym.pType(), idx);
-
-	// Ensure we have an equals sign
-	_match(*_scanner, token, Token::T_ASSIGN, line, "=");
-
-	// Parse the following expression
-	ASTNode *left = Expression::binary(*_scanner, token, line, 0);
-
-	// Ensure the types are compatible
-	left = Types::modify(left, right->type(), 0);
-	if (left == nullptr)
-		FATAL(ERR_TYPE, "Types incompatible at line %d", line);
-
-	// Make an assignment AST tree
-	// FIXME: Ought this always be PT_S32 ?
-	ASTNode *tree = new ASTNode(ASTNode::A_ASSIGN,
-								PT_S32,
-								left,
-								nullptr,
-								right,
-								0);
-
-	return tree;
 	}
 
 

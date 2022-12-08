@@ -52,9 +52,10 @@ int Compiler::main(int argc, const char *argv[])
 	{
 	_ap = new ArgParser(argc, argv);
 
+    _dumpAST				= _ap->flagFor("-T", "--dump-AST", false);
     _debugLevel      		= _ap->flagFor("-d", "--debug", 0);
     std::string output		= _ap->stringFor("-o", "--output", "/tmp/out.s");
-
+	
 	/*************************************************************************\
 	|* Construct the input by catenating any argument names without switches
 	\*************************************************************************/
@@ -119,9 +120,12 @@ int Compiler::_run(std::string source)
 		
 	scanner.scan(t, _line);
 	_emitter->preamble();
-	stmt.globalDeclaration(t, _line);
+	ASTNode *tree = stmt.globalDeclaration(t, _line);
 	_emitter->postamble();
 	
+	if (_dumpAST && (tree != nullptr))
+		tree->dump();
+		
 	return ok;
 	}
 

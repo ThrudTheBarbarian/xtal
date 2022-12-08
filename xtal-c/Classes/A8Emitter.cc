@@ -81,11 +81,10 @@ Register A8Emitter::emit(ASTNode *node,
 		left = emit(node->left(), none, node->op(), label);
 		
 	if (node->right())
-		right = emit(node->right(), left, node->op(), label);
+		right = emit(node->right(), none, node->op(), label);
 
 	switch (node->op())
 		{
-		case ASTNode::A_ASSIGN:			return right;
 		case ASTNode::A_ADD:			return _cgAdd(left, right);
 		case ASTNode::A_SUBTRACT:		return _cgSub(left, right);
 		case ASTNode::A_MULTIPLY:		return _cgMul(left, right);
@@ -107,14 +106,38 @@ Register A8Emitter::emit(ASTNode *node,
 			}
 		case ASTNode::A_IDENT:
 			{
-			auto symbol = SYMTAB->table()[node->value().identifier];
-			return _cgLoadGlobal(symbol);
+			if (node->isRValue() || (parentAstOp == ASTNode::A_DEREF))
+				{
+				auto symbol = SYMTAB->table()[node->value().identifier];
+				return _cgLoadGlobal(symbol);
+				}
+			else
+				return none;
 			}
-		case ASTNode::A_LVIDENT:
-			{
-			auto symbol = SYMTAB->table()[node->value().identifier];
-			return _cgStoreGlobal(reg, symbol);
-			}
+		case ASTNode::A_ASSIGN:
+			// Are we assigning to an identifier, or through a pointer
+			switch (node->right()->op())
+				{
+				case ASTNode::A_IDENT:
+					{
+					auto sym = SYMTAB->table()[node->right()->value().identifier];
+					return _cgStoreGlobal(left, sym);
+					}
+				case ASTNode::A_DEREF:
+					return _cgStoreDeref(left, right, node->right()->type());
+				
+				default:
+					FATAL(ERR_PARSE, "Can't ASSIGN in emitter, op=%d",
+									 node->op());
+				}
+		case ASTNode::A_DEREF:
+			// if we're an r-value, dereference to get the value we point
+			// at, otherwise leave it for A_ASSIGN to store through the
+			// pointer
+			if (node->isRValue())
+				return _cgDeref(left, node->left()->type());
+			else
+				return left;
 		case ASTNode::A_PRINT:
 			{
 			printReg(left);
@@ -131,8 +154,6 @@ Register A8Emitter::emit(ASTNode *node,
 			return _cgCall(left, node->value().identifier);
 		case ASTNode::A_ADDR:
 			return _cgAddress(node->value().identifier);
-		case ASTNode::A_DEREF:
-			return _cgDeref(left, node->left()->type());
 		case ASTNode::A_SCALE:
 			// Use a shift if the scale value is a known power of 2
 			switch (node->value().size)
@@ -268,6 +289,7 @@ Register A8Emitter::_cgLoadGlobal(const Symbol& symbol)
 	return r;
 	}
 
+	
 /*****************************************************************************\
 |* Store a register into a global variable
 \*****************************************************************************/
@@ -1074,6 +1096,58 @@ Register A8Emitter::_cgDeref(Register r1, int type)
 
 	_regs->free(r1);
 	return r;
+	}
+
+/*****************************************************************************\
+|* Store a register into a global variable
+\*****************************************************************************/
+Register A8Emitter::_cgStoreDeref(Register& r1, Register& r2, int type)
+	{
+	const char *name1 = r1.name().c_str();
+	const char *name2 = r2.name().c_str();
+	
+	switch (type)
+		{
+		case PT_S8:
+		case PT_U8:
+			fprintf(_ofp, "\tlda $%s\n"
+						  "\tldy #0\n"
+						  "\tsta (%s),y",
+						  name1, name2);
+			break;
+			
+		case PT_S16:
+		case PT_U16:
+			fprintf(_ofp, "\tlda $%s\n"
+						  "\tldy #0\n"
+						  "\tsta (%s),y"
+						  "\tiny\n"
+						  "\tlda %s+1\n"
+						  "\tsta (%s),y",
+						  name1, name2, name1, name2);
+			
+		case PT_S32:
+		case PT_U32:
+			fprintf(_ofp, "\tlda $%s\n"
+						  "\tldy #0\n"
+						  "\tsta (%s),y"
+						  "\tiny\n"
+						  "\tlda %s+1\n"
+						  "\tsta (%s),y"
+						  "\tiny\n"
+						  "\tlda %s+2\n"
+						  "\tsta (%s),y"
+						  "\tiny\n"
+						  "\tlda %s+3\n"
+						  "\tsta (%s),y",
+						  name1, name2, name1, name2,
+						  name1, name2, name1, name2);
+			break;
+		
+		default:
+			FATAL(ERR_TYPE, "Can't deref through type %d", type);
+		}
+	return r1;
 	}
 
 /*****************************************************************************\

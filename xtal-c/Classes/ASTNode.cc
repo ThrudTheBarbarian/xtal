@@ -6,6 +6,7 @@
 //
 
 #include "ASTNode.h"
+#include "SymbolTable.h"
 
 
 typedef struct
@@ -40,6 +41,7 @@ ASTNode::ASTNode(int op,
 		,_mid(mid)
 		,_right(right)
 		,_type(type)
+		,_isRValue(false)
 	{
 	_value.intValue = iVal;		// Note this sets identifier also
 	}
@@ -53,6 +55,7 @@ ASTNode::ASTNode(int op, int type, int intValue)
 		,_mid(nullptr)
 		,_right(nullptr)
 		,_type(type)
+		,_isRValue(false)
 	{
 	_value.intValue = intValue;		// Note this sets identifier also
 	}
@@ -66,6 +69,7 @@ ASTNode::ASTNode(int op, int type, ASTNode *left, int intValue)
 		,_mid(nullptr)
 		,_right(nullptr)
 		,_type(type)
+		,_isRValue(false)
 	{
 	_value.intValue = intValue;		// Note this sets identifier also
 	}
@@ -157,4 +161,162 @@ int ASTNode::interpret(void)
 		}
 		
 	return result;
+	}
+
+static int _genDumpLabel(void)
+	{
+	static int label = 1;
+	return (label++);
+	}
+	
+/*****************************************************************************\
+|* dump the AST tree
+\*****************************************************************************/
+void ASTNode::dump(ASTNode *node, int label, int level)
+	{
+	int lFalse, lStart, lEnd;			// Labels
+	
+	if (node == nullptr)
+		node = this;
+		
+	switch (node->op())
+		{
+		case A_IF:
+			lFalse = _genDumpLabel();
+			for (int i=0; i<level; i++)
+				printf(" ");
+			printf("A_IF");
+			
+			if (node->right())
+				{
+				lEnd = _genDumpLabel();
+				printf(", end L%d", lEnd);
+				}
+			printf("\n");
+			dump(node->left(), lFalse, level+2);
+			dump(node->mid(), 0, level+2);
+			if (node->right())
+				dump(node->right(), 0, level+2);
+			return;
+		
+		case A_WHILE:
+			lStart = _genDumpLabel();
+			for (int i=0; i<level; i++)
+				printf(" ");
+			printf("A_WHILE, start L%d", lStart);
+			lEnd = _genDumpLabel();
+			dump(node->left(), lEnd, level+2);
+			dump(node->right(), 0, level+2);
+			return;
+		}
+	
+	// If this is a GLUE op, bump us back a level
+	if (node->op() == A_GLUE)
+		level -= 2;
+
+	
+	// General AST node handling
+	if (node->left())
+		dump(node->left(), 0, level+2);
+	if (node->right())
+		dump(node->right(), 0, level+2);
+	
+	
+	for (int i=0; i < level; i++)
+		printf(" ");
+  
+	switch (node->op())
+		{
+		case A_GLUE:
+			printf("\n\n");
+			return;
+		case A_FUNCTION:
+			{
+			Symbol s = SYMTAB->table()[node->value().identifier];
+			printf("A_FUNCTION %s\n", s.name().c_str());
+			return;
+			}
+		case A_ADD:
+			printf("A_ADD\n");
+			return;
+		case A_SUBTRACT:
+			printf("A_SUBTRACT\n");
+			return;
+		case A_MULTIPLY:
+			printf("A_MULTIPLY\n");
+			return;
+		case A_DIVIDE:
+			printf("A_DIVIDE\n");
+			return;
+		case A_EQ:
+			printf("A_EQ\n");
+			return;
+		case A_NE:
+			printf("A_NE\n");
+			return;
+		case A_LT:
+			printf("A_LE\n");
+			return;
+		case A_GT:
+			printf("A_GT\n");
+			return;
+		case A_LE:
+			printf("A_LE\n");
+			return;
+		case A_GE:
+			printf("A_GE\n");
+			return;
+		case A_INTLIT:
+			printf("A_INTLIT %d\n", node->value().intValue);
+			return;
+		case A_IDENT:
+			{
+			Symbol s = SYMTAB->table()[node->value().identifier];
+			if (node->isRValue())
+				printf("A_IDENT rval %s\n", s.name().c_str());
+			else
+				printf("A_IDENT %s\n", s.name().c_str());
+			return;
+			}
+		case A_ASSIGN:
+			printf("A_ASSIGN\n");
+			return;
+		case A_WIDEN:
+			printf("A_WIDEN\n");
+			return;
+		case A_RETURN:
+			printf("A_RETURN\n");
+			return;
+		case A_FUNCCALL:
+			{
+			Symbol s = SYMTAB->table()[node->value().identifier];
+			printf("A_FUNCCALL %s\n", s.name().c_str());
+			return;
+			}
+		case A_ADDR:
+			{
+			Symbol s = SYMTAB->table()[node->value().identifier];
+			printf("A_ADDR %s\n", s.name().c_str());
+			return;
+			}
+		case A_DEREF:
+			if (node->isRValue())
+				printf("A_DEREF rval\n");
+			else
+				printf("A_DEREF\n");
+			return;
+		case A_SCALE:
+			printf("A_SCALE %d\n", node->value().size);
+			return;
+			
+		case A_PRINT:
+			{
+			Symbol s = SYMTAB->table()[node->value().identifier];
+			printf("A_PRINT %s\n", s.name().c_str());
+			return;
+			}
+			
+		default:
+			FATAL(ERR_PARSE, "Unknown dumpAST operator %d", node->op());
+		}
 	}

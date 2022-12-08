@@ -25,6 +25,27 @@ Expression::Expression()
 /*****************************************************************************\
 |* Primary expression resolution
 \*****************************************************************************/
+bool Expression::_rightAssoc(int tokenType)
+	{
+	bool isRight = false;
+	
+	switch (tokenType)
+		{
+		case Token::T_ASSIGN:
+			isRight = true;
+			break;
+		
+		default:
+			isRight = false;
+			break;
+		}
+	return isRight;
+	}
+
+
+/*****************************************************************************\
+|* Primary expression resolution
+\*****************************************************************************/
 ASTNode * Expression::primary(Scanner &scanner, Token &token,  int &line)
 	{
 	ASTNode *node;
@@ -81,7 +102,7 @@ ASTNode * Expression::primary(Scanner &scanner, Token &token,  int &line)
 /*****************************************************************************\
 |* Helper to determine if it's an arithmetic operation
 \*****************************************************************************/
-static int isArith(int tokentype, int line)
+int Expression::_binaryAstOp(int tokentype, int line)
 	{
 	if (tokentype > Token::T_NONE && tokentype < Token::T_INTLIT)
 		return(tokentype);
@@ -107,13 +128,18 @@ ASTNode * Expression::binary(Scanner &scanner,
     \*************************************************************************/
     int tokenType = token.token();
 	if ((tokenType == Token::T_SEMICOLON) || (tokenType == Token::T_RPAREN))
+		{
+		left->setIsRValue(true);
 		return left;
-	
+		}
+		
 	/*************************************************************************\
     |* Handle precedence: while the precedence of this token > that of the
     |* previous precedence, ...
     \*************************************************************************/
-	while (Token::precedence(tokenType) > previousPrecedence)
+	while ((Token::precedence(tokenType) > previousPrecedence) ||
+		   (_rightAssoc(tokenType) &&
+				(Token::precedence(tokenType) == previousPrecedence)))
 		{
 		/*********************************************************************\
 		|* Convert the token into a node-type and scan the next token
@@ -129,27 +155,67 @@ ASTNode * Expression::binary(Scanner &scanner,
 								  Token::precedence(tokenType));
 
  		/*********************************************************************\
-		|* Check to make sure that the types are compatible by trying to
-		|* modify each tree to the others type
+		|* Determine the operation to perform on the subtrees
 		\*********************************************************************/
-		int ASTop 		= isArith(tokenType, line);
-		ASTNode *lTemp	= Types::modify(left, right->type(), ASTop);
-		ASTNode *rTemp	= Types::modify(right, left->type(), ASTop);
-		if ((lTemp == nullptr) && (rTemp == nullptr))
-			FATAL(ERR_TYPE, "Incompatible types at line %d", line);
-		
- 		/*********************************************************************\
-		|* Update any trees that were widened or scaled
-		\*********************************************************************/
-		if (lTemp != nullptr)
-			left = lTemp;
-		if (rTemp != nullptr)
-			right = rTemp;
+		int ASTop 		= _binaryAstOp(tokenType, line);
 
+ 		/*********************************************************************\
+		|* If we're assigning, then make the tree an r-value
+		\*********************************************************************/
+		if (ASTop == ASTNode::A_ASSIGN)
+			{
+			/*****************************************************************\
+			|* Set the right to be an r-value
+			\*****************************************************************/
+			right->setIsRValue(true);
+			
+			/*****************************************************************\
+			|* Ensure the right type matches the left
+			\*****************************************************************/
+			right = Types::modify(right, left->type(), 0);
+			
+			if (left == nullptr)
+				FATAL(ERR_PARSE,
+					"Incompatible expression in assignment at line %d", line);
+			
+			/*****************************************************************\
+			|* Make an assignment AST tree, but switch left and right around
+			|* so the right expression will be generated before the left
+			\*****************************************************************/
+			ASTNode *lTemp = left;
+			left = right;
+			right = lTemp;
+			}
+		else
+			{
+			/*****************************************************************\
+			|* We aren't doing assignment, so make both L and R into r-values
+			\*****************************************************************/
+			left->setIsRValue(true);
+			right->setIsRValue(true);
+			
+			/*****************************************************************\
+			|* Check to make sure that the types are compatible by trying to
+			|* modify each tree to the others type
+			\*****************************************************************/
+			ASTNode *lTemp	= Types::modify(left, right->type(), ASTop);
+			ASTNode *rTemp	= Types::modify(right, left->type(), ASTop);
+			if ((lTemp == nullptr) && (rTemp == nullptr))
+				FATAL(ERR_TYPE, "Incompatible types at line %d", line);
+			
+			/*****************************************************************\
+			|* Update any trees that were widened or scaled
+			\*****************************************************************/
+			if (lTemp != nullptr)
+				left = lTemp;
+			if (rTemp != nullptr)
+				right = rTemp;
+			}
+			
 		/*********************************************************************\
 		|* Join that sub-tree with ours, convert the token into an ASTnode.
 		\*********************************************************************/
-		left = new ASTNode(isArith(tokenType, line),
+		left = new ASTNode(_binaryAstOp(tokenType, line),
 						   left->type(),
 						   left,
 						   nullptr,
@@ -162,11 +228,16 @@ ASTNode * Expression::binary(Scanner &scanner,
 		\*********************************************************************/
 		tokenType = token.token();
 		if ((tokenType == Token::T_SEMICOLON) || (tokenType == Token::T_RPAREN))
+			{
+			left->setIsRValue(true);
 			return left;
+			}
 		}
+		
 	/*************************************************************************\
     |* Return the tree we have when the precedence is lower
     \*************************************************************************/
+	left->setIsRValue(true);
 	return left;
 	}
 

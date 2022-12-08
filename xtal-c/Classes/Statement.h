@@ -67,11 +67,6 @@ class Statement
         |* Process a function declaration
         \********************************************************************/
         ASTNode * _functionDeclaration(Token& token, int& line, int type);
-
-        /********************************************************************\
-        |* Handle an assign statement
-        \********************************************************************/
-		ASTNode * _assignment(Token& token, int& line);
 		
         /********************************************************************\
         |* Handle an if statement
@@ -119,7 +114,7 @@ class Statement
         /********************************************************************\
         |* Process a global function or variable declaration
         \********************************************************************/
-		void globalDeclaration(Token& token, int&line);
+		ASTNode * globalDeclaration(Token& token, int&line);
      
         /********************************************************************\
         |* Process a return statement

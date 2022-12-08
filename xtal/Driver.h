@@ -32,6 +32,7 @@ class Driver
     GET(String, hexOutput);				// Hex-dump Output filename
     GET(String, listFile);				// Output listing filename
 	GET(String, asmFile);				// Intermediate assembly file
+	GET(bool, dumpTree);				// Dump out the AS tree
 	
     private:
 		/*********************************************************************\
