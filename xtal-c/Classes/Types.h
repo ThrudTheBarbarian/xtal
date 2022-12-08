@@ -33,14 +33,6 @@ class Types
         explicit Types();
 
         /*********************************************************************\
-        |* Check whether two types are compatible
-        \*********************************************************************/
-        static bool areCompatible(int line,
-								  int& left,
-								  int& right,
-								  bool onlyRight = false);
-		
-        /*********************************************************************\
         |* modify a type within the AST tree
         \*********************************************************************/
 		static ASTNode * modify(ASTNode *tree, int rType, int op);
