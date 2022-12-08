@@ -58,6 +58,7 @@ class ASTNode
 			
 			A_DEREF, 			// Dereference op
 			A_ADDR,				// Address-of op
+			A_SCALE,			// Scale the offset by the type size
 			
 			A_MAXVAL			// Last normal entry
 			};
@@ -66,6 +67,7 @@ class ASTNode
 		{
 		int		intValue;		// For A_INTLIT, Value of the integer
 		int 	identifier;		// For A_IDENT, Symbol slot number
+		int		size;			// For A_SCALE, how much to scale by
 		} Value;
 	
 	/*************************************************************************\

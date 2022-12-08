@@ -15,6 +15,8 @@
 #include "macros.h"
 #include "sharedDefines.h"
 
+class ASTNode;
+
 class Types
 	{
     NON_COPYABLE_NOR_MOVEABLE(Types)
@@ -37,7 +39,12 @@ class Types
 								  int& left,
 								  int& right,
 								  bool onlyRight = false);
-							
+		
+        /*********************************************************************\
+        |* modify a type within the AST tree
+        \*********************************************************************/
+		static ASTNode * modify(ASTNode *tree, int rType, int op);
+		
         /*********************************************************************\
         |* Return the size of a given type
         \*********************************************************************/
@@ -52,6 +59,16 @@ class Types
         |* Given a primitive pointer, return the type which it points to
         \*********************************************************************/
         static int valueAt(int type, int line=-1);
+							
+        /*********************************************************************\
+        |* Return true if something is an integer type
+        \*********************************************************************/
+        static bool isInt(int type);
+							
+        /*********************************************************************\
+        |* Return true if something is a pointer type
+        \*********************************************************************/
+        static bool isPointer(int type);
         
 	};
 

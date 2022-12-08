@@ -129,20 +129,22 @@ ASTNode * Expression::binary(Scanner &scanner,
 								  Token::precedence(tokenType));
 
  		/*********************************************************************\
-		|* Check to make sure that the types are compatible
+		|* Check to make sure that the types are compatible by trying to
+		|* modify each tree to the others type
 		\*********************************************************************/
-		int leftType 	= left->type();
-		int rightType 	= right->type();
-		if (! Types::areCompatible(line, leftType, rightType))
+		int ASTop 		= isArith(tokenType, line);
+		ASTNode *lTemp	= Types::modify(left, right->type(), ASTop);
+		ASTNode *rTemp	= Types::modify(right, left->type(), ASTop);
+		if ((lTemp == nullptr) && (rTemp == nullptr))
 			FATAL(ERR_TYPE, "Incompatible types at line %d", line);
 		
  		/*********************************************************************\
-		|* Widen either side if required. type vars are A_WIDEN|0 now
+		|* Update any trees that were widened or scaled
 		\*********************************************************************/
-		if (leftType)
-			left = new ASTNode(leftType, right->type(), left, 0);
-		if (rightType)
-			right = new ASTNode(rightType, left->type(), right, 0);
+		if (lTemp != nullptr)
+			left = lTemp;
+		if (rTemp != nullptr)
+			right = rTemp;
 
 		/*********************************************************************\
 		|* Join that sub-tree with ours, convert the token into an ASTnode.

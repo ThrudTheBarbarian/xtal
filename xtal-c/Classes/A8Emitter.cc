@@ -133,6 +133,19 @@ Register A8Emitter::emit(ASTNode *node,
 			return _cgAddress(node->value().identifier);
 		case ASTNode::A_DEREF:
 			return _cgDeref(left, node->left()->type());
+		case ASTNode::A_SCALE:
+			// Use a shift if the scale value is a known power of 2
+			switch (node->value().size)
+				{
+				case 1:		return left;
+				case 2:		return _cgShlConst(left, 1);
+				case 4:		return _cgShlConst(left, 2);
+				default:
+					right = _cgLoadInt(node->value().size);
+					right.setType(left.type());
+					return _cgMul(left, right);
+				}
+			break;
 			
 		default:
 			FATAL(ERR_AST_UNKNOWN_OPERATOR, "Unknown AST operator %d", node->op());
@@ -222,8 +235,10 @@ void A8Emitter::genSymbol(int idx)
 /*****************************************************************************\
 |* Generate a load-value-to-register
 \*****************************************************************************/
-Register A8Emitter::_cgLoadInt(int val)
+Register A8Emitter::_cgLoadInt(int val, int primitiveType)
 	{
+	(void)primitiveType;
+	
 	REG type 	= ((val >= 0) && (val <= 255))   ? Register::UNSIGNED_1BYTE
 				: ((val >= 0) && (val <= 65535)) ? Register::UNSIGNED_2BYTE
 				: Register::SIGNED_4BYTE;
@@ -1056,31 +1071,22 @@ Register A8Emitter::_cgDeref(Register r1, int type)
 		if (i < r1.size()-1)
 			fprintf(_ofp, "\tiny\n");
 		}
-//
-//	fprintf(_ofp, "\t.push context block deref_%s 1\n", randomString(8).c_str());
-//
-//
-//
-//	fprintf(_ofp, "\tldx #%d\n"
-//				  "\tldy #0\n"
-//				  "deref:\n"
-//				  "\tlda (%s),y\n"
-//				  "\tpha\n"
-//				  "\tiny\n"
-//				  "\tdex\n"
-//				  "\tbne deref\n",
-//				  r1.size(), r1.name().c_str());
-//
-//	fprintf(_ofp, "\tldx #3\n"
-//				  "store:\n"
-//				  "\tpla\n"
-//				  "\tsta %s,X\n"
-//				  "\tdex\n"
-//				  "\tbpl store\n",
-//				  r1.name().c_str());
-//
-//	fprintf(_ofp, "\t.pop context\n");
 
 	_regs->free(r1);
 	return r;
+	}
+
+/*****************************************************************************\
+|* Shift a register by a constant
+\*****************************************************************************/
+Register A8Emitter::_cgShlConst(Register r1, int amount)
+	{
+	int size = r1.size() * 8;		// bits not bytes
+	
+	for (int i=0; i<amount; i++)
+		fprintf(_ofp, "\t_asl%d %s,%s\n",
+					  size,
+					  r1.name().c_str(),
+					  r1.name().c_str());
+	return r1;
 	}

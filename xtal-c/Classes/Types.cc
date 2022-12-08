@@ -79,6 +79,102 @@ bool Types::areCompatible(int line, int &left, int &right, bool onlyRight)
 	}
 
 /*****************************************************************************\
+|* Static method - determine if a type is an integer type or not
+\*****************************************************************************/
+bool Types::isInt(int type)
+	{
+	bool isInt = false;
+	
+	switch (type)
+		{
+		case PT_S8:
+		case PT_U8:
+		case PT_S16:
+		case PT_U16:
+		case PT_S32:
+		case PT_U32:
+			isInt = true;
+			break;
+		}
+	return isInt;
+	}
+
+/*****************************************************************************\
+|* Static method - determine if a type is a pointer type or not
+\*****************************************************************************/
+bool Types::isPointer(int type)
+	{
+	bool isPtr = false;
+	
+	switch (type)
+		{
+		case PT_S8PTR:
+		case PT_U8PTR:
+		case PT_S16PTR:
+		case PT_U16PTR:
+		case PT_S32PTR:
+		case PT_U32PTR:
+		case PT_VOIDPTR:
+			isPtr = true;
+			break;
+		}
+	return isPtr;
+	}
+	
+/*****************************************************************************\
+|* Static method - modify a type within the AST tree
+\*****************************************************************************/
+ASTNode * Types::modify(ASTNode *tree, int rType, int op)
+	{
+	int lType = tree->type();
+	
+	// Compare scalar int types
+	if (isInt(lType) && isInt(rType))
+		{
+		// If both types are the same, there's nothing to do
+		if (lType == rType)
+			return tree;
+		
+		// Get the sizes for each type
+		int lSize = typeSize(lType);
+		int rSize = typeSize(rType);
+		
+		// Is the tree's size too big ?
+		if (lSize > rSize)
+			return nullptr;
+		
+		// Widen to the right
+		if (rSize > lSize)
+			return new ASTNode(ASTNode::A_WIDEN, rType, tree, 0);
+		}
+
+	// For pointers on the left...
+	if (isPointer(lType))
+		{
+		// if we have the same type on the right, and not doing a binary
+		// operation (op == 0), we're ok
+		if ((op == 0) && (lType == rType))
+			return tree;
+		}
+	
+	// We can only scale when it's an A_ADD or A_SUBTRACT operation
+	if ((op == ASTNode::A_ADD) || (op == ASTNode::A_SUBTRACT))
+		{
+		// If left is int-type, right is pointer-type, and the size
+		// of the original type is >1, scale the left
+		if (isInt(lType) && isPointer(rType))
+			{
+			int rSize = typeSize(valueAt(rType));
+			if (rSize > 1)
+				return new ASTNode(ASTNode::A_SCALE, rType, tree, rSize);
+			}
+		}
+	
+	// If we get here, the types aren't compatible
+	return nullptr;
+	}
+	
+/*****************************************************************************\
 |* Static method - return a type's size in bytes
 \*****************************************************************************/
 int Types::typeSize(int type, int line)

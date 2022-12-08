@@ -162,19 +162,12 @@ ASTNode * Statement::returnStatement(Token& token, int& line)
 	/*************************************************************************\
     |* Make sure this is compatible with the function's type
     \*************************************************************************/
-	int returnType 	= tree->type();
-	int funcType	= sym.pType();
-	if (! Types::areCompatible(line, returnType, funcType, true))
+    tree = Types::modify(tree, sym.pType(), 0);
+	if (tree == nullptr)
 		FATAL(ERR_PARSE,
 			  "Incompatible function type in call at line %d",
 			  line);
-	
-	/*************************************************************************\
-    |* Widen the left if required
-    \*************************************************************************/
-	if (returnType == ASTNode::A_WIDEN)
-		tree = new ASTNode(returnType, sym.pType(), tree, 0);
-	
+		
 	/*************************************************************************\
     |* Add on the A_RETURN node
     \*************************************************************************/
@@ -357,14 +350,10 @@ ASTNode * Statement::_print(Token& token, int& line)
 	// Parse the following expression and generate the assembly code
 	ASTNode *tree = Expression::binary(*_scanner, token, line, 0);
 	
-	int leftType 	= PT_S32;
-	int rightType	= tree->type();
-	if (!Types::areCompatible(line, leftType, rightType))
+	// Make sure we're type-compatible
+	tree = Types::modify(tree, PT_S32, 0);
+	if (tree == nullptr)
 		FATAL(ERR_TYPE, "Types incompatible at line %d", line);
-	
-	// Widen the tree if required
-	if (rightType)
-		tree = new ASTNode(rightType, PT_S32, tree, 0);
 	
 	// Make a 'print' AST node
 	return new ASTNode(ASTNode::A_PRINT, PT_S32, tree, 0);
@@ -402,14 +391,9 @@ ASTNode * Statement::_assignment(Token& token, int& line)
 	ASTNode *left = Expression::binary(*_scanner, token, line, 0);
 
 	// Ensure the types are compatible
-	int leftType 	= left->type();
-	int rightType	= right->type();
-	if (!Types::areCompatible(line, leftType, rightType, true))
+	left = Types::modify(left, right->type(), 0);
+	if (left == nullptr)
 		FATAL(ERR_TYPE, "Types incompatible at line %d", line);
-
-	// Widen the left if required
-	if (leftType)
-		left = new ASTNode(leftType, right->type(), left, 0);
 
 	// Make an assignment AST tree
 	// FIXME: Ought this always be PT_S32 ?

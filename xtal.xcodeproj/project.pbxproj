@@ -253,6 +253,7 @@
 		F4BE0808293C309D00004A8D /* ptr.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ptr.xt; sourceTree = "<group>"; };
 		F4BE0809294026EE00004A8D /* mul16u.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = mul16u.xt; sourceTree = "<group>"; };
 		F4BE080A294027E100004A8D /* div16u.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = div16u.xt; sourceTree = "<group>"; };
+		F4BE080C29417C9A00004A8D /* scale.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = scale.xt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -483,6 +484,7 @@
 				F4BE0805293BD9BE00004A8D /* 13 */,
 				F4BE0807293C308C00004A8D /* 15 */,
 				F43F131A2940534A003D42B5 /* 16 */,
+				F4BE080B29417C7700004A8D /* 17 */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -602,6 +604,14 @@
 				F4BE0808293C309D00004A8D /* ptr.xt */,
 			);
 			path = 15;
+			sourceTree = "<group>";
+		};
+		F4BE080B29417C7700004A8D /* 17 */ = {
+			isa = PBXGroup;
+			children = (
+				F4BE080C29417C9A00004A8D /* scale.xt */,
+			);
+			path = 17;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

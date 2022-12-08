@@ -13,6 +13,7 @@
 
 #include "properties.h"
 #include "macros.h"
+#include "sharedDefines.h"
 
 #include "Emitter.h"
 
@@ -33,7 +34,7 @@ class A8Emitter : public Emitter
 		/*********************************************************************\
         |* Generate a register load immediate
         \*********************************************************************/
-        Register _cgLoadInt(int value);
+        Register _cgLoadInt(int value, int type = PT_U8);
         
 		/*********************************************************************\
         |* Fetch a global var
@@ -170,6 +171,11 @@ class A8Emitter : public Emitter
         |* same register
 		\*********************************************************************/
 		Register _cgDeref(Register r1, int type);
+        
+		/*********************************************************************\
+        |* Shift a register by a constant amount
+        \*********************************************************************/
+        Register _cgShlConst(Register r1, int amount);
 
 		
     public:
