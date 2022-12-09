@@ -94,7 +94,14 @@ int Token::precedence(void)
 	|* Populate the map if it isn't already holding data
 	\*************************************************************************/
 	_populateMap();
-	
+
+	/*************************************************************************\
+	|* Sanity check
+	\*************************************************************************/
+	if (_token >= Token::T_VOID)
+		FATAL(ERR_AST_PRIORITY, "Token %d with no precedence requested!",
+							    _token);
+		
 	auto it = _info.find(_token);
 	if (it == _info.end())
 		FATAL(ERR_AST_PRIORITY, "Cannot find Token priority %d in AST", _token);

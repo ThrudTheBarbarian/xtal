@@ -74,6 +74,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$PROJECT_DIR/xtal-c/Tests/19/brackets.xt -d"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "$PROJECT_DIR/xtal-c/Tests/20-arrays/array.xt -d -T"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

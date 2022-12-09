@@ -38,10 +38,10 @@ class Token
 			T_GE,				// Is greater than or equal to
 
 			T_VOID, 			// Void declaration
-			T_S32,				// signed 32-bit value
 			T_S8,				// signed 8-bit value
 			T_U8,				// unsigned 8-bit value
 			T_U16,				// unsigned 16-bit value
+			T_S32,				// signed 32-bit value
 			
 			T_INTLIT,			// Integer literal
 			T_SEMICOLON,		// Semicolon

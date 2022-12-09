@@ -36,6 +36,21 @@ class Expression
         \*********************************************************************/
 		static int _binaryAstOp(int tokenType, int line);
 		
+        /*********************************************************************\
+        |* Function call recognition
+        \*********************************************************************/
+        static ASTNode * _funcCall(Scanner &scanner, Token &token, int &line);
+		
+        /*********************************************************************\
+        |* Function call recognition
+        \*********************************************************************/
+        static ASTNode * _arrayAccess(Scanner &scanner, Token &tkn, int &line);
+								
+        /*********************************************************************\
+        |* Prefix resolution - pointers and de-refs
+        \*********************************************************************/
+        static ASTNode * _prefix(Scanner &scanner, Token &token, int &line);
+		
     public:
         /*********************************************************************\
         |* Constructors and Destructor
@@ -54,17 +69,7 @@ class Expression
 								Token &token,
 								int &line,
 								int previousPrecedence);
-								
-        /*********************************************************************\
-        |* Prefix resolution - pointers and de-refs
-        \*********************************************************************/
-        static ASTNode * prefix(Scanner &scanner, Token &token, int &line);
 
-		
-        /*********************************************************************\
-        |* Function call recognition
-        \*********************************************************************/
-        static ASTNode * funcCall(Scanner &scanner, Token &token, int &line);
 		
 	};
 

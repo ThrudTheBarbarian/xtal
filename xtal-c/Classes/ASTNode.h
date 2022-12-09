@@ -52,8 +52,8 @@ class ASTNode
 			A_FUNCTION,			// Function node
 			A_WIDEN,			// Widen the type
 			
-			A_FUNCCALL,			// Call-point for a function
 			A_RETURN,			// Function return opcode
+			A_FUNCCALL,			// Call-point for a function
 			
 			A_DEREF, 			// Dereference op
 			A_ADDR,				// Address-of op

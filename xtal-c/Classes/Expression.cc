@@ -22,26 +22,6 @@ Expression::Expression()
 	{
 	}
 
-/*****************************************************************************\
-|* Primary expression resolution
-\*****************************************************************************/
-bool Expression::_rightAssoc(int tokenType)
-	{
-	bool isRight = false;
-	
-	switch (tokenType)
-		{
-		case Token::T_ASSIGN:
-			isRight = true;
-			break;
-		
-		default:
-			isRight = false;
-			break;
-		}
-	return isRight;
-	}
-
 
 /*****************************************************************************\
 |* Primary expression resolution
@@ -72,7 +52,11 @@ ASTNode * Expression::primary(Scanner &scanner, Token &token,  int &line)
 			
 			// If it's a '(' then we have a function call
 			if (token.token() == Token::T_LPAREN)
-				return funcCall(scanner, token, line);
+				return _funcCall(scanner, token, line);
+			
+			// If it's a '[' then we have an array reference
+			if (token.token() == Token::T_LBRACE)
+				return _arrayAccess(scanner, token, line);
 			
 			// It wasn't, so reject this just-scanned token for next time
 			scanner.reject(token);
@@ -129,13 +113,15 @@ ASTNode * Expression::binary(Scanner &scanner,
 	/*************************************************************************\
     |* Get the next token and parse it recursively as a prefix expression
     \*************************************************************************/
-	ASTNode *left = prefix(scanner, token, line);
+	ASTNode *left = _prefix(scanner, token, line);
 	
 	/*************************************************************************\
-    |* If we hit a semicolon or ), just return the left node
+    |* If we hit a semicolon, ] or ), just return the left node
     \*************************************************************************/
     int tokenType = token.token();
-	if ((tokenType == Token::T_SEMICOLON) || (tokenType == Token::T_RPAREN))
+	if ((tokenType == Token::T_SEMICOLON) ||
+	    (tokenType == Token::T_RPAREN)    ||
+	    (tokenType == Token::T_RBRACE))
 		{
 		left->setIsRValue(true);
 		return left;
@@ -235,7 +221,9 @@ ASTNode * Expression::binary(Scanner &scanner,
 		|* or right-parentheses, return just the left node
 		\*********************************************************************/
 		tokenType = token.token();
-		if ((tokenType == Token::T_SEMICOLON) || (tokenType == Token::T_RPAREN))
+		if ((tokenType == Token::T_SEMICOLON) ||
+			(tokenType == Token::T_RPAREN)    ||
+			(tokenType == Token::T_RBRACE))
 			{
 			left->setIsRValue(true);
 			return left;
@@ -253,7 +241,7 @@ ASTNode * Expression::binary(Scanner &scanner,
 |* function call resolution. Return an AST tree whose root is a binary
 |* operator.
 \*****************************************************************************/
-ASTNode * Expression::funcCall(Scanner &scanner, Token &token, int &line)
+ASTNode * Expression::_funcCall(Scanner &scanner, Token &token, int &line)
 	{
 	/*************************************************************************\
     |* Find the function
@@ -291,12 +279,95 @@ ASTNode * Expression::funcCall(Scanner &scanner, Token &token, int &line)
     
 	return tree;
 	}
+
+
+/*****************************************************************************\
+|* Parse the index into an array and return an AST tree for it
+\*****************************************************************************/
+ASTNode * Expression::_arrayAccess(Scanner &scanner, Token &token, int &line)
+	{
+	/*************************************************************************\
+    |* Check that the identifier has been defined as an array then make a leaf
+    |* node for it that points at the base
+    \*************************************************************************/
+	int identifier 	= SYMTAB->find(scanner.text());
+	Symbol s		= SYMTAB->table()[identifier];
+	
+	if ((identifier == SymbolTable::NOT_FOUND) || (s.sType() != ST_ARRAY))
+		FATAL(ERR_ARRAY, "Undeclared array '%s'", scanner.text().c_str());
+		
+	ASTNode *left = new ASTNode(ASTNode::A_ADDR, s.pType(), identifier);
+	
+	/*************************************************************************\
+    |* Eat the left [
+    \*************************************************************************/
+	scanner.scan(token, line);
+	
+	/*************************************************************************\
+    |* Parse the following expression
+    \*************************************************************************/
+	ASTNode *right = binary(scanner, token, line, 0);
+	
+	/*************************************************************************\
+    |* Make sure we close the ]
+    \*************************************************************************/
+    Statement::rightBrace(scanner, token, line);
+
+	/*************************************************************************\
+    |* Make sure this is of integer type
+    \*************************************************************************/
+	if (!Types::isInt(right->type()))
+		FATAL(ERR_ARRAY, "Array index is not of integer type");
+
+	/*************************************************************************\
+    |* Scale the index by the size of the element's type
+    \*************************************************************************/
+	right = Types::modify(right, left->type(), ASTNode::A_ADD);
+
+	/*************************************************************************\
+    |* Return an AST tree where the array's base has the offset added to it,
+    |* and dereference the element. Still an lvalue at this point
+    \*************************************************************************/
+    left = new ASTNode(ASTNode::A_ADD,
+					   s.pType(),
+					   left,
+					   nullptr,
+					   right,
+					   0);
+					   
+    left = new ASTNode(ASTNode::A_DEREF,
+					   Types::valueAt(left->type()),
+					   left,
+					   0);
+  
+	return left;
+	}
+	
+/*****************************************************************************\
+|* Primary expression resolution
+\*****************************************************************************/
+bool Expression::_rightAssoc(int tokenType)
+	{
+	bool isRight = false;
+	
+	switch (tokenType)
+		{
+		case Token::T_ASSIGN:
+			isRight = true;
+			break;
+		
+		default:
+			isRight = false;
+			break;
+		}
+	return isRight;
+	}
 	
 /*****************************************************************************\
 |* Parse a prefix expression and return a sub-tree representing it. Used for
 |* pointers and de-refs
 \*****************************************************************************/
-ASTNode * Expression::prefix(Scanner &scanner, Token &token, int &line)
+ASTNode * Expression::_prefix(Scanner &scanner, Token &token, int &line)
 	{
   	ASTNode *tree;
   
@@ -305,7 +376,7 @@ ASTNode * Expression::prefix(Scanner &scanner, Token &token, int &line)
 		case Token::T_AMPER:
 			// Get the next token and parse it recursively as a prefix
 			scanner.scan(token, line);
-			tree = prefix(scanner, token, line);
+			tree = _prefix(scanner, token, line);
 
 			// Ensure that it's an identifier
 			if (tree->op() != ASTNode::A_IDENT)
@@ -321,7 +392,7 @@ ASTNode * Expression::prefix(Scanner &scanner, Token &token, int &line)
 		case Token::T_STAR:
 			// Get the next token and parse it recursively as a prefix
 			scanner.scan(token, line);
-			tree = prefix(scanner, token, line);
+			tree = _prefix(scanner, token, line);
 
 			// For now, ensure it's either another deref or an identifier
 			if (!(IS_OP(A_IDENT) || IS_OP(A_DEREF)))

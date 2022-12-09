@@ -539,7 +539,10 @@ void Statement::_varDeclaration(Token& token, int& line, int type)
 			{
 			// Add this as a known array and generate its space in assembly.
 			// We treat the array as a pointer to its elements' type
-			int symIdx = SYMTAB->add(name, type, ST_ARRAY, token.intValue());
+			int symIdx = SYMTAB->add(name,
+									 Types::pointerTo(type),
+									 ST_ARRAY,
+									 token.intValue());
 			
 			// Tell the emitter to reserve space for our variable
 			_emitter->genSymbol(symIdx);

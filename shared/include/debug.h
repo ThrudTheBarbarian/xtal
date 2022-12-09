@@ -140,6 +140,7 @@ enum
 	ERR_FUNCTION,
 	ERR_TYPE,
 	ERR_TOKEN,
+	ERR_ARRAY,
 	ERR_MAX
 	};
 
