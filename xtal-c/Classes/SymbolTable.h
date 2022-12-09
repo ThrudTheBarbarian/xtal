@@ -65,7 +65,7 @@ class SymbolTable
         /********************************************************************\
         |* Add a global variable, and return the new slot position
         \********************************************************************/
-		int add(const String& name, int pType, StructuralType sType);
+		int add(const String& name, int pType, StructuralType sType, int size);
 		
         /**********************************************************************\
         |* This method returns the default global instance.          \**********************************************************************/

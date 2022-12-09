@@ -30,6 +30,7 @@ class Symbol
 	GETSET(int, pType, PType);				// Primitive type for symbol
 	GETSET(StructuralType, sType, SType);	// Structural type for symbol
 	GETSET(String, endLabel, EndLabel);		// Label at the end of the function
+	GETSET(int, size, Size);				// Number of elements in array
 	
     private:
         
@@ -41,7 +42,9 @@ class Symbol
 		explicit Symbol(const String& name,
 						int pType,
 						StructuralType sType,
-						String endLabel = "endFunc");
+						int size=1,
+						String endLabel = "endFunc"
+						);
 	};
 
 #endif /* Symbol_h */

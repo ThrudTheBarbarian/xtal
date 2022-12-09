@@ -24,11 +24,13 @@ Symbol::Symbol()
 Symbol::Symbol(const String& name,
 			   int pType,
 			   StructuralType sType,
+			   int size,
 			   String endLabel)
 	   :_name(name)
 	   ,_pType(pType)
 	   ,_sType(sType)
 	   ,_endLabel(endLabel)
+	   ,_size(size)
 	{
 	}
 	

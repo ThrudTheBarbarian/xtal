@@ -231,24 +231,31 @@ void A8Emitter::genSymbol(int idx)
 	
 	Symbol symbol 	= SYMTAB->table()[idx];
 	String name 	= symbol.name();
-	switch (_symbolSize(symbol))
-		{
-		case Register::SIGNED_4BYTE:
-			snprintf(buf, 1024, "@S_%s:.word 0,0\n", name.c_str());
-			break;
-		case Register::UNSIGNED_2BYTE:
-			snprintf(buf, 1024, "@S_%s:.word 0\n", name.c_str());
-			break;
-		case Register::UNSIGNED_1BYTE:
-			snprintf(buf, 1024, "@S_%s:.byte 0\n", name.c_str());
-			break;
-		default:
-			{
-			FATAL(ERR_TYPE, "Unknown size for symbol %s", symbol.name().c_str());
-			}
-		}
-
+	snprintf(buf, 1024, "@S_%s:\n", name.c_str());
 	append(buf, POSTAMBLE);
+	
+	for (int i=0; i<symbol.size(); i++)
+		{
+		String str;
+		
+		switch (_symbolSize(symbol))
+			{
+			case Register::SIGNED_4BYTE:
+				str = "\t.word 0,0\n";
+				break;
+			case Register::UNSIGNED_2BYTE:
+				str = "\t.word 0\n";
+				break;
+			case Register::UNSIGNED_1BYTE:
+				str = "\t.byte 0\n";
+				break;
+			default:
+				{
+				FATAL(ERR_TYPE, "Unknown size for symbol %s", symbol.name().c_str());
+				}
+			}
+		append(str, POSTAMBLE);
+		}
 	}
 	
 #pragma mark - Private Methods

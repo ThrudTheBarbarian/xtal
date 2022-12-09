@@ -50,11 +50,12 @@ enum
 	PT_MAXVAL				// Last entry
 	};
 
-// Structural types (function or variable)
+// Structural types (function, variable, array)
 typedef enum
 	{
 	ST_VARIABLE	= 1,
-	ST_FUNCTION
+	ST_FUNCTION,
+	ST_ARRAY
 	} StructuralType;
 
 #endif /* ! sharedDefines_h */
