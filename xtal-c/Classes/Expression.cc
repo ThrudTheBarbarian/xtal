@@ -90,7 +90,15 @@ ASTNode * Expression::primary(Scanner &scanner, Token &token,  int &line)
 			node = new ASTNode(ASTNode::A_IDENT, pType, identifier);
 			break;
 			}
-			
+
+		case Token::T_LPAREN:
+			// Beginning of a parenthesised expression, skip the '('.
+			// Scan in the expression and the right parenthesis
+			scanner.scan(token, line);\
+			node = binary(scanner, token, line, 0);
+			Statement::rightParen(scanner, token, line);
+			return node;
+
 		default:
 			FATAL(ERR_AST_SYNTAX, "Syntax error on line %d", line);
 		}
