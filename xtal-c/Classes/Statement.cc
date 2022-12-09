@@ -104,7 +104,7 @@ ASTNode * Statement::_functionDeclaration(Token& token, int& line, int type)
 	SYMTAB->setFunctionId(symIdx);
 
 	// Tell the emitter to reserve space for our variable
-	_emitter->genSymbol(symIdx);
+	//_emitter->genSymbol(symIdx);
 
 	// Parentheses
 	leftParen(*_scanner, token, line);

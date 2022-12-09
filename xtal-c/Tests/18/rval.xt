@@ -13,6 +13,6 @@ s32 main()
 	
 	*x = *y;
 	print c;
-	
+
 	return (0);
 	]
