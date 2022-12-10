@@ -203,7 +203,7 @@ void ASTNode::dump(ASTNode *node, int label, int level)
 			lStart = _genDumpLabel();
 			for (int i=0; i<level; i++)
 				printf(" ");
-			printf("A_WHILE, start L%d", lStart);
+			printf("A_WHILE, start L%d\n", lStart);
 			lEnd = _genDumpLabel();
 			dump(node->left(), lEnd, level+2);
 			dump(node->right(), 0, level+2);
