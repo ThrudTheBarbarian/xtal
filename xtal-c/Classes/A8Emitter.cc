@@ -145,7 +145,7 @@ Register A8Emitter::emit(ASTNode *node,
 				return left;
 		case ASTNode::A_PRINT:
 			{
-			printReg(left);
+			printReg(left, node->type());
 			RegisterFile::clear();
 			return none;
 			}
@@ -190,10 +190,18 @@ void A8Emitter::cgLabel(String label)
 /*****************************************************************************\
 |* Dump a register to CIO0
 \*****************************************************************************/
-void A8Emitter::printReg(Register r)
+void A8Emitter::printReg(Register r, int type)
 	{
-	//String size = r.sizeAsString();
-	fprintf(_ofp, "\tcall printReg %s\n", r.name().c_str());
+	switch (type)
+		{
+		case PT_U8PTR:
+			fprintf(_ofp, "\tcall printStr %s\n", r.name().c_str());
+			break;
+			
+		default:
+			fprintf(_ofp, "\tcall printReg %s\n", r.name().c_str());
+			break;
+		}
 	}
 	
 

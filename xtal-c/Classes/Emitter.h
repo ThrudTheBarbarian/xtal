@@ -72,7 +72,7 @@ class Emitter
         /*********************************************************************\
         |* Debugging - print a register
         \*********************************************************************/
-        virtual void printReg(Register r) = 0;
+        virtual void printReg(Register r, int type) = 0;
 
         /*********************************************************************\
         |* Generate the code

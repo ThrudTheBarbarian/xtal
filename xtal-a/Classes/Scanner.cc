@@ -1362,6 +1362,7 @@ int Scanner::_reserveBytes(TokenList &tokens, int size, String args)
 						_engine.eval(word);
 						val	= (int) _engine.result();
 						}
+					word = "";
 					if (size == 2)
 						{
 						t.data().push_back(val & 0xFF);

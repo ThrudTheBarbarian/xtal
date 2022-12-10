@@ -198,7 +198,7 @@ class A8Emitter : public Emitter
         /*********************************************************************\
         |* Debugging - print a register
         \*********************************************************************/
-        void printReg(Register r);
+        void printReg(Register r, int type);
 
         /*********************************************************************\
         |* Generate the code

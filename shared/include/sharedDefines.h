@@ -39,7 +39,7 @@ enum
 	PT_S32,					// signed int, 32 bits
 	PT_U32,					// unsigned int, 32 bits
 	
-	PT_VOIDPTR	= 0x102,	// Pointer to void
+	PT_VOIDPTR	= 0x102,	// Pointer to void	.. 258
 	PT_U8PTR,				// Pointer to unsigned 8-bit value
 	PT_S8PTR,				// Pointer to signed 8-bit value
 	PT_U16PTR,				// Pointer to unsigned 16-bit value

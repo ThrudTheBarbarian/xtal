@@ -350,12 +350,18 @@ ASTNode * Statement::_print(Token& token, int& line)
 	ASTNode *tree = Expression::binary(*_emitter, *_scanner, token, line, 0);
 	
 	// Make sure we're type-compatible
-	tree = Types::modify(tree, PT_S32, 0);
-	if (tree == nullptr)
+	int type = PT_S32;
+	ASTNode *candidate = Types::modify(tree, type, 0);
+	if (candidate == nullptr)
+		{
+		type = PT_U8PTR;	// String pointer
+		candidate = Types::modify(tree, type, 0);
+		}
+	if (candidate == nullptr)
 		FATAL(ERR_TYPE, "Types incompatible at line %d", line);
 	
 	// Make a 'print' AST node
-	return new ASTNode(ASTNode::A_PRINT, PT_S32, tree, 0);
+	return new ASTNode(ASTNode::A_PRINT, type, tree, 0);
 	}
 
 
