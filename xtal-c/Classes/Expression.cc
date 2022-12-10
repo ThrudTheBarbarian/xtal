@@ -56,35 +56,7 @@ ASTNode * Expression::primary(Emitter& emitter,
 			break;
 
 		case Token::T_IDENT:
-			{
-			// This could be a variable or a function, scan in the next
-			// token to find out
-			scanner.scan(token, line);
-			
-			// If it's a '(' then we have a function call
-			if (token.token() == Token::T_LPAREN)
-				return _funcCall(emitter, scanner, token, line);
-			
-			// If it's a '[' then we have an array reference
-			if (token.token() == Token::T_LBRACE)
-				return _arrayAccess(emitter, scanner, token, line);
-			
-			// It wasn't, so reject this just-scanned token for next time
-			scanner.reject(token);
-			
-			// Check that this identifier exists
-			identifier = SYMTAB->find(scanner.text());
-			if (identifier == SymbolTable::NOT_FOUND)
-				FATAL(ERR_PARSE,
-					"Unknown variable [%s] on line %d",
-						scanner.text().c_str(), line);
-
-
-			// Make a leaf AST node for it
-			int pType = SYMTAB->table()[identifier].pType();
-			node = new ASTNode(ASTNode::A_IDENT, pType, identifier);
-			break;
-			}
+			return _postfix(emitter, scanner, token, line);
 
 		case Token::T_LPAREN:
 			// Beginning of a parenthesised expression, skip the '('.
@@ -99,6 +71,63 @@ ASTNode * Expression::primary(Emitter& emitter,
 		}
 		
 	scanner.scan(token, line);
+	return node;
+	}
+
+/*****************************************************************************\
+|* Parse a postfix expression and return an AST node representing it. The
+|* identifier is already in scanner.text()
+\*****************************************************************************/
+ASTNode * Expression::_postfix(Emitter& emitter,
+							   Scanner &scanner,
+							   Token &token,
+							   int &line)
+	{
+	ASTNode *node = nullptr;
+
+	// Scan in the next token to see if we have a postfix expression
+	scanner.scan(token, line);
+
+	// Function call
+	if (token.token() == Token::T_LPAREN)
+		return (_funcCall(emitter, scanner, token, line));
+
+	// An array reference
+	if (token.token() == Token::T_LBRACE)
+		return (_arrayAccess(emitter, scanner, token, line));
+
+	// A variable. Check that the variable exists.
+	int identifier 	= SYMTAB->find(scanner.text());
+	if (identifier == SymbolTable::NOT_FOUND)
+		FATAL(ERR_PARSE, "Unknown variable [%s] on line %d",
+						scanner.text().c_str(), line);
+	
+	// And that the symbol is actually a variable
+	Symbol s = SYMTAB->table()[identifier];
+	if (s.sType() != ST_VARIABLE)
+		FATAL(ERR_PARSE, "Symbol %s is not a variable on line %d",
+						scanner.text().c_str(), line);
+
+	switch (token.token())
+		{
+		// Post-increment: skip over the token
+		case Token::T_INC:
+			scanner.scan(token, line);
+			node = new ASTNode(ASTNode::A_POSTINC, s.pType(), identifier);
+			break;
+
+		// Post-decrement: skip over the token
+		case Token::T_DEC:
+ 			scanner.scan(token, line);
+			node = new ASTNode(ASTNode::A_POSTDEC, s.pType(), identifier);
+			break;
+
+		// Just a variable reference
+		default:
+			node = new ASTNode(ASTNode::A_IDENT, s.pType(), identifier);
+			break;
+		}
+		
 	return node;
 	}
 
@@ -427,7 +456,74 @@ ASTNode * Expression::_prefix(Emitter& emitter,
 							   tree,
 							   0);
 			break;
-			
+
+		case Token::T_MINUS:
+			// Get the next token and parse it recursively as a prefix
+			scanner.scan(token, line);
+			tree = _prefix(emitter, scanner, token, line);
+
+			// Prepend a A_NEGATE operation to the tree and
+			// make the child an rvalue. Because chars are unsigned,
+			// also widen this to int so that it's signed
+			tree->setIsRValue(true);
+			// FIXME: tree = modify_type(tree, P_INT, 0);
+			tree = new ASTNode(ASTNode::A_NEGATE, tree->type(), tree, 0);
+			break;
+    
+		case Token::T_INVERT:
+			// Get the next token and parse it recursively as a prefix
+			scanner.scan(token, line);
+			tree = _prefix(emitter, scanner, token, line);
+
+			// Prepend a A_INVERT operation to the tree and
+			// make the child an rvalue.
+			tree->setIsRValue(true);
+			tree = new ASTNode(ASTNode::A_INVERT, tree->type(), tree, 0);
+			break;
+    
+		case Token::T_LOGNOT:
+			// Get the next token and parse it recursively as a prefix
+			scanner.scan(token, line);
+			tree = _prefix(emitter, scanner, token, line);
+
+			// Prepend a A_LOGNOT operation to the tree and
+			// make the child an rvalue.
+			tree->setIsRValue(true);
+			tree = new ASTNode(ASTNode::A_LOGNOT, tree->type(), tree, 0);
+			break;
+    
+		case Token::T_INC:
+			// Get the next token and parse it recursively as a prefix
+			scanner.scan(token, line);
+			tree = _prefix(emitter, scanner, token, line);
+
+			// For now, ensure it's an identifier
+			if (tree->op() != ASTNode::A_IDENT)
+				FATAL(ERR_PARSE, "++ operator must be followed "
+								 "by an identifier");
+
+			// Prepend a A_LOGNOT operation to the tree and
+			// make the child an rvalue.
+			tree->setIsRValue(true);
+			tree = new ASTNode(ASTNode::A_PREINC, tree->type(), tree, 0);
+			break;
+    
+		case Token::T_DEC:
+			// Get the next token and parse it recursively as a prefix
+			scanner.scan(token, line);
+			tree = _prefix(emitter, scanner, token, line);
+
+			// For now, ensure it's an identifier
+			if (tree->op() != ASTNode::A_IDENT)
+				FATAL(ERR_PARSE, "-- operator must be followed "
+								 "by an identifier");
+
+			// Prepend a A_LOGNOT operation to the tree and
+			// make the child an rvalue.
+			tree->setIsRValue(true);
+			tree = new ASTNode(ASTNode::A_PREDEC, tree->type(), tree, 0);
+			break;
+
 		default:
 			tree = primary(emitter, scanner, token, line);
 		}

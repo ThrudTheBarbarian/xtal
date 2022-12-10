@@ -24,12 +24,14 @@ class Token
 			{
 			T_NONE		= -1,
 			T_ASSIGN	= 1,	// Equals (assign, lowest priority)
-			T_PLUS,				// Plus op
-			T_MINUS,			// Minus op
-			T_STAR,				// Multiply op
-			T_SLASH,			// Divide op
 			
-			// Comparisons
+			T_LOGOR,			// Logical OR
+			T_LOGAND,			// Logical AND
+			T_OR,				// Numeric OR
+			T_XOR,				// Numeric XOR
+			
+			T_AMPER, 			// Address-of operator
+			
 			T_EQ,				// Is equal to
 			T_NE,				// Is not equal to
 			T_LT,				// Is less than
@@ -37,11 +39,32 @@ class Token
 			T_LE,				// Is less than or equal to
 			T_GE,				// Is greater than or equal to
 
+			T_LSHIFT,			// Left-shift
+			T_RSHIFT,			// Right-shift
+			
+			T_PLUS,				// Plus op
+			T_MINUS,			// Minus op
+			T_STAR,				// Multiply op
+			T_SLASH,			// Divide op
+
+			T_INC,				// Increment
+			T_DEC,				// Decrement
+			T_INVERT,			// Invert (~)
+			T_LOGNOT,			// logical not (!)
+
 			T_VOID, 			// Void declaration
 			T_S8,				// signed 8-bit value
 			T_U8,				// unsigned 8-bit value
 			T_U16,				// unsigned 16-bit value
 			T_S32,				// signed 32-bit value
+
+			// Keywords
+			T_PRINT,			// Print command
+			T_IF,				// Start an IF block
+			T_ELSE,				// Start an ELSE block
+			T_WHILE,			// Start a WHILE loop
+			T_FOR,				// Start a FOR loop
+			T_RETURN,			// Return from a function
 			
 			T_INTLIT,			// Integer literal
 			T_STRLIT,			// String literal
@@ -53,18 +76,8 @@ class Token
 			T_LPAREN,			// Left bracket		(
 			T_RPAREN,			// Right bracket	)
 
-			T_AMPER, 			// Address-of operator
-			T_LOGAND,			// Logical AND
 			T_COMMA,			// Comma operator
 
-			// Keywords
-			T_PRINT,			// Print command
-			T_IF,				// Start an IF block
-			T_ELSE,				// Start an ELSE block
-			T_WHILE,			// Start a WHILE loop
-			T_FOR,				// Start a FOR loop
-			T_RETURN,			// Return from a function
-			
 			T_MAXVAL,			// Max token value
 			};
 		

@@ -89,6 +89,9 @@ Register A8Emitter::emit(ASTNode *node,
 		case ASTNode::A_SUBTRACT:		return _cgSub(left, right);
 		case ASTNode::A_MULTIPLY:		return _cgMul(left, right);
 		case ASTNode::A_DIVIDE:			return _cgDiv(left, right);
+		case ASTNode::A_AND:			return _cgAnd(left, right);
+		case ASTNode::A_OR:				return _cgOr(left, right);
+		case ASTNode::A_XOR:			return _cgXor(left, right);
 		case ASTNode::A_EQ:
 		case ASTNode::A_NE:
 		case ASTNode::A_LT:
@@ -1227,4 +1230,49 @@ Register A8Emitter::_cgShlConst(Register r1, int amount)
 					  r1.name().c_str(),
 					  r1.name().c_str());
 	return r1;
+	}
+
+/*****************************************************************************\
+|* Perform an AND
+\*****************************************************************************/
+Register A8Emitter::_cgAnd(Register r1, Register r2)
+	{
+	int size = r1.size()*8;		// will be the same for both
+	
+	fprintf(_ofp, "\t_and%d %s,%s\n",
+					  size,
+					  r1.name().c_str(),
+					  r2.name().c_str());
+	_regs->free(r1);
+	return r2;
+	}
+
+/*****************************************************************************\
+|* Perform an OR
+\*****************************************************************************/
+Register A8Emitter::_cgOr(Register r1, Register r2)
+	{
+	int size = r1.size()*8;		// will be the same for both
+	
+	fprintf(_ofp, "\t_or%d %s,%s\n",
+					  size,
+					  r1.name().c_str(),
+					  r2.name().c_str());
+	_regs->free(r1);
+	return r2;
+	}
+
+/*****************************************************************************\
+|* Perform an XOR
+\*****************************************************************************/
+Register A8Emitter::_cgXor(Register r1, Register r2)
+	{
+	int size = r1.size()*8;		// will be the same for both
+	
+	fprintf(_ofp, "\t_eor%d %s,%s\n",
+					  size,
+					  r1.name().c_str(),
+					  r2.name().c_str());
+	_regs->free(r1);
+	return r2;
 	}

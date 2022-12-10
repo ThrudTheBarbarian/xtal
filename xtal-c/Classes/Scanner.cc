@@ -51,11 +51,23 @@ int Scanner::scan(Token& token, int& line)
 			return SCAN_COMPLETE;
 		
 		case '+':
-			token.setToken(Token::T_PLUS);
+			if ((c = _next(line)) == '+')
+				token.setToken(Token::T_INC);
+			else
+				{
+				_putBack();
+				token.setToken(Token::T_PLUS);
+				}
 			break;
 		
 		case '-':
-			token.setToken(Token::T_MINUS);
+			if ((c = _next(line)) == '-')
+				token.setToken(Token::T_DEC);
+			else
+				{
+				_putBack();
+				token.setToken(Token::T_MINUS);
+				}
 			break;
 		
 		case '/':
@@ -90,6 +102,13 @@ int Scanner::scan(Token& token, int& line)
  			token.setToken(Token::T_COMMA);
 			break;
 
+		case '~':
+ 			token.setToken(Token::T_INVERT);
+			break;
+
+		case '^':
+ 			token.setToken(Token::T_XOR);
+			break;
 
 		case '=':
 			if ((c = _next(line)) == '=')
@@ -138,6 +157,17 @@ int Scanner::scan(Token& token, int& line)
 				token.setToken(Token::T_AMPER);
 				}
 			break;
+		
+		case '|':
+			if ((c = _next(line)) == '|')
+				token.setToken(Token::T_LOGOR);
+			else
+				{
+				_putBack();
+				token.setToken(Token::T_OR);
+				}
+			break;
+
 
 		case '\'':
 			// If it's a quote, scan in the literal character value and

@@ -60,6 +60,14 @@ class Expression
 								 Scanner &scanner,
 								 Token &token,
 								 int &line);
+								
+        /*********************************************************************\
+        |* Prefix resolution - pointers and de-refs
+        \*********************************************************************/
+        static ASTNode * _postfix(Emitter& emitter,
+								  Scanner &scanner,
+								  Token &token,
+								  int &line);
 		
     public:
         /*********************************************************************\

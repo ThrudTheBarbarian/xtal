@@ -301,25 +301,45 @@ r15	= $fc
 ;/*************************************************************************\
 ;|* Type: Logic operation
 ;|*
-;|* Calculate the logical OR of the 16-bit value at location %1 and %2
-;|* storing it at %3
+;|* Calculate the logical OR of the 8-bit value at location %1 and %2
+;|* storing it at %2
 ;|*
 ;|* Clobbers: A
 ;|* Arguments:
 ;|*    %1 : first source address to read from
-;|*    %2 : second source address to read from
-;|*    %3 : destination address to write to
+;|*    %2 : second source address to read from, also destination
+;\*************************************************************************/
+.macro _or8
+	.if (%1 != %2)
+		lda %1
+		ora %2
+		sta %2
+	.else
+		_xfer8 %1, %2
+	.endif
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Logic operation
+;|*
+;|* Calculate the logical OR of the 16-bit value at location %1 and %2
+;|* storing it at %2
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : first source address to read from
+;|*    %2 : second source address to read from, also destination
 ;\*************************************************************************/
 .macro _or16
 	.if (%1 != %2)
 		lda %1
 		ora %2
-		sta %3
+		sta %2
 		lda %1+1
 		ora %2+1
-		sta %3+1
+		sta %2+1
 	.else
-		_xfer16 %1, %3
+		_xfer16 %1, %2
 	.endif
 .endmacro
 
@@ -350,30 +370,29 @@ r15	= $fc
 ;|* Type: Logic operation
 ;|*
 ;|* Calculate the logical OR of the 32-bit value at location %1 and %2
-;|* storing it at %3
+;|* storing it at %2
 ;|*
 ;|* Clobbers: A
 ;|* Arguments:
 ;|*    %1 : first source address to read from
-;|*    %2 : second source address to read from
-;|*    %3 : destination address to write to
+;|*    %2 : second source address to read from, also destination
 ;\*************************************************************************/
 .macro _or32
 	.if (%1 != %2)
 		lda %1
 		ora %2
-		sta %3
+		sta %2
 		lda %1+1
 		ora %2+1
-		sta %3+1
+		sta %2+1
 		lda %1+2
 		ora %2+2
-		sta %3+2
+		sta %2+2
 		lda %1+3
 		ora %2+3
-		sta %3+3
+		sta %2+3
 	.else
-		_xfer32 %1, %3
+		_xfer32 %1, %2
 	.endif
 .endmacro
 
@@ -382,24 +401,44 @@ r15	= $fc
 ;|* Type: Logic operation
 ;|*
 ;|* Calculate the logical AND of the 16-bit value at location %1 and %2
-;|* storing it at %3
+;|* storing it at %2
 ;|*
 ;|* Clobbers: A
 ;|* Arguments:
 ;|*    %1 : first source address to read from
-;|*    %2 : second source address to read from
-;|*    %3 : destination address to write to
+;|*    %2 : second source address to read from, also destination
+;\*************************************************************************/
+.macro _and8
+	.if (%1 != %2)
+		lda %1
+		and %2
+		sta %2
+	.else
+		_xfer8 %1, %2
+	.endif
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Logic operation
+;|*
+;|* Calculate the logical AND of the 16-bit value at location %1 and %2
+;|* storing it at %2
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : first source address to read from
+;|*    %2 : second source address to read from, also destination
 ;\*************************************************************************/
 .macro _and16
 	.if (%1 != %2)
 		lda %1
 		and %2
-		sta %3
+		sta %2
 		lda %1+1
 		and %2+1
-		sta %3+1
+		sta %2+1
 	.else
-		_xfer16 %1, %3
+		_xfer16 %1, %2
 	.endif
 .endmacro
 
@@ -430,30 +469,29 @@ r15	= $fc
 ;|* Type: Logic operation
 ;|*
 ;|* Calculate the logical AND of the 32-bit value at location %1 and %2
-;|* storing it at %3
+;|* storing it at %2
 ;|*
 ;|* Clobbers: A
 ;|* Arguments:
 ;|*    %1 : first source address to read from
-;|*    %2 : second source address to read from
-;|*    %3 : destination address to write to
+;|*    %2 : second source address to read from, also destination
 ;\*************************************************************************/
 .macro _and32
 	.if (%1 != %2)
 		lda %1
 		and %2
-		sta %3
+		sta %2
 		lda %1+1
 		and %2+1
-		sta %3+1
+		sta %2+1
 		lda %1+2
 		and %2+2
-		sta %3+2
+		sta %2+2
 		lda %1+3
 		and %2+3
-		sta %3+3
+		sta %2+3
 	.else
-		_xfer32 %1, %3
+		_xfer32 %1, %2
 	.endif
 .endmacro
 
@@ -461,25 +499,45 @@ r15	= $fc
 ;/*************************************************************************\
 ;|* Type: Logic operation
 ;|*
-;|* Calculate the logical EOR of the 16-bit value at location %1 and %2
-;|* storing it at %3
+;|* Calculate the logical EOR of the 8-bit value at location %1 and %2
+;|* storing it at %2
 ;|*
 ;|* Clobbers: A
 ;|* Arguments:
 ;|*    %1 : first source address to read from
-;|*    %2 : second source address to read from
-;|*    %3 : destination address to write to
+;|*    %2 : second source address to read from, and destination
+;\*************************************************************************/
+.macro _eor8
+	.if (%1 != %2)
+		lda %1
+		eor %2
+		sta %2
+	.else
+		_clr8 %2
+	.endif
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Logic operation
+;|*
+;|* Calculate the logical EOR of the 16-bit value at location %1 and %2
+;|* storing it at %2
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : first source address to read from
+;|*    %2 : second source address to read from, and destination
 ;\*************************************************************************/
 .macro _eor16
 	.if (%1 != %2)
 		lda %1
 		eor %2
-		sta %3
+		sta %2
 		lda %1+1
 		eor %2+1
-		sta %3+1
+		sta %2+1
 	.else
-		_clr16 %3
+		_clr16 %2
 	.endif
 .endmacro
 
@@ -509,31 +567,30 @@ r15	= $fc
 ;/*************************************************************************\
 ;|* Type: Logic operation
 ;|*
-;|* Calculate the logical AND of the 32-bit value at location %1 and %2
-;|* storing it at %3
+;|* Calculate the logical EOR of the 32-bit value at location %1 and %2
+;|* storing it at %2
 ;|*
 ;|* Clobbers: A
 ;|* Arguments:
 ;|*    %1 : first source address to read from
-;|*    %2 : second source address to read from
-;|*    %3 : destination address to write to
+;|*    %2 : second source address to read from, and destination
 ;\*************************************************************************/
 .macro _eor32
 	.if (%1 != %2)
 		lda %1
 		eor %2
-		sta %3
+		sta %2
 		lda %1+1
 		eor %2+1
-		sta %3+1
+		sta %2+1
 		lda %1+2
 		eor %2+2
-		sta %3+2
+		sta %2+2
 		lda %1+3
 		eor %2+3
-		sta %3+3
+		sta %2+3
 	.else
-		_clr32 %3
+		_clr32 %2
 	.endif
 .endmacro
 

@@ -148,6 +148,9 @@
 		F45E73D6294301990032D589 /* array.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = array.xt; sourceTree = "<group>"; };
 		F45E73D72944F28E0032D589 /* printstr.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = printstr.s; sourceTree = "<group>"; };
 		F45E73D929451EE10032D589 /* 2string.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = 2string.xt; sourceTree = "<group>"; };
+		F45E73DB29453D230032D589 /* and.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = and.xt; sourceTree = "<group>"; };
+		F45E73DC294540CA0032D589 /* or.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = or.xt; sourceTree = "<group>"; };
+		F45E73DD2945437C0032D589 /* eor.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = eor.xt; sourceTree = "<group>"; };
 		F480EF082922B472008584FB /* xtal */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = xtal; sourceTree = BUILT_PRODUCTS_DIR; };
 		F480EF0B2922B472008584FB /* main.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cc; sourceTree = "<group>"; };
 		F480EF162922B512008584FB /* xtal-c */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "xtal-c"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -310,6 +313,16 @@
 				F45E73D6294301990032D589 /* array.xt */,
 			);
 			path = "19-arrays";
+			sourceTree = "<group>";
+		};
+		F45E73DA29453D060032D589 /* 21-ops */ = {
+			isa = PBXGroup;
+			children = (
+				F45E73DB29453D230032D589 /* and.xt */,
+				F45E73DC294540CA0032D589 /* or.xt */,
+				F45E73DD2945437C0032D589 /* eor.xt */,
+			);
+			path = "21-ops";
 			sourceTree = "<group>";
 		};
 		F480EEFF2922B472008584FB = {
@@ -512,6 +525,7 @@
 				F43F131C2941B8A6003D42B5 /* 18 */,
 				F45E73D5294301810032D589 /* 19-arrays */,
 				F4BE080F29441EDB00004A8D /* 20-strings */,
+				F45E73DA29453D060032D589 /* 21-ops */,
 			);
 			path = Tests;
 			sourceTree = "<group>";

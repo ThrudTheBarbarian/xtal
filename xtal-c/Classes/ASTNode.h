@@ -26,23 +26,31 @@ class ASTNode
 			{
 			A_NONE 		= -1,
 			A_ASSIGN	= 1,	// Assign operation (must = Token::T_ASSIGN)
-			A_ADD,				// Add  (align with Token::T_PLUS)
-			A_SUBTRACT,			// Subtract
-			A_MULTIPLY,			// Multiply
-			A_DIVIDE,			// Divide
 			
+			A_LOGOR,			// Logical OR
+			A_LOGAND,			// Logical AND
+			A_OR,				// Mumeric OR
+			A_XOR,				// Numeric XOR
+		
+			A_AND,				// Numeric AND
+
 			A_EQ,				// ==
 			A_NE,				// !=
 			A_LT,				// <
 			A_GT,				// >
 			A_LE,				// <=
 			A_GE,				// >=
+
+			A_LSHIFT,			// <<
+			A_RSHIFT,			// >>
+			
+			A_ADD,				// Add  (align with Token::T_PLUS)
+			A_SUBTRACT,			// Subtract
+			A_MULTIPLY,			// Multiply
+			A_DIVIDE,			// Divide
 			
 			A_INTLIT,			// Integer literal
 			A_STRLIT,			// String literal
-			
-			// Below here, the node types stop aligning with Token::
-			// but we have all the binary operators above
 			
 			A_IDENT,			// Identifier
 			
@@ -59,6 +67,16 @@ class ASTNode
 			A_DEREF, 			// Dereference op
 			A_ADDR,				// Address-of op
 			A_SCALE,			// Scale the offset by the type size
+			
+			A_PREINC,			// ++x
+			A_PREDEC,			// --x
+			A_POSTINC,			// x++
+			A_POSTDEC,			// x--
+			A_NEGATE,			// !x
+			A_INVERT,			// ~x
+
+			A_LOGNOT,			// Logical not
+			A_TOBOOL,			// logical truth for expression
 			
 			A_MAXVAL			// Last normal entry
 			};

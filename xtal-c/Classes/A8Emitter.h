@@ -186,6 +186,21 @@ class A8Emitter : public Emitter
         |* Shift a register by a constant amount
         \*********************************************************************/
         Register _cgShlConst(Register r1, int amount);
+        
+		/*********************************************************************\
+        |* Perform an AND op on two registers
+        \*********************************************************************/
+        Register _cgAnd(Register r1, Register r2);
+        
+		/*********************************************************************\
+        |* Perform an AND op on two registers
+        \*********************************************************************/
+        Register _cgOr(Register r1, Register r2);
+        
+		/*********************************************************************\
+        |* Perform an AND op on two registers
+        \*********************************************************************/
+        Register _cgXor(Register r1, Register r2);
 
 		
     public:

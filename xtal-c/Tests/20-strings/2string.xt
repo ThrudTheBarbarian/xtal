@@ -2,7 +2,7 @@ s32 main()
 	[
 	u8 *s;
 	
-	s = "hello ";
+	s = "Hello ";
 	print s;
 	
 	s = "world!";
