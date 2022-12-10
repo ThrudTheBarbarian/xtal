@@ -1168,7 +1168,7 @@ Register A8Emitter::_cgStoreDeref(Register& r1, Register& r2, int type)
 		case PT_U8:
 			fprintf(_ofp, "\tlda $%s\n"
 						  "\tldy #0\n"
-						  "\tsta (%s),y",
+						  "\tsta (%s),y\n",
 						  name1, name2);
 			break;
 			
@@ -1179,7 +1179,7 @@ Register A8Emitter::_cgStoreDeref(Register& r1, Register& r2, int type)
 						  "\tsta (%s),y\n"
 						  "\tiny\n"
 						  "\tlda %s+1\n"
-						  "\tsta (%s),y",
+						  "\tsta (%s),y\n",
 						  name1, name2, name1, name2);
 			
 		case PT_S32:
