@@ -1,0 +1,14 @@
+s32 main()
+	[
+	u8 *s;
+	
+	s = "hello ";
+	print s;
+	
+	s = "world!";
+	print s;
+	
+	return (0);
+	]
+	
+

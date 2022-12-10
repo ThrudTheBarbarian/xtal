@@ -297,7 +297,7 @@ int A8Emitter::genString(String content)
 		define += comma + toHexString(content[i], "$");
 		comma   = ",";
 		}
-	define += ",0";
+	define += ",0\n";
 	
 	append(define, POSTAMBLE);
 	return symIdx;
