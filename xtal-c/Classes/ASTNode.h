@@ -39,6 +39,7 @@ class ASTNode
 			A_GE,				// >=
 			
 			A_INTLIT,			// Integer literal
+			A_STRLIT,			// String literal
 			
 			// Below here, the node types stop aligning with Token::
 			// but we have all the binary operators above

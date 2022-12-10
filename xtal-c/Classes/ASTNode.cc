@@ -269,6 +269,9 @@ void ASTNode::dump(ASTNode *node, int label, int level)
 		case A_INTLIT:
 			printf("A_INTLIT %d\n", node->value().intValue);
 			return;
+		case A_STRLIT:
+			printf("A_STRLIT\n");
+			return;
 		case A_IDENT:
 			{
 			Symbol s = SYMTAB->table()[node->value().identifier];

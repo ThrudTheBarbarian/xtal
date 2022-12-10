@@ -148,7 +148,7 @@ int Types::typeSize(int type, int line)
 			}
 		}
 	if (type >= 0x100)
-		return 4;
+		return 2;
 		
 	return _sizes[type];
 	}

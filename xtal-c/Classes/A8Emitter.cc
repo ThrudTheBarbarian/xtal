@@ -104,6 +104,11 @@ Register A8Emitter::emit(ASTNode *node,
 			{
 			return _cgLoadInt(node->value().intValue);
 			}
+				
+		case ASTNode::A_STRLIT:
+			{
+			return _cgLoadGlobalStr(node->value().intValue);
+			}
 		case ASTNode::A_IDENT:
 			{
 			if (node->isRValue() || (parentAstOp == ASTNode::A_DEREF))
@@ -257,6 +262,38 @@ void A8Emitter::genSymbol(int idx)
 		append(str, POSTAMBLE);
 		}
 	}
+
+/*****************************************************************************\
+|* Generate a global string symbol
+\*****************************************************************************/
+int A8Emitter::genString(String content)
+	{
+	static int stringId = 0;
+	char name[1024];
+	snprintf(name, 1024, "str_%d", stringId++);
+	
+	int symIdx = SYMTAB->add(name,
+							 PT_U8PTR,
+							 ST_ARRAY,
+							 (int)content.length());
+	
+	char buf[1024];
+	snprintf(buf, 1024, "@S_%s:\n", name);
+	append(buf, POSTAMBLE);
+	
+	String define = ".byte ";
+	String comma  = "";
+	
+	for (int i=0; i<(int)content.length(); i++)
+		{
+		define += comma + toHexString(content[i], "$");
+		comma   = ",";
+		}
+	define += ",0";
+	
+	append(define, POSTAMBLE);
+	return symIdx;
+	}
 	
 #pragma mark - Private Methods
 
@@ -273,6 +310,18 @@ Register A8Emitter::_cgLoadInt(int val, int primitiveType)
 	Register r	= _regs->allocate(type);
 	
 	fprintf(_ofp, "\tmove.%d #$%x %s\n", r.size(), val, r.name().c_str());
+	return r;
+	}
+
+/*****************************************************************************\
+|* Generate a load-value-to-register
+\*****************************************************************************/
+Register A8Emitter::_cgLoadGlobalStr(int val)
+	{
+	Register r	= _regs->allocate(Register::UNSIGNED_2BYTE);
+	Symbol s	= SYMTAB->table()[val];
+	
+	fprintf(_ofp, "\tmove.2 #S_%s %s\n",s.name().c_str(), r.name().c_str());
 	return r;
 	}
 
@@ -1069,7 +1118,7 @@ void A8Emitter::_cgReturn(Register r1, int funcId)
 Register A8Emitter::_cgAddress(int identifier)
 	{
 	// Get a new out-register
-	Register r 	= _regs->allocate(Register::SIGNED_4BYTE);
+	Register r 	= _regs->allocate(Register::UNSIGNED_2BYTE);
 	
 	// Fetch the symbol
 	Symbol s 	= SYMTAB->table()[identifier];

@@ -37,6 +37,11 @@ class A8Emitter : public Emitter
         Register _cgLoadInt(int value, int type = PT_U8);
         
 		/*********************************************************************\
+        |* Generate a global string load immediate
+        \*********************************************************************/
+        Register _cgLoadGlobalStr(int value);
+        
+		/*********************************************************************\
         |* Fetch a global var
         \*********************************************************************/
         Register _cgLoadGlobal(const Symbol& symbol);
@@ -207,6 +212,11 @@ class A8Emitter : public Emitter
         |* Generate a global symbol by reference to the symbol table index
         \*********************************************************************/
         virtual void genSymbol(int symIdx);
+
+        /*********************************************************************\
+        |* Generate a global string symbol
+        \*********************************************************************/
+        virtual int genString(String );
 
 		/*********************************************************************\
         |* Emit a jump-to-a-label command

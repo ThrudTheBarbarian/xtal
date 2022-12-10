@@ -157,7 +157,7 @@ ASTNode * Statement::returnStatement(Token& token, int& line)
 	/*************************************************************************\
     |* Parse the following expression
     \*************************************************************************/
-	ASTNode *tree 	= Expression::binary(*_scanner, token, line, 0);
+	ASTNode *tree 	= Expression::binary(*_emitter, *_scanner, token, line, 0);
 	
 	/*************************************************************************\
     |* Make sure this is compatible with the function's type
@@ -330,7 +330,7 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 			
 		default:
 			// Catch assignments, for now
-			return Expression::binary(*_scanner, token, line, 0);
+			return Expression::binary(*_emitter, *_scanner, token, line, 0);
 		}
 		
 	return tree;
@@ -347,7 +347,7 @@ ASTNode * Statement::_print(Token& token, int& line)
 	_match(*_scanner, token, Token::T_PRINT, line, "print");
 	
 	// Parse the following expression and generate the assembly code
-	ASTNode *tree = Expression::binary(*_scanner, token, line, 0);
+	ASTNode *tree = Expression::binary(*_emitter, *_scanner, token, line, 0);
 	
 	// Make sure we're type-compatible
 	tree = Types::modify(tree, PT_S32, 0);
@@ -370,7 +370,7 @@ ASTNode * Statement::_if(Token& token, int& line)
 	
 	// Parse the following expression, and the ')' after that. Ensure the
 	// tree's operation is a comparison
-	ASTNode *condAST = Expression::binary(*_scanner, token, line, 0);
+	ASTNode *condAST = Expression::binary(*_emitter, *_scanner, token, line, 0);
 	
 	if ((condAST->op() < ASTNode::A_EQ) || (condAST->op() > ASTNode::A_GE))
 		FATAL(ERR_AST_SYNTAX, "Bad comparison operator at %d", line);
@@ -405,7 +405,7 @@ ASTNode * Statement::_while(Token& token, int& line)
 	
 	// Parse the following expression, and the ')' after that. Ensure the
 	// tree's operation is a comparison
-	ASTNode *condAST = Expression::binary(*_scanner, token, line, 0);
+	ASTNode *condAST = Expression::binary(*_emitter, *_scanner, token, line, 0);
 	
 	if ((condAST->op() < ASTNode::A_EQ) || (condAST->op() > ASTNode::A_GE))
 		FATAL(ERR_AST_SYNTAX, "Bad comparison operator at %d", line);
@@ -436,7 +436,7 @@ ASTNode * Statement::_for(Token& token, int& line)
 	_semicolon(*_scanner, token, line);
 	
 	// Get the condition and the )
-	ASTNode *condAST = Expression::binary(*_scanner, token, line, 0);
+	ASTNode *condAST = Expression::binary(*_emitter, *_scanner, token, line, 0);
 	if ((condAST->op() < ASTNode::A_EQ) || (condAST->op() > ASTNode::A_GE))
 		FATAL(ERR_AST_SYNTAX, "Bad comparison operator at %d", line);
 	_semicolon(*_scanner, token, line);

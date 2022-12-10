@@ -108,6 +108,11 @@ class Emitter
         virtual void genSymbol(int symIdx) = 0;
 
         /*********************************************************************\
+        |* Generate a global symbol by reference to the symbol table index
+        \*********************************************************************/
+        virtual int genString(String content) = 0;
+
+        /*********************************************************************\
         |* Append text to one of the body parts
         \*********************************************************************/
         virtual void append(const String& what, Location where);

@@ -6,6 +6,7 @@
 //
 
 #include "ASTNode.h"
+#include "Emitter.h"
 #include "Expression.h"
 #include "Scanner.h"
 #include "Statement.h"
@@ -26,7 +27,10 @@ Expression::Expression()
 /*****************************************************************************\
 |* Primary expression resolution
 \*****************************************************************************/
-ASTNode * Expression::primary(Scanner &scanner, Token &token,  int &line)
+ASTNode * Expression::primary(Emitter& emitter,
+							  Scanner &scanner,
+							  Token &token,
+							  int &line)
 	{
 	ASTNode *node;
 	int identifier;
@@ -44,6 +48,13 @@ ASTNode * Expression::primary(Scanner &scanner, Token &token,  int &line)
 				node = new ASTNode(ASTNode::A_INTLIT, PT_S32, token.intValue());
 			break;
 
+		case Token::T_STRLIT:
+			// For a STRLIT token, generate the assembly for it.
+			// Then make a leaf AST node for it. id is the string's label.
+			identifier =  emitter.genString(scanner.text());
+			node = new ASTNode(ASTNode::A_STRLIT, PT_U8PTR, identifier);
+			break;
+
 		case Token::T_IDENT:
 			{
 			// This could be a variable or a function, scan in the next
@@ -52,11 +63,11 @@ ASTNode * Expression::primary(Scanner &scanner, Token &token,  int &line)
 			
 			// If it's a '(' then we have a function call
 			if (token.token() == Token::T_LPAREN)
-				return _funcCall(scanner, token, line);
+				return _funcCall(emitter, scanner, token, line);
 			
 			// If it's a '[' then we have an array reference
 			if (token.token() == Token::T_LBRACE)
-				return _arrayAccess(scanner, token, line);
+				return _arrayAccess(emitter, scanner, token, line);
 			
 			// It wasn't, so reject this just-scanned token for next time
 			scanner.reject(token);
@@ -79,7 +90,7 @@ ASTNode * Expression::primary(Scanner &scanner, Token &token,  int &line)
 			// Beginning of a parenthesised expression, skip the '('.
 			// Scan in the expression and the right parenthesis
 			scanner.scan(token, line);\
-			node = binary(scanner, token, line, 0);
+			node = binary(emitter, scanner, token, line, 0);
 			Statement::rightParen(scanner, token, line);
 			return node;
 
@@ -105,15 +116,16 @@ int Expression::_binaryAstOp(int tokentype, int line)
 |* Binary expression resolution. Return an AST tree whose root is a binary
 |* operator.
 \*****************************************************************************/
-ASTNode * Expression::binary(Scanner &scanner,
-							     Token &token,
-								 int &line,
-								 int previousPrecedence)
+ASTNode * Expression::binary(Emitter& emitter,
+							 Scanner &scanner,
+							 Token &token,
+							 int &line,
+							 int previousPrecedence)
 	{
 	/*************************************************************************\
     |* Get the next token and parse it recursively as a prefix expression
     \*************************************************************************/
-	ASTNode *left = _prefix(scanner, token, line);
+	ASTNode *left = _prefix(emitter, scanner, token, line);
 	
 	/*************************************************************************\
     |* If we hit a semicolon, ] or ), just return the left node
@@ -143,10 +155,11 @@ ASTNode * Expression::binary(Scanner &scanner,
 		/*********************************************************************\
 		|* Recursively get the right-hand tree based on precedence
 		\*********************************************************************/
-		ASTNode *right = binary(scanner,
-								  token,
-								  line,
-								  Token::precedence(tokenType));
+		ASTNode *right = binary(emitter,
+								scanner,
+								token,
+								line,
+								Token::precedence(tokenType));
 
  		/*********************************************************************\
 		|* Determine the operation to perform on the subtrees
@@ -241,7 +254,10 @@ ASTNode * Expression::binary(Scanner &scanner,
 |* function call resolution. Return an AST tree whose root is a binary
 |* operator.
 \*****************************************************************************/
-ASTNode * Expression::_funcCall(Scanner &scanner, Token &token, int &line)
+ASTNode * Expression::_funcCall(Emitter& emitter,
+								Scanner &scanner,
+								Token &token,
+								int &line)
 	{
 	/*************************************************************************\
     |* Find the function
@@ -261,7 +277,7 @@ ASTNode * Expression::_funcCall(Scanner &scanner, Token &token, int &line)
 	/*************************************************************************\
     |* Pase the following expression
     \*************************************************************************/
-	ASTNode *tree = binary(scanner, token, line, 0);
+	ASTNode *tree = binary(emitter, scanner, token, line, 0);
 	
 	/*************************************************************************\
     |* Build the function-call AST node, store the function's return type as
@@ -284,7 +300,10 @@ ASTNode * Expression::_funcCall(Scanner &scanner, Token &token, int &line)
 /*****************************************************************************\
 |* Parse the index into an array and return an AST tree for it
 \*****************************************************************************/
-ASTNode * Expression::_arrayAccess(Scanner &scanner, Token &token, int &line)
+ASTNode * Expression::_arrayAccess(Emitter& emitter,
+								   Scanner &scanner,
+								   Token &token,
+								   int &line)
 	{
 	/*************************************************************************\
     |* Check that the identifier has been defined as an array then make a leaf
@@ -306,7 +325,7 @@ ASTNode * Expression::_arrayAccess(Scanner &scanner, Token &token, int &line)
 	/*************************************************************************\
     |* Parse the following expression
     \*************************************************************************/
-	ASTNode *right = binary(scanner, token, line, 0);
+	ASTNode *right = binary(emitter, scanner, token, line, 0);
 	
 	/*************************************************************************\
     |* Make sure we close the ]
@@ -367,7 +386,10 @@ bool Expression::_rightAssoc(int tokenType)
 |* Parse a prefix expression and return a sub-tree representing it. Used for
 |* pointers and de-refs
 \*****************************************************************************/
-ASTNode * Expression::_prefix(Scanner &scanner, Token &token, int &line)
+ASTNode * Expression::_prefix(Emitter& emitter,
+							  Scanner &scanner,
+							  Token &token,
+							  int &line)
 	{
   	ASTNode *tree;
   
@@ -376,7 +398,7 @@ ASTNode * Expression::_prefix(Scanner &scanner, Token &token, int &line)
 		case Token::T_AMPER:
 			// Get the next token and parse it recursively as a prefix
 			scanner.scan(token, line);
-			tree = _prefix(scanner, token, line);
+			tree = _prefix(emitter, scanner, token, line);
 
 			// Ensure that it's an identifier
 			if (tree->op() != ASTNode::A_IDENT)
@@ -392,7 +414,7 @@ ASTNode * Expression::_prefix(Scanner &scanner, Token &token, int &line)
 		case Token::T_STAR:
 			// Get the next token and parse it recursively as a prefix
 			scanner.scan(token, line);
-			tree = _prefix(scanner, token, line);
+			tree = _prefix(emitter, scanner, token, line);
 
 			// For now, ensure it's either another deref or an identifier
 			if (!(IS_OP(A_IDENT) || IS_OP(A_DEREF)))
@@ -407,7 +429,7 @@ ASTNode * Expression::_prefix(Scanner &scanner, Token &token, int &line)
 			break;
 			
 		default:
-			tree = primary(scanner, token, line);
+			tree = primary(emitter, scanner, token, line);
 		}
 	return (tree);
 	}

@@ -44,6 +44,7 @@ class Token
 			T_S32,				// signed 32-bit value
 			
 			T_INTLIT,			// Integer literal
+			T_STRLIT,			// String literal
 			T_SEMICOLON,		// Semicolon
 			T_IDENT,			// Identifier
 			

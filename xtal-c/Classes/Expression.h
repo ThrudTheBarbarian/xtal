@@ -14,6 +14,7 @@
 #include "properties.h"
 #include "macros.h"
 
+class Emitter;
 class Scanner;
 class Token;
 
@@ -39,17 +40,26 @@ class Expression
         /*********************************************************************\
         |* Function call recognition
         \*********************************************************************/
-        static ASTNode * _funcCall(Scanner &scanner, Token &token, int &line);
+        static ASTNode * _funcCall(Emitter& emitter,
+								   Scanner &scanner,
+								   Token &token,
+								   int &line);
 		
         /*********************************************************************\
         |* Function call recognition
         \*********************************************************************/
-        static ASTNode * _arrayAccess(Scanner &scanner, Token &tkn, int &line);
+        static ASTNode * _arrayAccess(Emitter& emitter,
+									  Scanner &scanner,
+									  Token &token,
+									  int &line);
 								
         /*********************************************************************\
         |* Prefix resolution - pointers and de-refs
         \*********************************************************************/
-        static ASTNode * _prefix(Scanner &scanner, Token &token, int &line);
+        static ASTNode * _prefix(Emitter& emitter,
+								 Scanner &scanner,
+								 Token &token,
+								 int &line);
 		
     public:
         /*********************************************************************\
@@ -60,12 +70,16 @@ class Expression
         /*********************************************************************\
         |* Primary expression resolution
         \*********************************************************************/
-        static ASTNode * primary(Scanner &scanner, Token &token, int &line);
+        static ASTNode * primary(Emitter& emitter,
+								 Scanner &scanner,
+								 Token &token,
+								 int &line);
 
         /*********************************************************************\
         |* Binary expression resolution using Pratt precedence
         \*********************************************************************/
-        static ASTNode * binary(Scanner &scanner,
+        static ASTNode * binary(Emitter& emitter,
+								Scanner &scanner,
 								Token &token,
 								int &line,
 								int previousPrecedence);

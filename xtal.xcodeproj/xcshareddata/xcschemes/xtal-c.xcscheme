@@ -77,7 +77,11 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/20-arrays/array.xt -d -T"
+            argument = "$PROJECT_DIR/xtal-c/Tests/19-arrays/array.xt -d -T"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "$PROJECT_DIR/xtal-c/Tests/20-strings/string.xt -d -T"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

@@ -10,6 +10,8 @@
 #include "Symbol.h"
 #include "Token.h"
 
+#define MAX_STRING_LENGTH 32768
+
 static Token _rejected;				// Token we scanned and no longer need
 
 /*****************************************************************************\
@@ -135,6 +137,22 @@ int Scanner::scan(Token& token, int& line)
 				_putBack();
 				token.setToken(Token::T_AMPER);
 				}
+			break;
+
+		case '\'':
+			// If it's a quote, scan in the literal character value and
+			// the trailing quote
+			token.setIntValue(_scanCharacter(line));
+			token.setToken(Token::T_INTLIT);
+			if (_next(line) != '\'')
+				FATAL(ERR_LEX_BAD_CHAR,
+					"Expected '\\' at end of char literal on line %d", line);
+			break;
+			
+		case '"':
+			// Scan in a literal string
+			_scanString(line);
+			token.setToken(Token::T_STRLIT);
 			break;
 
 		default:
@@ -356,3 +374,54 @@ int Scanner::_keyword(void)
 		
 	return Token::T_NONE;
 	}
+
+	
+/*****************************************************************************\
+|* Scan a character literal
+\*****************************************************************************/
+int Scanner::_scanCharacter(int &line)
+	{
+	int c = _next(line);
+	if (c == '\\')
+		{
+		switch (c = _next(line))
+			{
+			case 'a':  return '\a';
+			case 'b':  return '\b';
+			case 'f':  return '\f';
+			case 'n':  return '\n';
+			case 'r':  return '\r';
+			case 't':  return '\t';
+			case 'v':  return '\v';
+			case '\\': return '\\';
+			case '"':  return '"' ;
+			case '\'': return '\'';
+      
+			default:
+				FATAL(ERR_PARSE, "Unknown escape sequence \%c", c);
+			}
+		}
+	return (c); 	// Just an ordinary old character!
+	}
+	
+	
+/*****************************************************************************\
+|* Scan a character literal
+\*****************************************************************************/
+int Scanner::_scanString(int &line)
+	{
+	_text = "";
+	
+	for (int i=0; i<MAX_STRING_LENGTH; i++)
+		{
+		int c = _scanCharacter(line);
+		if (c == '"')
+			return (int)(_text.length());
+		_text += c;
+		}
+	FATAL(ERR_PARSE, "Sring too long at line %d", line);
+	}
+
+
+
+
