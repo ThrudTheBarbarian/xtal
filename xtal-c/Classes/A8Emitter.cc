@@ -92,6 +92,7 @@ Register A8Emitter::emit(ASTNode *node,
 		case ASTNode::A_AND:			return _cgAnd(left, right);
 		case ASTNode::A_OR:				return _cgOr(left, right);
 		case ASTNode::A_XOR:			return _cgXor(left, right);
+		case ASTNode::A_LSHIFT:			return _cgShl(left, right);
 		case ASTNode::A_EQ:
 		case ASTNode::A_NE:
 		case ASTNode::A_LT:
@@ -1275,4 +1276,27 @@ Register A8Emitter::_cgXor(Register r1, Register r2)
 					  r2.name().c_str());
 	_regs->free(r1);
 	return r2;
+	}
+	
+/*****************************************************************************\
+|* Shift a register by a constant, only copes with left-shift by <255 steps
+\*****************************************************************************/
+Register A8Emitter::_cgShl(Register r1, Register r2)
+	{
+	int size 			= r1.size() * 8;		// bits not bytes
+	const char *reg1	= r1.name().c_str();
+	const char *reg2	= r2.name().c_str();
+	
+	fprintf(_ofp,	"\t.push context block shl_%s 1\n"
+					"\tldx %s\n"
+					"loop:\n"
+					"\t_asl%d %s,%s\n"
+					"\tdex\n"
+					"\tbne loop\n"
+					"\t.pop context\n",
+					randomString(8).c_str(),
+					reg2,
+					size, reg1, reg1);
+	_regs->free(r2);
+	return r1;
 	}

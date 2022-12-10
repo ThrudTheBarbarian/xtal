@@ -131,6 +131,8 @@ int Scanner::scan(Token& token, int& line)
 		case '<':
 			if ((c = _next(line)) == '=')
 				token.setToken(Token::T_LE);
+			else if (c == '<')
+				token.setToken(Token::T_LSHIFT);
 			else
 				{
 				_putBack();
@@ -141,6 +143,8 @@ int Scanner::scan(Token& token, int& line)
 		case '>':
 			if ((c = _next(line)) == '=')
 				token.setToken(Token::T_GE);
+			else if (c == '>')
+				token.setToken(Token::T_RSHIFT);
 			else
 				{
 				_putBack();

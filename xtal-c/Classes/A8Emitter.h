@@ -201,6 +201,11 @@ class A8Emitter : public Emitter
         |* Perform an AND op on two registers
         \*********************************************************************/
         Register _cgXor(Register r1, Register r2);
+        
+		/*********************************************************************\
+        |* Perform a shift-left op on two registers
+        \*********************************************************************/
+        Register _cgShl(Register r1, Register r2);
 
 		
     public:

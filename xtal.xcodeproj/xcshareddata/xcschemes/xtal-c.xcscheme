@@ -82,6 +82,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$PROJECT_DIR/xtal-c/Tests/20-strings/string.xt -d -T"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "$PROJECT_DIR/xtal-c/Tests/21-ops/shl.xt -d -T"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
