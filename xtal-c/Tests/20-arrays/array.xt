@@ -1,13 +1,20 @@
 s32 a;
-s32 b[25];
+u8 b[25];
 
 s32 main()
 	[
-	b[3]= 12;
-	a   = b[3];
+	u8 i;
+
+	for (i=0; i<26; i=i+1) [
+		b[i] = i;
+		]
+	
+	for (i=0; i<26; i=i+1) [
+		a = a + b[i];
+		]
 	
 	print a;
-  
+	
 	return(0);
 	]
 

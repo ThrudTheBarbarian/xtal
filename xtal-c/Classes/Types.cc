@@ -120,6 +120,8 @@ ASTNode * Types::modify(ASTNode *tree, int rType, int op)
 			int rSize = typeSize(valueAt(rType));
 			if (rSize > 1)
 				return new ASTNode(ASTNode::A_SCALE, rType, tree, rSize);
+			else
+				return tree;
 			}
 		}
 	
