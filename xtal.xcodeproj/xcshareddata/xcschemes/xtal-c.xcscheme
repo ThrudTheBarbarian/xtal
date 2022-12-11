@@ -57,6 +57,10 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "$PROJECT_DIR/xtal-c/Tests/21-ops/boolexpr.xt -d "
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "$PROJECT_DIR/xtal-c/Tests/15/ptr.xt -d"
             isEnabled = "NO">
          </CommandLineArgument>
@@ -86,7 +90,11 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$PROJECT_DIR/xtal-c/Tests/21-ops/shl.xt -d -T"
-            isEnabled = "YES">
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "$PROJECT_DIR/xtal-c/Tests/21-ops/preinc.xt -d -T"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$PROJECT_DIR/xtal-c/Tests/12/add16u.xt -d"

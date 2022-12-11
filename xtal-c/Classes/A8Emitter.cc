@@ -93,6 +93,7 @@ Register A8Emitter::emit(ASTNode *node,
 		case ASTNode::A_OR:				return _cgOr(left, right);
 		case ASTNode::A_XOR:			return _cgXor(left, right);
 		case ASTNode::A_LSHIFT:			return _cgShl(left, right);
+		case ASTNode::A_RSHIFT:			return _cgShr(left, right);
 		case ASTNode::A_EQ:
 		case ASTNode::A_NE:
 		case ASTNode::A_LT:
@@ -176,7 +177,32 @@ Register A8Emitter::emit(ASTNode *node,
 					return _cgMul(left, right);
 				}
 			break;
-			
+
+		case ASTNode::A_POSTINC:
+		case ASTNode::A_POSTDEC:
+			// Load the variable's value into a register, then increment it
+			return _cgLoadGlob(node->value().identifier, node->op());
+
+		case ASTNode::A_PREINC:
+		case ASTNode::A_PREDEC:
+			// Load and increment the variable's value into a register
+			return _cgLoadGlob(node->left()->value().identifier, node->op());
+
+		case ASTNode::A_NEGATE:
+			return _cgNegate(left);
+
+		case ASTNode::A_INVERT:
+			return _cgInvert(left);
+
+		case ASTNode::A_LOGNOT:
+			return _cgLogNot(left);
+
+		case ASTNode::A_TOBOOL:
+			// If the parent AST node is an A_IF or A_WHILE, generate
+			// a compare followed by a jump. Otherwise, set the register
+			// to 0 or 1 based on it's zeroeness or non-zeroeness
+			return (_cgBoolean(left, parentAstOp, label));
+
 		default:
 			FATAL(ERR_AST_UNKNOWN_OPERATOR, "Unknown AST operator %d", node->op());
 		}
@@ -1299,4 +1325,317 @@ Register A8Emitter::_cgShl(Register r1, Register r2)
 					size, reg1, reg1);
 	_regs->free(r2);
 	return r1;
+	}
+	
+/*****************************************************************************\
+|* Shift a register by a constant, only copes with left-shift by <255 steps
+\*****************************************************************************/
+Register A8Emitter::_cgShr(Register r1, Register r2)
+	{
+	int size 			= r1.size() * 8;		// bits not bytes
+	const char *reg1	= r1.name().c_str();
+	const char *reg2	= r2.name().c_str();
+	
+	fprintf(_ofp,	"\t.push context block shr_%s 1\n"
+					"\tldx %s\n"
+					"loop:\n"
+					"\t_lsr%d %s,%s\n"
+					"\tdex\n"
+					"\tbne loop\n"
+					"\t.pop context\n",
+					randomString(8).c_str(),
+					reg2,
+					size, reg1, reg1);
+	_regs->free(r2);
+	return r1;
+	}
+	
+/*****************************************************************************\
+|* Load a symbol into a register, given an identifier. Return the register
+|* If the operation is pre/post inc/dec also perform that operation
+\*****************************************************************************/
+Register A8Emitter::_cgLoadGlob(int identifier, int op)
+	{
+	Register r 			= _regs->allocate(Register::UNSIGNED_1BYTE);
+	Symbol s  			= SYMTAB->table()[identifier];
+	r.setPrimitiveType(s.pType());
+	
+	String symName		= "S_"+s.name();
+	const char *name 	= symName.c_str();
+	const char *reg		= r.name().c_str();
+	
+	switch (s.pType())
+		{
+		case PT_U8:
+		case PT_S8:
+			if (op == ASTNode::A_PREINC)
+				fprintf(_ofp, "\tinc %s\n", name);
+			else if (op == ASTNode::A_PREDEC)
+				fprintf(_ofp, "\tdec %s\n", name);
+			
+			fprintf(_ofp, "\t_xfer8 %s,%s\n", name, reg);
+			
+			if (op == ASTNode::A_POSTINC)
+				fprintf(_ofp, "\tinc %s\n", name);
+			else if (op == ASTNode::A_POSTDEC)
+				fprintf(_ofp, "\tdec %s\n", name);
+			break;
+		
+		case PT_U16:
+		case PT_S16:
+		case PT_U8PTR:
+			if (op == ASTNode::A_PREINC)
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+			else if (op == ASTNode::A_PREDEC)
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+			
+			fprintf(_ofp, "\t_xfer16 %s,%s\n", name, reg);
+			
+			if (op == ASTNode::A_POSTINC)
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+			else if (op == ASTNode::A_POSTDEC)
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+			break;
+		
+		case PT_U32:
+		case PT_S32:
+			if (op == ASTNode::A_PREINC)
+				fprintf(_ofp, "\t_inc32 %s\n", name);
+			else if (op == ASTNode::A_PREDEC)
+				fprintf(_ofp, "\t_dec32 %s\n", name);
+			
+			fprintf(_ofp, "\t_xfer32 %s,%s\n", name, reg);
+			
+			if (op == ASTNode::A_POSTINC)
+				fprintf(_ofp, "\t_inc32 %s\n", name);
+			else if (op == ASTNode::A_POSTDEC)
+				fprintf(_ofp, "\t_dec32 %s\n", name);
+			break;
+		
+		case PT_U16PTR:
+		case PT_S16PTR:
+			if (op == ASTNode::A_PREINC)
+				{
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				}
+			else if (op == ASTNode::A_PREDEC)
+				{
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				}
+				
+			fprintf(_ofp, "\t_xfer16 %s,%s\n", name, reg);
+			
+			if (op == ASTNode::A_POSTINC)
+				{
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				}
+			else if (op == ASTNode::A_POSTDEC)
+				{
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				}
+			break;
+		
+		case PT_S32PTR:
+		case PT_U32PTR:
+			if (op == ASTNode::A_PREINC)
+				{
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				}
+			else if (op == ASTNode::A_PREDEC)
+				{
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				}
+				
+			fprintf(_ofp, "\t_xfer32 %s,%s\n", name, reg);
+			
+			if (op == ASTNode::A_POSTINC)
+				{
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				}
+			else if (op == ASTNode::A_POSTDEC)
+				{
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				}
+			break;
+		
+		default:
+			FATAL(ERR_TYPE, "Unknown type %d in loadGlobal", s.pType());
+		}
+		
+	return r;
+	}
+	
+/*****************************************************************************\
+|* Negate a value
+\*****************************************************************************/
+Register A8Emitter::_cgNegate(Register r)
+	{
+	int size = r.size()*8;		// will be the same for both
+	
+	fprintf(_ofp, "\t_neg%d %s,%s\n",
+					  size,
+					  r.name().c_str(),
+					  r.name().c_str());
+	return r;
+	}
+	
+/*****************************************************************************\
+|* Invert a value
+\*****************************************************************************/
+Register A8Emitter::_cgInvert(Register r)
+	{
+	int size = r.size()*8;		// will be the same for both
+	
+	fprintf(_ofp, "\t_not%d %s,%s\n",
+					  size,
+					  r.name().c_str(),
+					  r.name().c_str());
+	return r;
+	}
+	
+/*****************************************************************************\
+|* Compute the logical NOT of a register (ie: test for it being 0, if so
+|* return 1, else return 0
+\*****************************************************************************/
+Register A8Emitter::_cgLogNot(Register r)
+	{
+	const char *reg		= r.name().c_str();
+
+	fprintf(_ofp, "\t.push context block lognot_%s 1\n",
+				  randomString(8).c_str());
+
+	switch (r.size())
+		{
+		case 1:
+			fprintf(_ofp, "\t_cmpi8 %s,0\n"
+						  "\tbeq isTrue\n"
+						  "\tlda #0\n"
+						  "\tsta %s\n"
+						  "\tbeq testDone\n"
+						  "isTrue:\n"
+						  "\tlda #1\n"
+						  "\tsta %s\n"
+						  "testDone:\n",
+						  reg, reg, reg);
+			break;
+		
+		case 2:
+			fprintf(_ofp, "\t_cmpi16 %s,0\n"
+						  "\tbeq isTrue\n"
+						  "\tlda #0\n"
+						  "\tsta %s\n"
+						  "\tsta %s+1\n"
+						  "\tbeq testDone\n"
+						  "isTrue:\n"
+						  "\tlda #1\n"
+						  "\tsta %s\n"
+						  "\tlda #0\n"
+						  "\tsta %s+1\n"
+						  "testDone:\n",
+						  reg, reg, reg, reg, reg);
+			break;
+		
+		case 4:
+			fprintf(_ofp, "\t_cmpi32 %s,0\n"
+						  "\tbeq isTrue\n"
+						  "\tlda #0\n"
+						  "\tsta %s\n"
+						  "\tsta %s+1\n"
+						  "\tsta %s+2\n"
+						  "\tsta %s+3\n"
+						  "\tbeq testDone\n"
+						  "isTrue:\n"
+						  "\tlda #1\n"
+						  "\tsta %s\n"
+						  "\tlda #0\n"
+						  "\tsta %s+1\n"
+						  "\tsta %s+2\n"
+						  "\tsta %s+3\n"
+						  "testDone:\n",
+						  reg, reg, reg, reg, reg,
+						  reg, reg, reg, reg);
+			break;
+		}
+	
+	fprintf(_ofp, ".pop context\n");
+	
+	return r;
+	}
+	
+/*****************************************************************************\
+|* If the parent AST node is an A_IF or A_WHILE, generate a compare followed
+|* by a jump. Otherwise, set the register to 0 or 1 based on it's zeroeness
+|* or non-zeroeness
+\*****************************************************************************/
+Register A8Emitter::_cgBoolean(Register r, int parentOp, String label)
+	{
+	String jmp 			= label+"_skip_"+randomString(8);
+	const char *reg		= r.name().c_str();
+	
+	switch (r.size())
+		{
+		case 1:
+			fprintf(_ofp, "\t_cmpi8 %s,0\n", reg);
+			if ((parentOp == ASTNode::A_IF) || (parentOp == ASTNode::A_WHILE))
+				fprintf(_ofp, "\tbne %s\n"
+						      "\tjmp %s\n"
+						      "%s:\n",
+						      jmp.c_str(), label.c_str(), jmp.c_str());
+			else
+				fprintf(_ofp, "\tlda #1\n"
+						      "\tsta %s\n",
+						      reg);
+			break;
+		
+		case 2:
+			fprintf(_ofp, "\t_cmpi16 %s,0\n", reg);
+			if ((parentOp == ASTNode::A_IF) || (parentOp == ASTNode::A_WHILE))
+				fprintf(_ofp, "\tbne %s\n"
+						      "\tjmp %s\n"
+						      "%s:\n",
+						      jmp.c_str(), label.c_str(), jmp.c_str());
+			else
+				fprintf(_ofp, "\tlda #1\n"
+						      "\tsta %s\n"
+							  "\tlda #0\n"
+						      "\tsta %s+1\n",
+						      reg, reg);
+			break;
+		
+		case 4:
+			fprintf(_ofp, "\t_cmpi8 %s,0\n", reg);
+			if ((parentOp == ASTNode::A_IF) || (parentOp == ASTNode::A_WHILE))
+				fprintf(_ofp, "\tbne %s\n"
+						      "\tjmp %s\n"
+						      "%s:\n",
+						      jmp.c_str(), label.c_str(), jmp.c_str());
+			else
+				fprintf(_ofp, "\tlda #1\n"
+						      "\tsta %s\n"
+							  "\tlda #0\n"
+						      "\tsta %s+1\n"
+						      "\tsta %s+2\n"
+						      "\tsta %s+3\n",
+						      reg, reg, reg, reg);
+			break;
+		
+		}
+	
+	return r;
 	}

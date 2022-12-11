@@ -151,16 +151,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "74231C7B-882A-4839-88CD-CCF5517EF5F9"
+            uuid = "BCBAB62B-31A5-43A9-99A6-2E6F824E241A"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "xtal-c/Classes/A8Emitter.cc"
+            filePath = "xtal-c/Classes/Register.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1289"
-            endingLineNumber = "1289"
-            landmarkName = "A8Emitter::_cgShl(r1, r2)"
+            startingLineNumber = "101"
+            endingLineNumber = "101"
+            landmarkName = "Register::setPrimitiveType(ptype)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

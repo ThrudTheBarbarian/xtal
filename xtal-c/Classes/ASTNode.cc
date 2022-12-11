@@ -227,26 +227,23 @@ void ASTNode::dump(ASTNode *node, int label, int level)
   
 	switch (node->op())
 		{
-		case A_GLUE:
-			printf("\n\n");
+		case A_ASSIGN:
+			printf("A_ASSIGN\n");
 			return;
-		case A_FUNCTION:
-			{
-			Symbol s = SYMTAB->table()[node->value().identifier];
-			printf("A_FUNCTION %s\n", s.name().c_str());
+		case A_LOGOR:
+			printf("A_LOGOR\n");
 			return;
-			}
-		case A_ADD:
-			printf("A_ADD\n");
+		case A_LOGAND:
+			printf("A_LOGAND\n");
 			return;
-		case A_SUBTRACT:
-			printf("A_SUBTRACT\n");
+		case A_OR:
+			printf("A_OR\n");
 			return;
-		case A_MULTIPLY:
-			printf("A_MULTIPLY\n");
+		case A_XOR:
+			printf("A_XOR\n");
 			return;
-		case A_DIVIDE:
-			printf("A_DIVIDE\n");
+		case A_AND:
+			printf("A_AND\n");
 			return;
 		case A_EQ:
 			printf("A_EQ\n");
@@ -266,6 +263,24 @@ void ASTNode::dump(ASTNode *node, int label, int level)
 		case A_GE:
 			printf("A_GE\n");
 			return;
+		case A_LSHIFT:
+			printf("A_LSHIFT\n");
+			return;
+		case A_RSHIFT:
+			printf("A_RSHIFT\n");
+			return;
+		case A_ADD:
+			printf("A_ADD\n");
+			return;
+		case A_SUBTRACT:
+			printf("A_SUBTRACT\n");
+			return;
+		case A_MULTIPLY:
+			printf("A_MULTIPLY\n");
+			return;
+		case A_DIVIDE:
+			printf("A_DIVIDE\n");
+			return;
 		case A_INTLIT:
 			printf("A_INTLIT %d\n", node->value().intValue);
 			return;
@@ -281,9 +296,21 @@ void ASTNode::dump(ASTNode *node, int label, int level)
 				printf("A_IDENT %s\n", s.name().c_str());
 			return;
 			}
-		case A_ASSIGN:
-			printf("A_ASSIGN\n");
+		case A_PRINT:
+			{
+			Symbol s = SYMTAB->table()[node->value().identifier];
+			printf("A_PRINT %s\n", s.name().c_str());
 			return;
+			}
+		case A_GLUE:
+			printf("\n\n");
+			return;
+		case A_FUNCTION:
+			{
+			Symbol s = SYMTAB->table()[node->value().identifier];
+			printf("A_FUNCTION %s\n", s.name().c_str());
+			return;
+			}
 		case A_WIDEN:
 			printf("A_WIDEN\n");
 			return;
@@ -296,28 +323,46 @@ void ASTNode::dump(ASTNode *node, int label, int level)
 			printf("A_FUNCCALL %s\n", s.name().c_str());
 			return;
 			}
-		case A_ADDR:
-			{
-			Symbol s = SYMTAB->table()[node->value().identifier];
-			printf("A_ADDR %s\n", s.name().c_str());
-			return;
-			}
 		case A_DEREF:
 			if (node->isRValue())
 				printf("A_DEREF rval\n");
 			else
 				printf("A_DEREF\n");
 			return;
+		case A_ADDR:
+			{
+			Symbol s = SYMTAB->table()[node->value().identifier];
+			printf("A_ADDR %s\n", s.name().c_str());
+			return;
+			}
 		case A_SCALE:
 			printf("A_SCALE %d\n", node->value().size);
 			return;
-			
-		case A_PRINT:
-			{
-			Symbol s = SYMTAB->table()[node->value().identifier];
-			printf("A_PRINT %s\n", s.name().c_str());
+		case A_PREINC:
+			printf("A_PREINC\n");
 			return;
-			}
+		case A_PREDEC:
+			printf("A_PREDEC\n");
+			return;
+		case A_POSTINC:
+			printf("A_POSTINC\n");
+			return;
+		case A_POSTDEC:
+			printf("A_POSTDEC\n");
+			return;
+		case A_NEGATE:
+			printf("A_NEGATE\n");
+			return;
+		case A_INVERT:
+			printf("A_INVERT\n");
+			return;
+		case A_LOGNOT:
+			printf("A_LOGNOT\n");
+			return;
+		case A_TOBOOL:
+			printf("A_TOBOOL\n");
+			return;
+			
 			
 		default:
 			FATAL(ERR_PARSE, "Unknown dumpAST operator %d", node->op());

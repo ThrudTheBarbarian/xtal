@@ -124,8 +124,10 @@ int Scanner::scan(Token& token, int& line)
 			if ((c = _next(line)) == '=')
 				token.setToken(Token::T_NE);
 			else
-				FATAL(ERR_LEX_BAD_CHAR,
-					"Unrecognised character '%c' on line %d", c, line);
+				{
+				_putBack();
+				token.setToken(Token::T_LOGNOT);
+				}
 			break;
 		
 		case '<':

@@ -466,7 +466,7 @@ ASTNode * Expression::_prefix(Emitter& emitter,
 			// make the child an rvalue. Because chars are unsigned,
 			// also widen this to int so that it's signed
 			tree->setIsRValue(true);
-			// FIXME: tree = modify_type(tree, P_INT, 0);
+			tree = Types::modify(tree, PT_S32, 0);
 			tree = new ASTNode(ASTNode::A_NEGATE, tree->type(), tree, 0);
 			break;
     

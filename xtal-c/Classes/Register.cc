@@ -77,7 +77,7 @@ String Register::sizeAsString()
 \****************************************************************************/
 void Register::setPrimitiveType(int ptype)
 	{
-	switch (ptype)
+	switch (ptype & 0xFF)
 		{
 		case PT_S8:
 			_type = SIGNED_1BYTE;

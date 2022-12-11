@@ -1,0 +1,15 @@
+
+s32 main()
+	[
+	u8 *str;
+	
+	for (str= "Hello"; *str; str++)
+		[
+		print str;
+		print ":";
+		]
+
+	return (0);
+	]
+	
+

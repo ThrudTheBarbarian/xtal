@@ -1,0 +1,16 @@
+
+
+s32 main()
+	[
+	u8 i;
+	u8 j;
+	
+	i = 10;
+	j = i--;
+	
+	print i;
+	print j;
+
+	return (0);
+	]
+	

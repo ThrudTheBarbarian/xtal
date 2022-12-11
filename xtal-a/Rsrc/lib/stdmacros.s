@@ -1810,6 +1810,70 @@ done:
 ;/*************************************************************************\
 ;|* Type: Comparison operation
 ;|*
+;|* Compare an 8-bit quantity at %1 to an immediate value %2
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : location of value 1
+;|*    %2 : value to compare against
+;\*************************************************************************/
+.macro _cmpi8
+		lda %1
+		cmp #<%2
+	done:
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Comparison operation
+;|*
+;|* Compare a 16-bit quantity at %1 to an immediate value %2. Returns as
+;|* soon as a difference is found
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : location of value 1
+;|*    %2 : value to compare against
+;\*************************************************************************/
+.macro _cmpi16
+		lda %1+1
+		cmp #>%2
+		bne done
+		lda %1
+		cmp #<%2
+	done:
+.endmacro
+
+
+;/*************************************************************************\
+;|* Type: Comparison operation
+;|*
+;|* Compare a 32-bit quantity at %1 to an immediate value %2. Returns as
+;|* soon as a difference is found
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : location of value 1
+;|*    %2 : value to compare against
+;\*************************************************************************/
+.macro _cmpi32
+		lda %1+3
+		cmp #>>>%2
+		bne done
+		lda %1+2
+		cmp #>>%2
+		bne done
+		lda %1+1
+		cmp #>%2
+		bne done
+		lda %1
+		cmp #<%2
+	done:
+.endmacro
+
+
+;/*************************************************************************\
+;|* Type: Comparison operation
+;|*
 ;|* Compare an 8-bit quantity at %1 to another at %2.
 ;|*
 ;|* Clobbers: A
