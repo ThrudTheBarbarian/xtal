@@ -50,7 +50,7 @@ class ASTNode
 			A_DIVIDE,			// Divide
 			
 			A_INTLIT,			// Integer literal
-			A_STRLIT,			// String literal
+			A_STRLIT,			// String literal // 20
 			
 			A_IDENT,			// Identifier
 			

@@ -58,6 +58,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$PROJECT_DIR/xtal-c/Tests/21-ops/boolexpr.xt -d "
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "$PROJECT_DIR/t.xt -d "
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

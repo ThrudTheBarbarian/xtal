@@ -351,7 +351,7 @@ ASTNode * Statement::_print(Token& token, int& line)
 	
 	// Make sure we're type-compatible
 	int type = PT_S32;
-	ASTNode *candidate = Types::modify(tree, type, 0);
+	ASTNode *candidate = Types::modify(tree, tree->type(), 0);
 	if (candidate == nullptr)
 		{
 		type = PT_U8PTR;	// String pointer

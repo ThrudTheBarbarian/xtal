@@ -13,7 +13,7 @@
 
 static uint32_t _regSpace[REG_PAGE_SPACE];		// Space to allocate to regs
 static std::vector<Register>	_allocated;		// List of current registers
-
+static FILE * _ofp;								// Asembly output file
 
 /*****************************************************************************\
 |* Constructor
@@ -31,10 +31,21 @@ RegisterFile::RegisterFile()
 \*****************************************************************************/
 void RegisterFile::clear(void)
 	{
-	printf("** clear **\n");
+	//printf("** clear **\n");
 	
 	_allocated.clear();
 	memset(_regSpace, MEM_EMPTY & 0xFF, sizeof(uint32_t)* REG_PAGE_SPACE);
+
+	if (_ofp != nullptr)
+		fprintf(_ofp, "\t.reg reset\n");
+	}
+
+/*****************************************************************************\
+|* Set the assembly output file pointer
+\*****************************************************************************/
+void RegisterFile::setOutputFile(FILE *fp)
+	{
+	_ofp = fp;
 	}
 
 /*****************************************************************************\
@@ -79,13 +90,13 @@ Register RegisterFile::allocate(Register::RegType type)
 	Register r;
 	r.setType(type);
 
-	printf("Allocating register for size %d\n", type & 0xff);
-	dump();
+	//printf("Allocating register for size %d\n", type & 0xff);
+	//dump();
 	/************************************************************************\
     |* Look for the first place we can place this reg
     \************************************************************************/
 	int offset	= _findSpace(type & 0xFF);
-	printf("Allocated: %d\n\n\n", offset);
+	//printf("Allocated: %d\n\n\n", offset);
 	
 	if (offset >= 0)
 		{
@@ -117,7 +128,10 @@ Register RegisterFile::allocate(Register::RegType type)
 		}
 	else
 		FATAL(ERR_REG_ALLOC, "Cannot allocate register");
-		
+
+	if (_ofp != nullptr)
+		fprintf(_ofp, "\t.reg %s %d\n", r.name().c_str(), r.size());
+
 	_allocated.push_back(r);
 	return _allocated[_allocated.size()-1];
 	}

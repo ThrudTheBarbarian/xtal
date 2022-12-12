@@ -41,6 +41,7 @@ void Emitter::preamble(void)
 	_includes.insert(_printRegFile);
 	_includes.insert(_stdMacrosFile);
 	
+	RegisterFile::setOutputFile(_ofp);
 	RegisterFile::clear();
 	
 	if (_ofp != nullptr)
@@ -140,4 +141,5 @@ void Emitter::append(const String &what, Location where)
 			FATAL(ERR_RUNTIME, "Append requested to unknown destination");
 		}
 	}
+
 

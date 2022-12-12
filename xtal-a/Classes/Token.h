@@ -27,6 +27,8 @@ typedef enum
 	P_ADDR,
 	P_ORG,
 	P_SRCREF,
+	P_REG,
+	
 	P_MOVE,
 	P_ADD,
 	P_DIV,
@@ -34,6 +36,7 @@ typedef enum
 	P_SUB,
 	P_CALL,
 	P_EXEC,
+	
 	P_ADC,
 	P_AND,
 	P_ASL,

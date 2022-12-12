@@ -199,6 +199,10 @@ int Scanner::scan(TokenList &tokens, int pass)
 				
 					case P_INCLUDE:
 						break;
+				
+					case P_REG:
+						_setRegister(args);
+						break;
 						
 					default:
 						FATAL(ERR_PARSE, "Unknown assembly directive\n%s",
@@ -795,18 +799,25 @@ int Scanner::_handleCall(Token::TokenInfo info,
 			switch (_regSize[args[i]])
 				{
 				case 4:
-					snprintf(buf, 1024, "_xfer32 %s,f%d\n",
+					snprintf(buf, 1024, "\t_xfer32 %s,f%d\n",
 										args[i].c_str(), i-1);
 					break;
 					
 				case 2:
-					snprintf(buf, 1024, "_xfer16 %s,f%d\n",
-										args[i].c_str(), i-1);
+					snprintf(buf, 1024, "\t_xfer16 %s,f%d\n"
+										"\tlda #0\n"
+										"\tsta f%d+2\n"
+										"\tsta f%d+3\n",
+										args[i].c_str(), i-1, i-1, i-1);
 					break;
 				case 1:
 					snprintf(buf, 1024, "lda %s\n"
-										"\tsta f%d\n",
-										args[i].c_str(), i-1);
+										"\tsta f%d\n"
+										"\tlda #0\n"
+										"\tsta f%d+1\n"
+										"\tsta f%d+2\n"
+										"\tsta f%d+3\n",
+										args[i].c_str(), i-1, i-1, i-1, i-1);
 					break;
 				}
 			assembly.push_back(buf);
@@ -1620,4 +1631,21 @@ int Scanner::_evaluateLabel(String s)
 	Engine& e 		= Engine::getInstance();
 	e.eval(vars);
 	return (int) e.result();
+	}
+
+/*****************************************************************************\
+|* Pick up a register hint from the compiler
+\*****************************************************************************/
+void Scanner::_setRegister(String args)
+	{
+	if (args == "reset")
+		_regSize.clear();
+	else
+		{
+		StringList words = split(args, ' ');
+		if (words.size() == 2)
+			_regSize[words[0]] = std::stoi(words[1]);
+		else
+			FATAL(ERR_PARSE, "Cannot parse .reg %s", args.c_str());
+		}
 	}
