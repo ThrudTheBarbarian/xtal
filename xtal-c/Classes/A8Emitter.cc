@@ -432,7 +432,7 @@ Register A8Emitter::_cgStoreGlobal(Register& r, const Symbol& symbol)
 			
 		else if (r.size() == 2)
 			{
-			if (r.type() > 0xFF)
+			if (r.type() > 0xFF) 	// Signed!
 				{
 				fprintf(_ofp, "\t.push context block extend_%s 1\n"
 						  "\tlda #0\n"
@@ -1079,11 +1079,12 @@ Register A8Emitter::_cgWhileAST(ASTNode *node)
 \*****************************************************************************/
 Register A8Emitter::_cgCall(Register r1, int identifier)
 	{
-	// Get a new out-register
-	Register r = _regs->allocate(r1.type());
-	
 	auto symbol = SYMTAB->table()[identifier];
 	fprintf(_ofp, "\tcall %s\n", symbol.name().c_str());
+
+	// Get a new out-register
+	Register r = _regs->allocateForPrimitiveType(symbol.pType());
+	
 	
 	// Move the returned value of the function to the register we created
 	int fId = 0;
@@ -1097,25 +1098,16 @@ Register A8Emitter::_cgCall(Register r1, int identifier)
 			break;
 			
 		case 2:
-			fprintf(_ofp, "\t_xfer16 f%d, %s\n"
-						  "\tlda #$0\n"
-						  "\tsta %s+2\n"
-						  "\tsta %s+3\n",
-						  fId, reg, reg, reg);
+			fprintf(_ofp, "\t_xfer16 f%d, %s\n",
+						  fId, reg);
 			break;
 		case 1:
 			fprintf(_ofp, "\tlda f%d\n"
-						  "\tsta %s\n"
-						  "\tlda #$0\n"
-						  "\tsta %s+1\n"
-						  "\tsta %s+2\n"
-						  "\tsta %s+3\n",
-						  fId, reg, reg, reg, reg);
+						  "\tsta %s\n",
+						  fId, reg);
 			break;
 		}
 	_regs->free(r1);
-
-	r.setPrimitiveType(symbol.pType());
 	return r;
 	}
 
@@ -1173,8 +1165,7 @@ Register A8Emitter::_cgAddress(int identifier)
 Register A8Emitter::_cgDeref(Register r1, int type)
 	{
 	// Get a new out-register
-	Register r 	= _regs->allocate(Register::UNSIGNED_2BYTE);
-	r.setPrimitiveType(Types::valueAt(type));
+	Register r 	= _regs->allocateForPrimitiveType(type);
 
 	fprintf(_ofp, "\tldy #0\n");
 	for (int i=0; i<r1.size(); i++)
@@ -1356,10 +1347,9 @@ Register A8Emitter::_cgShr(Register r1, Register r2)
 \*****************************************************************************/
 Register A8Emitter::_cgLoadGlob(int identifier, int op)
 	{
-	Register r 			= _regs->allocate(Register::UNSIGNED_1BYTE);
 	Symbol s  			= SYMTAB->table()[identifier];
-	r.setPrimitiveType(s.pType());
-	
+	Register r 			= _regs->allocateForPrimitiveType(s.pType());
+
 	String symName		= "S_"+s.name();
 	const char *name 	= symName.c_str();
 	const char *reg		= r.name().c_str();

@@ -6,10 +6,11 @@
 //
 
 #include "RegisterFile.h"
+#include "sharedDefines.h"
 
 #define REG_PAGE_SPACE	(16*4)
+#define MEM_EMPTY		(0xFFFFFFFF)
 
-static uint32_t _lastReg;						// Last register used
 static uint32_t _regSpace[REG_PAGE_SPACE];		// Space to allocate to regs
 static std::vector<Register>	_allocated;		// List of current registers
 
@@ -30,11 +31,46 @@ RegisterFile::RegisterFile()
 \*****************************************************************************/
 void RegisterFile::clear(void)
 	{
+	printf("** clear **\n");
+	
 	_allocated.clear();
-	memset(_regSpace, 0, sizeof(uint32_t)* REG_PAGE_SPACE);
-	_lastReg = 1;
+	memset(_regSpace, MEM_EMPTY & 0xFF, sizeof(uint32_t)* REG_PAGE_SPACE);
 	}
 
+/*****************************************************************************\
+|* Allocate a register and return the reference
+\*****************************************************************************/
+Register RegisterFile::allocateForPrimitiveType(int ptype)
+	{
+	Register::RegType type;
+	
+	switch (ptype & 0xFF)
+		{
+		case PT_S8:
+			type = Register::SIGNED_1BYTE;
+			break;
+		case PT_U8:
+			type = Register::UNSIGNED_1BYTE;
+			break;
+		case PT_S16:
+			type = Register::SIGNED_2BYTE;
+			break;
+		case PT_U16:
+			type = Register::UNSIGNED_2BYTE;
+			break;
+		case PT_S32:
+			type = Register::SIGNED_4BYTE;
+			break;
+		case PT_U32:
+			type = Register::UNSIGNED_4BYTE;
+			break;
+		default:
+			FATAL(ERR_REG_NOEXIST, "Undefined type %d requested", ptype);
+		}
+		
+	return allocate(type);
+	}
+	
 /*****************************************************************************\
 |* Allocate a register and return the reference
 \*****************************************************************************/
@@ -43,10 +79,13 @@ Register RegisterFile::allocate(Register::RegType type)
 	Register r;
 	r.setType(type);
 
+	printf("Allocating register for size %d\n", type & 0xff);
+	dump();
 	/************************************************************************\
     |* Look for the first place we can place this reg
     \************************************************************************/
 	int offset	= _findSpace(type & 0xFF);
+	printf("Allocated: %d\n\n\n", offset);
 	
 	if (offset >= 0)
 		{
@@ -68,31 +107,19 @@ Register RegisterFile::allocate(Register::RegType type)
 			default:
 				FATAL(ERR_REG_ALLOC, "Ran out of register space!");
 			}
-		r.setOffset(offset % 16);
+		r.setOffset(offset);
 		
 		char buf[1024];
-		snprintf(buf, 1024, "r%d", _lastReg);
+		snprintf(buf, 1024, "r%d", offset);
 		r.setName(buf);
-		r.setIdentifier(_lastReg);
+		r.setIdentifier(offset);
 		_populate(r);
-		_lastReg ++;
 		}
 	else
 		FATAL(ERR_REG_ALLOC, "Cannot allocate register");
 		
 	_allocated.push_back(r);
 	return _allocated[_allocated.size()-1];
-	}
-
-
-/*****************************************************************************\
-|* Return a register by index
-\*****************************************************************************/
-Register RegisterFile::registerAt(int idx)
-	{
-	if ((idx >= 0) && (idx < _allocated.size()))
-		return _allocated[idx];
-	FATAL(ERR_REG_NOEXIST, "Cannot find register %d", idx);
 	}
 
 /*****************************************************************************\
@@ -134,17 +161,11 @@ void RegisterFile::free(Register& reg)
 \*****************************************************************************/
 void RegisterFile::_populate(Register &r, bool clear)
 	{
-	int offset = (r.set() == Register::SET_C0CF)	? 0
-			   : (r.set() == Register::SET_D0DF)	? 16
-			   : (r.set() == Register::SET_E0EF)	? 32
-			   : 									  48;
-			   
-	
-	int from 	= offset + r.offset();
+	int from 	= r.offset();
 	int to		= from + (r.type() & 0xFF);
 	
 	for (int i=from; i<to; i++)
-		_regSpace[i] = (clear) ? 0 : r.identifier();
+		_regSpace[i] = (clear) ? MEM_EMPTY : r.identifier();
 	}
 
 /*****************************************************************************\
@@ -152,7 +173,7 @@ void RegisterFile::_populate(Register &r, bool clear)
 \*****************************************************************************/
 int RegisterFile::_findSpace(int bytes)
 	{
-	int spots	= REG_PAGE_SPACE / bytes;
+	int spots	= REG_PAGE_SPACE;
 	bool found	= false;
 	int offset 	= 0;
 	
@@ -161,30 +182,30 @@ int RegisterFile::_findSpace(int bytes)
 		switch (bytes)
 			{
 			case Register::UNSIGNED_1BYTE:	// unsigned doesn't matter
-				if (_regSpace[offset] == 0)
+				if (_regSpace[offset] == MEM_EMPTY)
 					found 	= true;
-				else
-					offset ++;
 				break;
 			
 			case Register::UNSIGNED_2BYTE:	// unsigned doesn't matter
-				if ((_regSpace[offset] == 0) && (_regSpace[offset+1] == 0))
+				if ((_regSpace[offset  ] == MEM_EMPTY) &&
+					(_regSpace[offset+1] == MEM_EMPTY))
 					found 	= true;
-				else
-					offset += 2;
 				break;
 			
 			case Register::UNSIGNED_4BYTE:	// unsigned doesn't matter
-				if ((_regSpace[offset] == 0)   && (_regSpace[offset+1] == 0)
-				 && (_regSpace[offset+2] == 0) && (_regSpace[offset+3] == 0))
+				if ((_regSpace[offset  ] == MEM_EMPTY) &&
+					(_regSpace[offset+1] == MEM_EMPTY) &&
+				    (_regSpace[offset+2] == MEM_EMPTY) &&
+				    (_regSpace[offset+3] == MEM_EMPTY))
 					found 	= true;
-				else
-					offset += 4;
 				break;
 			
 			default:
 				FATAL(ERR_REG_ALLOC, "Unknown register type 0x%x", bytes);
 			}
+			
+		if (!found)
+			offset ++;
 		}
 	
 	return (found) ? offset : -1;
@@ -199,7 +220,13 @@ void RegisterFile::dump(void)
 	for (int i=0; i<4; i++)
 		{
 		for (int j=0; j<16; j++)
-			printf("%d ", _regSpace[idx++]);
+			{
+			uint32_t val = _regSpace[idx ++];
+			if (val == MEM_EMPTY)
+				printf(".. ");
+			else
+				printf("%2d ", val);
+			}
 		printf("\n");
 		}
 	printf("\n-----\n");

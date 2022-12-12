@@ -569,36 +569,3 @@ void Statement::_varDeclaration(Token& token, int& line, int type)
   	_semicolon(*_scanner, token, line);
 	}
 	
-//void Statement::_varDeclaration(Token& token, int& line, int type)
-//	{
-//	forever
-//		{
-//		// the text() accessor gives access to the name of the
-//		// symbol that has been scanned, and we have the type passed in
-//		int symIdx = SYMTAB->add(_scanner->text(), type, ST_VARIABLE, 1);
-//
-//		// Tell the emitter to reserve space for our variable
-//		_emitter->genSymbol(symIdx);
-//
-//		// Match the following semi-colon and stop if we're out of tokens
-//		if (token.token() == Token::T_SEMICOLON)
-//			{
-//			_scanner->scan(token, line);
-//			return;
-//			}
-//
-//		// If the next token is a comma, skip it, get the identifier, and
-//		// loop back around
-//		if (token.token() == Token::T_COMMA)
-//			{
-//			_scanner->scan(token, line);
-//			_identifier(*_scanner, token, line);
-//			continue;
-//			}
-//
-//		// Should never get here, so error out if we do
-//		FATAL(ERR_PARSE, "Missing ; or , after identifier");
-//		}
-//	}
-
-

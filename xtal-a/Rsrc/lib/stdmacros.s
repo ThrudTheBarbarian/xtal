@@ -8,37 +8,112 @@
 ;|* Type: Register defines
 ;|*
 ;|* Let "normal" 6502 opcodes access the register variables by using
-;|* r0 .. r16. This isn't a perfect solution because it won't handle
+;|* r0 .. r63. This isn't a perfect solution because it won't handle
 ;|* automatically mapping in the correct range of values if r>16, but
 ;|* that can be done manually
 ;\*************************************************************************/
 
 f0	= $a0
-f1	= $a4
-f2	= $a8
-f3	= $ac
+f1	= $a1
+f2	= $a2
+f3	= $a3
+f4	= $a4
+f5	= $a5
+f6	= $a6
+f7 	= $a7
+f8	= $a8
+f9	= $a9
+f10	= $aa
+f11	= $ab
+f12	= $ac
+f13	= $ad
+f14	= $ae
+f15	= $af
 
 s0	= $b0
-s1	= $b4
-s2	= $b8
-s3	= $bc
+s1	= $b1
+s2	= $b2
+s3	= $b3
+s4	= $b4
+s5	= $b5
+s6	= $b6
+s7 	= $b7
+s8	= $b8
+s9	= $b9
+s10	= $ba
+s11	= $bb
+s12	= $bc
+s13	= $bd
+s14	= $be
+s15	= $bf
 
 r0	= $c0
-r1	= $c4
-r2	= $c8
-r3	= $cc
-r4	= $d0
-r5	= $d4
-r6	= $d8
-r7 	= $dc
-r8	= $e0
-r9	= $e4
-r10	= $e8
-r11	= $ec
-r12	= $f0
-r13	= $f4
-r14	= $f8
-r15	= $fc
+r1	= $c1
+r2	= $c2
+r3	= $c3
+r4	= $c4
+r5	= $c5
+r6	= $c6
+r7 	= $c7
+r8	= $c8
+r9	= $c9
+r10	= $ca
+r11	= $cb
+r12	= $cc
+r13	= $cd
+r14	= $ce
+r15	= $cf
+
+r16	= $d0
+r17	= $d1
+r18 = $d2
+r19	= $d3
+r20	= $d4
+r21	= $d5
+r22	= $d6
+r23	= $d7
+r24	= $d8
+r25	= $d9
+r26	= $da
+r27	= $db
+r28	= $dc
+r29	= $dd
+r30	= $de
+r31	= $df
+
+r32	= $e0
+r33	= $e1
+r34 = $e2
+r35	= $e3
+r36	= $e4
+r37	= $e5
+r38	= $e6
+r39	= $e7
+r40	= $e8
+r41	= $e9
+r42	= $ea
+r43	= $eb
+r44	= $ec
+r45	= $ed
+r46	= $ee
+r47	= $ef
+
+r48	= $f0
+r49	= $f1
+r50 = $f2
+r51	= $f3
+r52	= $f4
+r53	= $f5
+r54	= $f6
+r55	= $f7
+r56	= $f8
+r57	= $f9
+r58	= $fa
+r59	= $fb
+r60	= $fc
+r61	= $fd
+r62	= $fe
+r63	= $ff
 
 
 ;/*************************************************************************\

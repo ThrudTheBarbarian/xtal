@@ -146,7 +146,6 @@
 		F43F131B29405363003D42B5 /* comma.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = comma.xt; sourceTree = "<group>"; };
 		F43F131D2941B94D003D42B5 /* rval.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = rval.xt; sourceTree = "<group>"; };
 		F45E73D6294301990032D589 /* array.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = array.xt; sourceTree = "<group>"; };
-		F45E73D72944F28E0032D589 /* printstr.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = printstr.s; sourceTree = "<group>"; };
 		F45E73D929451EE10032D589 /* 2string.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = 2string.xt; sourceTree = "<group>"; };
 		F45E73DB29453D230032D589 /* and.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = and.xt; sourceTree = "<group>"; };
 		F45E73DC294540CA0032D589 /* or.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = or.xt; sourceTree = "<group>"; };
@@ -521,7 +520,6 @@
 				F480EF642922BC1A008584FB /* printReg.s */,
 				F480EF652922BC1A008584FB /* stdmacros.s */,
 				F4B8088C292DD9B70049B6EB /* stdio.s */,
-				F45E73D72944F28E0032D589 /* printstr.s */,
 			);
 			path = lib;
 			sourceTree = "<group>";

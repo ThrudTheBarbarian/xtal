@@ -390,13 +390,13 @@ Scanner::TargetType Scanner::_determineTarget(String s, int64_t &val)
 		
 	if (val > 0)
 		{
-		if ((type == REG_MAIN) && (val >= 1024))
+		if ((type == REG_MAIN) && (val >= 16384))
 			FATAL(ERR_META, "Main reg %lld OUB\n%s",
 				val, CTXMGR->location().c_str());
-		if ((type == REG_FN) && (val >= 4))
+		if ((type == REG_FN) && (val >= 16))
 			FATAL(ERR_META, "FN reg %lld OUB\n%s",
 				val, CTXMGR->location().c_str());
-		if ((type == REG_SCRATCH) && (val >= 4))
+		if ((type == REG_SCRATCH) && (val >= 16))
 			FATAL(ERR_META, "Scratch reg %lld OUB\n%s",
 				val, CTXMGR->location().c_str());
 		}
@@ -422,18 +422,18 @@ static int _compareIndexedByte(const void *v1, const void *v2)
 /*****************************************************************************\
 |* Helper method to surface the correct registers
 \*****************************************************************************/
-void Scanner::_surfaceRegs(TargetType t1,
+void Scanner::_surfaceRegs(TargetType t1,		// Type of register
 						   TargetType t2,
-						   int64_t v1,
+						   int64_t v1,			// Register index
 						   int64_t v2,
 						   TokenList &tokens,
 						   int pass)
 	{
 	Token::TokenInfo opInfo;
-	int bank1	= (v1 % 16) / 4;	// 0 -> $80,	1 -> $81
-	int bank2 	= (v2 % 16) / 4;	// 2 -> $82, 	3 -> $83
-	int page1	= (int) v1 / 16;	// r0 -> 0,		r17 -> 1
-	int page2	= (int) v2 / 16;	// r1 -> 0, 	r18	-> 1
+	int bank1	= (v1 % 64) / 16;	// 0 -> $80,	1 -> $81
+	int bank2 	= (v2 % 64) / 16;	// 2 -> $82, 	3 -> $83
+	int page1	= (int) v1 / 64;	// r0 -> 0,		r17 -> 1
+	int page2	= (int) v2 / 64;	// r1 -> 0, 	r18	-> 1
 	
 	if (t1 == REG_MAIN)
 		{
@@ -498,9 +498,9 @@ void Scanner::_surfaceRegs3(TargetType t1,
 						    int pass)
 	{
 	Token::TokenInfo opInfo;
-	int bank1	= (v1 % 16) / 4;	// 0 -> $80,	1 -> $81
-	int bank2 	= (v2 % 16) / 4;	// 2 -> $82, 	3 -> $83
-	int bank3 	= (v3 % 16) / 4;	// 2 -> $82, 	3 -> $83
+	int bank1	= (v1 % 64) / 16;	// 0 -> $80,	1 -> $81
+	int bank2 	= (v2 % 64) / 16;	// 2 -> $82, 	3 -> $83
+	int bank3 	= (v3 % 64) / 16;	// 2 -> $82, 	3 -> $83
 	int page1	= (int) v1 / 16;	// r0 -> 0,		r17 -> 1
 	int page2	= (int) v2 / 16;	// r1 -> 0, 	r18	-> 1
 	int page3	= (int) v3 / 16;	// r1 -> 0, 	r18	-> 1
@@ -612,9 +612,9 @@ void Scanner::_insertOp(TargetType t1,
 					: (t3 == REG_FN)	? REGFN_BASE
 					:					  REGSCRATCH_BASE;
 
-	int addr1		= base1 + ((v1 % 16) * 4);
-	int addr2		= base2 + ((v2 % 16) * 4);
-	int addr3		= base3 + ((v3 % 16) * 4);
+	int addr1		= base1 + ((v1 % 64));
+	int addr2		= base2 + ((v2 % 64));
+	int addr3		= base3 + ((v3 % 64));
 
 	String macro	= stem;
 	if (overflowPos == 1)
@@ -800,20 +800,13 @@ int Scanner::_handleCall(Token::TokenInfo info,
 					break;
 					
 				case 2:
-					snprintf(buf, 1024, "_xfer16 %s,f%d\n"
-										"\tlda #$0\n"
-										"\tsta f%d+2\n"
-										"\tsta f%d+3\n",
-										args[i].c_str(), i-1, i-1, i-1);
+					snprintf(buf, 1024, "_xfer16 %s,f%d\n",
+										args[i].c_str(), i-1);
 					break;
 				case 1:
 					snprintf(buf, 1024, "lda %s\n"
-										"\tsta f%d\n"
-										"\tlda #$0\n"
-										"\tsta f%d+1\n"
-										"\tsta f%d+2\n"
-										"\tsta f%d+3\n",
-										args[i].c_str(), i-1, i-1, i-1, i-1);
+										"\tsta f%d\n",
+										args[i].c_str(), i-1);
 					break;
 				}
 			assembly.push_back(buf);
@@ -914,8 +907,8 @@ int Scanner::_handleMove(Token::TokenInfo info,
 					: (t2 == REG_FN)	? REGFN_BASE
 					:					  REGSCRATCH_BASE;
 					
-		int addr1	= base1 + ((v1 % 16) * 4);
-		int addr2	= base2 + ((v2 % 16) * 4);
+		int addr1	= base1 + (v1 % 64);
+		int addr2	= base2 + (v2 % 64);
 		for (int i=0; i<extent; i++)
 			{
 			String arg	= toHexString(addr1+i, "$");
@@ -941,7 +934,7 @@ int Scanner::_handleMove(Token::TokenInfo info,
 					:					  REGSCRATCH_BASE;
 	
 		_engine.eval(arg2);
-		int addr1	= base1 + ((v1 % 16) * 4);
+		int addr1	= base1 + (v1 % 64);
 		int addr2 	= (int) _engine.result();
 		
 		for (int i=0; i<extent; i++)
@@ -971,7 +964,7 @@ int Scanner::_handleMove(Token::TokenInfo info,
 						: (t2 == REG_FN)	? REGFN_BASE
 						:					  REGSCRATCH_BASE;
 		
-		int addr2	= base2 + ((v2 % 16) * 4);
+		int addr2	= base2 + (v2 % 64);
 		
 		// To optimise stores, we want to find any reoccurrences of the
 		// known byte quantity
@@ -1017,7 +1010,7 @@ int Scanner::_handleMove(Token::TokenInfo info,
 	
 		_engine.eval(arg1);
 		int addr1 	= (int) _engine.result();
-		int addr2	= base2 + ((v2 % 16) * 4);
+		int addr2	= base2 + (v2 % 64);
 		
 		for (int i=0; i<extent; i++)
 			{

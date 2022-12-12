@@ -14,10 +14,10 @@
             filePath = "xtal-a/Classes/Scanner.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1064"
-            endingLineNumber = "1064"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            startingLineNumber = "1057"
+            endingLineNumber = "1057"
+            landmarkName = "Scanner::_handleMove(info, extent, argString, tokens, pass)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -55,22 +55,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "5B0C5A77-13C7-43E3-8766-611FEDB35CE5"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "xtal-c/Classes/RegisterFile.cc"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "33"
-            endingLineNumber = "33"
-            landmarkName = "RegisterFile::clear()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "65EC9E40-AF4E-40D9-8C13-242DD911DA22"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -78,8 +62,8 @@
             filePath = "xtal-a/Classes/Scanner.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1440"
-            endingLineNumber = "1440"
+            startingLineNumber = "1433"
+            endingLineNumber = "1433"
             landmarkName = "Scanner::_hasLabel(s)"
             landmarkType = "7">
          </BreakpointContent>
@@ -110,8 +94,8 @@
             filePath = "xtal-c/Classes/RegisterFile.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "81"
-            endingLineNumber = "81"
+            startingLineNumber = "119"
+            endingLineNumber = "119"
             landmarkName = "RegisterFile::allocate(type)"
             landmarkType = "7">
          </BreakpointContent>
@@ -145,22 +129,6 @@
             startingLineNumber = "254"
             endingLineNumber = "254"
             landmarkName = "Types::valueAt(ptrType, line)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "BCBAB62B-31A5-43A9-99A6-2E6F824E241A"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "xtal-c/Classes/Register.cc"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "101"
-            endingLineNumber = "101"
-            landmarkName = "Register::setPrimitiveType(ptype)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

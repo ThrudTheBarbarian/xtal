@@ -82,17 +82,13 @@ class RegisterFile
         |* Allocate a register
         \***********************************************************************/
         static Register allocate(Register::RegType type);
+        static Register allocateForPrimitiveType(int ptype);
         
         /***********************************************************************\
         |* Free up a register
         \***********************************************************************/
         static void free(Register& reg);
             
-        /***********************************************************************\
-        |* Return a register by index
-        \***********************************************************************/
-		static Register registerAt(int idx);
-		
         /***********************************************************************\
         |* Debugging: dump out register allocations
         \***********************************************************************/

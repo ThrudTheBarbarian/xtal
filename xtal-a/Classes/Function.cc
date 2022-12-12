@@ -10,7 +10,7 @@
 #include "Function.h"
 #include "ContextMgr.h"
 
-#define MAX_REGISTERS			(4*4*256)
+#define MAX_REGISTERS			(64*256)
 #define REG_BASE				(0xC0)
 
 #define CTXMGR					ContextMgr::sharedInstance()
@@ -63,22 +63,17 @@ void Function::enstack(StringList& assembly)
 			}
 		else
 			{
-			// FIXME: For the time being just push all 4 bytes of an 'r'
-			// register but in time we ought to have a property on the
-			// register to say what size it currently exists at
 			int regId;
 			sscanf(regName.c_str() + 1, "%d", &regId);
 			if (regId < 0 || regId > MAX_REGISTERS)
 				FATAL(ERR_FUNCTION, "Attempt to push reg '%s'\n%s",
 					regName.c_str(), CTXMGR->location().c_str());
-			int offset = REG_BASE + 4 * (regId % 16);
-			for (int i=0; i<4; i++)
-				{
-				char buf[1024];
-				snprintf(buf, 1024, "LDA $%x", offset + i);
-				assembly.push_back(buf);
-				assembly.push_back("PHA");
-				}
+			int offset = REG_BASE + (regId % 64);
+			
+			char buf[1024];
+			snprintf(buf, 1024, "LDA $%x", offset);
+			assembly.push_back(buf);
+			assembly.push_back("PHA");
 			}
 		}
 	}
@@ -113,22 +108,16 @@ void Function::destack(StringList& assembly)
 			}
 		else
 			{
-			// FIXME: For the time being just pull all 4 bytes of an 'r'
-			// register but in time we ought to have a property on the
-			// register to say what size it currently exists at
 			int regId;
 			sscanf(regName.c_str() + 1, "%d", &regId);
 			if (regId < 0 || regId > MAX_REGISTERS)
 				FATAL(ERR_FUNCTION, "Attempt to pull reg '%s'\n%s",
 					regName.c_str(), CTXMGR->location().c_str());
-			int offset = REG_BASE + 4 * (regId % 16);
-			for (int i=3; i>=0; i--)
-				{
-				char buf[1024];
-				assembly.push_back("pla");
-				snprintf(buf, 1024, "STA $%x", offset + i);
-				assembly.push_back(buf);
-				}
+			int offset = REG_BASE + (regId % 64);
+			char buf[1024];
+			assembly.push_back("pla");
+			snprintf(buf, 1024, "STA $%x", offset);
+			assembly.push_back(buf);
 			}
 		}
 	}

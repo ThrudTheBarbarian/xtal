@@ -75,7 +75,7 @@ void Emitter::functionPreamble(String name)
 		fprintf(_ofp, "; Begin function\n"
 					  "; --------------\n"
 					  "\n.function %s\n"
-					  ".clobber a,x,y\n"
+					  ";.clobber a,x,y\n"
 					  "@%s:\n",
 					  name.c_str(),
 					  name.c_str()
