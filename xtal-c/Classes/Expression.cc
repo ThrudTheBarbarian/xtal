@@ -156,6 +156,9 @@ ASTNode * Expression::binary(Emitter& emitter,
     \*************************************************************************/
 	ASTNode *left = _prefix(emitter, scanner, token, line);
 	
+	if (left == nullptr)
+		FATAL(ERR_RUNTIME,
+					"Internal compiler error at line %d", line);
 	/*************************************************************************\
     |* If we hit a semicolon, ] or ), just return the left node
     \*************************************************************************/
@@ -221,6 +224,10 @@ ASTNode * Expression::binary(Emitter& emitter,
 			ASTNode *lTemp = left;
 			left = right;
 			right = lTemp;
+
+			if (left == nullptr)
+				FATAL(ERR_RUNTIME,
+							"Internal compiler error at line %d", line);
 			}
 		else
 			{
@@ -244,6 +251,9 @@ ASTNode * Expression::binary(Emitter& emitter,
 			\*****************************************************************/
 			if (lTemp != nullptr)
 				left = lTemp;
+			if (left == nullptr)
+				FATAL(ERR_RUNTIME,
+							"Internal compiler error at line %d", line);
 			if (rTemp != nullptr)
 				right = rTemp;
 			}
@@ -466,7 +476,7 @@ ASTNode * Expression::_prefix(Emitter& emitter,
 			// make the child an rvalue. Because chars are unsigned,
 			// also widen this to int so that it's signed
 			tree->setIsRValue(true);
-			tree = Types::modify(tree, PT_S32, 0);
+			//tree = Types::modify(tree, PT_S32, 0);
 			tree = new ASTNode(ASTNode::A_NEGATE, tree->type(), tree, 0);
 			break;
     

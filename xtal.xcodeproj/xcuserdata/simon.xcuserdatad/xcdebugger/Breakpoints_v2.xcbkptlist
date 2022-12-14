@@ -167,32 +167,32 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "9CAB2C80-3DB1-49A0-86B7-6EDA2E84B761"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "xtal-c/Classes/A8Emitter.cc"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "225"
-            endingLineNumber = "225"
-            landmarkName = "A8Emitter::printReg(r, type)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "AB07A3FA-75C4-449E-914C-006E2DE85254"
+            uuid = "72CCAD4D-AD2A-4CFD-BB9D-A2D7DEA60139"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "xtal-c/Classes/Expression.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "475"
-            endingLineNumber = "475"
-            landmarkName = "Expression::_prefix(emitter, scanner, token, line)"
+            startingLineNumber = "160"
+            endingLineNumber = "160"
+            landmarkName = "Expression::binary(emitter, scanner, token, line, previousPrecedence)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "25903DB6-1367-49F0-9B3F-2C9FBE440076"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "xtal-c/Classes/Expression.cc"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "229"
+            endingLineNumber = "229"
+            landmarkName = "Expression::binary(emitter, scanner, token, line, previousPrecedence)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

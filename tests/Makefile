@@ -17,7 +17,7 @@ clean:
 %.exe : %.xt
 	@$(XC) $< -o $@
 	@$(SIM) $@ > $*.out
-	@cmp -s $*.out expected/$*.out; \
+	@cmp -s $*.out expected/$*.run; \
 	RETVAL=$$?; \
 	printf "%-20s" $<; \
 	if [ $$RETVAL -eq 0 ]; then \

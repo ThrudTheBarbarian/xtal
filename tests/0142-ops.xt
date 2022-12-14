@@ -1,0 +1,11 @@
+s32 main()
+	[
+	u8 i;
+
+	i = -10;
+	print i;
+
+	return (0);
+	]
+	
+

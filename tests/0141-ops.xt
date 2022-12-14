@@ -8,7 +8,6 @@ s32 main()
 	u8 *str;
 
 
-
 	i = 10;
 	j = ++i;	
 	print i;
@@ -31,9 +30,6 @@ s32 main()
 	j = i--;
 	print i;
 	print j;
-
-	i = -10;
-	print i;
 
 
 	v1 = 2863311530;
