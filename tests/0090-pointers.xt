@@ -1,0 +1,22 @@
+void main()
+	[
+	u8 a;
+	u8 *b;
+	u8 c;
+	
+	a = 42;
+	b = &a;
+	c = *b;
+	print c;
+	
+	
+	u16 d;
+	u16 *e;
+	u16 f;
+	
+	d = 4242;
+	e = &d;
+	f = *e;
+	print f;
+	
+	]

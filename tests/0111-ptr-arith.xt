@@ -1,0 +1,15 @@
+u8 a;
+u8 *b;
+s32 c;
+s32 *d;
+
+void main()
+	[
+	b 	= &a;
+	*b	= 15;
+	print a;
+	
+	d 	= &c;
+	*d	= 1024;
+	print c;
+	]

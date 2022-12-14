@@ -147,10 +147,8 @@ int Types::typeSize(int type, int line)
 			FATAL(ERR_TYPE, "Illegal type %d", type);
 			}
 		}
-	if (type >= 0x100)
-		return 2;
 		
-	return _sizes[type];
+	return _sizes[type & 0xFF];
 	}
 
 /*****************************************************************************\

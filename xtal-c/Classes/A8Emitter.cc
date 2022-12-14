@@ -155,7 +155,7 @@ Register A8Emitter::emit(ASTNode *node,
 			return none;
 			}
 		case ASTNode::A_WIDEN:
-			_cgWiden(left, node->left()->type(), node->type());
+			left = _cgWiden(left, node->left()->type(), node->type());
 			return left;
 		case ASTNode::A_RETURN:
 			_cgReturn(left, SYMTAB->functionId());
@@ -244,6 +244,9 @@ static Register::RegType _symbolSize(const Symbol& symbol)
 	int symType	= s.pType();
 	Register::RegType type = Register::UNKNOWN;
 	
+	if (symType > 0xFF)	// Is a pointer type
+		return Register::UNSIGNED_2BYTE;
+	
 	switch (Types::typeSize(symType))
 		{
 		case 1:
@@ -257,9 +260,7 @@ static Register::RegType _symbolSize(const Symbol& symbol)
 			break;
 		
 		default:
-			if (symType > 0xff)
-				type = Register::UNSIGNED_2BYTE;	// pointer
-			break;
+			FATAL(ERR_TYPE, "Illegal type 0x%x", symType);
 		}
 	
 	return type;
@@ -432,7 +433,7 @@ Register A8Emitter::_cgStoreGlobal(Register& r, const Symbol& symbol)
 			
 		else if (r.size() == 2)
 			{
-			if (r.type() > 0xFF)
+			if (r.type() > 0xFF) 	// Signed!
 				{
 				fprintf(_ofp, "\t.push context block extend_%s 1\n"
 						  "\tlda #0\n"
@@ -522,17 +523,17 @@ Register A8Emitter::_cgStoreGlobal(Register& r, const Symbol& symbol)
 /*****************************************************************************\
 |* Widen a register
 \*****************************************************************************/
-void A8Emitter::_cgWiden(Register& reg, int oldWidth, int newWidth)
+Register A8Emitter::_cgWiden(Register& reg, int oldWidth, int newWidth)
 	{
 	int oSize = Types::typeSize(oldWidth);
 	const char *regName = reg.name().c_str();
 	bool isSigned		= (oldWidth == PT_S8)
 					   || (oldWidth == PT_S16)
-					   || (oldWidth == PT_S32)/*
-					   || (newWidth == PT_S8)
-					   || (newWidth == PT_S16)
-					   || (newWidth == PT_S32)*/;
-					   
+					   || (oldWidth == PT_S32);
+
+	if (_regs->widen(reg, oldWidth, newWidth) == false)
+		return _cgAllocAndWiden(reg, oldWidth, newWidth);
+		
 	if (oldWidth != newWidth)
 		{
 		switch (newWidth)
@@ -617,6 +618,133 @@ void A8Emitter::_cgWiden(Register& reg, int oldWidth, int newWidth)
 				FATAL(ERR_TYPE, "Unknown type for reg %s", reg.name().c_str());
 			}
 		}
+	
+	return reg;
+	}
+
+        
+/*****************************************************************************\
+|* Widen a register
+\*****************************************************************************/
+Register A8Emitter::_cgAllocAndWiden(Register& reg, int oldWidth, int newWidth)
+	{
+	int oSize 			= Types::typeSize(oldWidth);
+	bool isSigned		= (oldWidth == PT_S8)
+					   || (oldWidth == PT_S16)
+					   || (oldWidth == PT_S32);
+
+	Register nReg 		= _regs->allocateForPrimitiveType(newWidth);
+	
+	const char * oName 	= reg.name().c_str();
+	const char * nName 	= nReg.name().c_str();
+	
+	switch (newWidth)
+		{
+		case PT_U8:
+		case PT_S8:
+			fprintf(_ofp, "\tlda %s ; move\n"
+						  "\tsta %s\n",
+						  oName, nName);
+			break;
+		
+		case PT_S16:
+		case PT_U16:
+			if (isSigned == false)
+				fprintf(_ofp, "\tlda %s; move 1u->2*\n"
+							  "\tsta %s\n"
+							  "\tlda #$0 \n"
+							  "\tsta %s+1\n",
+							  oName, nName, nName);
+			else
+				fprintf(_ofp, "\t.push context block widen_%s 1\n"
+							  "lda %s; move 1s -> 2*\n"
+							  "sta %s\n"
+							  "\tlda #0 \n"
+							  "\tbit %s\n"
+							  "\tbpl zeroExtend\n"
+							  "\tlda #$ff\n"
+							  "zeroExtend:\n"
+							  "\tsta %s+1\n"
+							  "\t.pop context\n",
+							  randomString(6).c_str(),
+							  oName, nName, oName, nName);
+			reg.setType(newWidth == PT_S16 ? Register::SIGNED_2BYTE
+										   : Register::UNSIGNED_2BYTE);
+			break;
+			
+		
+		case PT_U32:
+		case PT_S32:
+			if (oSize == 1)
+				{
+				if (isSigned == false)
+					fprintf(_ofp, "\tlda %s; move 1u->4*\n"
+								  "\tsta %s\n"
+								  "\tlda #0 \n"
+								  "\tsta %s+1\n"
+								  "\tsta %s+2\n"
+								  "\tsta %s+3\n",
+								  oName, nName, nName, nName, nName);
+
+				else
+					fprintf(_ofp, "\t.push context block widen_%s 1\n"
+								  "\tlda %s; move 1s->4*\n"
+								  "\tsta %s\n"
+								  "\tlda #0 \n"
+								  "\tbit %s\n"
+								  "\tbpl zeroExtend\n"
+								  "\tlda #$ff\n"
+								  "zeroExtend:\n"
+								  "\tsta %s+1\n"
+								  "\tsta %s+2\n"
+								  "\tsta %s+3\n"
+								  "\t.pop context\n",
+								  randomString(6).c_str(),
+								  oName, nName, oName, nName, nName, nName);
+				}
+			else if (oSize == 2)
+				{
+				if (isSigned == false)
+					fprintf(_ofp, "\tlda %s; move 2u->4*\n"
+								  "\tsta %s\n"
+								  "\tlda %s\n"
+								  "\tsta %s\n"
+								  "\tlda #0 \n"
+								  "\tsta %s+2\n"
+								  "\tsta %s+3\n",
+								  oName, nName,
+								  oName, nName,
+								  nName, nName);
+				else
+					fprintf(_ofp, "\t.push context block widen_%s 1\n"
+								  "\tlda %s; move 2s->4*\n"
+								  "\tsta %s\n"
+								  "\tlda %s\n"
+								  "\tsta %s\n"
+								  "\tlda #0 \n"
+								  "\tbit %s+1\n"
+								  "\tbpl zeroExtend\n"
+								  "\tlda #$ff\n"
+								  "zeroExtend:\n"
+								  "\tsta %s+2\n"
+								  "\tsta %s+3\n"
+								  "\t.pop context\n",
+								  randomString(6).c_str(),
+								  oName, nName,
+								  oName, nName,
+								  oName,
+								  nName, nName);
+				}
+			reg.setType(newWidth == PT_S32 ? Register::SIGNED_4BYTE
+										   : Register::UNSIGNED_4BYTE);
+			break;
+		
+		default:
+			FATAL(ERR_TYPE, "Unknown type for reg %s", reg.name().c_str());
+		}
+	
+	_regs->free(reg);
+	return nReg;
 	}
 
 
@@ -759,6 +887,10 @@ Register A8Emitter::_cgCompareAndSet(Register r1, Register r2, int how)
 	{
 	String criteria 	= "beq there";
 	String alternate	= "bne done";
+	Register r3			= _regs->allocate(r1.type());
+	
+	int size			= r1.size();
+	int bits			= 8*size;
 	
 	switch (how)
 		{
@@ -795,23 +927,29 @@ Register A8Emitter::_cgCompareAndSet(Register r1, Register r2, int how)
 	
 	
 	fprintf(_ofp,	"\t.push context block cmp_%s 1\n"
-					"\t_cmp32 %s,%s\n"
+					"\t_cmp%d %s,%s\n"
 					"\t%s\n"
 					"here:\n"
-					"\tmove.4 #0 r2\n"
+					"\tmove.%d #0 %s\n"
 					"\t%s\n"
 					"there:\n"
-					"\tmove.4 #1 r2\n"
+					"\tmove.%d #1 %s\n"
 					"done:\n"
 					"\t.pop context\n\n",
 					randomString(8).c_str(),
+					bits,
 					r1.name().c_str(),
 					r2.name().c_str(),
 					criteria.c_str(),
-					alternate.c_str());
+					size,
+					r3.name().c_str(),
+					alternate.c_str(),
+					size,
+					r3.name().c_str());
 	
 	_regs->free(r1);
-	return r2;
+	_regs->free(r2);
+	return r3;
 	}
 
 /*****************************************************************************\
@@ -1079,11 +1217,12 @@ Register A8Emitter::_cgWhileAST(ASTNode *node)
 \*****************************************************************************/
 Register A8Emitter::_cgCall(Register r1, int identifier)
 	{
-	// Get a new out-register
-	Register r = _regs->allocate(r1.type());
-	
 	auto symbol = SYMTAB->table()[identifier];
 	fprintf(_ofp, "\tcall %s\n", symbol.name().c_str());
+
+	// Get a new out-register
+	Register r = _regs->allocateForPrimitiveType(symbol.pType());
+	
 	
 	// Move the returned value of the function to the register we created
 	int fId = 0;
@@ -1097,25 +1236,16 @@ Register A8Emitter::_cgCall(Register r1, int identifier)
 			break;
 			
 		case 2:
-			fprintf(_ofp, "\t_xfer16 f%d, %s\n"
-						  "\tlda #$0\n"
-						  "\tsta %s+2\n"
-						  "\tsta %s+3\n",
-						  fId, reg, reg, reg);
+			fprintf(_ofp, "\t_xfer16 f%d, %s\n",
+						  fId, reg);
 			break;
 		case 1:
 			fprintf(_ofp, "\tlda f%d\n"
-						  "\tsta %s\n"
-						  "\tlda #$0\n"
-						  "\tsta %s+1\n"
-						  "\tsta %s+2\n"
-						  "\tsta %s+3\n",
-						  fId, reg, reg, reg, reg);
+						  "\tsta %s\n",
+						  fId, reg);
 			break;
 		}
 	_regs->free(r1);
-
-	r.setPrimitiveType(symbol.pType());
 	return r;
 	}
 
@@ -1173,11 +1303,10 @@ Register A8Emitter::_cgAddress(int identifier)
 Register A8Emitter::_cgDeref(Register r1, int type)
 	{
 	// Get a new out-register
-	Register r 	= _regs->allocate(Register::UNSIGNED_2BYTE);
-	r.setPrimitiveType(Types::valueAt(type));
+	Register r 	= _regs->allocateForPrimitiveType(type);
 
 	fprintf(_ofp, "\tldy #0\n");
-	for (int i=0; i<r1.size(); i++)
+	for (int i=0; i<r.size(); i++)
 		{
 		fprintf(_ofp, "\tlda (%s),y\n"
 					  "\tsta %s+%d\n",
@@ -1356,10 +1485,9 @@ Register A8Emitter::_cgShr(Register r1, Register r2)
 \*****************************************************************************/
 Register A8Emitter::_cgLoadGlob(int identifier, int op)
 	{
-	Register r 			= _regs->allocate(Register::UNSIGNED_1BYTE);
 	Symbol s  			= SYMTAB->table()[identifier];
-	r.setPrimitiveType(s.pType());
-	
+	Register r 			= _regs->allocateForPrimitiveType(s.pType());
+
 	String symName		= "S_"+s.name();
 	const char *name 	= symName.c_str();
 	const char *reg		= r.name().c_str();

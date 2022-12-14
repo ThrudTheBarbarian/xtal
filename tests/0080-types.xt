@@ -1,0 +1,16 @@
+void main()
+	[
+	s32 i;
+	u16 j;
+	u8 k;
+	
+	i = 4000;
+	j = 400;
+	k = 40;
+	
+	print i + j + k;
+	
+	for (k=253; k != 2; k++)
+		[ print k; ]
+		
+	]

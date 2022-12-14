@@ -74,6 +74,11 @@ class RegisterFile
         explicit RegisterFile();
 
         /***********************************************************************\
+        |* Set the file pointer for assembly hinting
+        \***********************************************************************/
+        static void setOutputFile(FILE *fp);
+
+        /***********************************************************************\
         |* free all registers
         \***********************************************************************/
         static void clear(void);
@@ -82,17 +87,18 @@ class RegisterFile
         |* Allocate a register
         \***********************************************************************/
         static Register allocate(Register::RegType type);
+        static Register allocateForPrimitiveType(int ptype);
+        
+        /***********************************************************************\
+        |* Set the file pointer for assembly hinting
+        \***********************************************************************/
+        static bool widen(Register& reg, int oldWidth, int newWidth);
         
         /***********************************************************************\
         |* Free up a register
         \***********************************************************************/
         static void free(Register& reg);
             
-        /***********************************************************************\
-        |* Return a register by index
-        \***********************************************************************/
-		static Register registerAt(int idx);
-		
         /***********************************************************************\
         |* Debugging: dump out register allocations
         \***********************************************************************/

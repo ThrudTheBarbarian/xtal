@@ -1,0 +1,18 @@
+void main()
+	[
+	u8 i;
+
+	for (i=1; i<=10; i++)
+		[ print i; ]
+	]
+
+void dummy()
+	[
+	s32 a;
+	s32 b;
+	
+	a = 12;
+	b = a * 3;
+	if (a >= b)
+		[ print 2*b-a; ]
+	]

@@ -53,80 +53,12 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/01/test.01"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/21-ops/boolexpr.xt -d "
+            argument = "$PROJECT_DIR/test.xt -d  -T -o /tmp/out.s"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/15/ptr.xt -d"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/16/comma.xt -d"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/17/scale.xt -d"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/18/rval.xt -d"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/19/brackets.xt -d"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/19-arrays/array.xt -d -T"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/20-strings/string.xt -d -T"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/21-ops/shl.xt -d -T"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/21-ops/preinc.xt -d -T"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/12/add16u.xt -d"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/12/test.01 -d -o /var/folders/th/63xq4hqx6yqcx57qgds7ry7r0000gn/T/5PN2qmWq.asm"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/05/test01"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/06/test.01"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/07/test.02 -d"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/08/test.01 -d"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-c/Tests/09/test.01 -d"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-o /tmp/out.asm &apos;/Users/simon/src/xtal/xtal-c/Tests/15/ptr.xt&apos;"
-            isEnabled = "NO">
+            argument = "-d"
+            isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>

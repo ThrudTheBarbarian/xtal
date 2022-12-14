@@ -72,33 +72,3 @@ String Register::sizeAsString()
 	return std::to_string(size());
 	}
 
-/****************************************************************************\
-|* Set the size using a primitive type
-\****************************************************************************/
-void Register::setPrimitiveType(int ptype)
-	{
-	switch (ptype & 0xFF)
-		{
-		case PT_S8:
-			_type = SIGNED_1BYTE;
-			break;
-		case PT_U8:
-			_type = UNSIGNED_1BYTE;
-			break;
-		case PT_S16:
-			_type = SIGNED_2BYTE;
-			break;
-		case PT_U16:
-			_type = UNSIGNED_2BYTE;
-			break;
-		case PT_S32:
-			_type = SIGNED_4BYTE;
-			break;
-		case PT_U32:
-			_type = UNSIGNED_4BYTE;
-			break;
-		default:
-			FATAL(ERR_REG_NOEXIST, "Undefined type %d requested for reg %s",
-				ptype, _name.c_str());
-		}
-	}

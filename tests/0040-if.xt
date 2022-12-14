@@ -1,0 +1,21 @@
+u8 main()
+	[
+	u8 x;
+	u8 y;
+	
+	x = 10;
+	y = 20;
+	
+	if (x < y)
+		[ print x; ]
+	else
+		[ print y; ]
+	
+	if (y >= x)
+		[ print x; ]
+	else
+		[ print y; ]
+	
+	return (0);
+	]
+	

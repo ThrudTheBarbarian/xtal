@@ -127,9 +127,17 @@ class A8Emitter : public Emitter
         void _cgJump(String label);
         
 		/*********************************************************************\
-        |* Widen a register
+        |* Widen a register, this can possibly result in a new register
+        |* allocation, if there isn't space in the current setup to do the
+        |* widen
         \*********************************************************************/
-        void _cgWiden(Register& reg, int oldWidth, int newWidth);
+        Register _cgWiden(Register& reg, int oldWidth, int newWidth);
+        
+		/*********************************************************************\
+        |* Widen a register, this is the new register allocation path, if
+        |* there wasn't space around the current register to do the widen
+        \*********************************************************************/
+        Register _cgAllocAndWiden(Register& reg, int oldWidth, int newWidth);
         
  			
 		/*********************************************************************\

@@ -1,0 +1,16 @@
+s32 a;
+u8 b;
+u8 c;
+
+s32 main()
+	[
+	a = 0;
+	b = 5;
+	
+	a = a + b + 1024;
+		
+	print a;
+
+	return(0);
+	]
+

@@ -1,0 +1,17 @@
+List of known bugs
+
+
+- If a series of maths ops overflows in the middle, the end result will appear
+  to be wrong, so somethiing like:
+  
+		u8 x = 20 + 30 * 50 - 80 / 30
+
+		... will overflow at the 30*50 stage.
+	
+		* Two possible ways to overcome this:
+			
+			- Introduce casts, so either the 30 or 50 could be (u16)(30)
+			
+			- Have an options keyword that sets the assumed size of types
+			  for integers, at the moment we choose the smallest that fits
+			  

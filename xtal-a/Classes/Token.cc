@@ -21,6 +21,8 @@ static Token::TokenInfo _tokens[] = {
 	{T_DIRECTIVE, 	P_ADDR,		"TOKEN_ADDR   ", ".addr"   , 5},
 	{T_DIRECTIVE, 	P_ORG,		"TOKEN_ORG    ", ".org"	   , 4},
 	{T_DIRECTIVE, 	P_SRCREF,	"TOKEN_SRCREF ", ""		   , 0},
+	{T_DIRECTIVE, 	P_REG,	    "TOKEN_REG    ", ".reg"	   , 4},
+	{T_DIRECTIVE, 	P_REG,	    "TOKEN_REG    ", ".reg"	   , 4},
 	
 	{T_META, 		P_MOVE,		"TOKEN_MOVE   ", "move"	   , 4},
 	{T_META, 		P_ADD,		"TOKEN_ADD    ", "add"	   , 3},
