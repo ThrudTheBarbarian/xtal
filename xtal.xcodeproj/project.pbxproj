@@ -160,6 +160,7 @@
 		F45E73E529459AE50032D589 /* invert.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = invert.xt; sourceTree = "<group>"; };
 		F45E73E62945A3EF0032D589 /* lognot.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = lognot.xt; sourceTree = "<group>"; };
 		F45E73E72945AC4B0032D589 /* boolexpr.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = boolexpr.xt; sourceTree = "<group>"; };
+		F45E73E82949873E0032D589 /* Bugs */ = {isa = PBXFileReference; lastKnownFileType = text; path = Bugs; sourceTree = "<group>"; };
 		F480EF082922B472008584FB /* xtal */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = xtal; sourceTree = BUILT_PRODUCTS_DIR; };
 		F480EF0B2922B472008584FB /* main.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cc; sourceTree = "<group>"; };
 		F480EF162922B512008584FB /* xtal-c */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "xtal-c"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -613,6 +614,7 @@
 			isa = PBXGroup;
 			children = (
 				F4B808A329370A400049B6EB /* Functions.md */,
+				F45E73E82949873E0032D589 /* Bugs */,
 			);
 			path = Docs;
 			sourceTree = "<group>";

@@ -350,11 +350,11 @@ ASTNode * Statement::_print(Token& token, int& line)
 	ASTNode *tree = Expression::binary(*_emitter, *_scanner, token, line, 0);
 	
 	// Make sure we're type-compatible
-	int type = PT_S32;
+	int type = tree->type();
 	ASTNode *candidate = Types::modify(tree, tree->type(), 0);
 	if (candidate == nullptr)
 		{
-		type = PT_U8PTR;	// String pointer
+		type = PT_S32;	// int pointer
 		candidate = Types::modify(tree, type, 0);
 		}
 	if (candidate == nullptr)

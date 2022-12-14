@@ -1,0 +1,12 @@
+u8 main()
+	[
+	u8 a;
+	u8 b;
+	
+	a = 5; 
+	b = 50;
+	
+	print a+b;
+	
+	return (0);
+	]

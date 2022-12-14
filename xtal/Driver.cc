@@ -17,7 +17,7 @@ namespace fs = std::filesystem;
 #include "Driver.h"
 #include "Stringutils.h"
 
-#define DEFAULT_ORG		16384
+#define DEFAULT_ORG		0x6000
 
 static int _debugLevel;
 

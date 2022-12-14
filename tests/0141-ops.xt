@@ -1,0 +1,63 @@
+s32 main()
+	[
+	s32 v1;
+	s32 v2;
+	s32 v3;
+	u8 i;
+	u8 j;
+	u8 *str;
+
+
+
+	i = 10;
+	j = ++i;	
+	print i;
+	print j;
+
+
+	i = 10;
+	j = i++;
+	print i;
+	print j;
+
+
+	i = 10;
+	j = --i;
+	print i;
+	print j;
+
+
+	i = 10;
+	j = i--;
+	print i;
+	print j;
+
+	i = -10;
+	print i;
+
+
+	v1 = 2863311530;
+	v3 = ~v1;
+	if (v3 == 1431655765)
+	    [ print "OK "; ]
+	else
+		[ print "FAIL! "; ]
+
+
+	v1 = 240;
+	print !v1;
+	v1 = 0;
+	print !v1;
+
+
+	
+	for (str= "Hello"; *str; str++)
+		[
+		print str;
+		print ":";
+		]
+
+	return (0);
+	]
+	
+

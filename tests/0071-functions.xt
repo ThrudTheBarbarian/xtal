@@ -1,0 +1,25 @@
+
+u8 dummy()
+	[
+	return (50);
+	]
+
+s32 bigDummy()
+	[
+	return (500);
+	]
+	
+void main()
+	[
+	u8 sml;
+	sml = dummy(5);
+	print sml;
+	
+	s32 big;
+	big = bigDummy(5);
+	print big;
+	
+	print 500;
+	print (bigDummy(10) + big);
+	]
+	

@@ -35,7 +35,7 @@ class Token
 			T_EQ,				// Is equal to
 			T_NE,				// Is not equal to
 			T_LT,				// Is less than
-			T_GT,				// Is greater than
+			T_GT,	/* 10 */	// Is greater than
 			T_LE,				// Is less than or equal to
 			T_GE,				// Is greater than or equal to
 
@@ -48,7 +48,7 @@ class Token
 			T_SLASH,			// Divide op
 
 			T_INC,				// Increment
-			T_DEC,				// Decrement
+			T_DEC,	/* 20 */	// Decrement
 			T_INVERT,			// Invert (~)
 			T_LOGNOT,			// logical not (!)
 
@@ -61,7 +61,7 @@ class Token
 			// Keywords
 			T_PRINT,			// Print command
 			T_IF,				// Start an IF block
-			T_ELSE,				// Start an ELSE block
+			T_ELSE,	/* 30 */	// Start an ELSE block
 			T_WHILE,			// Start a WHILE loop
 			T_FOR,				// Start a FOR loop
 			T_RETURN,			// Return from a function
@@ -73,7 +73,7 @@ class Token
 			
 			T_LBRACE,			// Left block		[
 			T_RBRACE,			// Right block		]
-			T_LPAREN,			// Left bracket		(
+			T_LPAREN, /* 40 */	// Left bracket		(
 			T_RPAREN,			// Right bracket	)
 
 			T_COMMA,			// Comma operator

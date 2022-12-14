@@ -244,6 +244,9 @@ static Register::RegType _symbolSize(const Symbol& symbol)
 	int symType	= s.pType();
 	Register::RegType type = Register::UNKNOWN;
 	
+	if (symType > 0xFF)	// Is a pointer type
+		return Register::UNSIGNED_2BYTE;
+	
 	switch (Types::typeSize(symType))
 		{
 		case 1:
@@ -257,9 +260,7 @@ static Register::RegType _symbolSize(const Symbol& symbol)
 			break;
 		
 		default:
-			if (symType > 0xff)
-				type = Register::UNSIGNED_2BYTE;	// pointer
-			break;
+			FATAL(ERR_TYPE, "Illegal type 0x%x", symType);
 		}
 	
 	return type;
@@ -886,6 +887,10 @@ Register A8Emitter::_cgCompareAndSet(Register r1, Register r2, int how)
 	{
 	String criteria 	= "beq there";
 	String alternate	= "bne done";
+	Register r3			= _regs->allocate(r1.type());
+	
+	int size			= r1.size();
+	int bits			= 8*size;
 	
 	switch (how)
 		{
@@ -922,23 +927,29 @@ Register A8Emitter::_cgCompareAndSet(Register r1, Register r2, int how)
 	
 	
 	fprintf(_ofp,	"\t.push context block cmp_%s 1\n"
-					"\t_cmp32 %s,%s\n"
+					"\t_cmp%d %s,%s\n"
 					"\t%s\n"
 					"here:\n"
-					"\tmove.4 #0 r2\n"
+					"\tmove.%d #0 %s\n"
 					"\t%s\n"
 					"there:\n"
-					"\tmove.4 #1 r2\n"
+					"\tmove.%d #1 %s\n"
 					"done:\n"
 					"\t.pop context\n\n",
 					randomString(8).c_str(),
+					bits,
 					r1.name().c_str(),
 					r2.name().c_str(),
 					criteria.c_str(),
-					alternate.c_str());
+					size,
+					r3.name().c_str(),
+					alternate.c_str(),
+					size,
+					r3.name().c_str());
 	
 	_regs->free(r1);
-	return r2;
+	_regs->free(r2);
+	return r3;
 	}
 
 /*****************************************************************************\
@@ -1295,7 +1306,7 @@ Register A8Emitter::_cgDeref(Register r1, int type)
 	Register r 	= _regs->allocateForPrimitiveType(type);
 
 	fprintf(_ofp, "\tldy #0\n");
-	for (int i=0; i<r1.size(); i++)
+	for (int i=0; i<r.size(); i++)
 		{
 		fprintf(_ofp, "\tlda (%s),y\n"
 					  "\tsta %s+%d\n",

@@ -1,0 +1,15 @@
+s32 c;
+s32 d;
+s32 f;
+s32 *e;
+
+void main()
+	[
+	c = 12;
+	d = 18; 
+	print c;
+	
+	e = &c + 1;
+	f = *e;
+	print f;
+	]

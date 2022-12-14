@@ -61,7 +61,7 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "$PROJECT_DIR/test.xt -d "
+            argument = "$PROJECT_DIR//test.xt -d  -T -o /tmp/out.s"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
