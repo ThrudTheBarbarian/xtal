@@ -7,6 +7,7 @@
 
 #include "RegisterFile.h"
 #include "sharedDefines.h"
+#include "Types.h"
 
 #define REG_PAGE_SPACE	(16*4)
 #define MEM_EMPTY		(0xFFFFFFFF)
@@ -135,7 +136,38 @@ Register RegisterFile::allocate(Register::RegType type)
 	_allocated.push_back(r);
 	return _allocated[_allocated.size()-1];
 	}
-
+	
+/*****************************************************************************\
+|* Widen a register
+\*****************************************************************************/
+bool RegisterFile::widen(Register& reg, int oldWidth, int newWidth)
+	{
+	if (oldWidth == newWidth)
+		return true;
+	
+	int delta = Types::typeSize(newWidth) - Types::typeSize(oldWidth);
+	if (delta < 0)
+		return true;
+	
+	// Find out where we are, and see if there is sufficient space after the
+	// current register
+	int at = /*(reg.set() * 16) +*/ reg.offset() + reg.size();
+	
+	bool haveSpace = true;
+	for (int i=0; i<delta; i++)
+		if (_regSpace[i+at] != MEM_EMPTY)
+			{
+			haveSpace = false;
+			break;
+			}
+	
+	if (haveSpace)
+		for (int i=0; i<delta; i++)
+			_regSpace[i+at] = reg.offset();
+	
+	return haveSpace;
+	}
+	
 /*****************************************************************************\
 |* Deallocate a register
 \*****************************************************************************/

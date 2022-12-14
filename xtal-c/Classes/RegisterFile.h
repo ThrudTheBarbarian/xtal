@@ -90,6 +90,11 @@ class RegisterFile
         static Register allocateForPrimitiveType(int ptype);
         
         /***********************************************************************\
+        |* Set the file pointer for assembly hinting
+        \***********************************************************************/
+        static bool widen(Register& reg, int oldWidth, int newWidth);
+        
+        /***********************************************************************\
         |* Free up a register
         \***********************************************************************/
         static void free(Register& reg);
