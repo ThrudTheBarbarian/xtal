@@ -1,0 +1,47 @@
+void main()
+	[
+	s32 a;
+	u8 b;
+	s32 c;
+	u16 d;
+	
+	a = 1000;
+	b = 5;
+	d = 50000;
+	
+	c = a + b;
+
+	if (c != 1005)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	c = b + a;
+
+	if (c != 1005)
+		[ print 0; ]
+	else
+		[ print 1; ]
+
+	
+	c = a + d;
+
+	if (c != 51000)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	c = d + a;
+
+	if (c != 51000)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	c = b + d;
+
+	if (c != 50005)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	]

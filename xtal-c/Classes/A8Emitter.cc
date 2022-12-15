@@ -1313,7 +1313,7 @@ Register A8Emitter::_cgDeref(Register r1, int type)
 					  r1.name().c_str(),
 					  r.name().c_str(),
 					  i);
-		if (i < r1.size()-1)
+		if (i < r.size()-1)
 			fprintf(_ofp, "\tiny\n");
 		}
 

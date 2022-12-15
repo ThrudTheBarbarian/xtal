@@ -19,4 +19,11 @@ void main()
 	f = *e;
 	print f;
 	
+	s32 h; s32 *i; s32 j;
+	h = 420000;
+	print h;
+	i = &h;
+	j = *i;
+	print j;
+
 	]

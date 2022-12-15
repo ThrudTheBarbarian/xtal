@@ -1,0 +1,64 @@
+void main()
+	[
+	s32 a;
+	u8 b;
+	s32 c;
+	u16 d;
+	
+	a = 1000;
+	b = 5;
+	d = 500;
+	
+	c = a / b;
+
+	if (c != 200)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	c = b / a;
+
+	if (c != 0)
+		[ print 0; ]
+	else
+		[ print 1; ]
+
+	a = 4294966296;
+	b = 5;
+	c = a/b;
+
+	if (c != 4294967096)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	a = 1000;
+	b = 5;
+	d = 500;
+
+	c = d / a;
+	if (c != 0)
+		[ print c; ]
+	else
+		[ print 1; ]
+
+	c = a / d;
+	if (c != 2)
+		[ print c; ]
+	else
+		[ print 1; ]
+
+	c = d / b;
+	if (c != 100)
+		[ print c; ]
+	else
+		[ print 1; ]
+
+	c = b / d;
+	if (c != 0)
+		[ print c; ]
+	else
+		[ print 1; ]
+	
+	
+	]
