@@ -1,0 +1,36 @@
+void main()
+	[
+	s8 a;
+	s8 b;
+	s8 c;
+	
+	a = 10;
+	b = 20;
+	c = a + b;
+
+	if (c != 30)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	a = -1;
+	b = 1;
+	c = a + b;
+
+	if (c != 0)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	
+	a = 127;
+	b = 127;
+	c = a + b;
+
+	if (c != -2)
+		[ print c; ]
+	else
+		[ print 1; ]
+	]
+
+

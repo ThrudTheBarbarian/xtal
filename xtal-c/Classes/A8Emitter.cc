@@ -1631,13 +1631,35 @@ Register A8Emitter::_cgLoadGlob(int identifier, int op)
 \*****************************************************************************/
 Register A8Emitter::_cgNegate(Register r)
 	{
-	int size = r.size()*8;		// will be the same for both
+	Register::RegType type = r.type();
 	
+	switch (r.type())
+		{
+		case Register::UNSIGNED_1BYTE:
+			type = Register::SIGNED_1BYTE;
+			break;
+		
+		case Register::UNSIGNED_2BYTE:
+			type = Register::SIGNED_2BYTE;
+			break;
+		
+		case Register::UNSIGNED_4BYTE:
+			type = Register::SIGNED_4BYTE;
+			break;
+		
+		default:
+			break;
+		}
+	
+	Register r2 = _regs->allocate(type);
+	
+	int size = r.size()*8;		// will be the same for both
 	fprintf(_ofp, "\t_neg%d %s,%s\n",
 					  size,
 					  r.name().c_str(),
-					  r.name().c_str());
-	return r;
+					  r2.name().c_str());
+	_regs->free(r);
+	return r2;
 	}
 	
 /*****************************************************************************\

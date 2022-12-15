@@ -1,0 +1,25 @@
+void main()
+	[
+	s8 a;
+	s8 b;
+	s8 c;
+	
+	a = 2;
+	b = 1;
+	c = a - b;
+	
+	if (c != 1)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	a = 0;
+	b = 2;
+	c = a - b;
+	
+	if (c != -2)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	]
+

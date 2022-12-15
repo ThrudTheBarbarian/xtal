@@ -4,10 +4,12 @@ void main()
 	u8 b;
 	s32 c;
 	u16 d;
+	s8 e;
 	
 	a = 1000;
 	b = 5;
 	d = 2000;
+	e = -2;
 	
 	c = a * b;
 
@@ -36,5 +38,19 @@ void main()
 		[ print 0; ]
 	else
 		[ print 1; ]
+	
+	c = b * e;
 
+	if (c != -10)
+		[ print 0; ]
+	else
+		[ print 1; ]
+
+	
+	c = e * a;
+
+	if (c != -2000)
+		[ print c; ]
+	else
+		[ print 1; ]
 	]

@@ -5,10 +5,14 @@ void main()
 	u8 b;
 	s32 c;
 	u16 d;
+	s8 e;
+	u16 f;
+	
 	
 	a = 1000;
 	b = 5;
 	d = 50000;
+	e = -2;
 	
 	c = a - b;
 
@@ -44,6 +48,29 @@ void main()
 
 	if (c != 15541 )
 		[ print c; ]
+	else
+		[ print 1; ]
+	
+	c = b - e ;
+
+	if (c != 7 )
+		[ print c; ]
+	else
+		[ print 1; ]
+	
+
+	
+	c = d -e ;
+
+	if (c != 50002 )
+		[ print c; ]
+	else
+		[ print 1; ]
+	
+	
+	f = a - e;
+	if (f != 1002 )
+		[ print f; ]
 	else
 		[ print 1; ]
 	]
