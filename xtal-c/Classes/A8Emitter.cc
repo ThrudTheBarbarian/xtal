@@ -247,16 +247,25 @@ static Register::RegType _symbolSize(const Symbol& symbol)
 	if (symType > 0xFF)	// Is a pointer type
 		return Register::UNSIGNED_2BYTE;
 	
-	switch (Types::typeSize(symType))
+	switch (symType)
 		{
-		case 1:
+		case PT_S8:
+			type = Register::SIGNED_1BYTE;
+			break;
+		case PT_U8:
 			type = Register::UNSIGNED_1BYTE;
 			break;
-		case 2:
+		case PT_S16:
+			type = Register::SIGNED_2BYTE;
+			break;
+		case PT_U16:
 			type = Register::UNSIGNED_2BYTE;
 			break;
-		case 4:
+		case PT_S32:
 			type = Register::SIGNED_4BYTE;
+			break;
+		case PT_U32:
+			type = Register::UNSIGNED_4BYTE;
 			break;
 		
 		default:
@@ -284,13 +293,16 @@ void A8Emitter::genSymbol(int idx)
 		
 		switch (_symbolSize(symbol))
 			{
+			case Register::UNSIGNED_4BYTE:
 			case Register::SIGNED_4BYTE:
 				str = "\t.word 0,0\n";
 				break;
 			case Register::UNSIGNED_2BYTE:
+			case Register::SIGNED_2BYTE:
 				str = "\t.word 0\n";
 				break;
 			case Register::UNSIGNED_1BYTE:
+			case Register::SIGNED_1BYTE:
 				str = "\t.byte 0\n";
 				break;
 			default:
@@ -343,7 +355,8 @@ Register A8Emitter::_cgLoadInt(int val, int primitiveType)
 	{
 	(void)primitiveType;
 	
-	REG type 	= ((val >= 0) && (val <= 255))   ? Register::UNSIGNED_1BYTE
+	REG type 	= ((val >= -128) && (val <= 127))   ? Register::SIGNED_1BYTE
+				: ((val >= 0) && (val <= 255))   ? Register::UNSIGNED_1BYTE
 				: ((val >= 0) && (val <= 65535)) ? Register::UNSIGNED_2BYTE
 				: Register::SIGNED_4BYTE;
 	Register r	= _regs->allocate(type);
@@ -538,8 +551,11 @@ Register A8Emitter::_cgWiden(Register& reg, int oldWidth, int newWidth)
 		{
 		switch (newWidth)
 			{
-			case PT_U8:
 			case PT_S8:
+				reg.setType(Register::SIGNED_1BYTE);
+				break;
+				
+			case PT_U8:
 				reg.setType(Register::UNSIGNED_1BYTE);
 				break;
 			
@@ -1512,6 +1528,7 @@ Register A8Emitter::_cgLoadGlob(int identifier, int op)
 		case PT_U16:
 		case PT_S16:
 		case PT_U8PTR:
+		case PT_S8PTR:
 			if (op == ASTNode::A_PREINC)
 				fprintf(_ofp, "\t_inc16 %s\n", name);
 			else if (op == ASTNode::A_PREDEC)

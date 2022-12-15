@@ -131,7 +131,10 @@ Register RegisterFile::allocate(Register::RegType type)
 		FATAL(ERR_REG_ALLOC, "Cannot allocate register");
 
 	if (_ofp != nullptr)
-		fprintf(_ofp, "\t.reg %s %d\n", r.name().c_str(), r.size());
+		fprintf(_ofp, "\t.reg %s %d %c\n",
+			r.name().c_str(),
+			r.size(),
+			r.type() > 0xFF ? 's' : 'u');
 
 	_allocated.push_back(r);
 	return _allocated[_allocated.size()-1];

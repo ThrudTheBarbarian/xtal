@@ -34,7 +34,7 @@ class A8Emitter : public Emitter
 		/*********************************************************************\
         |* Generate a register load immediate
         \*********************************************************************/
-        Register _cgLoadInt(int value, int type = PT_U8);
+        Register _cgLoadInt(int value, int type = PT_S8);
         
 		/*********************************************************************\
         |* Generate a global string load immediate

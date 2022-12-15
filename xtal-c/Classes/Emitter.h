@@ -59,6 +59,7 @@ class Emitter
     \************************************************************************/
     GET(RegisterFile *, regs);
     GETSET(FILE *, ofp, Ofp);
+    GETSET(String, xtrt0, Xtrt0);		// XT runtime 0 setup file
     
     private:
 

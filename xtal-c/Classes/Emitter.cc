@@ -22,7 +22,8 @@ Emitter::Emitter()
 		,_postamble("")
 		,_ofp(nullptr)
 	{
-	_regs = new RegisterFile();
+	_regs 	= new RegisterFile();
+	_xtrt0	= "xtrt0.s";
 	}
 
 /****************************************************************************\
@@ -53,6 +54,7 @@ void Emitter::preamble(void)
 					  "; ---------------\n"
 					  ".include %s\n"
 					  ".include %s\n"
+					  ".include %s\n"
 					  "\n"
 					  "%s\n"
 					  "call main\n"
@@ -60,6 +62,7 @@ void Emitter::preamble(void)
 					  __TIME__, __DATE__,
 					  _printRegFile.c_str(),
 					  _stdMacrosFile.c_str(),
+					  _xtrt0.c_str(),
 					  _preamble.c_str());
 		}
 	else

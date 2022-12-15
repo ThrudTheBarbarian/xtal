@@ -27,7 +27,9 @@
 |*   $87 		: command arg1
 |*   $88		: command args fifo
 |*	 $89..$8C	: overflow register, used in some arithmetic code
-|*	 $8D..$9F	: global vars (not swapped, 18 bytes)
+|*   $8D..$8E	: stack pointer
+|* 	 $8F..$90	: frame pointer
+|*	 $91..$9F	: global vars (not swapped, 14 bytes)
 |*	 $A0..$AF	: 16 bytes of function-return-and-args. Not swapped
 |* > $B0..$BF	: 16 bytes of function scratch-space [indexed by $1C,$1D].
 |*                               Not preserved over fn-calls

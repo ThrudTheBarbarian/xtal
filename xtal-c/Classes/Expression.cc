@@ -38,16 +38,29 @@ ASTNode * Expression::primary(Emitter& emitter,
 	switch (token.token())
 		{
 		case Token::T_INTLIT:
-			if ((token.intValue() >= 0) && (token.intValue() <= 255))
-				node = new ASTNode(ASTNode::A_INTLIT, PT_U8, token.intValue());
-			else if ((token.intValue() >= -128) && (token.intValue() <= 127))
-				node = new ASTNode(ASTNode::A_INTLIT, PT_S8, token.intValue());
-			else if ((token.intValue() >= 0) && (token.intValue() <= 65535))
-				node = new ASTNode(ASTNode::A_INTLIT, PT_U16, token.intValue());
+			{
+			int v = token.intValue();
+			
+			// the value < 0, enforce a signed type
+			if (v < 0)
+				{
+				if (v > -129)
+					node = new ASTNode(ASTNode::A_INTLIT, PT_S8, v);
+				else
+					node = new ASTNode(ASTNode::A_INTLIT, PT_S32, v);
+				}
 			else
-				node = new ASTNode(ASTNode::A_INTLIT, PT_S32, token.intValue());
+				{
+				if (v < 256)
+					node = new ASTNode(ASTNode::A_INTLIT, PT_U8, v);
+				else if (v < 65536)
+					node = new ASTNode(ASTNode::A_INTLIT, PT_U16, v);
+				else
+					node = new ASTNode(ASTNode::A_INTLIT, PT_U32, v);
+				}
 			break;
-
+			}
+			
 		case Token::T_STRLIT:
 			// For a STRLIT token, generate the assembly for it.
 			// Then make a leaf AST node for it. id is the string's label.
@@ -212,6 +225,9 @@ ASTNode * Expression::binary(Emitter& emitter,
 			|* Ensure the right type matches the left
 			\*****************************************************************/
 			right = Types::modify(right, left->type(), 0);
+			if ((right == nullptr) || (left == nullptr))
+				FATAL(ERR_RUNTIME,
+							"Internal compiler error at line %d", line);
 			
 			if (left == nullptr)
 				FATAL(ERR_PARSE,
@@ -224,7 +240,7 @@ ASTNode * Expression::binary(Emitter& emitter,
 			ASTNode *lTemp = left;
 			left = right;
 			right = lTemp;
-
+				
 			if (left == nullptr)
 				FATAL(ERR_RUNTIME,
 							"Internal compiler error at line %d", line);

@@ -1,5 +1,0 @@
-s32 hotel;
-hotel= 900;
-s32 peacocks;
-peacocks= 100;
-print peacocks * hotel;

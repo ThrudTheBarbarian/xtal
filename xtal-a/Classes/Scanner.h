@@ -74,6 +74,7 @@ class Scanner
         |* Infer the types and sizes of the registers being used
         \*********************************************************************/
 		IntMap 		_regSize;			// Map of byte-count to register name
+		IntMap 		_regSign;			// Map of signed to register name
 		BoolMap		_regSigned;			// true == signed arithmetic
 		
         /*********************************************************************\

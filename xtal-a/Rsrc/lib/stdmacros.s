@@ -115,6 +115,8 @@ r61	= $fd
 r62	= $fe
 r63	= $ff
 
+sp	= $8d		; also $8e
+fp	= $8f		; also $90
 
 ;/*************************************************************************\
 ;|* Type: Basic operation
@@ -1085,6 +1087,25 @@ dec0:
 ;|*    %2 : address of source operand #2
 ;|*    %3 : address of destination operand
 ;\*************************************************************************/
+.macro _add8
+		clc
+        lda %1
+       	adc %2
+       	sta %3
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* add the 8-bit unsigned value at location %1 to the 8-bit unsigned value
+;|* at %2, storing the result in %3
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : address of source operand #1
+;|*    %2 : address of source operand #2
+;|*    %3 : address of destination operand
+;\*************************************************************************/
 .macro _add8u
 	.if %1 != %2
 		clc
@@ -1157,6 +1178,25 @@ dec0:
 	.endif
 .endmacro
 
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* subtract the 8-bit signed value at location %1 from the 8-bit signed
+;|* value at %2, storing the result in %3
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : address of source operand #1
+;|*    %2 : address of source operand #2
+;|*    %3 : address of destination operand
+;\*************************************************************************/
+.macro _sub8
+		sec
+        lda %1
+       	sbc %2
+       	sta %3
+.endmacro
 
 ;/*************************************************************************\
 ;|* Type: Arithmetic operation
@@ -1378,6 +1418,44 @@ dec0:
 		_asl8 %2, %2
 		dex
 		bne loop
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Multiply two 8-bit possibly-signed numbers. Do this by checking the
+;|* sign of the high bytes, and if they differ, then remember to convert
+;|* the result back to negative. Then convert both operands to +ve if
+;|* necessary, and run
+;|*
+;|* Clobbers: A, X
+;|* Arguments:
+;|*    %1 : address of source operand #1
+;|*    %2 : address of source operand #2
+;|*    %3 : address of destination operand.
+;\*************************************************************************/
+.macro _mul8
+		lda %1				; compute the EOR of high-bits of both numbers
+		eor %2
+		php					; and store for later
+		
+		lda %1				; is num1 negative ?
+		bpl check2			; +ve, so nothing to do here
+		_neg8 %1,%1			; convert to +ve
+	
+	check2:
+		lda %2				; is num2 negative
+		bpl doMul8			; +ve, so nothing to do here
+		_neg8 %2,%2
+	
+	doMul8:
+		_mul8u %1, %2, %3	; Do an unsigned multiply
+	
+		plp					; Pull the saved state
+		bpl done			; don't need to convert back to -ve
+		_neg8 %3, %3
+	
+	done:
 .endmacro
 
 ;/*************************************************************************\

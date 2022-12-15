@@ -63,6 +63,7 @@ void Scanner::reset(int to)
 	_listing		= "";
 	
 	_regSize.clear();
+	_regSign.clear();
 	_regSigned.clear();
 	
 	ContextMgr::sharedInstance()->reset();
@@ -804,20 +805,58 @@ int Scanner::_handleCall(Token::TokenInfo info,
 					break;
 					
 				case 2:
-					snprintf(buf, 1024, "\t_xfer16 %s,f%d\n"
+					if (_regSign[args[i]])
+						snprintf(buf, 1024,
+										"\t.push context block call_%s 1\n"
+										"\t_xfer16 %s,f%d\n"
+										"\tlda #0\n"
+										"\tbit f%d+1\n"
+										"\tbpl zeroExtend\n"
+										"\tlda #$ff\n"
+										"zeroExtend:\n"
+										"\tsta f%d+2\n"
+										"\tsta f%d+3\n"
+										"\t.pop context\n",
+										randomString(6).c_str(),
+										args[i].c_str(), i-1,
+										i-1,
+										i-1, i-1);
+					else
+						snprintf(buf, 1024,
+										"\t_xfer16 %s,f%d\n"
 										"\tlda #0\n"
 										"\tsta f%d+2\n"
 										"\tsta f%d+3\n",
-										args[i].c_str(), i-1, i-1, i-1);
+										args[i].c_str(), i-1,
+										i-1, i-1);
 					break;
 				case 1:
-					snprintf(buf, 1024, "lda %s\n"
-										"\tsta f%d\n"
+					if (_regSign[args[i]])
+						snprintf(buf, 1024,
+										"\t.push context block call_%s 1\n"
+										"\t_xfer8 %s,f%d\n"
+										"\tlda #0\n"
+										"\tbit f%d\n"
+										"\tbpl zeroExtend\n"
+										"\tlda #$ff\n"
+										"zeroExtend:\n"
+										"\tsta f%d+1\n"
+										"\tsta f%d+2\n"
+										"\tsta f%d+3\n"
+										"\t.pop context\n",
+										randomString(6).c_str(),
+										args[i].c_str(), i-1,
+										i-1,
+										i-1,i-1, i-1);
+					else
+						snprintf(buf, 1024,
+										"\t_xfer8 %s,f%d\n"
 										"\tlda #0\n"
 										"\tsta f%d+1\n"
 										"\tsta f%d+2\n"
 										"\tsta f%d+3\n",
-										args[i].c_str(), i-1, i-1, i-1, i-1);
+										args[i].c_str(), i-1,
+										i-1, i-1, i-1);
 					break;
 				}
 			assembly.push_back(buf);
@@ -1639,12 +1678,18 @@ int Scanner::_evaluateLabel(String s)
 void Scanner::_setRegister(String args)
 	{
 	if (args == "reset")
+		{
 		_regSize.clear();
+		_regSign.clear();
+		}
 	else
 		{
 		StringList words = split(args, ' ');
-		if (words.size() == 2)
+		if (words.size() == 3)
+			{
 			_regSize[words[0]] = std::stoi(words[1]);
+			_regSign[words[0]] = (lcase(words[2]) == "u") ? 0 : 1;
+			}
 		else
 			FATAL(ERR_PARSE, "Cannot parse .reg %s", args.c_str());
 		}

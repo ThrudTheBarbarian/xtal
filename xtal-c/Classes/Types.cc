@@ -92,9 +92,11 @@ ASTNode * Types::modify(ASTNode *tree, int rType, int op)
 		int lSize = typeSize(lType);
 		int rSize = typeSize(rType);
 		
-		// Is the tree's size too big ?
-		if (lSize > rSize)
-			return nullptr;
+		// Is the tree's size too big ? Just ignore for now. We
+		// may want to put an ASTNode A_SHRINK in there which
+		// issues a warning ? 
+		if (lSize >= rSize)
+			return tree;
 		
 		// Widen to the right
 		if (rSize > lSize)
