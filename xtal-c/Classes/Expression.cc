@@ -494,8 +494,31 @@ ASTNode * Expression::_prefix(Emitter& emitter,
 			// make the child an rvalue. Because chars are unsigned,
 			// also widen this to int so that it's signed
 			tree->setIsRValue(true);
-			tree = Types::modify(tree, PT_S32, 0);
-			tree = new ASTNode(ASTNode::A_NEGATE, tree->type(), tree, 0);
+			if (tree->op() == ASTNode::A_INTLIT)
+				{
+				int64_t val = tree->value().intValue;
+				ASTNode::Value v;
+				v.intValue = - val;
+				tree->setValue(v);
+				
+				switch (tree->type())
+					{
+					case PT_U8:
+						if (val > 127)
+							tree = Types::modify(tree, PT_S16, 0);
+						break;
+					
+					case PT_U16:
+					case PT_U32:
+						if (val > 32767)
+							tree = Types::modify(tree, PT_S32, 0);
+					}
+				}
+			else
+				{
+				//tree = Types::modify(tree, PT_S32, 0);
+				tree = new ASTNode(ASTNode::A_NEGATE, tree->type(), tree, 0);
+				}
 			break;
     
 		case Token::T_INVERT:

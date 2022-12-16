@@ -39,7 +39,7 @@ void main()
 	else
 		[ print 1; ]
 	
-	c = b * e;
+	c = e * b;
 
 	if (c != -10)
 		[ print 0; ]

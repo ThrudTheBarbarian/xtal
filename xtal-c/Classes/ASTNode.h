@@ -83,9 +83,9 @@ class ASTNode
 				
 	typedef union
 		{
-		int		intValue;		// For A_INTLIT, Value of the integer
-		int 	identifier;		// For A_IDENT, Symbol slot number
-		int		size;			// For A_SCALE, how much to scale by
+		int64_t		intValue;		// For A_INTLIT, Value of the integer
+		int64_t 	identifier;		// For A_IDENT, Symbol slot number
+		int64_t		size;			// For A_SCALE, how much to scale by
 		} Value;
 	
 	/*************************************************************************\
