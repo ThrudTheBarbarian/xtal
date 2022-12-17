@@ -490,11 +490,8 @@ ASTNode * Expression::_prefix(Emitter& emitter,
 			scanner.scan(token, line);
 			tree = _prefix(emitter, scanner, token, line);
 
-// FIXMW: Modify the child node if it is an A_IDENT node
 
-			// Prepend a A_NEGATE operation to the tree and
-			// make the child an rvalue. Because chars are unsigned,
-			// also widen this to int so that it's signed
+			// Modify the child node if it is an A_INTLIT node
 			tree->setIsRValue(true);
 			if (tree->op() == ASTNode::A_INTLIT)
 				{
@@ -532,7 +529,9 @@ ASTNode * Expression::_prefix(Emitter& emitter,
 				}
 			else
 				{
-				//tree = Types::modify(tree, PT_S32, 0);
+				// Prepend a A_NEGATE operation to the tree and
+				// make the child an rvalue.
+				// Don't do: tree = Types::modify(tree, PT_S32, 0);
 				tree = new ASTNode(ASTNode::A_NEGATE, tree->type(), tree, 0);
 				}
 			break;

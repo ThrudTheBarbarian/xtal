@@ -397,6 +397,8 @@ int Scanner::_keyword(void)
 				return Token::T_U8;
 			else if (lc == "u16")
 				return Token::T_U16;
+			else if (lc == "u32")
+				return Token::T_U32;
 			break;
 		
 		case 'v':

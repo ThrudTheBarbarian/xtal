@@ -9,6 +9,7 @@ void main()
 	u16 f;
 	s8 g;
 	s16 h;
+	u32 i;
 	
 	
 	
@@ -18,6 +19,7 @@ void main()
 	e = -2;
 	g = -6;
 	h = -4000;
+	i = 100000;
 	
 	c = a - b;
 
@@ -113,6 +115,18 @@ void main()
 
 	c =  h - h;
 	if (c != 0 )
+		[ print c; ]
+	else
+		[ print 1; ]
+
+	c =  i - i;
+	if (c != 0 )
+		[ print c; ]
+	else
+		[ print 1; ]
+
+	c =  i - g;
+	if (c != 100006 )
 		[ print c; ]
 	else
 		[ print 1; ]

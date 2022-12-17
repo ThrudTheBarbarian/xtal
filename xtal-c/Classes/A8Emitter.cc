@@ -359,6 +359,7 @@ Register A8Emitter::_cgLoadInt(int val, int primitiveType)
 				: ((val >= 0) && (val <= 255))   ? Register::UNSIGNED_1BYTE
 				: ((val >= -32768) && (val <= 32767)) ? Register::SIGNED_2BYTE
 				: ((val >= 0) && (val <= 65535)) ? Register::UNSIGNED_2BYTE
+				: (val > 2147483647) ? Register::UNSIGNED_4BYTE
 				: Register::SIGNED_4BYTE;
 	Register r	= _regs->allocate(type);
 	

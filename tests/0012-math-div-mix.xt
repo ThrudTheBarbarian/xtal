@@ -6,12 +6,14 @@ void main()
 	u16 d;
 	s8 e;
 	s16 f;
+	u32 g;
 	
 	a = 1000;
 	b = 5;
 	d = 500;
 	e = 9;
 	f = -4000;
+	g = 200000;
 	
 	c = a / b;
 
@@ -89,4 +91,16 @@ void main()
 	else
 		[ print 1; ]
 
+
+	c = g / d;
+	if (c != 400)
+		[ print c; ]
+	else
+		[ print 1; ]
+
+	c = g / a;
+	if (c != 200)
+		[ print c; ]
+	else
+		[ print 1; ]
 	]

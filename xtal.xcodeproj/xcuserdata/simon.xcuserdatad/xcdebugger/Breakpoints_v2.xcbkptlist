@@ -190,25 +190,9 @@
             filePath = "xtal-c/Classes/A8Emitter.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "612"
-            endingLineNumber = "612"
+            startingLineNumber = "613"
+            endingLineNumber = "613"
             landmarkName = "A8Emitter::_cgWiden(reg, oldWidth, newWidth)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "B04C5DED-643F-4EB8-9F92-9EA4EC0EFEFE"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "xtal-c/Classes/Expression.cc"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "536"
-            endingLineNumber = "536"
-            landmarkName = "Expression::_prefix(emitter, scanner, token, line)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -222,8 +206,8 @@
             filePath = "xtal-c/Classes/A8Emitter.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "524"
-            endingLineNumber = "524"
+            startingLineNumber = "525"
+            endingLineNumber = "525"
             landmarkName = "A8Emitter::_cgStoreGlobal(r, symbol)"
             landmarkType = "7">
          </BreakpointContent>
@@ -238,41 +222,9 @@
             filePath = "xtal-c/Classes/A8Emitter.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1290"
-            endingLineNumber = "1290"
+            startingLineNumber = "1291"
+            endingLineNumber = "1291"
             landmarkName = "A8Emitter::_cgReturn(r1, funcId)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "540D6345-D992-4B71-9233-ACEDDEF6ED55"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "xtal-c/Classes/Expression.cc"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "520"
-            endingLineNumber = "520"
-            landmarkName = "Expression::_prefix(emitter, scanner, token, line)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "658F903D-00B8-43B6-9FD6-D15564C1CE40"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "xtal-c/Classes/Expression.cc"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "498"
-            endingLineNumber = "498"
-            landmarkName = "Expression::_prefix(emitter, scanner, token, line)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

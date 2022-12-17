@@ -5,11 +5,13 @@ void main()
 	s32 c;
 	u16 d;
 	s16 f;
+	u32 g;
 	
 	a = 1000;
 	b = 5;
 	d = 50000;
 	f = -400;
+	g = 100000;
 	
 	c = a + b;
 
@@ -67,4 +69,27 @@ void main()
 		[ print 0; ]
 	else
 		[ print 1; ]
+	
+	c = a + g;
+
+	if (c != 101000)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	g = c + c;
+
+	if (g != 202000)
+		[ print 0; ]
+	else
+		[ print 1; ]
+
+	
+	c = b + g;
+
+	if (c != 202005)
+		[ print 0; ]
+	else
+		[ print 1; ]
+
 	]

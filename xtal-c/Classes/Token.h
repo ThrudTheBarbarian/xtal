@@ -58,6 +58,7 @@ class Token
 			T_S16,				// signed 16-bit value
 			T_U16,				// unsigned 16-bit value
 			T_S32,				// signed 32-bit value
+			T_U32,				// unsigned 32-bit value
 			
 			// Keywords
 			T_PRINT,			// Print command

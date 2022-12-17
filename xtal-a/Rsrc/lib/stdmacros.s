@@ -1181,6 +1181,34 @@ dec0:
 ;|*    %3 : address of destination operand
 ;\*************************************************************************/
 .macro _add32
+		clc
+        lda %1
+       	adc %2
+       	sta %3
+       	lda %1+1
+       	adc %2+1
+       	sta %3+1
+       	lda %1+2
+       	adc %2+2
+       	sta %3+2
+       	lda %1+3
+       	adc %2+3
+       	sta %3+3
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* add the 32-bit value at location %1 to the 32-bit value at %2, storing
+;|* the result in %3
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : address of source operand #1
+;|*    %2 : address of source operand #2
+;|*    %3 : address of destination operand
+;\*************************************************************************/
+.macro _add32u
 	.if %1 != %2
 		clc
         lda %1
@@ -1323,6 +1351,39 @@ dec0:
        	lda %1+3
        	sbc %2+3
        	sta %3+3
+.endmacro
+
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* subtract the 16-bit value at location %1 to the 16-bit value at %2,
+;|* storing the result in %3
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : address of source operand #1
+;|*    %2 : address of source operand #2
+;|*    %3 : address of destination operand
+;\*************************************************************************/
+.macro _sub32u
+	.if %1 != %2
+		sec
+        lda %1
+       	sbc %2
+       	sta %3
+       	lda %1+1
+       	sbc %2+1
+       	sta %3+1
+       	lda %1+2
+       	sbc %2+2
+       	sta %3+2
+       	lda %1+3
+       	sbc %2+3
+       	sta %3+3
+	.else
+		_clr32 %3
+	.endif
 .endmacro
 
 
@@ -2057,6 +2118,59 @@ sdv6:
 		_neg32 %3,%3
 
 sdv8:
+		clc					; set status = no error
+done:
+
+.endmacro
+
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Divide an unsigned 32-bit value at location %1 by an unsigned 32-bit
+;|* value %2 and store the 32-bit remainder in location %3
+;|* and surface the result in %1
+;|*
+;|* Clobbers: A, X, Y
+;|* Arguments:
+;|*    %1 : location of dividend and final result
+;|*    %2 : location of divisor
+;|*    %3 : location of remainder
+;\*************************************************************************/
+.macro _div32u
+		_clr32 %3			; Clear the accumulator
+		
+		lda %2				; Check for divide-by-zero error
+		ora %2+1
+		ora %2+2
+		ora %2+3
+		bne ok
+		sec					; set error status
+		bcs error
+ok:
+		ldy #$20			; Number of bits to rotate through
+
+sdv_loop:
+		_asl32 %1,%1		; left-shift dividend
+		_rol32 %3,%3		; and rotate into 'accumulator'
+		
+		_sub32 %3,%2,%3		; subtract divisor from accumulator
+		bcs sdv4			; if carry is set, r0 is +ve, skip add-back
+		
+		_add32 %3,%2,%3		; get r0 +ve again by adding back r2
+		clc					; then always branch to next-bit routine
+		bcc sdv5
+
+sdv4:
+		inc %1				; increment the results bit
+		bcs sdv5			; and allow space for a longer bcs for error
+
+error:
+		bcs done
+	
+sdv5:
+		dey					; Go to the next bit
+		bne sdv_loop		; ... for 32 times
 		clc					; set status = no error
 done:
 

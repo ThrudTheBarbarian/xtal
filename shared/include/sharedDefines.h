@@ -40,12 +40,12 @@ enum
 	PT_U32,					// unsigned int, 32 bits
 	
 	PT_VOIDPTR	= 0x102,	// Pointer to void	.. 258
-	PT_U8PTR,				// Pointer to unsigned 8-bit value
 	PT_S8PTR,				// Pointer to signed 8-bit value
-	PT_U16PTR,				// Pointer to unsigned 16-bit value
+	PT_U8PTR,				// Pointer to unsigned 8-bit value
 	PT_S16PTR,				// Pointer to signed 16-bit value
-	PT_U32PTR,				// Pointer to unsigned 32-bit value
+	PT_U16PTR,				// Pointer to unsigned 16-bit value
 	PT_S32PTR,				// Pointer to signed 32-bit value
+	PT_U32PTR,				// Pointer to unsigned 32-bit value
 	
 	PT_MAXVAL				// Last entry
 	};

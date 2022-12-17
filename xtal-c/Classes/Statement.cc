@@ -303,6 +303,7 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 		case Token::T_U16:
 		case Token::T_S16:
 		case Token::T_S32:
+		case Token::T_U32:
 			// Parse the type
 			type = _parseType(token, line);
 			
@@ -355,7 +356,7 @@ ASTNode * Statement::_print(Token& token, int& line)
 	ASTNode *candidate = Types::modify(tree, tree->type(), 0);
 	if (candidate == nullptr)
 		{
-		type = PT_S32;	// int pointer
+		type = PT_S32;	// try an int
 		candidate = Types::modify(tree, type, 0);
 		}
 	if (candidate == nullptr)
@@ -506,6 +507,10 @@ int Statement::_parseType(Token& token, int& line)
 		
 		case Token::T_S32:
 			type = PT_S32;
+			break;
+		
+		case Token::T_U32:
+			type = PT_U32;
 			break;
 		
 		
