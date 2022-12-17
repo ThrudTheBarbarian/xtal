@@ -4,10 +4,12 @@ void main()
 	u8 b;
 	s32 c;
 	u16 d;
+	s16 f;
 	
 	a = 1000;
 	b = 5;
 	d = 50000;
+	f = -400;
 	
 	c = a + b;
 
@@ -41,6 +43,27 @@ void main()
 	c = b + d;
 
 	if (c != 50005)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	c = b + f;
+
+	if (c != -395)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	c = f + -f;
+
+	if (c != 0)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	c = a + f;
+
+	if (c != 600)
 		[ print 0; ]
 	else
 		[ print 1; ]

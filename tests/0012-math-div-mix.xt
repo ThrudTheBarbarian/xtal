@@ -5,11 +5,13 @@ void main()
 	s32 c;
 	u16 d;
 	s8 e;
+	s16 f;
 	
 	a = 1000;
 	b = 5;
 	d = 500;
 	e = 9;
+	f = -4000;
 	
 	c = a / b;
 
@@ -73,4 +75,18 @@ void main()
 		[ print c; ]
 	else
 		[ print 1; ]
+
+	c = f / d;
+	if (c != -8)
+		[ print c; ]
+	else
+		[ print 1; ]
+
+	c = 20000;
+	c = c / f;
+	if (c != -5)
+		[ print c; ]
+	else
+		[ print 1; ]
+
 	]

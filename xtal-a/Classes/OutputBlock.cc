@@ -1,6 +1,6 @@
 //
 //  OutputBlock.cc
-//  as8
+//  xtal-a
 //
 //  Created by Thrud The Barbarian on 10/31/22.
 //

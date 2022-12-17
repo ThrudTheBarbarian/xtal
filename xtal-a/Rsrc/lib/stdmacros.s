@@ -1131,6 +1131,28 @@ dec0:
 ;|*    %2 : address of source operand #2
 ;|*    %3 : address of destination operand
 ;\*************************************************************************/
+.macro _add16
+		clc
+        lda %1
+       	adc %2
+       	sta %3
+       	lda %1+1
+       	adc %2+1
+       	sta %3+1
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* add the 16-bit value at location %1 to the 16-bit value at %2, storing
+;|* the result in %3
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : address of source operand #1
+;|*    %2 : address of source operand #2
+;|*    %3 : address of destination operand
+;\*************************************************************************/
 .macro _add16u
 	.if %1 != %2
 		clc
@@ -1234,7 +1256,8 @@ dec0:
 ;|*    %2 : address of source operand #2
 ;|*    %3 : address of destination operand
 ;\*************************************************************************/
-.macro _sub16u
+.macro _sub16
+	.if %1 != %2
 		sec
         lda %1
        	sbc %2
@@ -1242,6 +1265,35 @@ dec0:
        	lda %1+1
        	sbc %2+1
        	sta %3+1
+	.else
+		_clr16 %3
+	.endif
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* subtract the 16-bit value at location %1 to the 16-bit value at %2,
+;|* storing the result in %3
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : address of source operand #1
+;|*    %2 : address of source operand #2
+;|*    %3 : address of destination operand
+;\*************************************************************************/
+.macro _sub16u
+	.if %1 != %2
+		sec
+        lda %1
+       	sbc %2
+       	sta %3
+       	lda %1+1
+       	sbc %2+1
+       	sta %3+1
+	.else
+		_clr16 %3
+	.endif
 .endmacro
 
 
@@ -1650,64 +1702,6 @@ dec0:
 ;/*************************************************************************\
 ;|* Type: Arithmetic operation
 ;|*
-;|* Divide a 16-bit value at location %1 by a 16-bit value %2 and
-;|* store 16-bit result in location %3 and the 16-bit remainder in %4
-;|*
-;|* Clobbers: A, X
-;|* Arguments:
-;|*    %1 : location of dividend
-;|*    %2 : location of divisor
-;|*    %3 : location of quotient
-;|*	   %4 : location of remainder
-;\*************************************************************************/
-.macro _div16
-		_clr16 %4
-		ldx #16
-	loop:
-		_asl16 %1, %1
-		_rol16 %4, %4
-		_sub16u %4, %2, %4
-		bcs next
-		_add16u %4, %2, %4
-	next:
-		_rol16 %3, %3
-		dex
-		bpl loop
-.endmacro
-
-
-;/*************************************************************************\
-;|* Type: Arithmetic operation
-;|*
-;|* Divide a 16-bit value at location %1 by a 16-bit value %2 and
-;|* store 16-bit result in location %3 and the 16-bit remainder in %4
-;|*
-;|* Clobbers: A, X
-;|* Arguments:
-;|*    %1 : location of dividend
-;|*    %2 : location of divisor
-;|*    %3 : location of quotient
-;|*	   %4 : location of remainder
-;\*************************************************************************/
-.macro _div16x
-		_clr16 %4
-		ldx #32
-	loop:
-		_asl32 %1, %1
-		_rol16 %4, %4
-		_sub16u %4, %2, %4
-		bcs next
-		_add16u %4, %2, %4
-	next:
-		_rol16 %3, %3
-		dex
-		bpl loop
-.endmacro
-
-
-;/*************************************************************************\
-;|* Type: Arithmetic operation
-;|*
 ;|* Divide a signed 8-bit value at location %1 by a signed 8-bit value %2
 ;|* and store the 8-bit remainder in location %3, surface the result in %1
 ;|*
@@ -1828,6 +1822,114 @@ sdv5:
 		clc					; set status = no error
 done:
 
+.endmacro
+
+
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Divide a signed 16-bit value at location %1 by a signed 16-bit value %2
+;|* and store the 16-bit remainder in location %3, surface the result in %1
+;|*
+;|* Clobbers: A, X, Y
+;|* Arguments:
+;|*    %1 : location of dividend and final result
+;|*    %2 : location of divisor
+;|*    %3 : location of remainder
+;\*************************************************************************/
+.macro _div16
+		lda %2+1			; Get the upper byte of the divisor
+		pha					; and store in the scratch registor
+		eor %1+1			; EOR with sign of dividend
+		pha					; and store for later
+
+		lda %1+1			; Check if the dividend needs to be negated
+		bpl skp1			; If it's +ve, skip the negation
+		_neg16 %1,%1		; otherwise negate
+
+skp1:
+		lda %2+1			; Check if the divisor needs to be negated
+		bpl skp2			; If it's +ve, skip the negation
+		_neg16 %2,%2
+
+skp2:
+		_clr16 %3			; Clear the accumulator
+		
+		lda %2				; Check for divide-by-zero error
+		ora %2+1
+		bne ok
+		pla
+		pla
+		sec					; set error status
+		bcs error
+ok:
+		ldy #$10			; Number of bits to rotate through
+
+sdv_loop:
+		_asl16 %1,%1		; left-shift dividend
+		_rol16 %3,%3		; and rotate into 'accumulator'
+		
+		_sub16 %3,%2,%3		; subtract divisor from accumulator
+		bcs sdv4			; if carry is set, r0 is +ve, skip add-back
+		
+		_add16 %3,%2,%3		; get r0 +ve again by adding back r2
+		clc					; then always branch to next-bit routine
+		bcc sdv5
+
+sdv4:
+		inc %1				; increment the results bit
+		bcs sdv5			; and allow space for a longer bcs for error
+
+error:
+		bcs done
+	
+sdv5:
+		dey					; Go to the next bit
+		bne sdv_loop		; ... for 16 times
+
+		pla					; check remainder sign,
+		bpl sdv6			; skip negation if +ve
+		_neg16 %1,%1
+		
+sdv6:
+		pla					; check quotient sign
+		bpl sdv8			; skip negation if +ve
+		_neg16 %3,%3
+
+sdv8:
+		clc					; set status = no error
+done:
+
+.endmacro
+
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Divide a 16-bit value at location %1 by a 16-bit value %2 and
+;|* store 16-bit result in location %3 and the 16-bit remainder in %4
+;|*
+;|* Clobbers: A, X
+;|* Arguments:
+;|*    %1 : location of dividend
+;|*    %2 : location of divisor
+;|*    %3 : location of quotient
+;|*	   %4 : location of remainder
+;\*************************************************************************/
+.macro _div16x
+		_clr16 %4
+		ldx #32
+	loop:
+		_asl32 %1, %1
+		_rol16 %4, %4
+		_sub16u %4, %2, %4
+		bcs next
+		_add16u %4, %2, %4
+	next:
+		_rol16 %3, %3
+		dex
+		bpl loop
 .endmacro
 
 ;/*************************************************************************\

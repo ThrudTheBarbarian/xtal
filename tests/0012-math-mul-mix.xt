@@ -5,11 +5,13 @@ void main()
 	s32 c;
 	u16 d;
 	s8 e;
+	s16 f;
 	
 	a = 1000;
 	b = 5;
 	d = 2000;
 	e = -2;
+	f = -4000;
 	
 	c = a * b;
 
@@ -53,4 +55,30 @@ void main()
 		[ print c; ]
 	else
 		[ print 1; ]
+
+	
+	c = e * f;
+
+	if (c != 8000)
+		[ print 0; ]
+	else
+		[ print 1; ]
+
+	
+	f = -40;
+	c = f * f;
+
+	if (c != 1600)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	f = -4000;
+	c = b * f;
+
+	if (c != -20000)
+		[ print 0; ]
+	else
+		[ print 1; ]
+
 	]

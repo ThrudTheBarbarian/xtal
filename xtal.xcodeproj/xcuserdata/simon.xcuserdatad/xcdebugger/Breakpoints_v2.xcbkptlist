@@ -126,8 +126,8 @@
             filePath = "xtal-c/Classes/Expression.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "173"
-            endingLineNumber = "173"
+            startingLineNumber = "175"
+            endingLineNumber = "175"
             landmarkName = "Expression::binary(emitter, scanner, token, line, previousPrecedence)"
             landmarkType = "7">
          </BreakpointContent>
@@ -142,8 +142,8 @@
             filePath = "xtal-c/Classes/Expression.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "245"
-            endingLineNumber = "245"
+            startingLineNumber = "247"
+            endingLineNumber = "247"
             landmarkName = "Expression::binary(emitter, scanner, token, line, previousPrecedence)"
             landmarkType = "7">
          </BreakpointContent>
@@ -158,8 +158,8 @@
             filePath = "xtal-c/Classes/Expression.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "229"
-            endingLineNumber = "229"
+            startingLineNumber = "231"
+            endingLineNumber = "231"
             landmarkName = "Expression::binary(emitter, scanner, token, line, previousPrecedence)"
             landmarkType = "7">
          </BreakpointContent>
@@ -190,8 +190,8 @@
             filePath = "xtal-c/Classes/A8Emitter.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "611"
-            endingLineNumber = "611"
+            startingLineNumber = "612"
+            endingLineNumber = "612"
             landmarkName = "A8Emitter::_cgWiden(reg, oldWidth, newWidth)"
             landmarkType = "7">
          </BreakpointContent>
@@ -206,8 +206,8 @@
             filePath = "xtal-c/Classes/Expression.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "534"
-            endingLineNumber = "534"
+            startingLineNumber = "536"
+            endingLineNumber = "536"
             landmarkName = "Expression::_prefix(emitter, scanner, token, line)"
             landmarkType = "7">
          </BreakpointContent>
@@ -222,8 +222,8 @@
             filePath = "xtal-c/Classes/A8Emitter.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "523"
-            endingLineNumber = "523"
+            startingLineNumber = "524"
+            endingLineNumber = "524"
             landmarkName = "A8Emitter::_cgStoreGlobal(r, symbol)"
             landmarkType = "7">
          </BreakpointContent>
@@ -238,8 +238,8 @@
             filePath = "xtal-c/Classes/A8Emitter.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1289"
-            endingLineNumber = "1289"
+            startingLineNumber = "1290"
+            endingLineNumber = "1290"
             landmarkName = "A8Emitter::_cgReturn(r1, funcId)"
             landmarkType = "7">
          </BreakpointContent>
@@ -254,8 +254,8 @@
             filePath = "xtal-c/Classes/Expression.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "518"
-            endingLineNumber = "518"
+            startingLineNumber = "520"
+            endingLineNumber = "520"
             landmarkName = "Expression::_prefix(emitter, scanner, token, line)"
             landmarkType = "7">
          </BreakpointContent>
@@ -270,8 +270,8 @@
             filePath = "xtal-c/Classes/Expression.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "496"
-            endingLineNumber = "496"
+            startingLineNumber = "498"
+            endingLineNumber = "498"
             landmarkName = "Expression::_prefix(emitter, scanner, token, line)"
             landmarkType = "7">
          </BreakpointContent>
@@ -302,8 +302,8 @@
             filePath = "xtal-c/Classes/Expression.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "57"
-            endingLineNumber = "57"
+            startingLineNumber = "59"
+            endingLineNumber = "59"
             landmarkName = "Expression::primary(emitter, scanner, token, line)"
             landmarkType = "7">
          </BreakpointContent>

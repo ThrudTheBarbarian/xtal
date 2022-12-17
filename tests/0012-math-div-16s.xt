@@ -1,0 +1,37 @@
+
+void main()
+	[
+	s16 a;
+	s16 b;
+	s16 c;
+	
+	a = 20;
+	b = 10;
+	c = a / b;
+
+	if (c != 2)
+		[ print 0; ]
+	else
+		[ print 1; ]
+	
+	a = -2000;
+	b = 2000;
+	c = a / b;
+
+	if (c != -1)
+		[ print c; ]
+	else
+		[ print 1; ]
+	
+	
+	a = -1600;
+	b = -1700;
+	c = a / b;
+
+	if (c != 0)
+		[ print c; ]
+	else
+		[ print 1; ]
+	]
+	
+

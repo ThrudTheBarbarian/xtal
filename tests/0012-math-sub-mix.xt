@@ -8,6 +8,8 @@ void main()
 	s8 e;
 	u16 f;
 	s8 g;
+	s16 h;
+	
 	
 	
 	a = 1000;
@@ -15,6 +17,7 @@ void main()
 	d = 50000;
 	e = -2;
 	g = -6;
+	h = -4000;
 	
 	c = a - b;
 
@@ -93,4 +96,25 @@ void main()
 		[ print c; ]
 	else
 		[ print 1; ]
+
+	c =  a - h;
+	if (c != 5000 )
+		[ print c; ]
+	else
+		[ print 1; ]
+
+	
+	f = b-h;
+	if (f != 4005 )
+		[ print f; ]
+	else
+		[ print 1; ]
+
+
+	c =  h - h;
+	if (c != 0 )
+		[ print c; ]
+	else
+		[ print 1; ]
+
 	]

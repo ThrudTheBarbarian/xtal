@@ -357,6 +357,7 @@ Register A8Emitter::_cgLoadInt(int val, int primitiveType)
 	
 	REG type 	= ((val >= -128) && (val <= 127))   ? Register::SIGNED_1BYTE
 				: ((val >= 0) && (val <= 255))   ? Register::UNSIGNED_1BYTE
+				: ((val >= -32768) && (val <= 32767)) ? Register::SIGNED_2BYTE
 				: ((val >= 0) && (val <= 65535)) ? Register::UNSIGNED_2BYTE
 				: Register::SIGNED_4BYTE;
 	Register r	= _regs->allocate(type);
@@ -1349,7 +1350,7 @@ Register A8Emitter::_cgStoreDeref(Register& r1, Register& r2, int type)
 		{
 		case PT_S8:
 		case PT_U8:
-			fprintf(_ofp, "\tlda $%s\n"
+			fprintf(_ofp, "\tlda %s\n"
 						  "\tldy #0\n"
 						  "\tsta (%s),y\n",
 						  name1, name2);
@@ -1357,7 +1358,7 @@ Register A8Emitter::_cgStoreDeref(Register& r1, Register& r2, int type)
 			
 		case PT_S16:
 		case PT_U16:
-			fprintf(_ofp, "\tlda $%s\n"
+			fprintf(_ofp, "\tlda %s\n"
 						  "\tldy #0\n"
 						  "\tsta (%s),y\n"
 						  "\tiny\n"
@@ -1367,7 +1368,7 @@ Register A8Emitter::_cgStoreDeref(Register& r1, Register& r2, int type)
 			
 		case PT_S32:
 		case PT_U32:
-			fprintf(_ofp, "\tlda $%s\n"
+			fprintf(_ofp, "\tlda %s\n"
 						  "\tldy #0\n"
 						  "\tsta (%s),y\n"
 						  "\tiny\n"

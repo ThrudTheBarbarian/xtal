@@ -1,6 +1,6 @@
 //
 //  Macro.h
-//  as8
+//  xtal-a
 //
 //  Created by Thrud The Barbarian on 11/6/22.
 //

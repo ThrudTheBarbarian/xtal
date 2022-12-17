@@ -301,6 +301,7 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 		case Token::T_U8:
 		case Token::T_S8:
 		case Token::T_U16:
+		case Token::T_S16:
 		case Token::T_S32:
 			// Parse the type
 			type = _parseType(token, line);
@@ -487,21 +488,26 @@ int Statement::_parseType(Token& token, int& line)
 	
 	switch (token.token())
 		{
-		case Token::T_S32:
-			type = PT_S32;
-			break;
-		
 		case Token::T_U8:
 			type = PT_U8;
-			break;
-		
-		case Token::T_U16:
-			type = PT_U16;
 			break;
 		
 		case Token::T_S8:
 			type = PT_S8;
 			break;
+
+		case Token::T_U16:
+			type = PT_U16;
+			break;
+		
+		case Token::T_S16:
+			type = PT_S16;
+			break;
+		
+		case Token::T_S32:
+			type = PT_S32;
+			break;
+		
 		
 		case Token::T_VOID:
 			type = PT_VOID;

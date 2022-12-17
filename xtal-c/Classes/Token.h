@@ -55,9 +55,10 @@ class Token
 			T_VOID, 			// Void declaration
 			T_S8,				// signed 8-bit value
 			T_U8,				// unsigned 8-bit value
+			T_S16,				// signed 16-bit value
 			T_U16,				// unsigned 16-bit value
 			T_S32,				// signed 32-bit value
-
+			
 			// Keywords
 			T_PRINT,			// Print command
 			T_IF,				// Start an IF block

@@ -46,6 +46,8 @@ ASTNode * Expression::primary(Emitter& emitter,
 				{
 				if (v > -129)
 					node = new ASTNode(ASTNode::A_INTLIT, PT_S8, v);
+				else if (v > -32769)
+					node = new ASTNode(ASTNode::A_INTLIT, PT_S16, v);
 				else
 					node = new ASTNode(ASTNode::A_INTLIT, PT_S32, v);
 				}
@@ -521,7 +523,7 @@ ASTNode * Expression::_prefix(Emitter& emitter,
 							tree->setType(PT_S8);
 							break;
 						case PT_U16:
-							tree->setType(PT_S32);	// FIXME: when we get S16
+							tree->setType(PT_S16);
 							break;
 						case PT_U32:
 							tree->setType(PT_S32);
