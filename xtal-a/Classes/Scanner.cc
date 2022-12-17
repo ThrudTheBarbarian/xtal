@@ -455,7 +455,7 @@ void Scanner::_surfaceRegs(TargetType t1,		// Type of register
 			opInfo 		= Token::parsePrefix("lda");
 			_handle6502(opInfo, arg, tokens, pass);
 			
-			arg			= toHexString(PAGEIDX0+bank1, "$");
+			arg			= toHexString(PAGEIDX0+bank1, "$") +"; in asm:SR2";
 			opInfo 		= Token::parsePrefix("sta");
 			_handle6502(opInfo, arg, tokens, pass);
 			
@@ -481,7 +481,7 @@ void Scanner::_surfaceRegs(TargetType t1,		// Type of register
 			opInfo 		= Token::parsePrefix("lda");
 			_handle6502(opInfo, arg, tokens, pass);
 			
-			arg			= toHexString(PAGEIDX0+bank2, "$");
+			arg			= toHexString(PAGEIDX0+bank2, "$") +"; in asm:SR2";
 			opInfo 		= Token::parsePrefix("sta");
 			_handle6502(opInfo, arg, tokens, pass);
 			
@@ -528,7 +528,7 @@ void Scanner::_surfaceRegs3(TargetType t1,
 			opInfo 		= Token::parsePrefix("lda");
 			_handle6502(opInfo, arg, tokens, pass);
 			
-			arg			= toHexString(PAGEIDX0+bank1, "$");
+			arg			= toHexString(PAGEIDX0+bank1, "$") +"; in asm:SR3";
 			opInfo 		= Token::parsePrefix("sta");
 			_handle6502(opInfo, arg, tokens, pass);
 			
@@ -557,7 +557,7 @@ void Scanner::_surfaceRegs3(TargetType t1,
 			_handle6502(opInfo, arg, tokens, pass);
 			
 			arg			= toHexString(PAGEIDX0+bank2, "$");
-			opInfo 		= Token::parsePrefix("sta");
+			opInfo 		= Token::parsePrefix("sta") +"; in asm:SR3";
 			_handle6502(opInfo, arg, tokens, pass);
 			
 			_pageIndex[bank2] = page2;
@@ -584,7 +584,7 @@ void Scanner::_surfaceRegs3(TargetType t1,
 			opInfo 		= Token::parsePrefix("lda");
 			_handle6502(opInfo, arg, tokens, pass);
 			
-			arg			= toHexString(PAGEIDX0+bank3, "$");
+			arg			= toHexString(PAGEIDX0+bank3, "$") +"; in asm:SR3";
 			opInfo 		= Token::parsePrefix("sta");
 			_handle6502(opInfo, arg, tokens, pass);
 			
@@ -961,11 +961,11 @@ int Scanner::_handleMove(Token::TokenInfo info,
 		int addr2	= base2 + (v2 % 64);
 		for (int i=0; i<extent; i++)
 			{
-			String arg	= toHexString(addr1+i, "$");
+			String arg	= toHexString(addr1+i, "$") + "; in asm:RR";
 			opInfo 		= Token::parsePrefix("lda");
 			_handle6502(opInfo, arg, tokens, pass);
 
-			arg			= toHexString(addr2+i, "$");
+			arg			= toHexString(addr2+i, "$") + "; in asm";
 			opInfo 		= Token::parsePrefix("sta");
 			_handle6502(opInfo, arg, tokens, pass);
 			}
@@ -989,11 +989,11 @@ int Scanner::_handleMove(Token::TokenInfo info,
 		
 		for (int i=0; i<extent; i++)
 			{
-			String arg	= toHexString(addr1+i, "$");
+			String arg	= toHexString(addr1+i, "$") + "; in asm:RM";
 			opInfo 		= Token::parsePrefix("lda");
 			_handle6502(opInfo, arg, tokens, pass);
 
-			arg			= toHexString(addr2+i, "$");
+			arg			= toHexString(addr2+i, "$") + "; in asm";
 			opInfo 		= Token::parsePrefix("sta");
 			_handle6502(opInfo, arg, tokens, pass);
 			}
@@ -1034,13 +1034,13 @@ int Scanner::_handleMove(Token::TokenInfo info,
 			{
 			if (v != b[i].byte)
 				{
-				String arg	= toHexString(b[i].byte, "#$");
+				String arg	= toHexString(b[i].byte, "#$") + "; in asm:IR";
 				opInfo 		= Token::parsePrefix("lda");
 				_handle6502(opInfo, arg, tokens, pass);
 				v = b[i].byte;
 				}
 			
-			String arg	= toHexString(addr2 + b[i].idx, "$");
+			String arg	= toHexString(addr2 + b[i].idx, "$") + "; in asm:IR";
 			opInfo 		= Token::parsePrefix("sta");
 			_handle6502(opInfo, arg, tokens, pass);
 			}
@@ -1064,11 +1064,11 @@ int Scanner::_handleMove(Token::TokenInfo info,
 		
 		for (int i=0; i<extent; i++)
 			{
-			String arg	= toHexString(addr1+i, "$");
+			String arg	= toHexString(addr1+i, "$") + "; in asm:MR";
 			opInfo 		= Token::parsePrefix("lda");
 			_handle6502(opInfo, arg, tokens, pass);
 
-			arg			= toHexString(addr2+i, "$");
+			arg			= toHexString(addr2+i, "$") + "; in asm";
 			opInfo 		= Token::parsePrefix("sta");
 			_handle6502(opInfo, arg, tokens, pass);
 			}
@@ -1087,11 +1087,11 @@ int Scanner::_handleMove(Token::TokenInfo info,
 		
 		for (int i=0; i<extent; i++)
 			{
-			String arg	= toHexString(addr1+i, "$");
+			String arg	= toHexString(addr1+i, "$") + "; in asm:AA";
 			opInfo 		= Token::parsePrefix("lda");
 			_handle6502(opInfo, arg, tokens, pass);
 
-			arg			= toHexString(addr2+i, "$");
+			arg			= toHexString(addr2+i, "$") + "; in asm";
 			opInfo 		= Token::parsePrefix("sta");
 			_handle6502(opInfo, arg, tokens, pass);
 			}

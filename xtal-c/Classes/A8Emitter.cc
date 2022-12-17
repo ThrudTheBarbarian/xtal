@@ -107,12 +107,12 @@ Register A8Emitter::emit(ASTNode *node,
 				
 		case ASTNode::A_INTLIT:
 			{
-			return _cgLoadInt(node->value().intValue);
+			return _cgLoadInt((int)node->value().intValue);
 			}
 				
 		case ASTNode::A_STRLIT:
 			{
-			return _cgLoadGlobalStr(node->value().intValue);
+			return _cgLoadGlobalStr((int)node->value().intValue);
 			}
 		case ASTNode::A_IDENT:
 			{

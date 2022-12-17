@@ -500,7 +500,7 @@ ASTNode * Expression::_prefix(Emitter& emitter,
 				ASTNode::Value v;
 				v.intValue = - val;
 				tree->setValue(v);
-				
+									
 				switch (tree->type())
 					{
 					case PT_U8:
@@ -513,6 +513,20 @@ ASTNode * Expression::_prefix(Emitter& emitter,
 						if (val > 32767)
 							tree = Types::modify(tree, PT_S32, 0);
 					}
+					
+				if (v.intValue < 0)
+					switch (tree->type())
+						{
+						case PT_U8:
+							tree->setType(PT_S8);
+							break;
+						case PT_U16:
+							tree->setType(PT_S32);	// FIXME: when we get S16
+							break;
+						case PT_U32:
+							tree->setType(PT_S32);
+							break;
+						}
 				}
 			else
 				{

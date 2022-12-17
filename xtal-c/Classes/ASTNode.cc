@@ -129,7 +129,7 @@ int ASTNode::interpret(void)
 	int rVal = (_right) ? _right->interpret() : 0;
 	
 	if (_op == A_INTLIT)
-		DBG_DEFAULT("-> int %d", _value.intValue);
+		DBG_DEFAULT("-> int %d", (int) _value.intValue);
 	else
 		DBG_DEFAULT("%d %s %d", lVal, toString().c_str(), rVal);
 	
@@ -153,7 +153,7 @@ int ASTNode::interpret(void)
 			break;
 		
 		case A_INTLIT:
-			result = _value.intValue;
+			result = (int)_value.intValue;
 			break;
 		
 		default:
@@ -282,7 +282,7 @@ void ASTNode::dump(ASTNode *node, int label, int level)
 			printf("A_DIVIDE\n");
 			return;
 		case A_INTLIT:
-			printf("A_INTLIT %d\n", node->value().intValue);
+			printf("A_INTLIT %d\n", (int) node->value().intValue);
 			return;
 		case A_STRLIT:
 			printf("A_STRLIT\n");
