@@ -10,6 +10,8 @@ SIM		= atarisim
 
 all: $(BINS)
 
+redo: clean all
+
 clean:
 	@echo "Cleaning up ..."
 	@$(RM) -f $(BINS) *.out

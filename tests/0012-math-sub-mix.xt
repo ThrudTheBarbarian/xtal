@@ -7,12 +7,14 @@ void main()
 	u16 d;
 	s8 e;
 	u16 f;
+	s8 g;
 	
 	
 	a = 1000;
 	b = 5;
 	d = 50000;
 	e = -2;
+	g = -6;
 	
 	c = a - b;
 
@@ -71,6 +73,24 @@ void main()
 	f = a - e;
 	if (f != 1002 )
 		[ print f; ]
+	else
+		[ print 1; ]
+	
+	f = -g;
+	if (f != 6 )
+		[ print f; ]
+	else
+		[ print 1; ]
+	
+	f = b-g;
+	if (f != 11 )
+		[ print f; ]
+	else
+		[ print 1; ]
+	
+	c =  a - g;
+	if (c != 1006 )
+		[ print c; ]
 	else
 		[ print 1; ]
 	]

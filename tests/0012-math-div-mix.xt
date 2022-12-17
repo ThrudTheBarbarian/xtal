@@ -4,10 +4,12 @@ void main()
 	u8 b;
 	s32 c;
 	u16 d;
+	s8 e;
 	
 	a = 1000;
 	b = 5;
 	d = 500;
+	e = 9;
 	
 	c = a / b;
 
@@ -59,6 +61,16 @@ void main()
 		[ print c; ]
 	else
 		[ print 1; ]
-	
-	
+
+	c = a / e;
+	if (c != 111)
+		[ print c; ]
+	else
+		[ print 1; ]
+
+	c = d / e;
+	if (c != 55)
+		[ print c; ]
+	else
+		[ print 1; ]
 	]
