@@ -556,8 +556,8 @@ void Scanner::_surfaceRegs3(TargetType t1,
 			opInfo 		= Token::parsePrefix("lda");
 			_handle6502(opInfo, arg, tokens, pass);
 			
-			arg			= toHexString(PAGEIDX0+bank2, "$");
-			opInfo 		= Token::parsePrefix("sta") +"; in asm:SR3";
+			arg			= toHexString(PAGEIDX0+bank2, "$")+"; in asm:SR3";
+			opInfo 		= Token::parsePrefix("sta");
 			_handle6502(opInfo, arg, tokens, pass);
 			
 			_pageIndex[bank2] = page2;
