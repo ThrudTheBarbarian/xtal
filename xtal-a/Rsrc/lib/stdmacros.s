@@ -223,8 +223,7 @@ fp	= $8f		; also $90
 ;/*************************************************************************\
 ;|* Type: Basic operation
 ;|*
-;|* Transfer two bytes from one memory location to another. The order in
-;|* which they are moved depends on the relative positions of src and dst.
+;|* Transfer a byte from one memory location to another.
 ;|* If src and dst are the same, then no code is generated
 ;|*
 ;|* Clobbers: A
@@ -302,6 +301,66 @@ fp	= $8f		; also $90
 			sta %2
 		.endif
 	.endif
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Basic operation
+;|*
+;|* Transfer a byte from one memory location pointer to a memory location.
+;|*
+;|* Clobbers: A,Y
+;|* Arguments:
+;|*    %1 : source address
+;|*    %2 : destination address
+;\*************************************************************************/
+.macro _xferp8
+		lda %1
+		ldy #0
+		sta (%2),y
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Basic operation
+;|*
+;|* Transfer 2 bytes from one memory location pointer to a memory location.
+;|*
+;|* Clobbers: A,Y
+;|* Arguments:
+;|*    %1 : source address
+;|*    %2 : destination address
+;\*************************************************************************/
+.macro _xferp16
+		lda %1
+		ldy #0
+		sta (%2),y
+		lda %1+1
+		iny
+		sta (%2),y
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Basic operation
+;|*
+;|* Transfer 2 bytes from one memory location pointer to a memory location.
+;|*
+;|* Clobbers: A,Y
+;|* Arguments:
+;|*    %1 : source address
+;|*    %2 : destination address
+;\*************************************************************************/
+.macro _xferp32
+		lda %1
+		ldy #0
+		sta (%2),y
+		lda %1+1
+		iny
+		sta (%2),y
+		lda %1+2
+		iny
+		sta (%2),y
+		lda %1+3
+		iny
+		sta (%2),y
 .endmacro
 
 
@@ -1117,6 +1176,27 @@ dec0:
        	asl a
        	sta %3
 	.endif
+.endmacro
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* add the 16-bit value at location %1 to the 16-bit value at %2, storing
+;|* the result in %3
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : value of operand #1
+;|*    %2 : address of source operand #2 and destination
+;\*************************************************************************/
+.macro _add16i
+		clc
+        lda #<%1
+       	adc %2
+       	sta %2
+       	lda #>%1
+       	adc %2+1
+       	sta %2+1
 .endmacro
 
 ;/*************************************************************************\

@@ -23,6 +23,15 @@ class Symbol
         \*********************************************************************/
 		static const int TEXTLEN	= 512;
 		
+        /*********************************************************************\
+        |* Types of symbol
+        \*********************************************************************/
+		typedef enum
+			{
+			C_GLOBAL				= 1,
+			C_LOCAL
+			} Storage;
+		
 	/************************************************************************\
     |* Properties
     \************************************************************************/
@@ -31,6 +40,8 @@ class Symbol
 	GETSET(StructuralType, sType, SType);	// Structural type for symbol
 	GETSET(String, endLabel, EndLabel);		// Label at the end of the function
 	GETSET(int, size, Size);				// Number of elements in array
+	GETSET(Storage, sClass, SClass);		// Storage class of the symbol
+	GETSET(int, position, Position);		// For locals, -ve offset from FP
 	
     private:
         

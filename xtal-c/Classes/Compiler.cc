@@ -20,6 +20,7 @@
 #include "Stringutils.h"
 #include "Scanner.h"
 #include "Statement.h"
+#include "SymbolTable.h"
 #include "Token.h"
 
 static int _debugLevel;
@@ -34,6 +35,7 @@ Compiler::Compiler()
 	{
 	_hadError 	= false;
 	_emitter	= new A8Emitter();
+	SYMTAB->setEmitter(_emitter);
 	}
 
 /*****************************************************************************\

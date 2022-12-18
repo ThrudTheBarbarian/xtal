@@ -100,11 +100,11 @@ ASTNode * Statement::_functionDeclaration(Token& token, int& line, int type)
 	{
 	// the text() accessor gives access to the name of the
 	// symbol that has been scanned, and we have the type passed in
-	int symIdx = SYMTAB->add(_scanner->text(), type, ST_FUNCTION, 0);
+	int symIdx = SYMTAB->addGlobal(_scanner->text(), type, ST_FUNCTION, 0);
 	SYMTAB->setFunctionId(symIdx);
 
-	// Tell the emitter to reserve space for our variable
-	//_emitter->genSymbol(symIdx);
+	// Reset the local frame offset within the stack pointer
+	_cgResetLocals();
 
 	// Parentheses
 	leftParen(*_scanner, token, line);
@@ -204,7 +204,7 @@ ASTNode * Statement::globalDeclaration(Token& token, int&line)
 			_emitter->emit(tree, none, 0, "");
 			}
 		else
-			_varDeclaration(token, line, type);
+			_varDeclaration(token, line, type, false);
 		
 		if (token.token() == Token::T_NONE)
 			break;
@@ -311,7 +311,7 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 			_identifier(*_scanner, token, line);
 			
 			// Declare the variable
-			_varDeclaration(token, line, type);
+			_varDeclaration(token, line, type, true);
 			tree = nullptr;
 			break;
 
@@ -541,9 +541,10 @@ int Statement::_parseType(Token& token, int& line)
 |* Scanner::text() now has the identifier's name. If all that us ok, add it
 |* as a known identifier
 \****************************************************************************/
-void Statement::_varDeclaration(Token& token, int& line, int type)
+void Statement::_varDeclaration(Token& token, int& line, int type, bool isLocal)
 	{
 	String name = _scanner->text();
+	int symIdx	= -1;
 	
 	// If the next token is a '['
 	if (token.token() == Token::T_LBRACE)
@@ -556,11 +557,16 @@ void Statement::_varDeclaration(Token& token, int& line, int type)
 			{
 			// Add this as a known array and generate its space in assembly.
 			// We treat the array as a pointer to its elements' type
-			int symIdx = SYMTAB->add(name,
-									 Types::pointerTo(type),
-									 ST_ARRAY,
-									 token.intValue());
-			
+			if (isLocal)
+				symIdx = SYMTAB->addLocal(name,
+										  Types::pointerTo(type),
+										  ST_ARRAY,
+										  token.intValue());
+			else
+				symIdx = SYMTAB->addGlobal(name,
+										  Types::pointerTo(type),
+										  ST_ARRAY,
+										  token.intValue());
 			// Tell the emitter to reserve space for our variable
 			_emitter->genSymbol(symIdx);
 			}
@@ -572,7 +578,11 @@ void Statement::_varDeclaration(Token& token, int& line, int type)
 	else
 		{
 		// Add this as a known scalar and generate its space in assembly
-		int symIdx = SYMTAB->add(name, type, ST_VARIABLE, 1);
+		if (isLocal)
+			symIdx = SYMTAB->addLocal(name, type, ST_VARIABLE, 1);
+		else
+			symIdx = SYMTAB->addGlobal(name, type, ST_VARIABLE, 1);
+
 		_emitter->genSymbol(symIdx);
 		}
 

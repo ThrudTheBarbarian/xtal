@@ -61,7 +61,7 @@ class Statement
         /********************************************************************\
         |* Handle a declaration statement
         \********************************************************************/
-		void _varDeclaration(Token& token, int& line, int type);
+		void _varDeclaration(Token& token, int& line, int type, bool isLocal);
 
         /********************************************************************\
         |* Process a function declaration

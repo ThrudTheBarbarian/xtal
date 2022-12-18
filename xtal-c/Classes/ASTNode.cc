@@ -289,7 +289,7 @@ void ASTNode::dump(ASTNode *node, int label, int level)
 			return;
 		case A_IDENT:
 			{
-			Symbol s = SYMTAB->table()[node->value().identifier];
+			Symbol s = SYMTAB->at(node->value().identifier);
 			if (node->isRValue())
 				printf("A_IDENT rval %s\n", s.name().c_str());
 			else
@@ -298,7 +298,7 @@ void ASTNode::dump(ASTNode *node, int label, int level)
 			}
 		case A_PRINT:
 			{
-			Symbol s = SYMTAB->table()[node->value().identifier];
+			Symbol s = SYMTAB->at(node->value().identifier);
 			printf("A_PRINT %s\n", s.name().c_str());
 			return;
 			}
@@ -307,7 +307,7 @@ void ASTNode::dump(ASTNode *node, int label, int level)
 			return;
 		case A_FUNCTION:
 			{
-			Symbol s = SYMTAB->table()[node->value().identifier];
+			Symbol s = SYMTAB->at(node->value().identifier);
 			printf("A_FUNCTION %s\n", s.name().c_str());
 			return;
 			}
@@ -319,7 +319,7 @@ void ASTNode::dump(ASTNode *node, int label, int level)
 			return;
 		case A_FUNCCALL:
 			{
-			Symbol s = SYMTAB->table()[node->value().identifier];
+			Symbol s = SYMTAB->at(node->value().identifier);
 			printf("A_FUNCCALL %s\n", s.name().c_str());
 			return;
 			}
@@ -331,7 +331,7 @@ void ASTNode::dump(ASTNode *node, int label, int level)
 			return;
 		case A_ADDR:
 			{
-			Symbol s = SYMTAB->table()[node->value().identifier];
+			Symbol s = SYMTAB->at(node->value().identifier);
 			printf("A_ADDR %s\n", s.name().c_str());
 			return;
 			}

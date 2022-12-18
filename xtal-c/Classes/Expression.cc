@@ -118,7 +118,7 @@ ASTNode * Expression::_postfix(Emitter& emitter,
 						scanner.text().c_str(), line);
 	
 	// And that the symbol is actually a variable
-	Symbol s = SYMTAB->table()[identifier];
+	Symbol s = SYMTAB->at(identifier);
 	if (s.sType() != ST_VARIABLE)
 		FATAL(ERR_PARSE, "Symbol %s is not a variable on line %d",
 						scanner.text().c_str(), line);
@@ -340,7 +340,7 @@ ASTNode * Expression::_funcCall(Emitter& emitter,
     |* Build the function-call AST node, store the function's return type as
     |* this node's type. Also record the function's symbol-id
     \*************************************************************************/
-	Symbol s	= SYMTAB->table()[identifier];
+	Symbol s	= SYMTAB->at(identifier);
 	tree 		= new ASTNode(ASTNode::A_FUNCCALL,
 							  s.pType(),
 							  tree,
@@ -367,7 +367,7 @@ ASTNode * Expression::_arrayAccess(Emitter& emitter,
     |* node for it that points at the base
     \*************************************************************************/
 	int identifier 	= SYMTAB->find(scanner.text());
-	Symbol s		= SYMTAB->table()[identifier];
+	Symbol s		= SYMTAB->at(identifier);
 	
 	if ((identifier == SymbolTable::NOT_FOUND) || (s.sType() != ST_ARRAY))
 		FATAL(ERR_ARRAY, "Undeclared array '%s'", scanner.text().c_str());

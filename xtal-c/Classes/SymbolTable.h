@@ -19,6 +19,7 @@
 
 #define SYMTAB					SymbolTable::sharedInstance()
 
+class Emitter;
 class SymbolTable
 	{
     NON_COPYABLE_NOR_MOVEABLE(SymbolTable)
@@ -27,20 +28,36 @@ class SymbolTable
 		/********************************************************************\
 		|* Returned value if we don't find a symbol
 		\********************************************************************/
-		static const int NOT_FOUND = -1;
+		static const int NOT_FOUND 		= -1;
 		
+		/********************************************************************\
+		|* Minimum local-symbol index for easy disambiguation
+		\********************************************************************/
+		static const int LOCAL_OFFSET	= 1000000;
 
 		/********************************************************************\
 		|* Help out the property definition
 		\********************************************************************/
 		typedef std::vector<Symbol> SymTable;
-				
+
+        /*********************************************************************\
+        |* Where to look for symbols
+        \*********************************************************************/
+		enum
+			{
+			SEARCH_GLOBAL				= 1,
+			SEARCH_LOCAL,
+			SEARCH_BOTH
+			};
+
 	/************************************************************************\
     |* Properties
     \************************************************************************/
-    GET(SymTable, table);					// The actual symbol table
+    GET(SymTable, globals);					// The globals symbol table
+    GET(SymTable, locals);					// The locals symbol table
  	GETSET(int, functionId, FunctionId);	// Which function we're in now
-   
+	GETSET(Emitter*, emitter, Emitter);		// Emitter for stack manipulation
+	
     private:
 
         static std::shared_ptr<SymbolTable> _instance;	// Shared instance
@@ -53,9 +70,10 @@ class SymbolTable
     public:
 
         /********************************************************************\
-        |* Find a global variable and return the slot position or NOT_FOUND
+        |* Find a global or local variable and return the slot position or
+        |* NOT_FOUND. A local index will have a value > LOCAL_OFFSET
         \********************************************************************/
-		int find(const String& name);
+		int find(const String& name, int where = SEARCH_BOTH);
 
         /********************************************************************\
         |* Return the symbol for the current function
@@ -63,9 +81,25 @@ class SymbolTable
 		Symbol currentFunction(void);
 
         /********************************************************************\
+        |* Return the symbol for a given index
+        \********************************************************************/
+		Symbol at(int idx);
+
+        /********************************************************************\
         |* Add a global variable, and return the new slot position
         \********************************************************************/
-		int add(const String& name, int pType, StructuralType sType, int size);
+		int addGlobal(const String& name,
+					  int pType,
+					  StructuralType sType,
+					  int size);
+
+        /********************************************************************\
+        |* Add a local variable, and return the new slot position
+        \********************************************************************/
+		int addLocal(const String& name,
+					  int pType,
+					  StructuralType sType,
+					  int size);
 		
         /**********************************************************************\
         |* This method returns the default global instance.          \**********************************************************************/

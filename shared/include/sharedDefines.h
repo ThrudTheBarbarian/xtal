@@ -58,4 +58,6 @@ typedef enum
 	ST_ARRAY
 	} StructuralType;
 
+#define STACK_PTR			"$8D"			// Stack pointer address (+$8E)
+
 #endif /* ! sharedDefines_h */

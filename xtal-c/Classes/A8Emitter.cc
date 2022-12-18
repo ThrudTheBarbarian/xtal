@@ -13,6 +13,7 @@
 #include "ASTNode.h"
 #include "A8Emitter.h"
 #include "RegisterFile.h"
+#include "sharedDefines.h"
 #include "Stringutils.h"
 #include "SymbolTable.h"
 #include "Types.h"
@@ -69,7 +70,7 @@ Register A8Emitter::emit(ASTNode *node,
 		case ASTNode::A_FUNCTION:
 			{
 			int funcId  = node->value().identifier;
-			auto symbol = SYMTAB->table()[funcId];
+			auto symbol = SYMTAB->at(funcId);
 			functionPreamble(symbol.name());
 			emit(node->left(), none, node->op(), "");
 			functionPostamble(funcId);
@@ -118,7 +119,7 @@ Register A8Emitter::emit(ASTNode *node,
 			{
 			if (node->isRValue() || (parentAstOp == ASTNode::A_DEREF))
 				{
-				auto symbol = SYMTAB->table()[node->value().identifier];
+				auto symbol = SYMTAB->at(node->value().identifier);
 				return _cgLoadGlobal(symbol);
 				}
 			else
@@ -130,7 +131,7 @@ Register A8Emitter::emit(ASTNode *node,
 				{
 				case ASTNode::A_IDENT:
 					{
-					auto sym = SYMTAB->table()[node->right()->value().identifier];
+					auto sym = SYMTAB->at(node->right()->value().identifier);
 					return _cgStoreGlobal(left, sym);
 					}
 				case ASTNode::A_DEREF:
@@ -282,7 +283,7 @@ void A8Emitter::genSymbol(int idx)
 	{
 	char buf[1024];
 	
-	Symbol symbol 	= SYMTAB->table()[idx];
+	Symbol symbol 	= SYMTAB->at(idx);
 	String name 	= symbol.name();
 	snprintf(buf, 1024, "@S_%s:\n", name.c_str());
 	append(buf, POSTAMBLE);
@@ -373,7 +374,7 @@ Register A8Emitter::_cgLoadInt(int val, int primitiveType)
 Register A8Emitter::_cgLoadGlobalStr(int val)
 	{
 	Register r	= _regs->allocate(Register::UNSIGNED_2BYTE);
-	Symbol s	= SYMTAB->table()[val];
+	Symbol s	= SYMTAB->at(val);
 	
 	fprintf(_ofp, "\tmove.2 #S_%s %s\n",s.name().c_str(), r.name().c_str());
 	return r;
@@ -1235,7 +1236,7 @@ Register A8Emitter::_cgWhileAST(ASTNode *node)
 \*****************************************************************************/
 Register A8Emitter::_cgCall(Register r1, int identifier)
 	{
-	auto symbol = SYMTAB->table()[identifier];
+	auto symbol = SYMTAB->at(identifier);
 	fprintf(_ofp, "\tcall %s\n", symbol.name().c_str());
 
 	// Get a new out-register
@@ -1272,7 +1273,7 @@ Register A8Emitter::_cgCall(Register r1, int identifier)
 \*****************************************************************************/
 void A8Emitter::_cgReturn(Register r1, int funcId)
 	{
-	Symbol s = SYMTAB->table()[funcId];
+	Symbol s = SYMTAB->at(funcId);
 	
 	switch (s.pType())
 		{
@@ -1307,7 +1308,7 @@ Register A8Emitter::_cgAddress(int identifier)
 	Register r 	= _regs->allocate(Register::UNSIGNED_2BYTE);
 	
 	// Fetch the symbol
-	Symbol s 	= SYMTAB->table()[identifier];
+	Symbol s 	= SYMTAB->at(identifier);
 	
 	fprintf(_ofp, "\tmove.2 #S_%s %s\n",
 					s.name().c_str(),
@@ -1501,13 +1502,192 @@ Register A8Emitter::_cgShr(Register r1, Register r2)
 |* Load a symbol into a register, given an identifier. Return the register
 |* If the operation is pre/post inc/dec also perform that operation
 \*****************************************************************************/
-Register A8Emitter::_cgLoadGlob(int identifier, int op)
+Register A8Emitter::_cgLoadLocal(int identifier, int op)
 	{
-	Symbol s  			= SYMTAB->table()[identifier];
-	Register r 			= _regs->allocateForPrimitiveType(s.pType());
+	Symbol s  			= SYMTAB->at(identifier);
+	
+	/*************************************************************************\
+    |* Get a new register, U16PTR to do stack arithmetic with
+    \*************************************************************************/
+	Register r			= _regs->allocateForPrimitiveType(PT_U16);
+	const char *rTemp	= r.name().c_str();
+	
+	/*************************************************************************\
+    |* Get the address of the symbol relative to the current stack pointer
+    \*************************************************************************/
+	fprintf(_ofp, 	"\t_xfer16 " STACK_PTR ",%s\n"
+					"\t_add16i %d,%s\n"
+					,rTemp,
+					s.position(), rTemp);
+	
+	/*************************************************************************\
+    |* Dereference this pointer into a new register the same size as the symbol
+    \*************************************************************************/
+	Register var 		= _cgDeref(r, s.pType());
+	const char *name	= var.name().c_str();
+	
+	/*************************************************************************\
+    |* If we have no post/pre inc/dec then we're done. Return the register
+    \*************************************************************************/
+	switch (op)
+		{
+		case ASTNode::A_PREINC:
+		case ASTNode::A_PREDEC:
+		case ASTNode::A_POSTINC:
+		case ASTNode::A_POSTDEC:
+			break;
+		
+		default:
+			_regs->free(r);
+			return var;
+			break;
+		}
+		
+	/*************************************************************************\
+    |* Handle the pre/post inc/dec
+    \*************************************************************************/
+	switch (s.pType())
+		{
+		case PT_U8:
+		case PT_S8:
+			if (op == ASTNode::A_PREINC)
+				fprintf(_ofp, "\tinc %s\n"
+							  "\t_xferp8 %s,%s\n"
+							, name, name, rTemp);
+				
+			else if (op == ASTNode::A_PREDEC)
+				fprintf(_ofp, "\tdec %s\n"
+							  "\t_xferp8 %s,%s\n"
+							, name, name, rTemp);
+						
+			else if (op == ASTNode::A_POSTINC)
+				fprintf(_ofp, "\tinc %s\n", name);
+			else if (op == ASTNode::A_POSTDEC)
+				fprintf(_ofp, "\tdec %s\n", name);
+			break;
+		
+		case PT_U16:
+		case PT_S16:
+		case PT_U8PTR:
+		case PT_S8PTR:
+			if (op == ASTNode::A_PREINC)
+				fprintf(_ofp, "\t_inc16 %s\n"
+							  "\t_xferp16 %s,%s\n"
+							, name, name, rTemp);
+			else if (op == ASTNode::A_PREDEC)
+				fprintf(_ofp, "\t_dec16 %s\n"
+							  "\t_xferp16 %s,%s\n"
+							, name, name, rTemp);
+			else if (op == ASTNode::A_POSTINC)
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+			else if (op == ASTNode::A_POSTDEC)
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+			break;
+		
+		case PT_U32:
+		case PT_S32:
+			if (op == ASTNode::A_PREINC)
+				fprintf(_ofp, "\t_inc32 %s\n"
+							  "\t_xferp32 %s,%s\n"
+							, name, name, rTemp);
+			else if (op == ASTNode::A_PREDEC)
+				fprintf(_ofp, "\t_dec32 %s\n"
+							  "\t_xferp32 %s,%s\n"
+							, name, name, rTemp);
+			else if (op == ASTNode::A_POSTINC)
+				fprintf(_ofp, "\t_inc32 %s\n", name);
+			else if (op == ASTNode::A_POSTDEC)
+				fprintf(_ofp, "\t_dec32 %s\n", name);
+			break;
+		
+		case PT_U16PTR:
+		case PT_S16PTR:
+			if (op == ASTNode::A_PREINC)
+				{
+				fprintf(_ofp, "\t_inc16 %s\n"
+							  "\t_inc16 %s\n"
+							  "\t_xferp16 %s,%s\n"
+							, name, name, name, rTemp);
+				}
+			else if (op == ASTNode::A_PREDEC)
+				{
+				fprintf(_ofp, "\t_dec16 %s\n"
+							  "\t_dec16 %s\n"
+							  "\t_xferp16 %s,%s\n"
+							, name, name, name, rTemp);
+				}
+			else if (op == ASTNode::A_POSTINC)
+				{
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				}
+			else if (op == ASTNode::A_POSTDEC)
+				{
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				}
+			break;
+		
+		case PT_S32PTR:
+		case PT_U32PTR:
+			if (op == ASTNode::A_PREINC)
+				{
+				fprintf(_ofp, "\t_inc16 %s\n"
+							  "\t_inc16 %s\n"
+							  "\t_inc16 %s\n"
+							  "\t_inc16 %s\n"
+							  "\t_xferp32 %s,%s\n"
+							  , name, name, name, name
+							  , name, rTemp);
+				}
+			else if (op == ASTNode::A_PREDEC)
+				{
+				fprintf(_ofp, "\t_dec16 %s\n"
+							  "\t_dec16 %s\n"
+							  "\t_dec16 %s\n"
+							  "\t_dec16 %s\n"
+							  "\t_xferp16 %s,%s\n"
+							, name, name, name, name
+							, name, rTemp);
+				}
+			else if (op == ASTNode::A_POSTINC)
+				{
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				fprintf(_ofp, "\t_inc16 %s\n", name);
+				}
+			else if (op == ASTNode::A_POSTDEC)
+				{
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				fprintf(_ofp, "\t_dec16 %s\n", name);
+				}
+			break;
+		
+		default:
+			FATAL(ERR_TYPE, "Unknown type %d in loadGlobal", s.pType());
+		}
 
-	String symName		= "S_"+s.name();
-	const char *name 	= symName.c_str();
+	_regs->free(r);
+	return var;
+	}
+	
+/*****************************************************************************\
+|* Load a symbol into a register, given an identifier. Return the register
+|* If the operation is pre/post inc/dec also perform that operation
+\*****************************************************************************/
+Register A8Emitter::_cgLoadGlob(int identifier, int op, char *name)
+	{
+	Symbol s  				= SYMTAB->at(identifier);
+	Register r 				= _regs->allocateForPrimitiveType(s.pType());
+
+	if (name == nullptr)
+		{
+		String symName		= "S_"+s.name();
+		name 				= (char *) symName.c_str();
+		}
 	const char *reg		= r.name().c_str();
 	
 	switch (s.pType())
@@ -1808,3 +1988,26 @@ Register A8Emitter::_cgBoolean(Register r, int parentOp, String label)
 	
 	return r;
 	}
+
+	
+/*****************************************************************************\
+|* Reset the position of new local variables
+\*****************************************************************************/
+void A8Emitter::_cgResetLocals(void)
+	{
+	_localOffset = 0;
+	}
+	
+/*****************************************************************************\
+|* Get the location of the next local variable. Decrement the current offset
+|* by the correct amount of bytes
+\*****************************************************************************/
+int A8Emitter::_cgGetLocalOffset(int type, bool isParam)
+	{
+	(void) isParam; // Currently unused
+	
+	_localOffset += Types::typeSize(type);
+	return -_localOffset;
+	}
+
+

@@ -22,8 +22,9 @@ Emitter::Emitter()
 		,_postamble("")
 		,_ofp(nullptr)
 	{
-	_regs 	= new RegisterFile();
-	_xtrt0	= "xtrt0.s";
+	_regs 			= new RegisterFile();
+	_xtrt0			= "xtrt0.s";
+	_stackOffset	= 0;
 	}
 
 /****************************************************************************\
@@ -112,7 +113,7 @@ void Emitter::functionPostamble(int funcId)
 	{
 	if (_ofp != nullptr)
 		{
-		Symbol s = SYMTAB->table()[funcId];
+		Symbol s = SYMTAB->at(funcId);
 		cgLabel(s.endLabel());
 		
 		fprintf(_ofp, "\trts\n"
