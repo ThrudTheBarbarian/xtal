@@ -16,10 +16,10 @@
 #include "sharedDefines.h"
 
 #include "Emitter.h"
+#include "Register.h"
 
 class ASTNode;
 class RegisterFile;
-class Register;
 class Symbol;
 
 class A8Emitter : public Emitter
@@ -61,6 +61,11 @@ class A8Emitter : public Emitter
         |* Store a global var
         \*********************************************************************/
         Register _cgStoreGlobal(Register& reg, const Symbol& symbol);
+        
+		/*********************************************************************\
+        |* Store a local var
+        \*********************************************************************/
+        Register _cgStoreLocal(Register& reg, const Symbol& symbol);
         
 		/*********************************************************************\
         |* Store through a dereference of a pointer
@@ -251,6 +256,11 @@ class A8Emitter : public Emitter
         \*********************************************************************/
         Register _cgBoolean(Register r, int parentOp, String label);
 
+		/*********************************************************************\
+        |* Extend a register if necessary
+        \*********************************************************************/
+        Register _cgExtendIfNeeded(Register r, int pType);
+
 		
     public:
         /*********************************************************************\
@@ -280,7 +290,7 @@ class A8Emitter : public Emitter
         /*********************************************************************\
         |* Generate a global string symbol
         \*********************************************************************/
-        virtual int genString(String );
+        virtual int genGlobalString(String );
 
 		/*********************************************************************\
         |* Emit a jump-to-a-label command

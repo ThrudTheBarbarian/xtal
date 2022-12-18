@@ -15,6 +15,8 @@ Symbol::Symbol()
 	   ,_pType(PT_NONE)
 	   ,_sType(ST_VARIABLE)
 	   ,_endLabel("endFunc")
+	   ,_sClass(C_GLOBAL)
+	   ,_position(0)
 	{
 	}
 
@@ -31,6 +33,8 @@ Symbol::Symbol(const String& name,
 	   ,_sType(sType)
 	   ,_endLabel(endLabel)
 	   ,_size(size)
+	   ,_sClass(C_GLOBAL)
+	   ,_position(0)
 	{
 	}
 	

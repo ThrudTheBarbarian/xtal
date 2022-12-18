@@ -69,6 +69,14 @@ class Register
         \********************************************************************/
         int size(void);
         String sizeAsString(void);
+
+
+		/*********************************************************************\
+		|* Change the primitive type. Note that the register ought to have been
+		|* prepared for the change in terms of its storage
+		\*********************************************************************/
+		void setPrimitiveType(int ptype);
+
 	};
 
 #endif /* Register_h */

@@ -104,7 +104,7 @@ ASTNode * Statement::_functionDeclaration(Token& token, int& line, int type)
 	SYMTAB->setFunctionId(symIdx);
 
 	// Reset the local frame offset within the stack pointer
-	_cgResetLocals();
+	_emitter->genResetLocals();
 
 	// Parentheses
 	leftParen(*_scanner, token, line);

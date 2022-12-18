@@ -42,7 +42,7 @@ int SymbolTable::find(const String& name, int whereToLook)
 	{
 	int idx = NOT_FOUND;
 	
-	if ((whereToLook & SEARCH_LOCAL) == SEARCH_GLOBAL)
+	if ((whereToLook & SEARCH_LOCAL) == SEARCH_LOCAL)
 		for (int i=0; i<_locals.size(); i++)
 			if (_locals[i].name() == name)
 				{
@@ -50,7 +50,7 @@ int SymbolTable::find(const String& name, int whereToLook)
 				break;
 				}
 				
-	if ((whereToLook & SEARCH_GLOBAL) == SEARCH_LOCAL)
+	if ((whereToLook & SEARCH_GLOBAL) == SEARCH_GLOBAL)
 		if (idx == NOT_FOUND)
 			{
 			for (int i=0; i<_globals.size(); i++)

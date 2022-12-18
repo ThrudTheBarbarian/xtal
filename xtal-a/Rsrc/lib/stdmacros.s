@@ -1191,11 +1191,11 @@ dec0:
 ;\*************************************************************************/
 .macro _add16i
 		clc
-        lda #<%1
-       	adc %2
+        lda %2
+       	adc #<%1
        	sta %2
-       	lda #>%1
-       	adc %2+1
+       	lda %2+1
+       	adc #>%1
        	sta %2+1
 .endmacro
 
@@ -1402,6 +1402,28 @@ dec0:
 	.else
 		_clr16 %3
 	.endif
+.endmacro
+
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* add the 16-bit value at location %1 to the 16-bit value at %2, storing
+;|* the result in %3
+;|*
+;|* Clobbers: A
+;|* Arguments:
+;|*    %1 : value of operand #1
+;|*    %2 : address of source operand #2 and destination
+;\*************************************************************************/
+.macro _sub16i
+		sec
+        lda %2
+       	sbc #<%1
+       	sta %2
+       	lda %2+1
+       	sbc #>%1
+       	sta %2+1
 .endmacro
 
 

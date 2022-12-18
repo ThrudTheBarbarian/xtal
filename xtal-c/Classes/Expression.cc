@@ -66,7 +66,7 @@ ASTNode * Expression::primary(Emitter& emitter,
 		case Token::T_STRLIT:
 			// For a STRLIT token, generate the assembly for it.
 			// Then make a leaf AST node for it. id is the string's label.
-			identifier =  emitter.genString(scanner.text());
+			identifier =  emitter.genGlobalString(scanner.text());
 			node = new ASTNode(ASTNode::A_STRLIT, PT_U8PTR, identifier);
 			break;
 

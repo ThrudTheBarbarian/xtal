@@ -72,3 +72,33 @@ String Register::sizeAsString()
 	return std::to_string(size());
 	}
 
+/****************************************************************************\
+|* Change the primitive type. Note that the register ought to have been
+|* prepared for the change in terms of its storage
+\****************************************************************************/
+void Register::setPrimitiveType(int ptype)
+	{
+	switch (ptype & 0xFF)
+		{
+		case PT_S8:
+			_type = Register::SIGNED_1BYTE;
+			break;
+		case PT_U8:
+			_type = Register::UNSIGNED_1BYTE;
+			break;
+		case PT_S16:
+			_type = Register::SIGNED_2BYTE;
+			break;
+		case PT_U16:
+			_type = Register::UNSIGNED_2BYTE;
+			break;
+		case PT_S32:
+			_type = Register::SIGNED_4BYTE;
+			break;
+		case PT_U32:
+			_type = Register::UNSIGNED_4BYTE;
+			break;
+		default:
+			FATAL(ERR_REG_NOEXIST, "Undefined type %d requested", ptype);
+		}
+	}

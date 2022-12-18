@@ -116,7 +116,7 @@ class Emitter
         /*********************************************************************\
         |* Generate a global symbol by reference to the symbol table index
         \*********************************************************************/
-        virtual int genString(String content) = 0;
+        virtual int genGlobalString(String content) = 0;
 
         /*********************************************************************\
         |* Append text to one of the body parts

@@ -13,6 +13,7 @@
 #include "Emitter.h"
 #include "RegisterFile.h"
 #include "SymbolTable.h"
+#include "Types.h"
 
 /****************************************************************************\
 |* Constructor
@@ -72,6 +73,7 @@ void Emitter::preamble(void)
 
 /****************************************************************************\
 |* Output a function preamble
+|* load the stack and adjust the pointer
 \****************************************************************************/
 void Emitter::functionPreamble(String name)
 	{
@@ -83,8 +85,10 @@ void Emitter::functionPreamble(String name)
 					  ";.clobber a,x,y\n"
 					  "@%s:\n",
 					  name.c_str(),
-					  name.c_str()
-					  );
+					  name.c_str());
+		
+		if (_stackOffset > 0)
+			fprintf(_ofp, "\t_sub16i $%x," STACK_PTR "\n", _stackOffset);
 		}
 	else
 		FATAL(ERR_OUTPUT, "No file handle available for func preamble output!");
@@ -116,6 +120,9 @@ void Emitter::functionPostamble(int funcId)
 		Symbol s = SYMTAB->at(funcId);
 		cgLabel(s.endLabel());
 		
+		if (_stackOffset > 0)
+			fprintf(_ofp, "\t_add16i $%x," STACK_PTR "\n", _stackOffset);
+			
 		fprintf(_ofp, "\trts\n"
 					  ".endfunction\n"
 					  "; -------------\n"
@@ -144,6 +151,28 @@ void Emitter::append(const String &what, Location where)
 		default:
 			FATAL(ERR_RUNTIME, "Append requested to unknown destination");
 		}
+	}
+
+
+	
+/*****************************************************************************\
+|* Reset the position of new local variables
+\*****************************************************************************/
+void Emitter::genResetLocals(void)
+	{
+	_stackOffset = 0;
+	}
+	
+/*****************************************************************************\
+|* Get the location of the next local variable. Decrement the current offset
+|* by the correct amount of bytes
+\*****************************************************************************/
+int Emitter::genGetLocalOffset(int type, bool isParam)
+	{
+	(void) isParam; // Currently unused
+	
+	_stackOffset += Types::typeSize(type);
+	return _stackOffset;
 	}
 
 
