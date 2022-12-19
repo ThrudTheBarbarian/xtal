@@ -1190,6 +1190,7 @@ dec0:
 ;|*    %2 : address of source operand #2 and destination
 ;\*************************************************************************/
 .macro _add16i
+	.if %1 != 0
 		clc
         lda %2
        	adc #<%1
@@ -1197,6 +1198,7 @@ dec0:
        	lda %2+1
        	adc #>%1
        	sta %2+1
+	.endif
 .endmacro
 
 ;/*************************************************************************\
@@ -1417,6 +1419,7 @@ dec0:
 ;|*    %2 : address of source operand #2 and destination
 ;\*************************************************************************/
 .macro _sub16i
+	.if %1 != 0
 		sec
         lda %2
        	sbc #<%1
@@ -1424,6 +1427,7 @@ dec0:
        	lda %2+1
        	sbc #>%1
        	sta %2+1
+	.endif
 .endmacro
 
 

@@ -171,8 +171,9 @@ int Emitter::genGetLocalOffset(int type, bool isParam)
 	{
 	(void) isParam; // Currently unused
 	
+	int currentOffset = _stackOffset;
 	_stackOffset += Types::typeSize(type);
-	return _stackOffset;
+	return currentOffset;
 	}
 
 

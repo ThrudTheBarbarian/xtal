@@ -188,8 +188,13 @@ Register A8Emitter::emit(ASTNode *node,
 		case ASTNode::A_POSTINC:
 		case ASTNode::A_POSTDEC:
 			// Load the variable's value into a register, then increment it
+			{
+			auto sym = SYMTAB->at(node->value().identifier);
+			if (sym.sClass() == Symbol::C_LOCAL)
+				return _cgLoadLocal(node->value().identifier, node->op());
+			
 			return _cgLoadGlob(node->value().identifier, node->op());
-
+			}
 		case ASTNode::A_PREINC:
 		case ASTNode::A_PREDEC:
 			// Load and increment the variable's value into a register
@@ -362,10 +367,10 @@ Register A8Emitter::_cgLoadInt(int val, int primitiveType)
 	{
 	(void)primitiveType;
 	
-	REG type 	= ((val >= -128) && (val <= 127))   ? Register::SIGNED_1BYTE
-				: ((val >= 0) && (val <= 255))   ? Register::UNSIGNED_1BYTE
-				: ((val >= -32768) && (val <= 32767)) ? Register::SIGNED_2BYTE
+	REG type 	= ((val >= 0) && (val <= 255))   ? Register::UNSIGNED_1BYTE
+				: ((val >= -128) && (val <= 127))   ? Register::SIGNED_1BYTE
 				: ((val >= 0) && (val <= 65535)) ? Register::UNSIGNED_2BYTE
+				: ((val >= -32768) && (val <= 32767)) ? Register::SIGNED_2BYTE
 				: (val > 2147483647) ? Register::UNSIGNED_4BYTE
 				: Register::SIGNED_4BYTE;
 	Register r	= _regs->allocate(type);
@@ -1324,6 +1329,7 @@ Register A8Emitter::_cgStoreDeref(Register& r1, Register& r2, int type)
 						  "\tlda %s+1\n"
 						  "\tsta (%s),y\n",
 						  name1, name2, name1, name2);
+			break;
 			
 		case PT_S32:
 		case PT_U32:
@@ -1495,7 +1501,6 @@ Register A8Emitter::_cgLoadLocal(int identifier, int op)
 			break;
 		
 		default:
-			_regs->free(r);
 			return var;
 			break;
 		}
@@ -1626,7 +1631,8 @@ Register A8Emitter::_cgLoadLocal(int identifier, int op)
 		default:
 			FATAL(ERR_TYPE, "Unknown type %d in loadGlobal", s.pType());
 		}
-
+	_cgStoreLocal(var, s);
+	
 	_regs->free(r);
 	return var;
 	}
@@ -2019,8 +2025,8 @@ Register A8Emitter::_cgExtendIfNeeded(Register r, int pType)
 					fprintf(_ofp, "\tlda #0\n"
 								  "\tsta r%d + 2\n"
 								  "\tsta r%d + 3\n",
-								  r.identifier(),
-								  r.identifier());
+								  copy.identifier(),
+								  copy.identifier());
 					}
 				}
 			}
@@ -2046,39 +2052,41 @@ Register A8Emitter::_cgExtendIfNeeded(Register r, int pType)
 					{
 					fprintf(_ofp, "\tlda #0\n"
 								  "\tsta r%d + 1\n",
-								  r.identifier());
+								  copy.identifier());
 					}
 				}
 			}
 
+		
 		/*********************************************************************\
 		|* Then copy the actual data into 'copy'
 		\*********************************************************************/
-		switch (type)
+		int copySize = (r.size() < Types::typeSize(pType))
+					 ? r.size()
+					 : Types::typeSize(pType);
+					 
+		switch (copySize)
 			{
-			case Register::SIGNED_1BYTE:
-			case Register::UNSIGNED_1BYTE:
+			case 1:
 				fprintf(_ofp, "\tmove.1 %s %s\n",
 							r.name().c_str(),
 							copy.name().c_str());
 				break;
 				
-			case Register::SIGNED_2BYTE:
-			case Register::UNSIGNED_2BYTE:
+			case 2:
 				fprintf(_ofp, "\tmove.2 %s %s\n",
 							r.name().c_str(),
 							copy.name().c_str());
 				break;
 				
-			case Register::SIGNED_4BYTE:
-			case Register::UNSIGNED_4BYTE:
-				fprintf(_ofp, "\tmove.4 %s S_%s\n",
+			case 4:
+				fprintf(_ofp, "\tmove.4 %s %s\n",
 							r.name().c_str(),
 							copy.name().c_str());
 				break;
 			
 			default:
-				FATAL(ERR_TYPE, "Unknown type in extend");
+				FATAL(ERR_TYPE, "Unknown register-size in extend");
 			}
 			
 		/*********************************************************************\
