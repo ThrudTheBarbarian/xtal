@@ -56,7 +56,7 @@ Register RegisterFile::allocateForPrimitiveType(int ptype)
 	{
 	Register::RegType type;
 	
-	switch (ptype & 0xFF)
+	switch (ptype)
 		{
 		case PT_S8:
 			type = Register::SIGNED_1BYTE;
@@ -77,6 +77,11 @@ Register RegisterFile::allocateForPrimitiveType(int ptype)
 			type = Register::UNSIGNED_4BYTE;
 			break;
 		default:
+			if (((ptype & 0xff) <= PT_U32) && ((ptype &0xff) >= PT_S8))
+				{
+				type = type = Register::UNSIGNED_2BYTE;
+				break;
+				}
 			FATAL(ERR_REG_NOEXIST, "Undefined type %d requested", ptype);
 		}
 		

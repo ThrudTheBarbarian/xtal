@@ -467,13 +467,14 @@ Register A8Emitter::_cgStoreGlobal(Register& r, const Symbol& symbol)
 Register A8Emitter::_cgStoreLocal(Register& r, const Symbol& symbol)
 	{
 	Symbol s 	= (Symbol)symbol;
-	REG size	= _symbolSize(symbol);
 
 	/*************************************************************************\
     |* If the register width and the symbol width differ, allocate a new
     |* register (since they are packed in there, now) of the same size as
     |* the symbol and sign/zero extend it
     \*************************************************************************/
+    if (s.pType() > 0xFF)
+    
 	r = _cgExtendIfNeeded(r, s.pType());
 	
 	/*************************************************************************\
@@ -484,16 +485,20 @@ Register A8Emitter::_cgStoreLocal(Register& r, const Symbol& symbol)
 	Register sp 		= _regs->allocateForPrimitiveType(PT_U16);
 	const char * spName = sp.name().c_str();
 	
-	fprintf(_ofp, 	"\t_xfer16 " STACK_PTR ",%s\n"
-					"\t_add16i %d,%s\n"
-					,spName,
-					s.position(), spName);
+	if (s.position() == 0)
+		fprintf(_ofp, 	"\t_xfer16 " STACK_PTR ",%s\n" ,spName);
+	else
+		fprintf(_ofp, 	"\t_xfer16 " STACK_PTR ",%s\n"
+						"\t_add16i %d,%s\n"
+						,spName,
+						s.position(), spName);
 
 	/*************************************************************************\
     |* Store the data in 'r' to the address in 'sp'
     \*************************************************************************/
-	_cgStoreDeref(r, sp, s.pType());
-
+	r = _cgStoreDeref(r, sp, s.pType());
+	_regs->free(sp);
+	
 	return r;
 	}
 
@@ -1271,10 +1276,21 @@ Register A8Emitter::_cgAddress(int identifier)
 	
 	// Fetch the symbol
 	Symbol s 	= SYMTAB->at(identifier);
-	
-	fprintf(_ofp, "\tmove.2 #S_%s %s\n",
-					s.name().c_str(),
-					r.name().c_str());
+	if (s.sClass() == Symbol::C_LOCAL)
+		{
+		if (s.position() != 0)
+			fprintf(_ofp, "\tmove.2 " STACK_PTR " %s; offset = %d\n"
+					  "\t_add16i $%x,%s\n"
+					, r.name().c_str(), s.position()
+					, s.position(), r.name().c_str());
+		else
+			fprintf(_ofp, "\tmove.2 " STACK_PTR " %s ; offset = 0\n"
+					, r.name().c_str());
+		}
+	else
+		fprintf(_ofp, "\tmove.2 #S_%s %s\n",
+						s.name().c_str(),
+						r.name().c_str());
 	return r;
 	}
 
@@ -1284,9 +1300,9 @@ Register A8Emitter::_cgAddress(int identifier)
 Register A8Emitter::_cgDeref(Register r1, int type)
 	{
 	// Get a new out-register
-	Register r 	= _regs->allocateForPrimitiveType(type);
+	Register r 	= _regs->allocateForPrimitiveType(type & 0xff);
 
-	fprintf(_ofp, "\tldy #0\n");
+	fprintf(_ofp, "\tldy #0; _cgDeref (%d)\n", type);
 	for (int i=0; i<r.size(); i++)
 		{
 		fprintf(_ofp, "\tlda (%s),y\n"
@@ -1314,7 +1330,7 @@ Register A8Emitter::_cgStoreDeref(Register& r1, Register& r2, int type)
 		{
 		case PT_S8:
 		case PT_U8:
-			fprintf(_ofp, "\tlda %s\n"
+			fprintf(_ofp, "\tlda %s ; cgStoreDeref 1\n"
 						  "\tldy #0\n"
 						  "\tsta (%s),y\n",
 						  name1, name2);
@@ -1322,7 +1338,13 @@ Register A8Emitter::_cgStoreDeref(Register& r1, Register& r2, int type)
 			
 		case PT_S16:
 		case PT_U16:
-			fprintf(_ofp, "\tlda %s\n"
+		case PT_S8PTR:
+		case PT_U8PTR:
+		case PT_S16PTR:
+		case PT_U16PTR:
+		case PT_S32PTR:
+		case PT_U32PTR:
+			fprintf(_ofp, "\tlda %s ; cgStoreDeref 2\n"
 						  "\tldy #0\n"
 						  "\tsta (%s),y\n"
 						  "\tiny\n"
@@ -1333,7 +1355,7 @@ Register A8Emitter::_cgStoreDeref(Register& r1, Register& r2, int type)
 			
 		case PT_S32:
 		case PT_U32:
-			fprintf(_ofp, "\tlda %s\n"
+			fprintf(_ofp, "\tlda %s ; cgStoreDeref 4\n"
 						  "\tldy #0\n"
 						  "\tsta (%s),y\n"
 						  "\tiny\n"
@@ -1475,18 +1497,23 @@ Register A8Emitter::_cgLoadLocal(int identifier, int op)
 	Register r			= _regs->allocateForPrimitiveType(PT_U16);
 	const char *rTemp	= r.name().c_str();
 	
+	fprintf(_ofp, "\n\n; _cgloadLocal %s %d\n", s.name().c_str(), op);
+	
 	/*************************************************************************\
     |* Get the address of the symbol relative to the current stack pointer
     \*************************************************************************/
-	fprintf(_ofp, 	"\t_xfer16 " STACK_PTR ",%s\n"
-					"\t_add16i %d,%s\n"
-					,rTemp,
-					s.position(), rTemp);
+	if (s.position() == 0)
+		fprintf(_ofp, 	"\t_xfer16 " STACK_PTR ",%s\n" ,rTemp);
+	else
+		fprintf(_ofp, 	"\t_xfer16 " STACK_PTR ",%s\n"
+						"\t_add16i %d,%s\n"
+						,rTemp,
+						s.position(), rTemp);
 	
 	/*************************************************************************\
     |* Dereference this pointer into a new register the same size as the symbol
     \*************************************************************************/
-	Register var 		= _cgDeref(r, s.pType());
+	Register var 		= _cgDeref(r, s.pType() & 0xFF);
 	const char *name	= var.name().c_str();
 	
 	/*************************************************************************\

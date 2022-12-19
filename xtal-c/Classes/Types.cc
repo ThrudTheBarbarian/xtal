@@ -150,7 +150,7 @@ int Types::typeSize(int type, int line)
 			}
 		}
 		
-	return _sizes[type & 0xFF];
+	return (type > 0xFF) ? 2 : _sizes[type & 0xFF];
 	}
 
 /*****************************************************************************\
