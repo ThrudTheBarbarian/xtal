@@ -198,7 +198,14 @@ Register A8Emitter::emit(ASTNode *node,
 		case ASTNode::A_PREINC:
 		case ASTNode::A_PREDEC:
 			// Load and increment the variable's value into a register
-			return _cgLoadGlob(node->left()->value().identifier, node->op());
+			{
+			int identifier = node->left()->value().identifier;
+			auto sym = SYMTAB->at(identifier);
+			if (sym.sClass() == Symbol::C_LOCAL)
+				return _cgLoadLocal(identifier, node->op());
+			
+			return _cgLoadGlob(identifier, node->op());
+			}
 
 		case ASTNode::A_NEGATE:
 			return _cgNegate(left);
@@ -1542,19 +1549,23 @@ Register A8Emitter::_cgLoadLocal(int identifier, int op)
 		case PT_U8:
 		case PT_S8:
 			if (op == ASTNode::A_PREINC)
+				{
 				fprintf(_ofp, "\tinc %s\n"
 							  "\t_xferp8 %s,%s\n"
 							, name, name, rTemp);
-				
+				_cgStoreLocal(var, s);
+				}
 			else if (op == ASTNode::A_PREDEC)
+				{
 				fprintf(_ofp, "\tdec %s\n"
 							  "\t_xferp8 %s,%s\n"
 							, name, name, rTemp);
-						
+				_cgStoreLocal(var, s);
+				}
 			else if (op == ASTNode::A_POSTINC)
-				fprintf(_ofp, "\tinc %s\n", name);
+				fprintf(_ofp, "\t_inc8p %s,1\n", rTemp);
 			else if (op == ASTNode::A_POSTDEC)
-				fprintf(_ofp, "\tdec %s\n", name);
+				fprintf(_ofp, "\t_dec8p %s,1\n", rTemp);
 			break;
 		
 		case PT_U16:
@@ -1562,17 +1573,27 @@ Register A8Emitter::_cgLoadLocal(int identifier, int op)
 		case PT_U8PTR:
 		case PT_S8PTR:
 			if (op == ASTNode::A_PREINC)
+				{
 				fprintf(_ofp, "\t_inc16 %s\n"
 							  "\t_xferp16 %s,%s\n"
 							, name, name, rTemp);
+				_cgStoreLocal(var, s);
+				}
 			else if (op == ASTNode::A_PREDEC)
+				{
 				fprintf(_ofp, "\t_dec16 %s\n"
 							  "\t_xferp16 %s,%s\n"
 							, name, name, rTemp);
+				_cgStoreLocal(var, s);
+				}
 			else if (op == ASTNode::A_POSTINC)
-				fprintf(_ofp, "\t_inc16 %s\n", name);
+				fprintf(_ofp, "\t_inc16 %s\n"
+							  "\t_xferp16 %s,%s\n"
+							, name, name, rTemp);
 			else if (op == ASTNode::A_POSTDEC)
-				fprintf(_ofp, "\t_dec16 %s\n", name);
+				fprintf(_ofp, "\t_dec16 %s\n"
+							  "\t_xferp16 %s,%s\n"
+							, name, name, rTemp);
 			break;
 		
 		case PT_U32:
@@ -1660,9 +1681,7 @@ Register A8Emitter::_cgLoadLocal(int identifier, int op)
 		default:
 			FATAL(ERR_TYPE, "Unknown type %d in loadGlobal", s.pType());
 		}
-	_cgStoreLocal(var, s);
 	
-	_regs->free(r);
 	return var;
 	}
 	

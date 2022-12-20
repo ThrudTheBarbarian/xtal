@@ -1052,7 +1052,7 @@ sp	= $8d		; also $8e
 
 
 ;/*************************************************************************\
-;|* Type: Shift operation
+;|* Type: Arithmetic operation
 ;|*
 ;|* Increment (by one) the 16-bit value at location %1
 ;|*
@@ -1069,7 +1069,7 @@ done:
 
 
 ;/*************************************************************************\
-;|* Type: Shift operation
+;|* Type: Arithmetic operation
 ;|*
 ;|* Increment (by one) the 32-bit value at location %1
 ;|*
@@ -1088,6 +1088,67 @@ done:
 done:
 .endmacro
 
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Increment the 8-bit value pointed to by location %1
+;|*
+;|* Clobbers: <none>
+;|* Arguments:
+;|*    %1 : vector address in ZP that points to source address to increment
+;|*    %2 : value by which to increment
+;\*************************************************************************/
+.macro _inc8p
+	ldy #$0
+	lda (%1),y
+	clc
+	adc #%2
+	sta (%1),y
+.endmacro
+
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Increment the 16-bit value pointed to by location %1
+;|*
+;|* Clobbers: <none>
+;|* Arguments:
+;|*    %1 : vector address in ZP that points to source address to increment
+;|*    %2 : value by which to increment
+;\*************************************************************************/
+.macro _inc16p
+	ldy #$0
+	clc
+	lda (%1),y
+	adc #<%2
+	sta (%1),y
+	iny
+	lda (%1),y
+	adc #>%2
+	sta (%1),y
+.endmacro
+
+
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Increment the 8-bit value pointed to by location %1
+;|*
+;|* Clobbers: <none>
+;|* Arguments:
+;|*    %1 : vector address in ZP that points to source address to increment
+;|*    %2 : value by which to increment
+;\*************************************************************************/
+.macro _dec8p
+	ldy #$0
+	lda (%1),y
+	sec
+	sbc #%2
+	sta (%1),y
+.endmacro
 
 ;/*************************************************************************\
 ;|* Type: Arithmetic operation
