@@ -1513,7 +1513,9 @@ Register A8Emitter::_cgLoadLocal(int identifier, int op)
 	/*************************************************************************\
     |* Dereference this pointer into a new register the same size as the symbol
     \*************************************************************************/
-	Register var 		= _cgDeref(r, s.pType() & 0xFF);
+	int objType 		= (s.pType() > 0xFF) ? PT_U16PTR : s.pType();
+	
+	Register var 		= _cgDeref(r, objType);
 	const char *name	= var.name().c_str();
 	
 	/*************************************************************************\
