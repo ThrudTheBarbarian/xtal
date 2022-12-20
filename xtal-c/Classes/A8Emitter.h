@@ -50,7 +50,7 @@ class A8Emitter : public Emitter
 		/*********************************************************************\
         |* Load the variable's value into a register
         \*********************************************************************/
-        Register _cgLoadGlob(int identifier, int op, char *name = nullptr);
+        Register _cgLoadGlob(int identifier, int op);
         
 		/*********************************************************************\
         |* Load the variable's value into a register

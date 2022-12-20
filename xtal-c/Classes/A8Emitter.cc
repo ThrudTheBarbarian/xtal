@@ -1668,17 +1668,16 @@ Register A8Emitter::_cgLoadLocal(int identifier, int op)
 |* Load a symbol into a register, given an identifier. Return the register
 |* If the operation is pre/post inc/dec also perform that operation
 \*****************************************************************************/
-Register A8Emitter::_cgLoadGlob(int identifier, int op, char *name)
+Register A8Emitter::_cgLoadGlob(int identifier, int op)
 	{
-	Symbol s  				= SYMTAB->at(identifier);
-	Register r 				= _regs->allocateForPrimitiveType(s.pType());
+	Symbol s  			= SYMTAB->at(identifier);
+	Register r 			= _regs->allocateForPrimitiveType(s.pType());
+	String symName		= "S_"+s.name();
+	const char *name 	= (char *) symName.c_str();
 
-	if (name == nullptr)
-		{
-		String symName		= "S_"+s.name();
-		name 				= (char *) symName.c_str();
-		}
 	const char *reg		= r.name().c_str();
+	
+	fprintf(_ofp, "\n;_cgLoadGlob %s %d\n", name, op);
 	
 	switch (s.pType())
 		{
@@ -1773,7 +1772,7 @@ Register A8Emitter::_cgLoadGlob(int identifier, int op, char *name)
 				fprintf(_ofp, "\t_dec16 %s\n", name);
 				}
 				
-			fprintf(_ofp, "\t_xfer32 %s,%s\n", name, reg);
+			fprintf(_ofp, "\t_xfer16 %s,%s\n", name, reg);
 			
 			if (op == ASTNode::A_POSTINC)
 				{
