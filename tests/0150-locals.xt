@@ -1,0 +1,23 @@
+u32 a;
+
+s32 dummy()
+	[
+	u32 a;
+	a = 40;
+	
+	print a;
+
+	return (9);
+	]
+	
+s32 main()
+	[
+	a = 1000;
+	print a;
+	
+	dummy(a);
+	
+	return (0);
+	]
+	
+
