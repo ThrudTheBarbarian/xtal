@@ -1130,6 +1130,37 @@ done:
 	sta (%1),y
 .endmacro
 
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Increment the 32-bit value pointed to by location %1
+;|*
+;|* Clobbers: <none>
+;|* Arguments:
+;|*    %1 : vector address in ZP that points to source address to increment
+;|*    %2 : value by which to increment
+;\*************************************************************************/
+.macro _inc32p
+	ldy #$0
+	clc
+	lda (%1),y
+	adc #<%2
+	sta (%1),y
+	iny
+	lda (%1),y
+	adc #>%2
+	sta (%1),y
+	iny
+	lda (%1),y
+	adc #>%2
+	sta (%1),y
+	iny
+	lda (%1),y
+	adc #>%2
+	sta (%1),y
+.endmacro
+
+
 
 
 ;/*************************************************************************\
@@ -1147,6 +1178,60 @@ done:
 	lda (%1),y
 	sec
 	sbc #%2
+	sta (%1),y
+.endmacro
+
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Decrement the 32-bit value pointed to by location %1
+;|*
+;|* Clobbers: <none>
+;|* Arguments:
+;|*    %1 : vector address in ZP that points to source address to increment
+;|*    %2 : value by which to decrement
+;\*************************************************************************/
+.macro _dec32p
+	ldy #$0
+	sec
+	lda (%1),y
+	sbc #<%2
+	sta (%1),y
+	iny
+	lda (%1),y
+	sbc #>%2
+	sta (%1),y
+	iny
+	lda (%1),y
+	sbc #>%2
+	sta (%1),y
+	iny
+	lda (%1),y
+	sbc #>%2
+	sta (%1),y
+.endmacro
+
+
+;/*************************************************************************\
+;|* Type: Arithmetic operation
+;|*
+;|* Decrement the 16-bit value pointed to by location %1
+;|*
+;|* Clobbers: <none>
+;|* Arguments:
+;|*    %1 : vector address in ZP that points to source address to increment
+;|*    %2 : value by which to decrement
+;\*************************************************************************/
+.macro _dec16p
+	ldy #$0
+	sec
+	lda (%1),y
+	sbc #<%2
+	sta (%1),y
+	iny
+	lda (%1),y
+	sbc #>%2
 	sta (%1),y
 .endmacro
 

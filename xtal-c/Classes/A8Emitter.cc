@@ -1587,13 +1587,9 @@ Register A8Emitter::_cgLoadLocal(int identifier, int op)
 				_cgStoreLocal(var, s);
 				}
 			else if (op == ASTNode::A_POSTINC)
-				fprintf(_ofp, "\t_inc16 %s\n"
-							  "\t_xferp16 %s,%s\n"
-							, name, name, rTemp);
+				fprintf(_ofp, "\t_inc16p %s,1\n", rTemp);
 			else if (op == ASTNode::A_POSTDEC)
-				fprintf(_ofp, "\t_dec16 %s\n"
-							  "\t_xferp16 %s,%s\n"
-							, name, name, rTemp);
+				fprintf(_ofp, "\t_dec16p %s,1\n", rTemp);
 			break;
 		
 		case PT_U32:
@@ -1607,9 +1603,9 @@ Register A8Emitter::_cgLoadLocal(int identifier, int op)
 							  "\t_xferp32 %s,%s\n"
 							, name, name, rTemp);
 			else if (op == ASTNode::A_POSTINC)
-				fprintf(_ofp, "\t_inc32 %s\n", name);
+				fprintf(_ofp, "\t_inc32p %s,1\n", rTemp);
 			else if (op == ASTNode::A_POSTDEC)
-				fprintf(_ofp, "\t_dec32 %s\n", name);
+				fprintf(_ofp, "\t_dec32p %s,1\n", rTemp);
 			break;
 		
 		case PT_U16PTR:

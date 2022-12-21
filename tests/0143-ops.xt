@@ -1,0 +1,59 @@
+u8 main()
+	[
+	u16 i;
+	u16 j;
+
+
+	i = 10;
+	j = ++i;	
+	print i;
+	print j;
+
+
+	i = 10;
+	j = i++;
+	print i;
+	print j;
+
+
+	i = 10;
+	j = --i;
+	print i;
+	print j;
+
+
+	i = 10;
+	j = i--;
+	print i;
+	print j;
+
+	u32 a;
+	u32 b;
+
+
+	a = 10;
+	b = ++a;	
+	print a;
+	print b;
+
+
+	a = 10;
+	b = a++;
+	print a;
+	print b;
+
+
+	a = 10;
+	b = --a;
+	print a;
+	print b;
+
+
+	a = 10;
+	b = a--;
+	print a;
+	print b;
+
+
+	return (0);
+	]

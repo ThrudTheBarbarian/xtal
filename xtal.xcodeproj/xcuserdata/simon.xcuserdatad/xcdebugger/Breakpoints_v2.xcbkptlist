@@ -62,8 +62,8 @@
             filePath = "xtal-c/Classes/A8Emitter.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1694"
-            endingLineNumber = "1694"
+            startingLineNumber = "1690"
+            endingLineNumber = "1690"
             landmarkName = "A8Emitter::_cgLoadGlob(identifier, op)"
             landmarkType = "7">
          </BreakpointContent>
