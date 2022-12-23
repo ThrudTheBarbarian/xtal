@@ -28,8 +28,9 @@ class Symbol
         \*********************************************************************/
 		typedef enum
 			{
-			C_GLOBAL				= 1,
-			C_LOCAL
+			C_GLOBAL				= 1,	// Obviously, a global symbol
+			C_LOCAL,						// And a local symbol
+			C_PARAM 						// A parameter for a function
 			} Storage;
 		
 	/************************************************************************\
@@ -42,7 +43,9 @@ class Symbol
 	GETSET(int, size, Size);				// Number of elements in array
 	GETSET(Storage, sClass, SClass);		// Storage class of the symbol
 	GETSET(int, position, Position);		// For locals, -ve offset from FP
-	
+	GETSET(int, numParams, NumParams);		// For function, # params
+	GETSET(int, location, Location);		// For fn-arg, address
+
     private:
         
     public:

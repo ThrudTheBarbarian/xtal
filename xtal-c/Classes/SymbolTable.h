@@ -81,9 +81,19 @@ class SymbolTable
 		Symbol currentFunction(void);
 
         /********************************************************************\
+        |* Return whether a given symbol ID is held
+        \********************************************************************/
+		bool isValid(int symbolId);
+
+        /********************************************************************\
         |* Return the symbol for a given index
         \********************************************************************/
-		Symbol at(int idx);
+		Symbol& at(int idx);
+
+        /********************************************************************\
+        |* Free the local symbol table
+        \********************************************************************/
+		void freeLocalSymbols(void);
 
         /********************************************************************\
         |* Add a global variable, and return the new slot position
@@ -91,7 +101,8 @@ class SymbolTable
 		int addGlobal(const String& name,
 					  int pType,
 					  StructuralType sType,
-					  int size);
+					  int size,
+					  Symbol::Storage storageClass = Symbol::C_GLOBAL);
 
         /********************************************************************\
         |* Add a local variable, and return the new slot position
@@ -99,8 +110,9 @@ class SymbolTable
 		int addLocal(const String& name,
 					  int pType,
 					  StructuralType sType,
+					  bool isParam,
 					  int size);
-		
+
         /**********************************************************************\
         |* This method returns the default global instance.          \**********************************************************************/
         static std::shared_ptr<SymbolTable> sharedInstance();

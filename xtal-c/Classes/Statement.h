@@ -61,12 +61,23 @@ class Statement
         /********************************************************************\
         |* Handle a declaration statement
         \********************************************************************/
-		void _varDeclaration(Token& token, int& line, int type, bool isLocal);
+		void _varDeclaration(Token& token,
+							 int& line,
+							 int type,
+							 bool isLocal,
+							 bool isParam);
+		
+        /********************************************************************\
+        |* Handle parameter declarations
+        \********************************************************************/
+		int _paramDeclaration(Token& token, int& line);
 
         /********************************************************************\
         |* Process a function declaration
         \********************************************************************/
-        ASTNode * _functionDeclaration(Token& token, int& line, int type);
+        ASTNode * _functionDeclaration(Token& token,
+									   int& line,
+									   int type);
 		
         /********************************************************************\
         |* Handle an if statement

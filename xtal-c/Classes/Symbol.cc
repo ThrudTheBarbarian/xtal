@@ -17,6 +17,7 @@ Symbol::Symbol()
 	   ,_endLabel("endFunc")
 	   ,_sClass(C_GLOBAL)
 	   ,_position(0)
+	   ,_location(0)
 	{
 	}
 
@@ -35,6 +36,7 @@ Symbol::Symbol(const String& name,
 	   ,_size(size)
 	   ,_sClass(C_GLOBAL)
 	   ,_position(0)
+	   ,_location(0)
 	{
 	}
 	

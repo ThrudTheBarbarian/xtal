@@ -43,11 +43,6 @@ class A8Emitter : public Emitter
         Register _cgLoadGlobalStr(int value);
         
 		/*********************************************************************\
-        |* Fetch a global var
-        \*********************************************************************/
-        Register _cgLoadGlobal(const Symbol& symbol);
-        
-		/*********************************************************************\
         |* Load the variable's value into a register
         \*********************************************************************/
         Register _cgLoadGlob(int identifier, int op);

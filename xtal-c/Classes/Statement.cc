@@ -25,24 +25,6 @@ Statement::Statement(Scanner &scanner, Emitter *emitter)
 		  ,_emitter(emitter)
 	{
 	}
-
-
-/****************************************************************************\
-|* Determine if a statement needs a ';' after it
-\****************************************************************************/
-bool Statement::_needsSemicolon(int op)
-	{
-	switch (op)
-		{
-		case ASTNode::A_PRINT:
-		case ASTNode::A_ASSIGN:
-		case ASTNode::A_RETURN:
-		case ASTNode::A_FUNCCALL:
-			return true;
-		default:
-			return false;
-		}
-	}
 	
 /****************************************************************************\
 |* Process the statements we understand
@@ -91,46 +73,6 @@ ASTNode * Statement::compoundStatement(Token& token, int& line)
 			return left;
 			}
 		}
-	}
-
-/****************************************************************************\
-|* Process a function declaration. Currently void return and arguments
-\****************************************************************************/
-ASTNode * Statement::_functionDeclaration(Token& token, int& line, int type)
-	{
-	// the text() accessor gives access to the name of the
-	// symbol that has been scanned, and we have the type passed in
-	int symIdx = SYMTAB->addGlobal(_scanner->text(), type, ST_FUNCTION, 0);
-	SYMTAB->setFunctionId(symIdx);
-
-	// Reset the local frame offset within the stack pointer
-	_emitter->genResetLocals();
-
-	// Parentheses
-	leftParen(*_scanner, token, line);
-	rightParen(*_scanner, token, line);
-	
-	// Get the AST for the compound statement
-	ASTNode *tree = compoundStatement(token, line);
-	
-	// If the function type isn't P_VOID, check that
-	// the last AST operation in the compound statement
-	// was a return statement
-	if (type != PT_VOID)
-		{
-		if (tree == nullptr)
-			FATAL(ERR_FUNCTION, "No statements in function with non-void type");
-
-		ASTNode *lastStmt = (tree->op() == ASTNode::A_GLUE)
-						   ? tree->right()
-						   : tree;
-		if ((lastStmt == nullptr) || (lastStmt->op() != ASTNode::A_RETURN))
-			FATAL(ERR_PARSE, "No return for function with non-void type");
-		}
-
-	
-	// Return the AST node representing a function wrapping the body
-	return new ASTNode(ASTNode::A_FUNCTION, type, tree, symIdx);
 	}
 
 
@@ -204,8 +146,12 @@ ASTNode * Statement::globalDeclaration(Token& token, int&line)
 			_emitter->emit(tree, none, 0, "");
 			}
 		else
-			_varDeclaration(token, line, type, false);
-		
+			{
+			// Parse a global variable and skip past the semicolon
+			_varDeclaration(token, line, type, false, false);
+			_semicolon(*_scanner, token, line);
+			}
+			
 		if (token.token() == Token::T_NONE)
 			break;
 		}
@@ -310,8 +256,9 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 			// Check we have an identifier
 			_identifier(*_scanner, token, line);
 			
-			// Declare the variable
-			_varDeclaration(token, line, type, true);
+			// Declare the variable then skip over the semicolon
+			_varDeclaration(token, line, type, true, false);
+			_semicolon(*_scanner, token, line);
 			tree = nullptr;
 			break;
 
@@ -536,12 +483,61 @@ int Statement::_parseType(Token& token, int& line)
 	}
 
 /****************************************************************************\
+|* Private Method: param_declaration: <null>
+|*           | variable_declaration
+|*           | variable_declaration ',' param_declaration
+|*
+|* Parse the parameters in parentheses after the function name.
+|* Add them as symbols to the symbol table and return the number
+|* of parameters
+\****************************************************************************/
+int Statement::_paramDeclaration(Token& token, int& line)
+	{
+	int count = 0;
+
+	// Loop until the final right parentheses
+	while (token.token() != Token::T_RPAREN)
+		{
+		// Get the type and identifier and add it to the symbol table
+		int type = _parseType(token, line);
+    
+		// Match an identifier
+		_identifier(*_scanner, token, line);
+		
+		_varDeclaration(token, line, type, true, true);
+    	count ++;
+
+		// Must have a ',' or ')' at this point
+		switch (token.token())
+			{
+			case Token::T_COMMA:
+				_scanner->scan(token, line);
+				break;
+				
+			case Token::T_RPAREN:
+				break;
+      
+			default:
+				FATAL(ERR_TOKEN, "Unexpected token in parameters at %d",
+								line);
+			}
+		}
+
+	// Return the count of parameters
+	return(count);
+	}
+	
+/****************************************************************************\
 |* Private Method: Parse the declaration of a scalar variable or an array
 |* with a given size. The identifier has been scanned & we have the type
 |* Scanner::text() now has the identifier's name. If all that us ok, add it
 |* as a known identifier
 \****************************************************************************/
-void Statement::_varDeclaration(Token& token, int& line, int type, bool isLocal)
+void Statement::_varDeclaration(Token& token,
+								int& line,
+								int type,
+								bool isLocal,
+								bool isParam)
 	{
 	String name = _scanner->text();
 	int symIdx	= -1;
@@ -558,10 +554,16 @@ void Statement::_varDeclaration(Token& token, int& line, int type, bool isLocal)
 			// Add this as a known array and generate its space in assembly.
 			// We treat the array as a pointer to its elements' type
 			if (isLocal)
+				{
+				/*
 				symIdx = SYMTAB->addLocal(name,
 										  Types::pointerTo(type),
 										  ST_ARRAY,
 										  token.intValue());
+				*/
+				FATAL(ERR_PARSE, "Local arrays are not implemented at %d",
+						line);
+				}
 			else
 				symIdx = SYMTAB->addGlobal(name,
 										  Types::pointerTo(type),
@@ -579,14 +581,82 @@ void Statement::_varDeclaration(Token& token, int& line, int type, bool isLocal)
 		{
 		// Add this as a known scalar and generate its space in assembly
 		if (isLocal)
-			symIdx = SYMTAB->addLocal(name, type, ST_VARIABLE, 1);
+			{
+			symIdx = SYMTAB->addLocal(name, type, ST_VARIABLE, isParam, 1);
+			if (symIdx < 0)
+				FATAL(ERR_PARSE, "Duplicate local variable %s at %d",
+								name.c_str(), line);
+			}
 		else
 			symIdx = SYMTAB->addGlobal(name, type, ST_VARIABLE, 1);
 
 		_emitter->genSymbol(symIdx);
 		}
-
-	// Get the trailing semicolon
-  	_semicolon(*_scanner, token, line);
 	}
 	
+
+/****************************************************************************\
+|* Process a function declaration. Currently void return and arguments
+\****************************************************************************/
+ASTNode * Statement::_functionDeclaration(Token& token,
+										  int& line,
+										  int type)
+	{
+	// the text() accessor gives access to the name of the
+	// symbol that has been scanned, and we have the type passed in
+	int symIdx = SYMTAB->addGlobal(_scanner->text(), type, ST_FUNCTION, 0);
+	SYMTAB->setFunctionId(symIdx);
+	
+	// Reset the local frame offset within the stack pointer
+	_emitter->genResetLocals();
+
+	// Open the parentheses
+	leftParen(*_scanner, token, line);
+	
+	// Parse the parameters
+	int numParams = _paramDeclaration(token, line);
+	SYMTAB->at(symIdx).setNumParams(numParams);
+
+	// Close the parentheses
+	rightParen(*_scanner, token, line);
+
+	// Get the AST for the compound statement
+	ASTNode *tree = compoundStatement(token, line);
+	
+	// If the function type isn't P_VOID, check that
+	// the last AST operation in the compound statement
+	// was a return statement
+	if (type != PT_VOID)
+		{
+		if (tree == nullptr)
+			FATAL(ERR_FUNCTION, "No statements in function with non-void type");
+
+		ASTNode *lastStmt = (tree->op() == ASTNode::A_GLUE)
+						   ? tree->right()
+						   : tree;
+		if ((lastStmt == nullptr) || (lastStmt->op() != ASTNode::A_RETURN))
+			FATAL(ERR_PARSE, "No return for function with non-void type");
+		}
+
+	
+	// Return the AST node representing a function wrapping the body
+	return new ASTNode(ASTNode::A_FUNCTION, type, tree, symIdx);
+	}
+
+
+/****************************************************************************\
+|* Determine if a statement needs a ';' after it
+\****************************************************************************/
+bool Statement::_needsSemicolon(int op)
+	{
+	switch (op)
+		{
+		case ASTNode::A_PRINT:
+		case ASTNode::A_ASSIGN:
+		case ASTNode::A_RETURN:
+		case ASTNode::A_FUNCCALL:
+			return true;
+		default:
+			return false;
+		}
+	}

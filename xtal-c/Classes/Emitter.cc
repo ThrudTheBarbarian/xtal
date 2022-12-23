@@ -26,6 +26,7 @@ Emitter::Emitter()
 	_regs 			= new RegisterFile();
 	_xtrt0			= "xtrt0.s";
 	_stackOffset	= 0;
+	_fnParamAt		= FN_PARAM_MIN;
 	}
 
 /****************************************************************************\
@@ -70,29 +71,6 @@ void Emitter::preamble(void)
 	else
 		FATAL(ERR_OUTPUT, "No file handle available for preamble output!");
 	}
-
-/****************************************************************************\
-|* Output a function preamble
-|* load the stack and adjust the pointer
-\****************************************************************************/
-void Emitter::functionPreamble(String name)
-	{
-	if (_ofp != nullptr)
-		{
-		fprintf(_ofp, "; Begin function\n"
-					  "; --------------\n"
-					  "\n.function %s\n"
-					  ";.clobber a,x,y\n"
-					  "@%s:\n",
-					  name.c_str(),
-					  name.c_str());
-		
-		if (_stackOffset > 0)
-			fprintf(_ofp, "\t_sub16i $%x," STACK_PTR "\n", _stackOffset);
-		}
-	else
-		FATAL(ERR_OUTPUT, "No file handle available for func preamble output!");
-	}
 	
 /****************************************************************************\
 |* Output a function postamble
@@ -109,7 +87,92 @@ void Emitter::postamble(void)
 	else
 		FATAL(ERR_OUTPUT, "No file handle available for postamble output!");
 	}
-	
+
+
+/****************************************************************************\
+|* Output a function preamble
+|* load the stack and adjust the pointer
+\****************************************************************************/
+void Emitter::functionPreamble(int funcId)
+	{
+	if (_ofp != nullptr)
+		{
+		Symbol s 			= SYMTAB->at(funcId);
+		const char *name	= s.name().c_str();
+		
+        /*********************************************************************\
+        |* deal with any arguments to the function arg space
+        \*********************************************************************/
+		int argId = funcId + 1;
+		while (SYMTAB->isValid(argId))
+			{
+			/*****************************************************************\
+			|* Find the symbols in the global table that demarcate the
+			|* function signature
+			\*****************************************************************/
+			Symbol& arg = SYMTAB->at(argId);
+			if (arg.sClass() != Symbol::C_PARAM)
+				break;
+			
+			/*****************************************************************\
+			|* Look up the local argument of the same name, and place it in
+			|* global memory (in the function argument space)
+			\*****************************************************************/
+			int localIdx = SYMTAB->find(arg.name(), SymbolTable::SEARCH_LOCAL);
+			Symbol& localArg = SYMTAB->at(localIdx);
+			
+			int where = -1;
+			switch (arg.pType())
+				{
+				case PT_U8:
+				case PT_S8:
+				case PT_U16:
+				case PT_S16:
+				case PT_U32:
+				case PT_S32:
+					where = functionParameterLocation(localArg.pType());
+					localArg.setLocation(where);
+					break;
+				
+				case PT_U8PTR:
+				case PT_U16PTR:
+				case PT_U32PTR:
+				case PT_S8PTR:
+				case PT_S16PTR:
+				case PT_S32PTR:
+					// FIXME: We ought to be able to make this a no-op since
+					// it's a pointer.
+					break;
+				
+				default:
+					FATAL(ERR_TYPE, "Trying to pass unknown type to '%s'",
+									 name);
+				}
+			
+			argId++;
+			}
+
+
+        /*********************************************************************\
+        |* Write out the function
+        \*********************************************************************/
+		fprintf(_ofp, "; Begin function\n"
+					  "; --------------\n"
+					  "\n.function %s\n"
+					  ";.clobber a,x,y\n"
+					  "@%s:\n",
+					  name,
+					  name);
+		
+		// Manipulate the stack if necessary
+		if (_stackOffset > 0)
+			fprintf(_ofp, "\t_sub16i $%x," STACK_PTR "\n", _stackOffset);
+
+		}
+	else
+		FATAL(ERR_OUTPUT, "No file handle available for func preamble output!");
+	}
+
 /****************************************************************************\
 |* Output a function postamble
 \****************************************************************************/
@@ -127,6 +190,10 @@ void Emitter::functionPostamble(int funcId)
 					  ".endfunction\n"
 					  "; -------------\n"
 					  "; Function ends\n\n");
+
+			
+		// We're done with the locals for this function now
+		SYMTAB->freeLocalSymbols();
 		}
 	else
 		FATAL(ERR_OUTPUT, "No file handle available for fn postamble output!");
@@ -160,7 +227,8 @@ void Emitter::append(const String &what, Location where)
 \*****************************************************************************/
 void Emitter::genResetLocals(void)
 	{
-	_stackOffset = 0;
+	_stackOffset 	= 0;
+	_fnParamAt 		= FN_PARAM_MIN;
 	}
 	
 /*****************************************************************************\
@@ -177,3 +245,19 @@ int Emitter::genGetLocalOffset(int type, bool isParam)
 	}
 
 
+	
+/*****************************************************************************\
+|* Get the location of the next local variable. Decrement the current offset
+|* by the correct amount of bytes
+\*****************************************************************************/
+int Emitter::functionParameterLocation(int type)
+	{
+	int size = Types::typeSize(type);
+	if (size + _fnParamAt > FN_PARAM_MAX)
+		FATAL(ERR_RUNTIME, "Cannot use more than 16 bytes of function params");
+	
+	int location = _fnParamAt;
+	_fnParamAt += size;
+	return location;
+	}
+	

@@ -53,7 +53,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "$PROJECT_DIR/test.xt -d  -T -o /tmp/out.s"
+            argument = "$PROJECT_DIR/test.xt -d  -o /tmp/out.s"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

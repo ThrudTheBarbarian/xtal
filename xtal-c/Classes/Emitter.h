@@ -24,18 +24,21 @@ class Emitter
     NON_COPYABLE_NOR_MOVEABLE(Emitter)
     
     public:
+		/*********************************************************************\
+		|* Add to preamble/postamble using these constants
+		\*********************************************************************/
 		typedef enum
 			{
 			PREAMBLE		= 0,
 			POSTAMBLE
 			} Location;
 
-
-		// These should match what the assembler uses for its context
-		// definitions
-	/*************************************************************************\
-    |* Strings used
-    \*************************************************************************/
+		/*********************************************************************\
+		|* Function parameter passing region definition
+		\*********************************************************************/
+		static const int FN_PARAM_MIN			= 0xA0;
+		static const int FN_PARAM_MAX			= 0xAF;
+		
 	protected:
 		/*********************************************************************\
         |* Important macro files
@@ -59,6 +62,11 @@ class Emitter
         \*********************************************************************/
         int _stackOffset;		// Stack pointer
 
+		/*********************************************************************\
+        |* Next function parameter location
+        \*********************************************************************/
+        int _fnParamAt;		// Actual memory location
+		
 	/************************************************************************\
     |* Properties
     \************************************************************************/
@@ -96,7 +104,7 @@ class Emitter
         /*********************************************************************\
         |* Generate a function preamble
         \*********************************************************************/
-        virtual void functionPreamble(String name);
+        virtual void functionPreamble(int funcId);
 
         /*********************************************************************\
         |* Generate the code postamble
@@ -137,6 +145,11 @@ class Emitter
         |* Reset the position of new local variables
         \*********************************************************************/
         int genGetLocalOffset(int type, bool isParam);
+
+		/*********************************************************************\
+        |* Return the next position of a function parameter
+        \*********************************************************************/
+        int functionParameterLocation(int type);
 	};
 
 #endif /* Emitter_h */

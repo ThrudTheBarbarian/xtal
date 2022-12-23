@@ -71,7 +71,7 @@ Register A8Emitter::emit(ASTNode *node,
 			{
 			int funcId  = node->value().identifier;
 			auto symbol = SYMTAB->at(funcId);
-			functionPreamble(symbol.name());
+			functionPreamble(funcId);
 			emit(node->left(), none, node->op(), "");
 			functionPostamble(funcId);
 			return (none);
@@ -302,6 +302,9 @@ void A8Emitter::genSymbol(int idx)
 	char buf[1024];
 	
 	Symbol symbol 	= SYMTAB->at(idx);
+	if (symbol.sClass() != Symbol::C_GLOBAL)
+		return;
+		
 	String name 	= symbol.name();
 	snprintf(buf, 1024, "@S_%s:\n", name.c_str());
 	append(buf, POSTAMBLE);
@@ -397,27 +400,6 @@ Register A8Emitter::_cgLoadGlobalStr(int val)
 	fprintf(_ofp, "\tmove.2 #S_%s %s\n",s.name().c_str(), r.name().c_str());
 	return r;
 	}
-
-/*****************************************************************************\
-|* Generate a load-value-to-register
-\*****************************************************************************/
-Register A8Emitter::_cgLoadGlobal(const Symbol& symbol)
-	{
-	Symbol s 	= (Symbol)symbol;
-	REG size	= _symbolSize(symbol);
-	
-	if (size == Register::UNKNOWN)
-		FATAL(ERR_TYPE, "Unknown type for symbol %s", s.name().c_str());
-		
-	Register r	= _regs->allocate(size);
-	
-	fprintf(_ofp, "\tmove.%d S_%s %s\n",
-				r.size(),
-				s.name().c_str(),
-				r.name().c_str());
-	return r;
-	}
-
 	
 /*****************************************************************************\
 |* Store a register into a global variable
@@ -1213,6 +1195,12 @@ Register A8Emitter::_cgCall(Register r1, int identifier)
 	auto symbol = SYMTAB->at(identifier);
 	fprintf(_ofp, "\tcall %s\n", symbol.name().c_str());
 
+	if (symbol.pType() == PT_VOID)
+		{
+		Register none(Register::NO_REGISTER);
+		return none;
+		}
+
 	// Get a new out-register
 	Register r = _regs->allocateForPrimitiveType(symbol.pType());
 	
@@ -1689,9 +1677,12 @@ Register A8Emitter::_cgLoadGlob(int identifier, int op)
 	{
 	Symbol s  			= SYMTAB->at(identifier);
 	Register r 			= _regs->allocateForPrimitiveType(s.pType());
+	
 	String symName		= "S_"+s.name();
+	if (s.sClass() == Symbol::C_PARAM)
+		symName = toHexString(s.location(), "$");
+		
 	const char *name 	= (char *) symName.c_str();
-
 	const char *reg		= r.name().c_str();
 	
 	fprintf(_ofp, "\n;_cgLoadGlob %s %d\n", name, op);

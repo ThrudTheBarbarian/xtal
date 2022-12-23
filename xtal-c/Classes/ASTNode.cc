@@ -289,11 +289,19 @@ void ASTNode::dump(ASTNode *node, int label, int level)
 			return;
 		case A_IDENT:
 			{
-			Symbol s = SYMTAB->at(node->value().identifier);
-			if (node->isRValue())
-				printf("A_IDENT rval %s\n", s.name().c_str());
+			int idx		 = node->value().identifier;
+			bool isValid = SYMTAB->isValid(idx);
+			
+			if (isValid)
+				{
+				Symbol s = SYMTAB->at(idx);
+				if (node->isRValue())
+					printf("A_IDENT rval %s\n", s.name().c_str());
+				else
+					printf("A_IDENT %s\n", s.name().c_str());
+				}
 			else
-				printf("A_IDENT %s\n", s.name().c_str());
+				printf("A_IDENT with invalid identifier %d\n", idx);
 			return;
 			}
 		case A_PRINT:
