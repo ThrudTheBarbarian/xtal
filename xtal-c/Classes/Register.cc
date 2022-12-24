@@ -102,3 +102,36 @@ void Register::setPrimitiveType(int ptype)
 			FATAL(ERR_REG_NOEXIST, "Undefined type %d requested", ptype);
 		}
 	}
+
+/****************************************************************************\
+|* Return the equivalent primitive type
+\****************************************************************************/
+int Register::primitiveType(void)
+	{
+	int type = PT_NONE;
+	
+	switch (_type)
+		{
+		case SIGNED_1BYTE:
+			type = PT_S8;
+			break;
+		case UNSIGNED_1BYTE:
+			type = PT_U8;
+			break;
+		case SIGNED_2BYTE:
+			type = PT_S16;
+			break;
+		case UNSIGNED_2BYTE:
+			type = PT_U16;
+			break;
+		case SIGNED_4BYTE:
+			type = PT_S32;
+			break;
+		case UNSIGNED_4BYTE:
+			type = PT_U32;
+			break;
+		default:
+			FATAL(ERR_REG_NOEXIST, "Undefined type requested");
+		}
+	return type;
+	}

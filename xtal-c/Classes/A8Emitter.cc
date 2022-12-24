@@ -52,10 +52,13 @@ Register A8Emitter::emit(ASTNode *node,
 	switch (node->op())
 		{
 		case ASTNode::A_IF:
-			return (_cgIfAST(node));
+			return _cgIfAST(node);
     
 		case ASTNode::A_WHILE:
-			return (_cgWhileAST(node));
+			return _cgWhileAST(node);
+    
+		case ASTNode::A_FUNCCALL:
+			return _genFuncCall(node, label);
     
 		case ASTNode::A_GLUE:
 			// Do each child statement, and free the
@@ -167,8 +170,8 @@ Register A8Emitter::emit(ASTNode *node,
 		case ASTNode::A_RETURN:
 			_cgReturn(left, SYMTAB->functionId());
 			return left;
-		case ASTNode::A_FUNCCALL:
-			return _cgCall(left, node->value().identifier);
+//		case ASTNode::A_FUNCCALL:
+//			return _cgCall(left, node->value().identifier);
 		case ASTNode::A_ADDR:
 			return _cgAddress(node->value().identifier);
 		case ASTNode::A_SCALE:
@@ -1190,9 +1193,9 @@ Register A8Emitter::_cgWhileAST(ASTNode *node)
 /*****************************************************************************\
 |* Call a function
 \*****************************************************************************/
-Register A8Emitter::_cgCall(Register r1, int identifier)
+Register A8Emitter::_cgCall(int symIdx)
 	{
-	auto symbol = SYMTAB->at(identifier);
+	auto symbol = SYMTAB->at(symIdx);
 	fprintf(_ofp, "\tcall %s\n", symbol.name().c_str());
 
 	if (symbol.pType() == PT_VOID)
@@ -1226,7 +1229,6 @@ Register A8Emitter::_cgCall(Register r1, int identifier)
 						  fId, reg);
 			break;
 		}
-	_regs->free(r1);
 	return r;
 	}
 
@@ -2133,3 +2135,47 @@ Register A8Emitter::_cgExtendIfNeeded(Register r, int pType)
 		
 	return r;
 	}
+	
+/*****************************************************************************\
+|* Copy any function arguments to the correct memory, and call a function
+\*****************************************************************************/
+Register A8Emitter::_genFuncCall(ASTNode *node, String label)
+	{
+	ASTNode *gluetree 	= node->left();
+	Register none(Register::NO_REGISTER);
+
+	// If there is a list of arguments, walk this list from the last argument
+	// (right-hand child) to the first
+	while (gluetree)
+		{
+		// Calculate the expression's value
+		Register reg 	= emit(gluetree->right(), none, gluetree->op(), label);
+		int at			= functionParameterLocation(reg.primitiveType());
+		const char *name= reg.name().c_str();
+		
+		switch (reg.size())
+			{
+			case 1:
+				fprintf(_ofp, "\tmove.1 %s $%x\n", name, at);
+				break;
+			
+			case 2:
+				fprintf(_ofp, "\tmove.2 %s $%x\n", name, at);
+				break;
+			
+			case 4:
+				fprintf(_ofp, "\tmove.4 %s $%x\n", name, at);
+				break;
+			
+			default:
+				FATAL(ERR_PARSE, "Unknown register size %d", reg.size());
+			}
+			
+		RegisterFile::clear();
+		gluetree = gluetree->left();
+		}
+
+	// Call the function and return its result
+	return _cgCall(node->value().identifier);
+	}
+

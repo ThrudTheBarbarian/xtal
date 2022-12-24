@@ -76,7 +76,7 @@ class Register
 		|* prepared for the change in terms of its storage
 		\*********************************************************************/
 		void setPrimitiveType(int ptype);
-
+		int primitiveType(void);
 	};
 
 #endif /* Register_h */

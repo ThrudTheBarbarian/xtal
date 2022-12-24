@@ -68,6 +68,14 @@ class Expression
 								  Scanner &scanner,
 								  Token &token,
 								  int &line);
+								
+        /*********************************************************************\
+        |* Handle an expression list
+        \*********************************************************************/
+        static ASTNode * _expressionList(Emitter& emitter,
+								  Scanner &scanner,
+								  Token &token,
+								  int &line);
 		
     public:
         /*********************************************************************\

@@ -175,12 +175,13 @@ ASTNode * Expression::binary(Emitter& emitter,
 		FATAL(ERR_RUNTIME,
 					"Internal compiler error at line %d", line);
 	/*************************************************************************\
-    |* If we hit a semicolon, ] or ), just return the left node
+    |* If we hit a semicolon, comma, ] or ), just return the left node
     \*************************************************************************/
     int tokenType = token.token();
 	if ((tokenType == Token::T_SEMICOLON) ||
 	    (tokenType == Token::T_RPAREN)    ||
-	    (tokenType == Token::T_RBRACE))
+	    (tokenType == Token::T_RBRACE)	  ||
+	    (tokenType == Token::T_COMMA))
 		{
 		left->setIsRValue(true);
 		return left;
@@ -288,12 +289,13 @@ ASTNode * Expression::binary(Emitter& emitter,
 
 		/*********************************************************************\
 		|* Update the details of the current token, if we hit a semicolon,
-		|* or right-parentheses, return just the left node
+		|* comma, ] or ), return just the left node
 		\*********************************************************************/
 		tokenType = token.token();
 		if ((tokenType == Token::T_SEMICOLON) ||
 			(tokenType == Token::T_RPAREN)    ||
-			(tokenType == Token::T_RBRACE))
+			(tokenType == Token::T_RBRACE)	  ||
+			(tokenType == Token::T_COMMA))
 			{
 			left->setIsRValue(true);
 			return left;
@@ -332,9 +334,11 @@ ASTNode * Expression::_funcCall(Emitter& emitter,
     Statement::leftParen(scanner, token, line);
     
 	/*************************************************************************\
-    |* Pase the following expression
+    |* Parse the following expressions
     \*************************************************************************/
-	ASTNode *tree = binary(emitter, scanner, token, line, 0);
+	ASTNode *tree = _expressionList(emitter, scanner, token, line);
+	
+	// FIXME: Need to verify the types here
 	
 	/*************************************************************************\
     |* Build the function-call AST node, store the function's return type as
@@ -595,3 +599,64 @@ ASTNode * Expression::_prefix(Emitter& emitter,
 		}
 	return (tree);
 	}
+
+/*****************************************************************************\
+|* Handle an expression list
+|*
+|* expression_list: <null>
+|*        | expression ',' expression_list
+|*         ;
+|*
+|* Parse a list of zero or more comma-separated expressions and
+|* return an AST composed of A_GLUE nodes with the left-hand child
+|* being the sub-tree of previous expressions (or NULL) and the right-hand
+|* child being the next expression. Each A_GLUE node will have size field
+|* set to the number of expressions in the tree at this point. If no
+|* expressions are parsed, NULL is returned
+\*****************************************************************************/
+ASTNode * Expression::_expressionList(Emitter& emitter,
+									  Scanner &scanner,
+									  Token &token,
+									  int &line)
+	{
+	ASTNode *tree 	= nullptr;
+
+	// Loop until the final right parentheses
+	std::vector<ASTNode *> nodes;
+	while (token.token() != Token::T_RPAREN)
+		{
+		// Parse the next expression and increment the expression count
+    	ASTNode *child = binary(emitter, scanner, token, line, 0);
+		nodes.push_back(child);
+
+		// Must have a ',' or ')' at this point
+		switch (token.token())
+			{
+			case Token::T_COMMA:
+				scanner.scan(token, line);
+				break;
+				
+			case Token::T_RPAREN:
+				break;
+			
+			default:
+				FATAL(ERR_AST_SYNTAX,
+					  "Unexpected token %d in expression at line %d",
+					  token.token(), line);
+			}
+		}
+
+	for (auto it = nodes.rbegin(); it != nodes.rend(); ++it)
+		{
+		tree = new ASTNode(ASTNode::A_GLUE,
+						   PT_NONE,
+						   tree,
+						   nullptr,
+						   *it,
+						   0);
+		}
+
+	// Return the tree of expressions
+	return (tree);
+	}
+	

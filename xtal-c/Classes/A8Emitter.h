@@ -159,7 +159,7 @@ class A8Emitter : public Emitter
 		/*********************************************************************\
         |* Handle a function call
         \*********************************************************************/
-        Register _cgCall(Register r1, int identifier);
+        Register _cgCall(int symIdx);
          
 		/*********************************************************************\
         |* Handle a function call
@@ -255,6 +255,11 @@ class A8Emitter : public Emitter
         |* Extend a register if necessary
         \*********************************************************************/
         Register _cgExtendIfNeeded(Register r, int pType);
+
+		/*********************************************************************\
+        |* Generate a function call
+        \*********************************************************************/
+        Register _genFuncCall(ASTNode *node, String label);
 
 		
     public:
