@@ -2144,6 +2144,9 @@ Register A8Emitter::_genFuncCall(ASTNode *node, String label)
 	ASTNode *gluetree 	= node->left();
 	Register none(Register::NO_REGISTER);
 
+	// FIXME: Get the lesser of this fn and current fn args, and stash
+	// FIXME: them on the stack
+
 	// If there is a list of arguments, walk this list from the last argument
 	// (right-hand child) to the first
 	while (gluetree)
@@ -2177,5 +2180,8 @@ Register A8Emitter::_genFuncCall(ASTNode *node, String label)
 
 	// Call the function and return its result
 	return _cgCall(node->value().identifier);
+	
+	// FIXME: before returning, pull any of the stashed values off the
+	// FIXME: stack and repopulate them into fn args
 	}
 
