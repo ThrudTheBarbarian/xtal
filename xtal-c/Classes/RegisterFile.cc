@@ -179,8 +179,10 @@ bool RegisterFile::widen(Register& reg, int oldWidth, int newWidth)
 /*****************************************************************************\
 |* Deallocate a register
 \*****************************************************************************/
-void RegisterFile::free(Register& reg)
+bool RegisterFile::free(Register& reg)
 	{
+	bool ok = false;
+	
 	/************************************************************************\
     |* Clear out the map for this register
     \************************************************************************/
@@ -203,9 +205,14 @@ void RegisterFile::free(Register& reg)
 		idx ++;
 		}
 	if (found >= 0)
+		{
 		_allocated.erase(_allocated.begin() + found);
+		ok = true;
+		}
 	else
 		WARN("Cannot find %s in register file!", reg.toString().c_str());
+	
+	return ok;
 	}
 	
 #pragma mark - Private Methods

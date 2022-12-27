@@ -99,7 +99,7 @@ class RegisterFile
         /***********************************************************************\
         |* Free up a register
         \***********************************************************************/
-        static void free(Register& reg);
+        static bool free(Register& reg);
             
         /***********************************************************************\
         |* Debugging: dump out register allocations

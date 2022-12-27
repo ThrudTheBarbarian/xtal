@@ -1,10 +1,10 @@
 
-u8 dummy()
+u8 dummy(u16 y)
 	[
 	return (50);
 	]
 
-s32 bigDummy()
+s32 bigDummy(u16 y)
 	[
 	return (500);
 	]

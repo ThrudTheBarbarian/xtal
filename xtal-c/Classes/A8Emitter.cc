@@ -748,8 +748,11 @@ Register A8Emitter::_cgAdd(Register r1, Register r2)
 		r2.name().c_str(),
 		result.name().c_str());
 
-	_regs->free(r1);
-	_regs->free(r2);
+	if (!_regs->free(r1))
+		fprintf(_ofp, "; *** Failed to free register %s\n", r1.name().c_str());
+	if (!_regs->free(r2))
+		fprintf(_ofp, "; *** Failed to free register %s\n", r2.name().c_str());
+	
 	return result;
 	}
 
@@ -2147,9 +2150,12 @@ Register A8Emitter::_genFuncCall(ASTNode *node, String label)
 	StringList saves;
 	StringList moves;
 	StringList restore;
-	
-	// If there is a list of arguments, walk this list from the last argument
-	// (right-hand child) to the first
+
+	_fnParamAt = FN_PARAM_MIN;
+
+	/************************************************************************\
+    |* If there is a list of arguments, walk this list
+	\************************************************************************/
 	int sv = FN_PARAM_MIN;
 	while (gluetree)
 		{
@@ -2208,11 +2214,27 @@ Register A8Emitter::_genFuncCall(ASTNode *node, String label)
 		gluetree = gluetree->left();
 		}
 
+	/************************************************************************\
+    |* Make sure we're not going over
+	\************************************************************************/
 	if (sv >= FN_PARAM_MAX)
-		FATAL(ERR_FUNCTION, "Cannot call function with >16 bytes of args");
+		FATAL(ERR_FUNCTION, "Cannot call function with >%d bytes of args",
+							FN_PARAM_MAX - FN_PARAM_MIN+1);
 
+	/************************************************************************\
+    |* Show some info in the assembly
+	\************************************************************************/
 	int bytes = sv-FN_PARAM_MIN;
 
+	Symbol sFn = SYMTAB->at(node->value().identifier);
+	const char * fnName = sFn.name().c_str();
+	fprintf(_ofp, "\n; Function call %s [%d bytes]\n;\n", fnName, bytes);
+	
+
+	/************************************************************************\
+    |* See if we need to preserve the function args - there's no need if we
+    |* are in main()
+	\************************************************************************/
 	if (SYMTAB->currentFunction().name() != "main")
 		{
 		// Adjust the stack pointer down by the number of bytes we need
@@ -2225,13 +2247,21 @@ Register A8Emitter::_genFuncCall(ASTNode *node, String label)
 			fprintf(_ofp, "%s\n", cmd.c_str());
 		}
 		
+	/************************************************************************\
+    |* Update the function-calling args
+	\************************************************************************/
 	for (String cmd : moves)
 		fprintf(_ofp, "%s\n", cmd.c_str());
 
-	// Call the function and return its result
+	/************************************************************************\
+    |* Call the function and return its result
+	\************************************************************************/
 	Register ret = _cgCall(node->value().identifier);
 
 
+	/************************************************************************\
+    |* Restore the stashed values if we preserved them
+	\************************************************************************/
 	if (SYMTAB->currentFunction().name() != "main")
 		{
 		// Copy the function register data to the stack storage
@@ -2244,8 +2274,7 @@ Register A8Emitter::_genFuncCall(ASTNode *node, String label)
 						  "\t_add16i $%x,%d\n", bytes, SP, bytes);
 		}
 		
-	_fnParamAt = FN_PARAM_MIN;
-	RegisterFile::clear();
+	//RegisterFile::clear();
 	return ret;
 	}
 
