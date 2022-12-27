@@ -98,6 +98,9 @@ void Emitter::functionPreamble(int funcId)
 	if (_ofp != nullptr)
 		{
 		Symbol s 			= SYMTAB->at(funcId);
+		if (s.pType() == PT_NONE)
+			FATAL(ERR_TYPE, "Unknown function for id %d", funcId);
+			
 		const char *name	= s.name().c_str();
 		
         /*********************************************************************\
@@ -111,7 +114,9 @@ void Emitter::functionPreamble(int funcId)
 			|* function signature
 			\*****************************************************************/
 			Symbol& arg = SYMTAB->at(argId);
-			if (arg.sClass() != Symbol::C_PARAM)
+			if (arg.pType() == PT_NONE)
+				FATAL(ERR_TYPE, "Unknown argument for id %d", argId);
+			if (arg.sClass() != C_PARAM)
 				break;
 			
 			/*****************************************************************\
@@ -120,7 +125,9 @@ void Emitter::functionPreamble(int funcId)
 			\*****************************************************************/
 			int localIdx = SYMTAB->find(arg.name(), SymbolTable::SEARCH_LOCAL);
 			Symbol& localArg = SYMTAB->at(localIdx);
-			
+			if (localArg.pType() == PT_NONE)
+				FATAL(ERR_TYPE, "Unknown local argument for id %d", localIdx);
+
 			int where = -1;
 			switch (arg.pType())
 				{
@@ -181,6 +188,9 @@ void Emitter::functionPostamble(int funcId)
 	if (_ofp != nullptr)
 		{
 		Symbol s = SYMTAB->at(funcId);
+		if (s.pType() == PT_NONE)
+			FATAL(ERR_TYPE, "Unknown function for id %d", funcId);
+
 		cgLabel(s.endLabel());
 		
 		if (_stackOffset > 0)

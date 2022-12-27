@@ -14,6 +14,8 @@
 #include "properties.h"
 #include "macros.h"
 
+#include "Symbol.h"
+
 class ASTNode;
 class Scanner;
 class Emitter;
@@ -64,13 +66,12 @@ class Statement
 		void _varDeclaration(Token& token,
 							 int& line,
 							 int type,
-							 bool isLocal,
-							 bool isParam);
+							 Storage sClass);
 		
         /********************************************************************\
         |* Handle parameter declarations
         \********************************************************************/
-		int _paramDeclaration(Token& token, int& line);
+		int _paramDeclaration(Token& token, int& line, int idx);
 
         /********************************************************************\
         |* Process a function declaration

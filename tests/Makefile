@@ -17,11 +17,11 @@ clean:
 	@$(RM) -f $(BINS) *.out
 	
 %.exe : %.xt
-	@$(XC) $< -o $@
-	@$(SIM) $@ > $*.out
+	- @$(XC) $< -o $@ > $*.out 2>&1 || true
+	- @$(SIM) $@ >> $*.out >> $*.out 2>&1 || true
 	@cmp -s $*.out expected/$*.run; \
 	RETVAL=$$?; \
-	printf "%-20s" $<; \
+	printf "%-28s" $<; \
 	if [ $$RETVAL -eq 0 ]; then \
 		$(call print, 2, " PASS"); \
 	else \

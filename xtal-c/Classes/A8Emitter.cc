@@ -73,7 +73,10 @@ Register A8Emitter::emit(ASTNode *node,
 		case ASTNode::A_FUNCTION:
 			{
 			int funcId  = node->value().identifier;
-			auto symbol = SYMTAB->at(funcId);
+			Symbol& symbol = SYMTAB->at(funcId);
+			if (symbol.pType() == PT_NONE)
+				FATAL(ERR_TYPE, "Unknown function for id %d", funcId);
+
 			functionPreamble(funcId);
 			emit(node->left(), none, node->op(), "");
 			functionPostamble(funcId);
@@ -122,11 +125,15 @@ Register A8Emitter::emit(ASTNode *node,
 			{
 			if (node->isRValue() || (parentAstOp == ASTNode::A_DEREF))
 				{
-				auto sym = SYMTAB->at(node->value().identifier);
-				if (sym.sClass() == Symbol::C_LOCAL)
-					return _cgLoadLocal(node->value().identifier, node->op());
+				int nodeId = node->value().identifier;
+				Symbol& sym = SYMTAB->at(nodeId);
+				if (sym.pType() == PT_NONE)
+					FATAL(ERR_TYPE, "Unknown identifier for id %d", nodeId);
+
+				if (sym.sClass() == C_LOCAL)
+					return _cgLoadLocal(nodeId, node->op());
 				else
-					return _cgLoadGlob(node->value().identifier, node->op());
+					return _cgLoadGlob(nodeId, node->op());
 				}
 			else
 				return none;
@@ -137,8 +144,12 @@ Register A8Emitter::emit(ASTNode *node,
 				{
 				case ASTNode::A_IDENT:
 					{
-					auto sym = SYMTAB->at(node->right()->value().identifier);
-					if (sym.sClass() == Symbol::C_LOCAL)
+					int nodeId = node->right()->value().identifier;
+					Symbol& sym = SYMTAB->at(nodeId);
+					if (sym.pType() == PT_NONE)
+						FATAL(ERR_TYPE, "Unknown identifier for id %d", nodeId);
+					
+					if (sym.sClass() == C_LOCAL)
 						return (_cgStoreLocal(left, sym));
 					else
 						return _cgStoreGlobal(left, sym);
@@ -192,22 +203,27 @@ Register A8Emitter::emit(ASTNode *node,
 		case ASTNode::A_POSTDEC:
 			// Load the variable's value into a register, then increment it
 			{
-			auto sym = SYMTAB->at(node->value().identifier);
-			if (sym.sClass() == Symbol::C_LOCAL)
-				return _cgLoadLocal(node->value().identifier, node->op());
+			int nodeId = node->value().identifier;
+			Symbol& sym = SYMTAB->at(nodeId);
+			if (sym.pType() == PT_NONE)
+				FATAL(ERR_TYPE, "Unknown post-op identifier for id %d", nodeId);
+			if (sym.sClass() == C_LOCAL)
+				return _cgLoadLocal(nodeId, node->op());
 			
-			return _cgLoadGlob(node->value().identifier, node->op());
+			return _cgLoadGlob(nodeId, node->op());
 			}
 		case ASTNode::A_PREINC:
 		case ASTNode::A_PREDEC:
 			// Load and increment the variable's value into a register
 			{
-			int identifier = node->left()->value().identifier;
-			auto sym = SYMTAB->at(identifier);
-			if (sym.sClass() == Symbol::C_LOCAL)
-				return _cgLoadLocal(identifier, node->op());
+			int nodeId = node->left()->value().identifier;
+			Symbol& sym = SYMTAB->at(nodeId);
+			if (sym.pType() == PT_NONE)
+				FATAL(ERR_TYPE, "Unknown pre-op identifier for id %d", nodeId);
+			if (sym.sClass() == C_LOCAL)
+				return _cgLoadLocal(nodeId, node->op());
 			
-			return _cgLoadGlob(identifier, node->op());
+			return _cgLoadGlob(nodeId, node->op());
 			}
 
 		case ASTNode::A_NEGATE:
@@ -305,7 +321,9 @@ void A8Emitter::genSymbol(int idx)
 	char buf[1024];
 	
 	Symbol symbol 	= SYMTAB->at(idx);
-	if (symbol.sClass() != Symbol::C_GLOBAL)
+	if (symbol.pType() == PT_NONE)
+		FATAL(ERR_TYPE, "Unknown identifier for id %d", idx);
+	if (symbol.sClass() != C_GLOBAL)
 		return;
 		
 	String name 	= symbol.name();
@@ -398,7 +416,9 @@ Register A8Emitter::_cgLoadInt(int val, int primitiveType)
 Register A8Emitter::_cgLoadGlobalStr(int val)
 	{
 	Register r	= _regs->allocate(Register::UNSIGNED_2BYTE);
-	Symbol s	= SYMTAB->at(val);
+	Symbol& s	= SYMTAB->at(val);
+	if (s.pType() == PT_NONE)
+		FATAL(ERR_TYPE, "Unknown identifier for id %d", val);
 	
 	fprintf(_ofp, "\tmove.2 #S_%s %s\n",s.name().c_str(), r.name().c_str());
 	return r;
@@ -1198,7 +1218,10 @@ Register A8Emitter::_cgWhileAST(ASTNode *node)
 \*****************************************************************************/
 Register A8Emitter::_cgCall(int symIdx)
 	{
-	auto symbol = SYMTAB->at(symIdx);
+	Symbol& symbol = SYMTAB->at(symIdx);
+	if (symbol.pType() == PT_NONE)
+		FATAL(ERR_TYPE, "Unknown identifier for id %d", symIdx);
+
 	fprintf(_ofp, "\tcall %s\n", symbol.name().c_str());
 
 	if (symbol.pType() == PT_VOID)
@@ -1240,7 +1263,9 @@ Register A8Emitter::_cgCall(int symIdx)
 \*****************************************************************************/
 void A8Emitter::_cgReturn(Register r1, int funcId)
 	{
-	Symbol s = SYMTAB->at(funcId);
+	Symbol& s = SYMTAB->at(funcId);
+	if (s.pType() == PT_NONE)
+		FATAL(ERR_TYPE, "Unknown function identifier for id %d", funcId);
 	
 	switch (s.pType())
 		{
@@ -1276,7 +1301,9 @@ Register A8Emitter::_cgAddress(int identifier)
 	
 	// Fetch the symbol
 	Symbol s 	= SYMTAB->at(identifier);
-	if (s.sClass() == Symbol::C_LOCAL)
+	if (s.pType() == PT_NONE)
+		FATAL(ERR_TYPE, "Unknown address identifier for id %d", identifier);
+	if (s.sClass() == C_LOCAL)
 		{
 		if (s.position() != 0)
 			fprintf(_ofp, "\tmove.2 " STACK_PTR " %s; offset = %d\n"
@@ -1490,6 +1517,8 @@ Register A8Emitter::_cgShr(Register r1, Register r2)
 Register A8Emitter::_cgLoadLocal(int identifier, int op)
 	{
 	Symbol s  			= SYMTAB->at(identifier);
+	if (s.pType() == PT_NONE)
+		FATAL(ERR_TYPE, "Unknown local identifier for id %d", identifier);
 	
 	/*************************************************************************\
     |* Get a new register, U16PTR to do stack arithmetic with
@@ -1681,10 +1710,13 @@ Register A8Emitter::_cgLoadLocal(int identifier, int op)
 Register A8Emitter::_cgLoadGlob(int identifier, int op)
 	{
 	Symbol s  			= SYMTAB->at(identifier);
+	if (s.pType() == PT_NONE)
+		FATAL(ERR_TYPE, "Unknown global identifier for id %d", identifier);
+		
 	Register r 			= _regs->allocateForPrimitiveType(s.pType());
 	
 	String symName		= "S_"+s.name();
-	if (s.sClass() == Symbol::C_PARAM)
+	if (s.sClass() == C_PARAM)
 		symName = toHexString(s.location(), "$");
 		
 	const char *name 	= (char *) symName.c_str();
@@ -2226,7 +2258,11 @@ Register A8Emitter::_genFuncCall(ASTNode *node, String label)
 	\************************************************************************/
 	int bytes = sv-FN_PARAM_MIN;
 
-	Symbol sFn = SYMTAB->at(node->value().identifier);
+	int nodeId = node->value().identifier;
+	Symbol sFn = SYMTAB->at(nodeId);
+	if (sFn.pType() == PT_NONE)
+		FATAL(ERR_TYPE, "Unknown function identifier for id %d", nodeId);
+
 	const char * fnName = sFn.name().c_str();
 	fprintf(_ofp, "\n; Function call %s [%d bytes]\n;\n", fnName, bytes);
 	

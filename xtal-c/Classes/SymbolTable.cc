@@ -58,7 +58,7 @@ int SymbolTable::find(const String& name, int whereToLook)
 			{
 			for (int i=0; i<_globals.size(); i++)
 				{
-				if (_globals[i].sClass() == Symbol::C_PARAM)
+				if (_globals[i].sClass() == C_PARAM)
 					continue;
 				if (_globals[i].name() == name)
 					{
@@ -87,11 +87,21 @@ bool SymbolTable::isValid(int symbolId)
 \****************************************************************************/
 Symbol& SymbolTable::at(int idx)
 	{
+	static Symbol none("none", PT_NONE, ST_NONE,0, "");
+
 	if (idx >= LOCAL_OFFSET)
-		return _locals.at(idx - LOCAL_OFFSET);
+		{
+		idx -= LOCAL_OFFSET;
+		if (idx < _locals.size())
+			return _locals.at(idx);
+		}
 	else if (idx >= 0)
-		return _globals.at(idx);
-	FATAL(ERR_TYPE, "Attempt to find non-existent symbol");
+		{
+		if (idx < _globals.size())
+			return _globals.at(idx);
+		}
+		
+	return none;
 	}
 	
 /****************************************************************************\
@@ -101,7 +111,7 @@ int SymbolTable::addGlobal(const String& name,
 					 int pType,
 					 StructuralType sType,
 					 int size,
-					 Symbol::Storage storageClass)
+					 Storage storageClass)
 	{
 	/*************************************************************************\
 	|* Sanity check that we haven't already allocated the symbol
@@ -109,11 +119,16 @@ int SymbolTable::addGlobal(const String& name,
 	int idx = find(name, SEARCH_GLOBAL);
 	if (idx != NOT_FOUND)
 		return idx;
-	
+
+	/*************************************************************************\
+	|* Create the global
+	\*************************************************************************/
 	Symbol s(name, pType, sType, size);
 	s.setSClass(storageClass);
+	idx = (int) _globals.size();
 	_globals.push_back(s);
-	return (int)(_globals.size()-1);
+		
+	return idx;
 	}
 
 /****************************************************************************\
@@ -122,8 +137,9 @@ int SymbolTable::addGlobal(const String& name,
 int SymbolTable::addLocal(const String& name,
 					 int pType,
 					 StructuralType sType,
-					 bool isParam,
-					 int size)
+					 int size,
+					 Storage sClass
+					 )
 	{
 	int symIdx = NOT_FOUND;
 	Symbol s(name, pType, sType, size);
@@ -136,37 +152,17 @@ int SymbolTable::addLocal(const String& name,
 	if (idx != NOT_FOUND)
 		return NOT_FOUND;
 	
-	/*************************************************************************\
-	|* If this is a parameter, then also add it to the globals list as a
-	|* C_PARAM, to build the function prototype
+	/**************************************************************************\
+	|* Make space for it and register it
 	\*************************************************************************/
-	if (isParam)
-		{
-		/*********************************************************************\
-		|* Make space for it and register it
-		\*********************************************************************/
-		s.setSClass(Symbol::C_PARAM);
-		symIdx = (int)(_locals.size()) + LOCAL_OFFSET;
-		
-		/*********************************************************************\
-		|* Add a global C_PARAM type, to build the function prototype
-		\*********************************************************************/
-		this->addGlobal(name, pType, sType, size, Symbol::C_PARAM);
-		}
-	else
-		{
-		/*********************************************************************\
-		|* Make space for it and register it
-		\*********************************************************************/
-		s.setSClass(Symbol::C_LOCAL);
-		symIdx = (int)(_locals.size()) + LOCAL_OFFSET;
-		
-		/*********************************************************************\
-		|* Update the stack position index
-		\*********************************************************************/
-		int posn = _emitter->genGetLocalOffset(pType, false);
-		s.setPosition(posn);
-		}
+	s.setSClass(sClass);
+	symIdx = (int)(_locals.size()) + LOCAL_OFFSET;
+	
+	/*************************************************************************\
+	|* Update the stack position index
+	\*************************************************************************/
+	int posn = _emitter->genGetLocalOffset(pType, false);
+	s.setPosition(posn);
 		
 	_locals.push_back(s);
 	return symIdx;
@@ -188,4 +184,30 @@ Symbol SymbolTable::currentFunction(void)
 void SymbolTable::freeLocalSymbols(void)
 	{
 	_locals.clear();
+	}
+
+/****************************************************************************\
+|* Copy the function params into the local space, from the global space, for
+|* a given index in the global space
+\****************************************************************************/
+void SymbolTable::copyFuncParams(int idx)
+	{
+	Symbol& s = SYMTAB->at(idx);
+	if (s.pType() == PT_NONE)
+		FATAL(ERR_TYPE, "Unknown identifier for id %d in copy[G->L]", idx);
+	
+	int child = idx + 1;
+	for (int i=0; i<s.numParams(); i++)
+		{
+		Symbol& childSymbol = SYMTAB->at(child);
+		if (childSymbol.pType() == PT_NONE)
+			FATAL(ERR_TYPE, "Unknown child identifier for id %d", child);
+
+		SYMTAB->addLocal(childSymbol.name(),
+						 childSymbol.pType(),
+						 childSymbol.sType(),
+						 childSymbol.size(),
+						 childSymbol.sClass());
+		child ++;
+		}
 	}

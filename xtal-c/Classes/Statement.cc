@@ -143,12 +143,16 @@ ASTNode * Statement::globalDeclaration(Token& token, int&line)
 		if (token.token() == Token::T_LPAREN)
 			{
 			tree = _functionDeclaration(token, line, type);
+			
+			// Check for a function prototype
+			if (tree == nullptr)
+				continue;
 			_emitter->emit(tree, none, 0, "");
 			}
 		else
 			{
 			// Parse a global variable and skip past the semicolon
-			_varDeclaration(token, line, type, false, false);
+			_varDeclaration(token, line, type, C_GLOBAL);
 			_semicolon(*_scanner, token, line);
 			}
 			
@@ -257,7 +261,7 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 			_identifier(*_scanner, token, line);
 			
 			// Declare the variable then skip over the semicolon
-			_varDeclaration(token, line, type, true, false);
+			_varDeclaration(token, line, type, C_LOCAL);
 			_semicolon(*_scanner, token, line);
 			tree = nullptr;
 			break;
@@ -490,11 +494,25 @@ int Statement::_parseType(Token& token, int& line)
 |* Parse the parameters in parentheses after the function name.
 |* Add them as symbols to the symbol table and return the number
 |* of parameters
+|*
+|* If idx is not -1, there is an existing function prototype, and the function
+|* has this symbol slot number.
 \****************************************************************************/
-int Statement::_paramDeclaration(Token& token, int& line)
+int Statement::_paramDeclaration(Token& token, int& line, int idx)
 	{
-	int count = 0;
-
+	Symbol sym;
+	int count 			= 0;
+	int paramId 		= idx + 1;
+	int origNumParams	= 0;
+	
+	if (idx != SymbolTable::NOT_FOUND)
+		{
+		sym 			= SYMTAB->at(idx);
+		if (sym.pType() == PT_NONE)
+			FATAL(ERR_TYPE, "Unknown function identifier for id %d", idx);
+		origNumParams	= sym.numParams();
+		}
+		
 	// Loop until the final right parentheses
 	while (token.token() != Token::T_RPAREN)
 		{
@@ -504,7 +522,18 @@ int Statement::_paramDeclaration(Token& token, int& line)
 		// Match an identifier
 		_identifier(*_scanner, token, line);
 		
-		_varDeclaration(token, line, type, true, true);
+		// If we have an existing prototype, check each param-type matches
+		if (paramId)
+			{
+			sym = SYMTAB->at(paramId);
+			if (sym.pType() == PT_NONE)
+				FATAL(ERR_TYPE, "Unknown param for id %d", paramId);
+			if (type != sym.pType())
+				FATAL(ERR_TYPE, "Type doesn't match at index %d", count +1);
+			paramId ++;
+			}
+		else
+			_varDeclaration(token, line, type, C_PARAM);
     	count ++;
 
 		// Must have a ',' or ')' at this point
@@ -522,7 +551,15 @@ int Statement::_paramDeclaration(Token& token, int& line)
 								line);
 			}
 		}
-
+	
+	// Check the number of parameters matches the prototype, if we have one
+	if ((idx != SymbolTable::NOT_FOUND) && (count != origNumParams))
+		{
+		sym = SYMTAB->at(idx);
+		FATAL(ERR_FUNCTION, "Parameter count mismatch for function %s",
+							sym.name().c_str());
+		}
+		
 	// Return the count of parameters
 	return(count);
 	}
@@ -536,8 +573,7 @@ int Statement::_paramDeclaration(Token& token, int& line)
 void Statement::_varDeclaration(Token& token,
 								int& line,
 								int type,
-								bool isLocal,
-								bool isParam)
+								Storage sClass)
 	{
 	String name = _scanner->text();
 	int symIdx	= -1;
@@ -553,7 +589,7 @@ void Statement::_varDeclaration(Token& token,
 			{
 			// Add this as a known array and generate its space in assembly.
 			// We treat the array as a pointer to its elements' type
-			if (isLocal)
+			if (sClass == C_LOCAL)
 				{
 				/*
 				symIdx = SYMTAB->addLocal(name,
@@ -568,7 +604,8 @@ void Statement::_varDeclaration(Token& token,
 				symIdx = SYMTAB->addGlobal(name,
 										  Types::pointerTo(type),
 										  ST_ARRAY,
-										  token.intValue());
+										  token.intValue(),
+										  sClass);
 			// Tell the emitter to reserve space for our variable
 			_emitter->genSymbol(symIdx);
 			}
@@ -580,15 +617,15 @@ void Statement::_varDeclaration(Token& token,
 	else
 		{
 		// Add this as a known scalar and generate its space in assembly
-		if (isLocal)
+		if (sClass == C_LOCAL)
 			{
-			symIdx = SYMTAB->addLocal(name, type, ST_VARIABLE, isParam, 1);
+			symIdx = SYMTAB->addLocal(name, type, ST_VARIABLE, 1, sClass);
 			if (symIdx < 0)
 				FATAL(ERR_PARSE, "Duplicate local variable %s at %d",
 								name.c_str(), line);
 			}
 		else
-			symIdx = SYMTAB->addGlobal(name, type, ST_VARIABLE, 1);
+			symIdx = SYMTAB->addGlobal(name, type, ST_VARIABLE, 1, sClass);
 
 		_emitter->genSymbol(symIdx);
 		}
@@ -602,30 +639,82 @@ ASTNode * Statement::_functionDeclaration(Token& token,
 										  int& line,
 										  int type)
 	{
-	// the text() accessor gives access to the name of the
-	// symbol that has been scanned, and we have the type passed in
-	int symIdx = SYMTAB->addGlobal(_scanner->text(), type, ST_FUNCTION, 0);
-	SYMTAB->setFunctionId(symIdx);
+	int idx = SYMTAB->find(_scanner->text());
+
+	/************************************************************************\
+    |* If we have a symbol, and it's a function, then set the index
+    \************************************************************************/
+	if (idx != SymbolTable::NOT_FOUND)
+		{
+		Symbol s = SYMTAB->at(idx);
+		if (s.pType() == PT_NONE)
+			FATAL(ERR_TYPE, "Unknown function identifier for id %d", idx);
+		if (s.sType() != ST_FUNCTION)
+			idx = -1;
+		}
+
+	/************************************************************************\
+    |* If this is a new function, then add it to the symbol table as a global
+    \************************************************************************/
+	int symIdx = SYMTAB->addGlobal(_scanner->text(),
+								   type,
+								   ST_FUNCTION,
+								   0,
+								   C_GLOBAL);
 	
-	// Reset the local frame offset within the stack pointer
+	/************************************************************************\
+    |* Reset the local frame offset within the stack pointer
+    \************************************************************************/
 	_emitter->genResetLocals();
 
-	// Open the parentheses
+	/************************************************************************\
+    |* Open the parentheses
+    \************************************************************************/
 	leftParen(*_scanner, token, line);
 	
-	// Parse the parameters
-	int numParams = _paramDeclaration(token, line);
-	SYMTAB->at(symIdx).setNumParams(numParams);
+	/************************************************************************\
+    |* Parse the parameters, and set the expected number if this is a new
+    |* function declaration
+    \************************************************************************/
+	int numParams = _paramDeclaration(token, line, idx);
+	if (idx == -1)
+		SYMTAB->at(symIdx).setNumParams(numParams);
 
-	// Close the parentheses
+	/************************************************************************\
+    |* Close the parentheses
+    \************************************************************************/
 	rightParen(*_scanner, token, line);
 
-	// Get the AST for the compound statement
+	/************************************************************************\
+    |* Check to see if it's just a prototype (ie: next is a ; not a [)
+    \************************************************************************/
+	if (token.token() == Token::T_SEMICOLON)
+		{
+		_scanner->scan(token, line);
+		return nullptr;
+		}
+
+	/************************************************************************\
+    |* So not just a prototype, copy the global params to the local space
+    \************************************************************************/
+	if (idx == SymbolTable::NOT_FOUND)
+		idx = symIdx;
+	SYMTAB->copyFuncParams(idx);
+
+	/************************************************************************\
+    |* Set the current-function-id to point to this one
+    \************************************************************************/
+	SYMTAB->setFunctionId(idx);
+
+	/************************************************************************\
+    |* Get the AST for the compound statement
+    \************************************************************************/
 	ASTNode *tree = compoundStatement(token, line);
 	
-	// If the function type isn't P_VOID, check that
-	// the last AST operation in the compound statement
-	// was a return statement
+	/************************************************************************\
+    |* If the function type isn't P_VOID, check that the last AST operation
+    |* in the compound statement was a return statement
+    \************************************************************************/
 	if (type != PT_VOID)
 		{
 		if (tree == nullptr)
@@ -638,9 +727,10 @@ ASTNode * Statement::_functionDeclaration(Token& token,
 			FATAL(ERR_PARSE, "No return for function with non-void type");
 		}
 
-	
-	// Return the AST node representing a function wrapping the body
-	return new ASTNode(ASTNode::A_FUNCTION, type, tree, symIdx);
+	/************************************************************************\
+    |* Return the AST node representing a function wrapping the body
+    \************************************************************************/
+	return new ASTNode(ASTNode::A_FUNCTION, type, tree, idx);
 	}
 
 

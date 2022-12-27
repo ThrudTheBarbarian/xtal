@@ -102,7 +102,7 @@ class SymbolTable
 					  int pType,
 					  StructuralType sType,
 					  int size,
-					  Symbol::Storage storageClass = Symbol::C_GLOBAL);
+					  Storage storageClass = C_GLOBAL);
 
         /********************************************************************\
         |* Add a local variable, and return the new slot position
@@ -110,12 +110,19 @@ class SymbolTable
 		int addLocal(const String& name,
 					  int pType,
 					  StructuralType sType,
-					  bool isParam,
-					  int size);
+					  int size,
+					  Storage sClass);
 
         /**********************************************************************\
         |* This method returns the default global instance.          \**********************************************************************/
         static std::shared_ptr<SymbolTable> sharedInstance();
-	};
+
+        /**********************************************************************\
+        |* Copy the function params into the local space, from the global
+        |* space, for a given index in the global space \**********************************************************************/
+        static void copyFuncParams(int idx);
+        
+
+		};
 
 #endif /* SymbolTable_h */

@@ -53,11 +53,19 @@ enum
 // Structural types (function, variable, array)
 typedef enum
 	{
+	ST_NONE		= -1,
 	ST_VARIABLE	= 1,
 	ST_FUNCTION,
 	ST_ARRAY
 	} StructuralType;
 
+typedef enum
+	{
+	C_GLOBAL	= 1,		// Obviously, a global symbol
+	C_LOCAL,				// And a local symbol
+	C_PARAM 				// A parameter for a function
+	} Storage;
+	
 #define STACK_PTR			"$8D"			// Stack pointer address (+$8E)
 
 #endif /* ! sharedDefines_h */
