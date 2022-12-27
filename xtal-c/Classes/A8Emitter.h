@@ -27,8 +27,9 @@ class A8Emitter : public Emitter
     NON_COPYABLE_NOR_MOVEABLE(A8Emitter)
 
 	/*************************************************************************\
-    |* Properties
+    |* Public consts
     \*************************************************************************/
+    static const int SP	= 0x8D;
     
     private:
         

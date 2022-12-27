@@ -318,6 +318,22 @@ sp	= $8d		; also $8e
 		sta (%2),y
 .endmacro
 
+;
+; Variant - accept a third parameter as non-zero Y
+.macro _xferpn8
+		lda %1
+		ldy #%3
+		sta (%2),y
+.endmacro
+
+;
+; Variant - transfer from the indirected vector to an absolute address
+.macro _xferbn8
+		ldy #%3
+		lda (%2),y
+		sta %1
+.endmacro
+
 ;/*************************************************************************\
 ;|* Type: Basic operation
 ;|*
@@ -335,6 +351,28 @@ sp	= $8d		; also $8e
 		lda %1+1
 		iny
 		sta (%2),y
+.endmacro
+
+;
+; Variant - accept a third parameter as non-zero Y
+.macro _xferpn16
+		lda %1
+		ldy #%3
+		sta (%2),y
+		lda %1+1
+		iny
+		sta (%2),y
+.endmacro
+
+;
+; Variant - transfer from the indirected vector to an absolute address
+.macro _xferbn16
+		ldy #%3
+		lda (%2),y
+		sta %1
+		iny
+		lda (%2),y
+		sta %1+1
 .endmacro
 
 ;/*************************************************************************\
@@ -360,6 +398,40 @@ sp	= $8d		; also $8e
 		lda %1+3
 		iny
 		sta (%2),y
+.endmacro
+
+;
+; Variant - accept a third parameter as non-zero Y
+.macro _xferpn32
+		lda %1
+		ldy #%3
+		sta (%2),y
+		lda %1+1
+		iny
+		sta (%2),y
+		lda %1+2
+		iny
+		sta (%2),y
+		lda %1+3
+		iny
+		sta (%2),y
+.endmacro
+
+;
+; Variant - transfer from the indirected vector to an absolute address
+.macro _xferbn32
+		ldy #%3
+		lda (%2),y
+		sta %1
+		iny
+		lda (%2),y
+		sta %1+1
+		iny
+		lda (%2),y
+		sta %1+2
+		iny
+		lda (%2),y
+		sta %1+3
 .endmacro
 
 
@@ -1326,8 +1398,8 @@ dec0:
 ;/*************************************************************************\
 ;|* Type: Arithmetic operation
 ;|*
-;|* add the 16-bit value at location %1 to the 16-bit value at %2, storing
-;|* the result in %3
+;|* add the 16-bit value %1 to the 16-bit value at %2, storing
+;|* the result in %2
 ;|*
 ;|* Clobbers: A
 ;|* Arguments:
@@ -1555,8 +1627,8 @@ dec0:
 ;/*************************************************************************\
 ;|* Type: Arithmetic operation
 ;|*
-;|* add the 16-bit value at location %1 to the 16-bit value at %2, storing
-;|* the result in %3
+;|* subtract the 16-bit value of %1 from the 16-bit value at %2, storing
+;|* the result in %2
 ;|*
 ;|* Clobbers: A
 ;|* Arguments:

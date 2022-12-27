@@ -35,7 +35,8 @@ The assembler understands the following format:
 		$86			: cmd buffer
 		$87			: fifo #1
 		$88			: fifo #2
-		$89..$8C	: overflow register, used in some arithmetic code
+		$89..$8A	: overflow register, used in some arithmetic code
+		$8B..$8C	: Frame pointer, used for function calls
 		$8D..$8E	: Stack pointer
 		$8F..$9F	: global vars (not swapped, 16 bytes)
 		$A0..$AF	: 16 bytes of function-return-and-args. Not swapped

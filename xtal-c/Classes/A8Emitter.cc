@@ -2144,44 +2144,108 @@ Register A8Emitter::_genFuncCall(ASTNode *node, String label)
 	ASTNode *gluetree 	= node->left();
 	Register none(Register::NO_REGISTER);
 
-	// FIXME: Get the lesser of this fn and current fn args, and stash
-	// FIXME: them on the stack
-
+	StringList saves;
+	StringList moves;
+	StringList restore;
+	
 	// If there is a list of arguments, walk this list from the last argument
 	// (right-hand child) to the first
+	int sv = FN_PARAM_MIN;
 	while (gluetree)
 		{
 		// Calculate the expression's value
 		Register reg 	= emit(gluetree->right(), none, gluetree->op(), label);
 		int at			= functionParameterLocation(reg.primitiveType());
-		const char *name= reg.name().c_str();
 		
 		switch (reg.size())
 			{
 			case 1:
-				fprintf(_ofp, "\tmove.1 %s $%x\n", name, at);
+				saves.push_back("\t_xferpn8"
+							    +toHexString(sv, " $")
+							    +toHexString(SP, ",$")
+							    +toHexString(sv-FN_PARAM_MIN, ",$"));
+				restore.insert(restore.begin(),
+								"\t_xferbn8"
+							    +toHexString(sv, " $")
+							    +toHexString(SP, ",$")
+							    +toHexString(sv-FN_PARAM_MIN, ",$"));
+				sv ++;
+				moves.push_back("\tmove.1 " + reg.name() + toHexString(at, " $"));
 				break;
 			
 			case 2:
-				fprintf(_ofp, "\tmove.2 %s $%x\n", name, at);
+				saves.push_back("\t_xferpn16"
+							    +toHexString(sv, " $")
+							    +toHexString(SP, ",$")
+							    +toHexString(sv-FN_PARAM_MIN, ",$"));
+				restore.insert(restore.begin(),
+								"\t_xferbn16"
+							    +toHexString(sv, " $")
+							    +toHexString(SP, ",$")
+							    +toHexString(sv-FN_PARAM_MIN, ",$"));
+				sv +=2;
+				moves.push_back("\tmove.2 " + reg.name() + toHexString(at, " $"));
 				break;
 			
 			case 4:
-				fprintf(_ofp, "\tmove.4 %s $%x\n", name, at);
+				saves.push_back("\t_xferpn32"
+							    +toHexString(sv, " $")
+							    +toHexString(SP, ",$")
+							    +toHexString(sv-FN_PARAM_MIN, ",$"));
+				restore.insert(restore.begin(),
+								"\t_xferbn32"
+							    +toHexString(sv, " $")
+							    +toHexString(SP, ",$")
+							    +toHexString(sv-FN_PARAM_MIN, ",$"));
+				sv +=4;
+				moves.push_back("\tmove.4 " + reg.name() + toHexString(at, " $"));
 				break;
 			
 			default:
 				FATAL(ERR_PARSE, "Unknown register size %d", reg.size());
 			}
 			
-		RegisterFile::clear();
 		gluetree = gluetree->left();
 		}
 
+	if (sv >= FN_PARAM_MAX)
+		FATAL(ERR_FUNCTION, "Cannot call function with >16 bytes of args");
+
+	int bytes = sv-FN_PARAM_MIN;
+
+	if (SYMTAB->currentFunction().name() != "main")
+		{
+		// Adjust the stack pointer down by the number of bytes we need
+		if (bytes > 0)
+			fprintf(_ofp, "\t;push stack by %d\n"
+						  "\t_sub16i $%x,%d\n", bytes, SP, bytes);
+			
+		// Copy the function register data to the stack storage
+		for (String cmd : saves)
+			fprintf(_ofp, "%s\n", cmd.c_str());
+		}
+		
+	for (String cmd : moves)
+		fprintf(_ofp, "%s\n", cmd.c_str());
+
 	// Call the function and return its result
-	return _cgCall(node->value().identifier);
-	
-	// FIXME: before returning, pull any of the stashed values off the
-	// FIXME: stack and repopulate them into fn args
+	Register ret = _cgCall(node->value().identifier);
+
+
+	if (SYMTAB->currentFunction().name() != "main")
+		{
+		// Copy the function register data to the stack storage
+		for (String cmd : restore)
+			fprintf(_ofp, "%s\n", cmd.c_str());
+
+		// Adjust the stack pointer down by the number of bytes we used
+		if (bytes > 0)
+			fprintf(_ofp, "\t; pop stack by %d\n"
+						  "\t_add16i $%x,%d\n", bytes, SP, bytes);
+		}
+		
+	_fnParamAt = FN_PARAM_MIN;
+	RegisterFile::clear();
+	return ret;
 	}
 
