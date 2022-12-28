@@ -16,6 +16,7 @@
 #include "ASTNode.h"
 #include "A8Emitter.h"
 #include "Expression.h"
+#include "Locator.h"
 #include "Register.h"
 #include "RegisterFile.h"
 #include "Stringutils.h"
@@ -36,9 +37,10 @@ String fileContent(String& path, bool& ok);
 Compiler::Compiler()
 		 :_ap(nullptr)
 		 ,_hadError(false)
-		 ,_line(0)
 	{
 	_hadError 	= false;
+	LOCATOR;						// Set up the notification handler
+	
 	_emitter	= new A8Emitter();
 	SYMTAB->setEmitter(_emitter);
 	}
@@ -103,6 +105,10 @@ int Compiler::main(int argc, const char *argv[])
 	\*************************************************************************/
 	_handleImports(input);
 
+	FILE *dump = fopen("/tmp/src.xt", "w");
+	fwrite(input.c_str(), input.length(), 1, dump);
+	fclose(dump);
+
 	FILE *fp = fopen(output.c_str(), "w");
 	if (fp == NULL)
 		FATAL(ERR_OUTPUT, "Cannot open '%s' for write", output.c_str());
@@ -117,9 +123,9 @@ int Compiler::main(int argc, const char *argv[])
 /*****************************************************************************\
 |* Error handling - display an informative message
 \*****************************************************************************/
-void Compiler::error(int line, std::string msg)
+void Compiler::error(std::string msg)
 	{
-	_report(line, "", msg);
+	_report("", msg);
 	}
 	
 #pragma mark - Private Methods
@@ -137,9 +143,9 @@ int Compiler::_run(std::string source)
 	Token t;
 	Statement stmt(scanner, _emitter);
 		
-	scanner.scan(t, _line);
+	scanner.scan(t);
 	_emitter->preamble();
-	ASTNode *tree = stmt.globalDeclaration(t, _line);
+	ASTNode *tree = stmt.globalDeclaration(t);
 	_emitter->postamble();
 	
 	if (_dumpAST && (tree != nullptr))
@@ -151,10 +157,10 @@ int Compiler::_run(std::string source)
 /*****************************************************************************\
 |* Private method : Generic run method
 \*****************************************************************************/
-void Compiler::_report(int line, std::string where, std::string msg)
+void Compiler::_report(std::string where, std::string msg)
 	{
-	fprintf(stderr, "[line:%d] Error %s:%s\n",
-			line,
+	fprintf(stderr, "%s Error %s:%s\n",
+			LOCATOR->location().c_str(),
 			where.c_str(),
 			msg.c_str());
 	}
@@ -319,8 +325,11 @@ String fileContent(String& path, bool& ok)
 		in.read(&contents[0], contents.size());
 		in.close();
 		ok = true;
+		
+		contents = "#:line 1 "+path+"\n" + contents;
 		}
 	else
 		ok = false;
+		
 	return contents;
 	}

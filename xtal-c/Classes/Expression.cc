@@ -29,8 +29,7 @@ Expression::Expression()
 \*****************************************************************************/
 ASTNode * Expression::primary(Emitter& emitter,
 							  Scanner &scanner,
-							  Token &token,
-							  int &line)
+							  Token &token)
 	{
 	ASTNode *node;
 	int identifier;
@@ -71,21 +70,21 @@ ASTNode * Expression::primary(Emitter& emitter,
 			break;
 
 		case Token::T_IDENT:
-			return _postfix(emitter, scanner, token, line);
+			return _postfix(emitter, scanner, token);
 
 		case Token::T_LPAREN:
 			// Beginning of a parenthesised expression, skip the '('.
 			// Scan in the expression and the right parenthesis
-			scanner.scan(token, line);\
-			node = binary(emitter, scanner, token, line, 0);
-			Statement::rightParen(scanner, token, line);
+			scanner.scan(token);\
+			node = binary(emitter, scanner, token, 0);
+			Statement::rightParen(scanner, token);
 			return node;
 
 		default:
-			FATAL(ERR_AST_SYNTAX, "Syntax error on line %d", line);
+			FATAL(ERR_AST_SYNTAX, "Syntax error");
 		}
 		
-	scanner.scan(token, line);
+	scanner.scan(token);
 	return node;
 	}
 
@@ -95,47 +94,44 @@ ASTNode * Expression::primary(Emitter& emitter,
 \*****************************************************************************/
 ASTNode * Expression::_postfix(Emitter& emitter,
 							   Scanner &scanner,
-							   Token &token,
-							   int &line)
+							   Token &token)
 	{
 	ASTNode *node = nullptr;
 
 	// Scan in the next token to see if we have a postfix expression
-	scanner.scan(token, line);
+	scanner.scan(token);
 
 	// Function call
 	if (token.token() == Token::T_LPAREN)
-		return (_funcCall(emitter, scanner, token, line));
+		return (_funcCall(emitter, scanner, token));
 
 	// An array reference
 	if (token.token() == Token::T_LBRACE)
-		return (_arrayAccess(emitter, scanner, token, line));
+		return (_arrayAccess(emitter, scanner, token));
 
 	// A variable. Check that the variable exists.
 	int identifier 	= SYMTAB->find(scanner.text());
 	if (identifier == SymbolTable::NOT_FOUND)
-		FATAL(ERR_PARSE, "Unknown variable [%s] on line %d",
-						scanner.text().c_str(), line);
+		FATAL(ERR_PARSE, "Unknown variable [%s]", scanner.text().c_str());
 	
 	// And that the symbol is actually a variable
 	Symbol s = SYMTAB->at(identifier);
 	if (s.pType() == PT_NONE)
 		FATAL(ERR_TYPE, "Unknown identifier for id %d", identifier);
 	if (s.sType() != ST_VARIABLE)
-		FATAL(ERR_PARSE, "Symbol %s is not a variable on line %d",
-						scanner.text().c_str(), line);
+		FATAL(ERR_PARSE, "Symbol %s is not a variable", scanner.text().c_str());
 
 	switch (token.token())
 		{
 		// Post-increment: skip over the token
 		case Token::T_INC:
-			scanner.scan(token, line);
+			scanner.scan(token);
 			node = new ASTNode(ASTNode::A_POSTINC, s.pType(), identifier);
 			break;
 
 		// Post-decrement: skip over the token
 		case Token::T_DEC:
- 			scanner.scan(token, line);
+ 			scanner.scan(token);
 			node = new ASTNode(ASTNode::A_POSTDEC, s.pType(), identifier);
 			break;
 
@@ -151,11 +147,11 @@ ASTNode * Expression::_postfix(Emitter& emitter,
 /*****************************************************************************\
 |* Helper to determine if it's an arithmetic operation
 \*****************************************************************************/
-int Expression::_binaryAstOp(int tokentype, int line)
+int Expression::_binaryAstOp(int tokentype)
 	{
 	if (tokentype > Token::T_NONE && tokentype < Token::T_INTLIT)
 		return(tokentype);
-	FATAL(ERR_AST_SYNTAX, "Syntax error on line %d, token %d", line, tokentype);
+	FATAL(ERR_AST_SYNTAX, "Syntax error, token %d", tokentype);
 	}
 
 /*****************************************************************************\
@@ -165,17 +161,16 @@ int Expression::_binaryAstOp(int tokentype, int line)
 ASTNode * Expression::binary(Emitter& emitter,
 							 Scanner &scanner,
 							 Token &token,
-							 int &line,
 							 int previousPrecedence)
 	{
 	/*************************************************************************\
     |* Get the next token and parse it recursively as a prefix expression
     \*************************************************************************/
-	ASTNode *left = _prefix(emitter, scanner, token, line);
+	ASTNode *left = _prefix(emitter, scanner, token);
 	
 	if (left == nullptr)
-		FATAL(ERR_RUNTIME,
-					"Internal compiler error at line %d", line);
+		FATAL(ERR_RUNTIME, "Internal compiler error");
+		
 	/*************************************************************************\
     |* If we hit a semicolon, comma, ] or ), just return the left node
     \*************************************************************************/
@@ -200,7 +195,7 @@ ASTNode * Expression::binary(Emitter& emitter,
 		/*********************************************************************\
 		|* Convert the token into a node-type and scan the next token
 		\*********************************************************************/
-		scanner.scan(token, line);
+		scanner.scan(token);
 		
 		/*********************************************************************\
 		|* Recursively get the right-hand tree based on precedence
@@ -208,13 +203,12 @@ ASTNode * Expression::binary(Emitter& emitter,
 		ASTNode *right = binary(emitter,
 								scanner,
 								token,
-								line,
 								Token::precedence(tokenType));
 
  		/*********************************************************************\
 		|* Determine the operation to perform on the subtrees
 		\*********************************************************************/
-		int ASTop 		= _binaryAstOp(tokenType, line);
+		int ASTop 		= _binaryAstOp(tokenType);
 
  		/*********************************************************************\
 		|* If we're assigning, then make the tree an r-value
@@ -231,12 +225,10 @@ ASTNode * Expression::binary(Emitter& emitter,
 			\*****************************************************************/
 			right = Types::modify(right, left->type(), 0);
 			if ((right == nullptr) || (left == nullptr))
-				FATAL(ERR_RUNTIME,
-							"Internal compiler error at line %d", line);
+				FATAL(ERR_RUNTIME, "Internal compiler error");
 			
 			if (left == nullptr)
-				FATAL(ERR_PARSE,
-					"Incompatible expression in assignment at line %d", line);
+				FATAL(ERR_PARSE, "Incompatible expression in assignment");
 			
 			/*****************************************************************\
 			|* Make an assignment AST tree, but switch left and right around
@@ -247,8 +239,7 @@ ASTNode * Expression::binary(Emitter& emitter,
 			right = lTemp;
 				
 			if (left == nullptr)
-				FATAL(ERR_RUNTIME,
-							"Internal compiler error at line %d", line);
+				FATAL(ERR_RUNTIME, "Internal compiler error");
 			}
 		else
 			{
@@ -265,7 +256,7 @@ ASTNode * Expression::binary(Emitter& emitter,
 			ASTNode *lTemp	= Types::modify(left, right->type(), ASTop);
 			ASTNode *rTemp	= Types::modify(right, left->type(), ASTop);
 			if ((lTemp == nullptr) && (rTemp == nullptr))
-				FATAL(ERR_TYPE, "Incompatible types at line %d", line);
+				FATAL(ERR_TYPE, "Incompatible types");
 			
 			/*****************************************************************\
 			|* Update any trees that were widened or scaled
@@ -273,8 +264,7 @@ ASTNode * Expression::binary(Emitter& emitter,
 			if (lTemp != nullptr)
 				left = lTemp;
 			if (left == nullptr)
-				FATAL(ERR_RUNTIME,
-							"Internal compiler error at line %d", line);
+				FATAL(ERR_RUNTIME, "Internal compiler error");
 			if (rTemp != nullptr)
 				right = rTemp;
 			}
@@ -282,7 +272,7 @@ ASTNode * Expression::binary(Emitter& emitter,
 		/*********************************************************************\
 		|* Join that sub-tree with ours, convert the token into an ASTnode.
 		\*********************************************************************/
-		left = new ASTNode(_binaryAstOp(tokenType, line),
+		left = new ASTNode(_binaryAstOp(tokenType),
 						   left->type(),
 						   left,
 						   nullptr,
@@ -317,8 +307,7 @@ ASTNode * Expression::binary(Emitter& emitter,
 \*****************************************************************************/
 ASTNode * Expression::_funcCall(Emitter& emitter,
 								Scanner &scanner,
-								Token &token,
-								int &line)
+								Token &token)
 	{
 	/*************************************************************************\
     |* Find the function
@@ -327,21 +316,18 @@ ASTNode * Expression::_funcCall(Emitter& emitter,
 	String funcName = scanner.text();
 	int identifier 	= SYMTAB->find(scanner.text());
 	if (identifier == SymbolTable::NOT_FOUND)
-		FATAL(ERR_PARSE, "Unknown function [%s] on line %d",
-						funcName.c_str(), line);
+		FATAL(ERR_PARSE, "Unknown function [%s]", funcName.c_str());
 	
 	/*************************************************************************\
     |* Eat the left parenthesis
     \*************************************************************************/
-    Statement::leftParen(scanner, token, line);
+    Statement::leftParen(scanner, token);
     
 	/*************************************************************************\
     |* Parse the following expressions
     \*************************************************************************/
-	ASTNode *tree = _expressionList(emitter, scanner, token, line);
-	
-	// FIXME: Need to verify the types here
-	
+	ASTNode *tree = _expressionList(emitter, scanner, token);
+		
 	/*************************************************************************\
     |* Build the function-call AST node, store the function's return type as
     |* this node's type. Also record the function's symbol-id
@@ -354,10 +340,11 @@ ASTNode * Expression::_funcCall(Emitter& emitter,
 							  s.pType(),
 							  tree,
 							  identifier);
+							  
 	/*************************************************************************\
     |* Eat the right parenthesis
     \*************************************************************************/
-    Statement::rightParen(scanner, token, line);
+    Statement::rightParen(scanner, token);
     
 	return tree;
 	}
@@ -368,8 +355,7 @@ ASTNode * Expression::_funcCall(Emitter& emitter,
 \*****************************************************************************/
 ASTNode * Expression::_arrayAccess(Emitter& emitter,
 								   Scanner &scanner,
-								   Token &token,
-								   int &line)
+								   Token &token)
 	{
 	/*************************************************************************\
     |* Check that the identifier has been defined as an array then make a leaf
@@ -388,17 +374,17 @@ ASTNode * Expression::_arrayAccess(Emitter& emitter,
 	/*************************************************************************\
     |* Eat the left [
     \*************************************************************************/
-	scanner.scan(token, line);
+	scanner.scan(token);
 	
 	/*************************************************************************\
     |* Parse the following expression
     \*************************************************************************/
-	ASTNode *right = binary(emitter, scanner, token, line, 0);
+	ASTNode *right = binary(emitter, scanner, token, 0);
 	
 	/*************************************************************************\
     |* Make sure we close the ]
     \*************************************************************************/
-    Statement::rightBrace(scanner, token, line);
+    Statement::rightBrace(scanner, token);
 
 	/*************************************************************************\
     |* Make sure this is of integer type
@@ -456,8 +442,7 @@ bool Expression::_rightAssoc(int tokenType)
 \*****************************************************************************/
 ASTNode * Expression::_prefix(Emitter& emitter,
 							  Scanner &scanner,
-							  Token &token,
-							  int &line)
+							  Token &token)
 	{
   	ASTNode *tree;
   
@@ -465,13 +450,12 @@ ASTNode * Expression::_prefix(Emitter& emitter,
 		{
 		case Token::T_AMPER:
 			// Get the next token and parse it recursively as a prefix
-			scanner.scan(token, line);
-			tree = _prefix(emitter, scanner, token, line);
+			scanner.scan(token);
+			tree = _prefix(emitter, scanner, token);
 
 			// Ensure that it's an identifier
 			if (tree->op() != ASTNode::A_IDENT)
-				FATAL(ERR_PARSE, "& operator must be followed "
-								 "by an identifier at line %d", line);
+				FATAL(ERR_PARSE, "& operator must be followed by an identifier");
 
 			// Now change the operator to A_ADDR and the type to
 			// a pointer to the original type
@@ -481,13 +465,13 @@ ASTNode * Expression::_prefix(Emitter& emitter,
     
 		case Token::T_STAR:
 			// Get the next token and parse it recursively as a prefix
-			scanner.scan(token, line);
-			tree = _prefix(emitter, scanner, token, line);
+			scanner.scan(token);
+			tree = _prefix(emitter, scanner, token);
 
 			// For now, ensure it's either another deref or an identifier
 			if (!(IS_OP(A_IDENT) || IS_OP(A_DEREF)))
 				FATAL(ERR_PARSE, "* operator must be followed "
-								 "by an identifier or * at line %d", line);
+								 "by an identifier or *");
 
 			// Prepend an A_DEREF operation to the tree
 			tree = new ASTNode(ASTNode::A_DEREF,
@@ -498,8 +482,8 @@ ASTNode * Expression::_prefix(Emitter& emitter,
 
 		case Token::T_MINUS:
 			// Get the next token and parse it recursively as a prefix
-			scanner.scan(token, line);
-			tree = _prefix(emitter, scanner, token, line);
+			scanner.scan(token);
+			tree = _prefix(emitter, scanner, token);
 
 
 			// Modify the child node if it is an A_INTLIT node
@@ -549,8 +533,8 @@ ASTNode * Expression::_prefix(Emitter& emitter,
     
 		case Token::T_INVERT:
 			// Get the next token and parse it recursively as a prefix
-			scanner.scan(token, line);
-			tree = _prefix(emitter, scanner, token, line);
+			scanner.scan(token);
+			tree = _prefix(emitter, scanner, token);
 
 			// Prepend a A_INVERT operation to the tree and
 			// make the child an rvalue.
@@ -560,8 +544,8 @@ ASTNode * Expression::_prefix(Emitter& emitter,
     
 		case Token::T_LOGNOT:
 			// Get the next token and parse it recursively as a prefix
-			scanner.scan(token, line);
-			tree = _prefix(emitter, scanner, token, line);
+			scanner.scan(token);
+			tree = _prefix(emitter, scanner, token);
 
 			// Prepend a A_LOGNOT operation to the tree and
 			// make the child an rvalue.
@@ -571,8 +555,8 @@ ASTNode * Expression::_prefix(Emitter& emitter,
     
 		case Token::T_INC:
 			// Get the next token and parse it recursively as a prefix
-			scanner.scan(token, line);
-			tree = _prefix(emitter, scanner, token, line);
+			scanner.scan(token);
+			tree = _prefix(emitter, scanner, token);
 
 			// For now, ensure it's an identifier
 			if (tree->op() != ASTNode::A_IDENT)
@@ -587,8 +571,8 @@ ASTNode * Expression::_prefix(Emitter& emitter,
     
 		case Token::T_DEC:
 			// Get the next token and parse it recursively as a prefix
-			scanner.scan(token, line);
-			tree = _prefix(emitter, scanner, token, line);
+			scanner.scan(token);
+			tree = _prefix(emitter, scanner, token);
 
 			// For now, ensure it's an identifier
 			if (tree->op() != ASTNode::A_IDENT)
@@ -602,7 +586,7 @@ ASTNode * Expression::_prefix(Emitter& emitter,
 			break;
 
 		default:
-			tree = primary(emitter, scanner, token, line);
+			tree = primary(emitter, scanner, token);
 		}
 	return (tree);
 	}
@@ -623,8 +607,7 @@ ASTNode * Expression::_prefix(Emitter& emitter,
 \*****************************************************************************/
 ASTNode * Expression::_expressionList(Emitter& emitter,
 									  Scanner &scanner,
-									  Token &token,
-									  int &line)
+									  Token &token)
 	{
 	ASTNode *tree 	= nullptr;
 
@@ -633,14 +616,14 @@ ASTNode * Expression::_expressionList(Emitter& emitter,
 	while (token.token() != Token::T_RPAREN)
 		{
 		// Parse the next expression and increment the expression count
-    	ASTNode *child = binary(emitter, scanner, token, line, 0);
+    	ASTNode *child = binary(emitter, scanner, token, 0);
 		nodes.push_back(child);
 
 		// Must have a ',' or ')' at this point
 		switch (token.token())
 			{
 			case Token::T_COMMA:
-				scanner.scan(token, line);
+				scanner.scan(token);
 				break;
 				
 			case Token::T_RPAREN:
@@ -648,8 +631,7 @@ ASTNode * Expression::_expressionList(Emitter& emitter,
 			
 			default:
 				FATAL(ERR_AST_SYNTAX,
-					  "Unexpected token %d in expression at line %d",
-					  token.token(), line);
+					  "Unexpected token %d in expression", token.token());
 			}
 		}
 

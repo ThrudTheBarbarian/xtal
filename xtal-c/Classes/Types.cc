@@ -134,20 +134,13 @@ ASTNode * Types::modify(ASTNode *tree, int rType, int op)
 /*****************************************************************************\
 |* Static method - return a type's size in bytes
 \*****************************************************************************/
-int Types::typeSize(int type, int line)
+int Types::typeSize(int type)
 	{
 	int range = type & 0xFF;
 	
 	if ((range < PT_VOID) || (range >= PT_MAXVAL))
 		{
-		if (line > 0)
-			{
-			FATAL(ERR_TYPE, "Illegal type %d at line %d", type, line);
-			}
-		else
-			{
-			FATAL(ERR_TYPE, "Illegal type %d", type);
-			}
+		FATAL(ERR_TYPE, "Illegal type %d", type);
 		}
 		
 	return (type > 0xFF) ? 2 : _sizes[type & 0xFF];
@@ -157,7 +150,7 @@ int Types::typeSize(int type, int line)
 |* Static method - Given a primitive type, return the type which is a pointer
 |*                 to it
 \*****************************************************************************/
-int Types::pointerTo(int type, int line)
+int Types::pointerTo(int type)
 	{
 	int ptrType = PT_NONE;
 	
@@ -192,15 +185,9 @@ int Types::pointerTo(int type, int line)
 			break;
 		
 		default:
-			if (line > 0)
-				{
-				FATAL(ERR_TYPE, "Illegal type %d for pointer deref at line %d",
-					  type, line);
-				}
-			else
-				{
-				FATAL(ERR_TYPE, "Illegal type %d for pointer deref", type);
-				}
+			{
+			FATAL(ERR_TYPE, "Illegal type %d for pointer deref", type);
+			}
 		}
 		
 	return (ptrType);
@@ -209,7 +196,7 @@ int Types::pointerTo(int type, int line)
 /*****************************************************************************\
 |* Static method - For a primitive pointer, return the type which it points to
 \*****************************************************************************/
-int Types::valueAt(int ptrType, int line)
+int Types::valueAt(int ptrType)
 	{
 	int type = PT_NONE;
 	
@@ -244,15 +231,9 @@ int Types::valueAt(int ptrType, int line)
 			break;
 		
 		default:
-			if (line > 0)
-				{
-				FATAL(ERR_TYPE, "Illegal type %d for type deref at line %d",
-					  ptrType, line);
-				}
-			else
-				{
-				FATAL(ERR_TYPE, "Illegal type %d for type deref", ptrType);
-				}
+			{
+			FATAL(ERR_TYPE, "Illegal type %d for type deref", ptrType);
+			}
 		}
 		
 	return (type);

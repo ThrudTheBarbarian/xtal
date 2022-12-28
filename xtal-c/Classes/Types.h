@@ -40,17 +40,17 @@ class Types
         /*********************************************************************\
         |* Return the size of a given type
         \*********************************************************************/
-        static int typeSize(int type, int line=-1);
+        static int typeSize(int type);
 							
         /*********************************************************************\
         |* Given a primitive type, return the type which is a pointer to it
         \*********************************************************************/
-        static int pointerTo(int type, int line=-1);
+        static int pointerTo(int type);
 							
         /*********************************************************************\
         |* Given a primitive pointer, return the type which it points to
         \*********************************************************************/
-        static int valueAt(int type, int line=-1);
+        static int valueAt(int type);
 							
         /*********************************************************************\
         |* Return true if something is an integer type

@@ -110,6 +110,21 @@ std::string join(std::vector<std::string> &v, std::string delimiter)
 	}
 
 /*****************************************************************************\
+|* See if a string starts with another, case optional
+\*****************************************************************************/
+bool startsWith (std::string const &haystack,
+			     std::string const &needle,
+			     bool caseSensitive)
+	{
+    std::string h = (caseSensitive) ? haystack : lcase(haystack);
+    std::string n = (caseSensitive) ? needle   : lcase(needle);
+    
+    if (h.length() >= n.length())
+        return (h.rfind(n, 0) == 0);
+	return false;
+    }
+
+/*****************************************************************************\
 |* See if a string ends with another, case optional
 \*****************************************************************************/
 bool endsWith (std::string const &haystack,

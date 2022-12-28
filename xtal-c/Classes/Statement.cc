@@ -29,23 +29,23 @@ Statement::Statement(Scanner &scanner, Emitter *emitter)
 /****************************************************************************\
 |* Process the statements we understand
 \****************************************************************************/
-ASTNode * Statement::compoundStatement(Token& token, int& line)
+ASTNode * Statement::compoundStatement(Token& token)
 	{
 	ASTNode *left = nullptr;
 	
 	// Require a left block-open
-	leftBrace(*_scanner, token, line);
+	leftBrace(*_scanner, token);
 	
 	forever
 		{
-		ASTNode *tree = _singleStatement(token, line);
+		ASTNode *tree = _singleStatement(token);
 		
         /********************************************************************\
         |* Some statements must be followed by a semicolon
         \********************************************************************/
 		if (tree != nullptr)
 			if (_needsSemicolon(tree->op()))
-				_semicolon(*_scanner, token, line);
+				_semicolon(*_scanner, token);
 
         /********************************************************************\
         |* For each new tree, either save it in 'left' if left is empty, or
@@ -69,7 +69,7 @@ ASTNode * Statement::compoundStatement(Token& token, int& line)
         \********************************************************************/
 		if (token.token() == Token::T_RBRACE)
 			{
-			rightBrace(*_scanner, token, line);
+			rightBrace(*_scanner, token);
 			return left;
 			}
 		}
@@ -79,36 +79,32 @@ ASTNode * Statement::compoundStatement(Token& token, int& line)
 /****************************************************************************\
 |* Process a function declaration. Currently void return and arguments
 \****************************************************************************/
-ASTNode * Statement::returnStatement(Token& token, int& line)
+ASTNode * Statement::returnStatement(Token& token)
 	{
 	/*************************************************************************\
     |* Can't return a value from a void function
     \*************************************************************************/
 	Symbol sym = SYMTAB->currentFunction();
 	if (sym.pType() == PT_VOID)
-		FATAL(ERR_PARSE,
-			  "Can't return a value from a void function at line %d",
-			  line);
+		FATAL(ERR_PARSE, "Can't return a value from a void function");
 	
 	/*************************************************************************\
     |* Make sure we have 'return' '('
     \*************************************************************************/
-	_match(*_scanner, token, Token::T_RETURN, line, "return");
-	leftParen(*_scanner, token, line);
+	_match(*_scanner, token, Token::T_RETURN, "return");
+	leftParen(*_scanner, token);
 	
 	/*************************************************************************\
     |* Parse the following expression
     \*************************************************************************/
-	ASTNode *tree 	= Expression::binary(*_emitter, *_scanner, token, line, 0);
+	ASTNode *tree 	= Expression::binary(*_emitter, *_scanner, token, 0);
 	
 	/*************************************************************************\
     |* Make sure this is compatible with the function's type
     \*************************************************************************/
     tree = Types::modify(tree, sym.pType(), 0);
 	if (tree == nullptr)
-		FATAL(ERR_PARSE,
-			  "Incompatible function type in call at line %d",
-			  line);
+		FATAL(ERR_PARSE, "Incompatible function type in call");
 		
 	/*************************************************************************\
     |* Add on the A_RETURN node
@@ -118,7 +114,7 @@ ASTNode * Statement::returnStatement(Token& token, int& line)
 	/*************************************************************************\
     |* Eat the ')'
     \*************************************************************************/
-	rightParen(*_scanner, token, line);
+	rightParen(*_scanner, token);
 	
 	return tree;
 	}
@@ -127,7 +123,7 @@ ASTNode * Statement::returnStatement(Token& token, int& line)
 /****************************************************************************\
 |* Global declaration - either function or variable
 \****************************************************************************/
-ASTNode * Statement::globalDeclaration(Token& token, int&line)
+ASTNode * Statement::globalDeclaration(Token& token)
 	{
 	Register none(Register::NO_REGISTER);
 	ASTNode *tree = nullptr;
@@ -135,14 +131,14 @@ ASTNode * Statement::globalDeclaration(Token& token, int&line)
 	forever
 		{
 		// Fetch which type of primitive type we're dealing with
-		int type = _parseType(token, line);
+		int type = _parseType(token);
 		
 		// Check we have an identifier
-		_identifier(*_scanner, token, line);
+		_identifier(*_scanner, token);
 		
 		if (token.token() == Token::T_LPAREN)
 			{
-			tree = _functionDeclaration(token, line, type);
+			tree = _functionDeclaration(token, type);
 			
 			// Check for a function prototype
 			if (tree == nullptr)
@@ -152,8 +148,8 @@ ASTNode * Statement::globalDeclaration(Token& token, int&line)
 		else
 			{
 			// Parse a global variable and skip past the semicolon
-			_varDeclaration(token, line, type, C_GLOBAL);
-			_semicolon(*_scanner, token, line);
+			_varDeclaration(token, type, C_GLOBAL);
+			_semicolon(*_scanner, token);
 			}
 			
 		if (token.token() == Token::T_NONE)
@@ -173,61 +169,60 @@ ASTNode * Statement::globalDeclaration(Token& token, int&line)
 void Statement::_match(Scanner& scanner,
 					   Token& token,
 					   int tokenType,
-					   int& line,
 					   String info)
 	{
 	if (token.token() == tokenType)
-		scanner.scan(token, line);
+		scanner.scan(token);
 	else
-		FATAL(ERR_PARSE, "%s expected on line %d", info.c_str(), line);
+		FATAL(ERR_PARSE, "%s expected", info.c_str());
 	}
 
 /*****************************************************************************\
 |* Static method : Check we're getting a semicolon
 \*****************************************************************************/
-void Statement::_semicolon(Scanner& scanner, Token& token, int& line)
+void Statement::_semicolon(Scanner& scanner, Token& token)
 	{
-	_match(scanner, token, Token::T_SEMICOLON, line, ";");
+	_match(scanner, token, Token::T_SEMICOLON, ";");
 	}
 
 /*****************************************************************************\
 |* Static method : Check we're getting an identifier
 \*****************************************************************************/
-void Statement::_identifier(Scanner& scanner,Token& token, int& line)
+void Statement::_identifier(Scanner& scanner,Token& token)
 	{
-	_match(scanner, token, Token::T_IDENT, line, "identifier");
+	_match(scanner, token, Token::T_IDENT, "identifier");
 	}
 
 /*****************************************************************************\
 |* Static method : Check we're getting an identifier
 \*****************************************************************************/
-void Statement::leftBrace(Scanner& scanner, Token& token, int& line)
+void Statement::leftBrace(Scanner& scanner, Token& token)
 	{
-	_match(scanner, token, Token::T_LBRACE, line, "[");
+	_match(scanner, token, Token::T_LBRACE, "[");
 	}
 
 /*****************************************************************************\
 |* Static method : Check we're getting an identifier
 \*****************************************************************************/
-void Statement::rightBrace(Scanner& scanner, Token& token, int& line)
+void Statement::rightBrace(Scanner& scanner, Token& token)
 	{
-	_match(scanner, token, Token::T_RBRACE, line, "]");
+	_match(scanner, token, Token::T_RBRACE, "]");
 	}
 
 /*****************************************************************************\
 |* Static method : Check we're getting an identifier
 \*****************************************************************************/
-void Statement::leftParen(Scanner& scanner, Token& token, int& line)
+void Statement::leftParen(Scanner& scanner, Token& token)
 	{
-	_match(scanner, token, Token::T_LPAREN, line, "(");
+	_match(scanner, token, Token::T_LPAREN, "(");
 	}
 
 /*****************************************************************************\
 |* Static method : Check we're getting an identifier
 \*****************************************************************************/
-void Statement::rightParen(Scanner& scanner, Token& token, int& line)
+void Statement::rightParen(Scanner& scanner, Token& token)
 	{
-	_match(scanner, token, Token::T_RPAREN, line, ")");
+	_match(scanner, token, Token::T_RPAREN, ")");
 	}
 
 
@@ -237,7 +232,7 @@ void Statement::rightParen(Scanner& scanner, Token& token, int& line)
 |* Process a single statement, without the trailing ; so this method can be
 |* used in for() statements
 \****************************************************************************/
-ASTNode * Statement::_singleStatement(Token& token, int& line)
+ASTNode * Statement::_singleStatement(Token& token)
 	{
 	ASTNode *tree 	= nullptr;
 	int type	 	= -1;
@@ -245,7 +240,7 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 	switch (token.token())
 		{
 		case Token::T_PRINT:
-			tree = _print(token, line);
+			tree = _print(token);
 			break;
 
 		case Token::T_U8:
@@ -255,35 +250,35 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 		case Token::T_S32:
 		case Token::T_U32:
 			// Parse the type
-			type = _parseType(token, line);
+			type = _parseType(token);
 			
 			// Check we have an identifier
-			_identifier(*_scanner, token, line);
+			_identifier(*_scanner, token);
 			
 			// Declare the variable then skip over the semicolon
-			_varDeclaration(token, line, type, C_LOCAL);
-			_semicolon(*_scanner, token, line);
+			_varDeclaration(token, type, C_LOCAL);
+			_semicolon(*_scanner, token);
 			tree = nullptr;
 			break;
 
 		case Token::T_IF:
-			tree = _if(token, line);
+			tree = _if(token);
 			break;
 
 		case Token::T_WHILE:
-			tree = _while(token, line);
+			tree = _while(token);
 			break;
 
 		case Token::T_FOR:
-			tree = _for(token, line);
+			tree = _for(token);
 			break;
 		
 		case Token::T_RETURN:
-			return returnStatement(token, line);
+			return returnStatement(token);
 			
 		default:
 			// Catch assignments, for now
-			return Expression::binary(*_emitter, *_scanner, token, line, 0);
+			return Expression::binary(*_emitter, *_scanner, token, 0);
 		}
 		
 	return tree;
@@ -292,15 +287,15 @@ ASTNode * Statement::_singleStatement(Token& token, int& line)
 /****************************************************************************\
 |* Private Method: process a print statement
 \****************************************************************************/
-ASTNode * Statement::_print(Token& token, int& line)
+ASTNode * Statement::_print(Token& token)
 	{
 	Register none(Register::NO_REGISTER);
 	
 	// Match a 'print' as the first token
-	_match(*_scanner, token, Token::T_PRINT, line, "print");
+	_match(*_scanner, token, Token::T_PRINT, "print");
 	
 	// Parse the following expression and generate the assembly code
-	ASTNode *tree = Expression::binary(*_emitter, *_scanner, token, line, 0);
+	ASTNode *tree = Expression::binary(*_emitter, *_scanner, token, 0);
 	
 	// Make sure we're type-compatible
 	int type = tree->type();
@@ -311,7 +306,7 @@ ASTNode * Statement::_print(Token& token, int& line)
 		candidate = Types::modify(tree, type, 0);
 		}
 	if (candidate == nullptr)
-		FATAL(ERR_TYPE, "Types incompatible at line %d", line);
+		FATAL(ERR_TYPE, "Types incompatible");
 	
 	// Make a 'print' AST node
 	return new ASTNode(ASTNode::A_PRINT, type, tree, 0);
@@ -321,32 +316,32 @@ ASTNode * Statement::_print(Token& token, int& line)
 /****************************************************************************\
 |* Private Method: process an if statement, including an optional 'else'
 \****************************************************************************/
-ASTNode * Statement::_if(Token& token, int& line)
+ASTNode * Statement::_if(Token& token)
 	{
 	// Looking for an if token followed by a '('
-	_match(*_scanner, token, Token::T_IF, line, "if");
-	leftParen(*_scanner, token, line);
+	_match(*_scanner, token, Token::T_IF, "if");
+	leftParen(*_scanner, token);
 	
 	// Parse the following expression, and the ')' after that. Ensure the
 	// tree's operation is a comparison
-	ASTNode *condAST = Expression::binary(*_emitter, *_scanner, token, line, 0);
+	ASTNode *condAST = Expression::binary(*_emitter, *_scanner, token, 0);
 	
 	if ((condAST->op() < ASTNode::A_EQ) || (condAST->op() > ASTNode::A_GE))
 		condAST = new ASTNode(ASTNode::A_TOBOOL, condAST->type(), condAST, 0);
 
 	// Close the parentheses
-	rightParen(*_scanner, token, line);
+	rightParen(*_scanner, token);
 	
 	// Get the AST for the compound statement
-	ASTNode *trueAST = compoundStatement(token, line);
+	ASTNode *trueAST = compoundStatement(token);
 	
 	// If we have an 'else', skip over the 'else' and get the AST for the
 	// compound statement
 	ASTNode *falseAST = nullptr;
 	if (token.token() == Token::T_ELSE)
 		{
-		_scanner->scan(token, line);
-		falseAST = compoundStatement(token, line);
+		_scanner->scan(token);
+		falseAST = compoundStatement(token);
 		}
 	
 	// Build and return the AST for this entire IF statement
@@ -356,24 +351,24 @@ ASTNode * Statement::_if(Token& token, int& line)
 /****************************************************************************\
 |* Private Method: process a while statement
 \****************************************************************************/
-ASTNode * Statement::_while(Token& token, int& line)
+ASTNode * Statement::_while(Token& token)
 	{
 	// Looking for a while token followed by a '('
-	_match(*_scanner, token, Token::T_WHILE, line, "while");
-	leftParen(*_scanner, token, line);
+	_match(*_scanner, token, Token::T_WHILE, "while");
+	leftParen(*_scanner, token);
 	
 	// Parse the following expression, and the ')' after that. Ensure the
 	// tree's operation is a comparison
-	ASTNode *condAST = Expression::binary(*_emitter, *_scanner, token, line, 0);
+	ASTNode *condAST = Expression::binary(*_emitter, *_scanner, token, 0);
 	
 	if ((condAST->op() < ASTNode::A_EQ) || (condAST->op() > ASTNode::A_GE))
 		condAST = new ASTNode(ASTNode::A_TOBOOL, condAST->type(), condAST, 0);
 	
 	// Close the parentheses
-	rightParen(*_scanner, token, line);
+	rightParen(*_scanner, token);
 	
 	// Get the AST for the compound statement
-	ASTNode *bodyAST = compoundStatement(token, line);
+	ASTNode *bodyAST = compoundStatement(token);
 		
 	// Build and return the AST for this entire IF statement
 	return new ASTNode(ASTNode::A_WHILE, PT_NONE, condAST, nullptr, bodyAST, 0);
@@ -382,30 +377,30 @@ ASTNode * Statement::_while(Token& token, int& line)
 /****************************************************************************\
 |* Private Method: process a for statement
 \****************************************************************************/
-ASTNode * Statement::_for(Token& token, int& line)
+ASTNode * Statement::_for(Token& token)
 	{
 	ASTNode *tree = nullptr;
 	
 	// Looking for a while token followed by a '('
-	_match(*_scanner, token, Token::T_FOR, line, "for");
-	leftParen(*_scanner, token, line);
+	_match(*_scanner, token, Token::T_FOR, "for");
+	leftParen(*_scanner, token);
 
 	// Get the pre-op statement and the ;
-	ASTNode *preOpAST = _singleStatement(token, line);
-	_semicolon(*_scanner, token, line);
+	ASTNode *preOpAST = _singleStatement(token);
+	_semicolon(*_scanner, token);
 	
 	// Get the condition and the )
-	ASTNode *condAST = Expression::binary(*_emitter, *_scanner, token, line, 0);
+	ASTNode *condAST = Expression::binary(*_emitter, *_scanner, token, 0);
 	if ((condAST->op() < ASTNode::A_EQ) || (condAST->op() > ASTNode::A_GE))
 		condAST = new ASTNode(ASTNode::A_TOBOOL, condAST->type(), condAST, 0);
-	_semicolon(*_scanner, token, line);
+	_semicolon(*_scanner, token);
 	
 	// Get the post-op statement and the ;
-	ASTNode *postOpAST = _singleStatement(token, line);
-	rightParen(*_scanner, token, line);
+	ASTNode *postOpAST = _singleStatement(token);
+	rightParen(*_scanner, token);
 
 	// Get the compound statement, which is the body
-	ASTNode *bodyAST = compoundStatement(token, line);
+	ASTNode *bodyAST = compoundStatement(token);
 	
 	// FIXME: For now all 4 sub-trees have to be non-null.
 	tree = new ASTNode(ASTNode::A_GLUE,
@@ -434,7 +429,7 @@ ASTNode * Statement::_for(Token& token, int& line)
 
 #pragma mark - Private methods : declarations
 
-int Statement::_parseType(Token& token, int& line)
+int Statement::_parseType(Token& token)
 	{
 	int type = PT_NONE;
 	
@@ -470,14 +465,14 @@ int Statement::_parseType(Token& token, int& line)
 			break;
 		
 		default:
-			FATAL(ERR_PARSE, "Cannot determing type at line %d\n", line);
+			FATAL(ERR_PARSE, "Cannot determing type");
 		}
 
 	// Scan in one or more further '*' tokens
 	// and determine the correct pointer type
 	while (1)
 		{
-		_scanner->scan(token, line);
+		_scanner->scan(token);
 		if (token.token() != Token::T_STAR)
 			break;
 		type = Types::pointerTo(type);
@@ -498,7 +493,7 @@ int Statement::_parseType(Token& token, int& line)
 |* If idx is not -1, there is an existing function prototype, and the function
 |* has this symbol slot number.
 \****************************************************************************/
-int Statement::_paramDeclaration(Token& token, int& line, int idx)
+int Statement::_paramDeclaration(Token& token, int idx)
 	{
 	Symbol sym;
 	int count 			= 0;
@@ -517,10 +512,10 @@ int Statement::_paramDeclaration(Token& token, int& line, int idx)
 	while (token.token() != Token::T_RPAREN)
 		{
 		// Get the type and identifier and add it to the symbol table
-		int type = _parseType(token, line);
+		int type = _parseType(token);
     
 		// Match an identifier
-		_identifier(*_scanner, token, line);
+		_identifier(*_scanner, token);
 		
 		// If we have an existing prototype, check each param-type matches
 		if (paramId)
@@ -533,22 +528,21 @@ int Statement::_paramDeclaration(Token& token, int& line, int idx)
 			paramId ++;
 			}
 		else
-			_varDeclaration(token, line, type, C_PARAM);
+			_varDeclaration(token, type, C_PARAM);
     	count ++;
 
 		// Must have a ',' or ')' at this point
 		switch (token.token())
 			{
 			case Token::T_COMMA:
-				_scanner->scan(token, line);
+				_scanner->scan(token);
 				break;
 				
 			case Token::T_RPAREN:
 				break;
       
 			default:
-				FATAL(ERR_TOKEN, "Unexpected token in parameters at %d",
-								line);
+				FATAL(ERR_TOKEN, "Unexpected token in parameters");
 			}
 		}
 	
@@ -570,10 +564,7 @@ int Statement::_paramDeclaration(Token& token, int& line, int idx)
 |* Scanner::text() now has the identifier's name. If all that us ok, add it
 |* as a known identifier
 \****************************************************************************/
-void Statement::_varDeclaration(Token& token,
-								int& line,
-								int type,
-								Storage sClass)
+void Statement::_varDeclaration(Token& token, int type, Storage sClass)
 	{
 	String name = _scanner->text();
 	int symIdx	= -1;
@@ -582,7 +573,7 @@ void Statement::_varDeclaration(Token& token,
 	if (token.token() == Token::T_LBRACE)
 		{
 		// Skip past the '['
-		_scanner->scan(token, line);
+		_scanner->scan(token);
 
 		// Check we have an array size
 		if (token.token() == Token::T_INTLIT)
@@ -597,8 +588,7 @@ void Statement::_varDeclaration(Token& token,
 										  ST_ARRAY,
 										  token.intValue());
 				*/
-				FATAL(ERR_PARSE, "Local arrays are not implemented at %d",
-						line);
+				FATAL(ERR_PARSE, "Local arrays are not implemented");
 				}
 			else
 				symIdx = SYMTAB->addGlobal(name,
@@ -611,8 +601,8 @@ void Statement::_varDeclaration(Token& token,
 			}
 
 		// Ensure we have a following ']'
-		_scanner->scan(token, line);
-		_match(*_scanner, token, Token::T_RBRACE, line, "]");
+		_scanner->scan(token);
+		_match(*_scanner, token, Token::T_RBRACE, "]");
 		}
 	else
 		{
@@ -621,8 +611,7 @@ void Statement::_varDeclaration(Token& token,
 			{
 			symIdx = SYMTAB->addLocal(name, type, ST_VARIABLE, 1, sClass);
 			if (symIdx < 0)
-				FATAL(ERR_PARSE, "Duplicate local variable %s at %d",
-								name.c_str(), line);
+				FATAL(ERR_PARSE, "Duplicate local variable %s", name.c_str());
 			}
 		else
 			symIdx = SYMTAB->addGlobal(name, type, ST_VARIABLE, 1, sClass);
@@ -635,9 +624,7 @@ void Statement::_varDeclaration(Token& token,
 /****************************************************************************\
 |* Process a function declaration. Currently void return and arguments
 \****************************************************************************/
-ASTNode * Statement::_functionDeclaration(Token& token,
-										  int& line,
-										  int type)
+ASTNode * Statement::_functionDeclaration(Token& token, int type)
 	{
 	int idx = SYMTAB->find(_scanner->text());
 
@@ -670,27 +657,27 @@ ASTNode * Statement::_functionDeclaration(Token& token,
 	/************************************************************************\
     |* Open the parentheses
     \************************************************************************/
-	leftParen(*_scanner, token, line);
+	leftParen(*_scanner, token);
 	
 	/************************************************************************\
     |* Parse the parameters, and set the expected number if this is a new
     |* function declaration
     \************************************************************************/
-	int numParams = _paramDeclaration(token, line, idx);
+	int numParams = _paramDeclaration(token, idx);
 	if (idx == -1)
 		SYMTAB->at(symIdx).setNumParams(numParams);
 
 	/************************************************************************\
     |* Close the parentheses
     \************************************************************************/
-	rightParen(*_scanner, token, line);
+	rightParen(*_scanner, token);
 
 	/************************************************************************\
     |* Check to see if it's just a prototype (ie: next is a ; not a [)
     \************************************************************************/
 	if (token.token() == Token::T_SEMICOLON)
 		{
-		_scanner->scan(token, line);
+		_scanner->scan(token);
 		return nullptr;
 		}
 
@@ -709,7 +696,7 @@ ASTNode * Statement::_functionDeclaration(Token& token,
 	/************************************************************************\
     |* Get the AST for the compound statement
     \************************************************************************/
-	ASTNode *tree = compoundStatement(token, line);
+	ASTNode *tree = compoundStatement(token);
 	
 	/************************************************************************\
     |* If the function type isn't P_VOID, check that the last AST operation

@@ -68,4 +68,9 @@ typedef enum
 	
 #define STACK_PTR			"$8D"			// Stack pointer address (+$8E)
 
+
+#include "Locator.h"
+#define NC_FILE_START		"nc:file-start"
+#define NC_LINE_INC			"nc:line-inc"
+
 #endif /* ! sharedDefines_h */

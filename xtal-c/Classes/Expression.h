@@ -35,47 +35,42 @@ class Expression
         /*********************************************************************\
         |* Return true if this is a binary AST op
         \*********************************************************************/
-		static int _binaryAstOp(int tokenType, int line);
+		static int _binaryAstOp(int tokenType);
 		
         /*********************************************************************\
         |* Function call recognition
         \*********************************************************************/
         static ASTNode * _funcCall(Emitter& emitter,
 								   Scanner &scanner,
-								   Token &token,
-								   int &line);
+								   Token &token);
 		
         /*********************************************************************\
         |* Function call recognition
         \*********************************************************************/
         static ASTNode * _arrayAccess(Emitter& emitter,
 									  Scanner &scanner,
-									  Token &token,
-									  int &line);
+									  Token &token);
 								
         /*********************************************************************\
         |* Prefix resolution - pointers and de-refs
         \*********************************************************************/
         static ASTNode * _prefix(Emitter& emitter,
 								 Scanner &scanner,
-								 Token &token,
-								 int &line);
+								 Token &token);
 								
         /*********************************************************************\
         |* Prefix resolution - pointers and de-refs
         \*********************************************************************/
         static ASTNode * _postfix(Emitter& emitter,
 								  Scanner &scanner,
-								  Token &token,
-								  int &line);
+								  Token &token);
 								
         /*********************************************************************\
         |* Handle an expression list
         \*********************************************************************/
         static ASTNode * _expressionList(Emitter& emitter,
 								  Scanner &scanner,
-								  Token &token,
-								  int &line);
+								  Token &token);
 		
     public:
         /*********************************************************************\
@@ -88,8 +83,7 @@ class Expression
         \*********************************************************************/
         static ASTNode * primary(Emitter& emitter,
 								 Scanner &scanner,
-								 Token &token,
-								 int &line);
+								 Token &token);
 
         /*********************************************************************\
         |* Binary expression resolution using Pratt precedence
@@ -97,7 +91,6 @@ class Expression
         static ASTNode * binary(Emitter& emitter,
 								Scanner &scanner,
 								Token &token,
-								int &line,
 								int previousPrecedence);
 
 		

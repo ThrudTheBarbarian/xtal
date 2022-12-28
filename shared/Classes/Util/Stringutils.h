@@ -59,6 +59,13 @@ bool endsWith (std::string const &haystack,
 			   bool caseSensitive=true);
 
 /*****************************************************************************\
+|* See if a string starts with another, case optional
+\*****************************************************************************/
+bool startsWith (std::string const &haystack,
+			     std::string const &needle,
+			     bool caseSensitive=true);
+
+/*****************************************************************************\
 |* Turn am int into a hex string, optionally with a prefix
 \*****************************************************************************/
 std::string toHexString(int value, std::string prefix = "");

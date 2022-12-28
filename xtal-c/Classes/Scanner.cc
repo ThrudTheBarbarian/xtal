@@ -10,6 +10,8 @@
 #include "Symbol.h"
 #include "Token.h"
 
+#include "NotifyCenter.h"
+
 #define MAX_STRING_LENGTH 32768
 
 static Token _rejected;				// Token we scanned and no longer need
@@ -22,12 +24,13 @@ Scanner::Scanner(String src)
 		,_at(0)
 	{
 	_rejected.setValid(false);
+	_nc = NotifyCenter::defaultNotifyCenter();
 	}
 
 /*****************************************************************************\
 |* Scan for tokens
 \*****************************************************************************/
-int Scanner::scan(Token& token, int& line)
+int Scanner::scan(Token& token)
 	{
 	/*************************************************************************\
     |* First see if we have a previously-rejected token, and if so return it
@@ -38,12 +41,21 @@ int Scanner::scan(Token& token, int& line)
 		_rejected.setValid(false);
 		return SCAN_MORE;
 		}
-	
+		
 	/*************************************************************************\
     |* Carry on with the normal parsing
     \*************************************************************************/
-	int c = _skipWhitespace(line);
-	
+	int c = _skipWhitespace();
+
+	/*************************************************************************\
+    |* First check to see that there's no directive here
+    \*************************************************************************/
+	if (c == '#')
+		c = _scanDirective();
+		
+	/*************************************************************************\
+    |* Process any token
+    \*************************************************************************/
 	switch (c)
 		{
 		case EOF:
@@ -51,7 +63,7 @@ int Scanner::scan(Token& token, int& line)
 			return SCAN_COMPLETE;
 		
 		case '+':
-			if ((c = _next(line)) == '+')
+			if ((c = _next()) == '+')
 				token.setToken(Token::T_INC);
 			else
 				{
@@ -61,7 +73,7 @@ int Scanner::scan(Token& token, int& line)
 			break;
 		
 		case '-':
-			if ((c = _next(line)) == '-')
+			if ((c = _next()) == '-')
 				token.setToken(Token::T_DEC);
 			else
 				{
@@ -111,7 +123,7 @@ int Scanner::scan(Token& token, int& line)
 			break;
 
 		case '=':
-			if ((c = _next(line)) == '=')
+			if ((c = _next()) == '=')
 				token.setToken(Token::T_EQ);
 			else
 				{
@@ -121,7 +133,7 @@ int Scanner::scan(Token& token, int& line)
 			break;
 		
 		case '!':
-			if ((c = _next(line)) == '=')
+			if ((c = _next()) == '=')
 				token.setToken(Token::T_NE);
 			else
 				{
@@ -131,7 +143,7 @@ int Scanner::scan(Token& token, int& line)
 			break;
 		
 		case '<':
-			if ((c = _next(line)) == '=')
+			if ((c = _next()) == '=')
 				token.setToken(Token::T_LE);
 			else if (c == '<')
 				token.setToken(Token::T_LSHIFT);
@@ -143,7 +155,7 @@ int Scanner::scan(Token& token, int& line)
 			break;
 		
 		case '>':
-			if ((c = _next(line)) == '=')
+			if ((c = _next()) == '=')
 				token.setToken(Token::T_GE);
 			else if (c == '>')
 				token.setToken(Token::T_RSHIFT);
@@ -155,7 +167,7 @@ int Scanner::scan(Token& token, int& line)
 			break;
 
 		case '&':
-			if ((c = _next(line)) == '&')
+			if ((c = _next()) == '&')
 				token.setToken(Token::T_LOGAND);
 			else
 				{
@@ -165,7 +177,7 @@ int Scanner::scan(Token& token, int& line)
 			break;
 		
 		case '|':
-			if ((c = _next(line)) == '|')
+			if ((c = _next()) == '|')
 				token.setToken(Token::T_LOGOR);
 			else
 				{
@@ -174,34 +186,32 @@ int Scanner::scan(Token& token, int& line)
 				}
 			break;
 
-
 		case '\'':
 			// If it's a quote, scan in the literal character value and
 			// the trailing quote
-			token.setIntValue(_scanCharacter(line));
+			token.setIntValue(_scanCharacter());
 			token.setToken(Token::T_INTLIT);
-			if (_next(line) != '\'')
-				FATAL(ERR_LEX_BAD_CHAR,
-					"Expected '\\' at end of char literal on line %d", line);
+			if (_next() != '\'')
+				FATAL(ERR_LEX_BAD_CHAR, "Expected '\\' at end of char literal");
 			break;
 			
 		case '"':
 			// Scan in a literal string
-			_scanString(line);
+			_scanString();
 			token.setToken(Token::T_STRLIT);
 			break;
 
 		default:
 			if (::isdigit(c))
 				{
-				token.setIntValue(_scanInteger(c, line));
+				token.setIntValue(_scanInteger(c));
 				token.setToken(Token::T_INTLIT);
 				break;
 				}
 			else if (::isalpha(c) || ('_' == c))
 				{
 				// Read in a keyword or identifier
-				_scanIdentifier(c, line);
+				_scanIdentifier(c);
 				
 				// Check to see if it's a known keyword, returns non-zero if so
 				int tokenType = _keyword();
@@ -217,7 +227,7 @@ int Scanner::scan(Token& token, int& line)
 				}
 				
 			FATAL(ERR_LEX_BAD_CHAR,
-					"Unrecognised character '%c' on line %d", c, line);
+					"Unrecognised character '%c'", c);
 			break;
 		}
 	return SCAN_MORE;
@@ -249,14 +259,15 @@ bool Scanner::_atEnd(void)
 /*****************************************************************************\
 |* Get the next character in the input stream
 \*****************************************************************************/
-int Scanner::_next(int &line)
+int Scanner::_next(void)
 	{
 	if (_atEnd())
 		return EOF;
 		
 	int c = _src[_at++];
 	if (c == '\n')
-		line ++;
+		_nc->notify(NC_LINE_INC);
+		
 	return c;
 	}
 	
@@ -272,9 +283,9 @@ void Scanner::_putBack(void)
 /*****************************************************************************\
 |* Skip the whitespace
 \*****************************************************************************/
-int Scanner::_skipWhitespace(int &line)
+int Scanner::_skipWhitespace(void)
 	{
-	int c = _next(line);
+	int c = _next();
 	
 	bool readAgain = true;
 	while (readAgain)
@@ -289,7 +300,7 @@ int Scanner::_skipWhitespace(int &line)
 			case '\r':
 			case '\f':
 				readAgain = true;
-				c = _next(line);
+				c = _next();
 				break;
 			
 			default:
@@ -302,7 +313,7 @@ int Scanner::_skipWhitespace(int &line)
 /*****************************************************************************\
 |* Scan an integer into a token, starting with character 'c'
 \*****************************************************************************/
-int Scanner::_scanInteger(int c, int& line)
+int Scanner::_scanInteger(int c)
 	{
 	int val = 0;
 
@@ -313,7 +324,7 @@ int Scanner::_scanInteger(int c, int& line)
 	while (::isdigit(c))
 		{
 		val = val * 10 + (c-'0');
-		c = _next(line);
+		c = _next();
 		}
 
 	/*************************************************************************\
@@ -326,7 +337,7 @@ int Scanner::_scanInteger(int c, int& line)
 /*****************************************************************************\
 |* Scan an identifier into _text, starting with character 'c'
 \*****************************************************************************/
-int Scanner::_scanIdentifier(int c, int& line)
+int Scanner::_scanIdentifier(int c)
 	{
 	_text = "";
 	
@@ -338,7 +349,7 @@ int Scanner::_scanIdentifier(int c, int& line)
 		if (_text.length() >= Symbol::TEXTLEN)
 			FATAL(ERR_PARSE, "Symbol too long");
 		_text += c;
-		c = _next(line);
+		c = _next();
 		}
 
 	/*************************************************************************\
@@ -419,12 +430,12 @@ int Scanner::_keyword(void)
 /*****************************************************************************\
 |* Scan a character literal
 \*****************************************************************************/
-int Scanner::_scanCharacter(int &line)
+int Scanner::_scanCharacter(void)
 	{
-	int c = _next(line);
+	int c = _next();
 	if (c == '\\')
 		{
-		switch (c = _next(line))
+		switch (c = _next())
 			{
 			case 'a':  return '\a';
 			case 'b':  return '\b';
@@ -448,18 +459,39 @@ int Scanner::_scanCharacter(int &line)
 /*****************************************************************************\
 |* Scan a character literal
 \*****************************************************************************/
-int Scanner::_scanString(int &line)
+int Scanner::_scanString(void)
 	{
 	_text = "";
 	
 	for (int i=0; i<MAX_STRING_LENGTH; i++)
 		{
-		int c = _scanCharacter(line);
+		int c = _scanCharacter();
 		if (c == '"')
 			return (int)(_text.length());
 		_text += c;
 		}
-	FATAL(ERR_PARSE, "Sring too long at line %d", line);
+	FATAL(ERR_PARSE, "String too long");
+	}
+
+/*****************************************************************************\
+|* Scan a directive, or just random text until the end of a line
+\*****************************************************************************/
+int Scanner::_scanDirective(void)
+	{
+	String text = "";
+	int c = _next();
+	while (c != EOF)
+		{
+		if (c == '\n')
+			break;
+		text += c;
+		c = _next();
+		}
+	
+	if (startsWith(text, ":line", false))
+		_nc->notify(NC_FILE_START, text.substr(5));
+	
+	return _skipWhitespace();
 	}
 
 

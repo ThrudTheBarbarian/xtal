@@ -27,7 +27,6 @@ class Compiler
     \*************************************************************************/
     GET(ArgParser*, ap);			// Permanent reference to the arguments
     GET(bool, hadError);			// Whether we've seen a syntax error
-    GET(int, line);					// The current line number
     GET(Emitter *, emitter);		// How we produce assembly
     GET(bool, dumpAST);				// Whether to dump the AST tree
     GET(String, baseDir);			// Compiler base directory
@@ -47,12 +46,12 @@ class Compiler
         /*********************************************************************\
         |* Handle statements
         \*********************************************************************/
-        void _statements(Scanner& scanner, Token &token, int& line);
+        void _statements(Scanner& scanner, Token &token);
         
         /*********************************************************************\
         |* Actual error reporting
         \*********************************************************************/
-        static void _report(int line, std::string where, std::string msg);
+        static void _report(std::string where, std::string msg);
         
     public:
         /*********************************************************************\
@@ -69,7 +68,7 @@ class Compiler
         /*********************************************************************\
         |* Error handling
         \*********************************************************************/
-        static void error(int line, std::string msg);
+        static void error(std::string msg);
         
 	};
 

@@ -7,6 +7,7 @@
 
 #include <map>
 
+#include "sharedDefines.h"
 #include "Token.h"
 
 typedef struct

@@ -40,70 +40,67 @@ class Statement
         static void _match(Scanner& scanner,
 						   Token& token,
 						   int tokenType,
-						   int &line,
 						   String info);
     
         /*********************************************************************\
         |* Match a semicolon
         \*********************************************************************/
-        void _semicolon(Scanner& scanner, Token& token, int& line);
+        void _semicolon(Scanner& scanner, Token& token);
 
         /*********************************************************************\
         |* Match an identifier
         \*********************************************************************/
-        void _identifier(Scanner& scanner, Token& token, int& line);
+        void _identifier(Scanner& scanner, Token& token);
 
 
 
         /********************************************************************\
         |* Handle the print statement
         \********************************************************************/
-		ASTNode * _print(Token& token, int& line);
+		ASTNode * _print(Token& token);
 		
         /********************************************************************\
         |* Handle a declaration statement
         \********************************************************************/
 		void _varDeclaration(Token& token,
-							 int& line,
 							 int type,
 							 Storage sClass);
 		
         /********************************************************************\
         |* Handle parameter declarations
         \********************************************************************/
-		int _paramDeclaration(Token& token, int& line, int idx);
+		int _paramDeclaration(Token& token, int idx);
 
         /********************************************************************\
         |* Process a function declaration
         \********************************************************************/
         ASTNode * _functionDeclaration(Token& token,
-									   int& line,
 									   int type);
 		
         /********************************************************************\
         |* Handle an if statement
         \********************************************************************/
-		ASTNode * _if(Token& token, int& line);
+		ASTNode * _if(Token& token);
 		
         /********************************************************************\
         |* Handle a while statement
         \********************************************************************/
-		ASTNode * _while(Token& token, int& line);
+		ASTNode * _while(Token& token);
 
         /********************************************************************\
         |* Handle a for statement
         \********************************************************************/
-		ASTNode * _for(Token& token, int& line);
+		ASTNode * _for(Token& token);
 
         /********************************************************************\
         |* Process a single statement
         \********************************************************************/
-        ASTNode * _singleStatement(Token& token, int& line);
+        ASTNode * _singleStatement(Token& token);
 
         /********************************************************************\
         |* Parse a given type from the token
         \********************************************************************/
-        int _parseType(Token& token, int& line);
+        int _parseType(Token& token);
 
 
         /********************************************************************\
@@ -120,40 +117,40 @@ class Statement
         /********************************************************************\
         |* Process the statements we understand
         \********************************************************************/
-        ASTNode * compoundStatement(Token& token, int& line);
+        ASTNode * compoundStatement(Token& token);
 
 
         /********************************************************************\
         |* Process a global function or variable declaration
         \********************************************************************/
-		ASTNode * globalDeclaration(Token& token, int&line);
+		ASTNode * globalDeclaration(Token& token);
      
         /********************************************************************\
         |* Process a return statement
         \********************************************************************/
-        ASTNode * returnStatement(Token& token, int& line);
+        ASTNode * returnStatement(Token& token);
      
      
      
         /*********************************************************************\
         |* Match a left bracket '['
         \*********************************************************************/
-        static void leftBrace(Scanner& scanner, Token& token, int& line);
+        static void leftBrace(Scanner& scanner, Token& token);
 
         /*********************************************************************\
         |* Match a right bracket ']'
         \*********************************************************************/
-        static void rightBrace(Scanner& scanner, Token& token, int& line);
+        static void rightBrace(Scanner& scanner, Token& token);
 
         /*********************************************************************\
         |* Match a left parentheses '('
         \*********************************************************************/
-        static void leftParen(Scanner& scanner, Token& token, int& line);
+        static void leftParen(Scanner& scanner, Token& token);
 
         /*********************************************************************\
         |* Match a right parentheses ')'
         \*********************************************************************/
-        static void rightParen(Scanner& scanner, Token& token, int& line);
+        static void rightParen(Scanner& scanner, Token& token);
 	};
 
 #endif /* Statement_h */

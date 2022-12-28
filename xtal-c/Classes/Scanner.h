@@ -15,6 +15,7 @@
 #include "macros.h"
 
 class Token;
+class NotifyCenter;
 
 class Scanner
 	{
@@ -35,11 +36,12 @@ class Scanner
     GET(String, text);				// Last identifier scanned
     
     private:    
-    
-        /*********************************************************************\
+		std::shared_ptr<NotifyCenter>	_nc;
+		
+		/*********************************************************************\
         |* Get the next character in the input stream
         \*********************************************************************/
-        int _next(int &line);
+        int _next(void);
         
 		/*********************************************************************\
         |* Are we at the end of 'file'
@@ -54,27 +56,32 @@ class Scanner
         /*********************************************************************\
         |* Skip whitespace
         \*********************************************************************/
-        int _skipWhitespace(int &line);
+        int _skipWhitespace(void);
        
         /*********************************************************************\
         |* Scan an integer, starting with character 'c'
         \*********************************************************************/
-        int _scanInteger(int c, int &line);
+        int _scanInteger(int c);
        
         /*********************************************************************\
         |* Scan a character literal
         \*********************************************************************/
-        int _scanCharacter(int &line);
+        int _scanCharacter(void);
        
         /*********************************************************************\
         |* Scan a string literal
         \*********************************************************************/
-        int _scanString(int &line);
+        int _scanString(void);
        
         /*********************************************************************\
         |* Scan an identifier/keyword into '_text', starting with character 'c'
         \*********************************************************************/
-        int _scanIdentifier(int c, int &line);
+        int _scanIdentifier(int c);
+       
+        /*********************************************************************\
+        |* Scan a directive, or just random text until the end of a line
+        \*********************************************************************/
+        int _scanDirective(void);
         
         /*********************************************************************\
         |* Check to see if the value in _text is a keyword, return 0 if false
@@ -91,7 +98,7 @@ class Scanner
         /*********************************************************************\
         |* Scan for tokens
         \*********************************************************************/
-        int scan(Token &token, int& line);
+        int scan(Token& t);
          
         /*********************************************************************\
         |* Reject a token as no longer needed, store it for later

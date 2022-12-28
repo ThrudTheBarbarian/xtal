@@ -23,6 +23,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		F44E9394295CB6D300A60C28 /* Locator.cc in Sources */ = {isa = PBXBuildFile; fileRef = F44E9393295CB6D300A60C28 /* Locator.cc */; };
 		F45E73EE294ACCE20032D589 /* xtrt0.s in CopyFiles */ = {isa = PBXBuildFile; fileRef = F45E73EB294ACA6A0032D589 /* xtrt0.s */; };
 		F480EF0C2922B472008584FB /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF0B2922B472008584FB /* main.cc */; };
 		F480EF192922B512008584FB /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF182922B512008584FB /* main.cc */; };
@@ -164,6 +165,8 @@
 /* Begin PBXFileReference section */
 		F44E938F295BCF9A00A60C28 /* stdio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stdio.h; sourceTree = "<group>"; };
 		F44E9390295BCFC200A60C28 /* stdio.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = stdio.xt; sourceTree = "<group>"; };
+		F44E9392295CB6D300A60C28 /* Locator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Locator.h; path = Classes/Locator.h; sourceTree = "<group>"; };
+		F44E9393295CB6D300A60C28 /* Locator.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Locator.cc; path = Classes/Locator.cc; sourceTree = "<group>"; };
 		F45E73E82949873E0032D589 /* Bugs */ = {isa = PBXFileReference; lastKnownFileType = text; path = Bugs; sourceTree = "<group>"; };
 		F45E73EB294ACA6A0032D589 /* xtrt0.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = xtrt0.s; sourceTree = "<group>"; };
 		F480EF082922B472008584FB /* xtal */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = xtal; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -349,33 +352,35 @@
 				F45E73E9294ACA4C0032D589 /* Rsrc */,
 				F4B808A229370A240049B6EB /* Docs */,
 				F4AE741329317E600000F817 /* xtal-c.entitlements */,
+				F480EF182922B512008584FB /* main.cc */,
 				F480EF712922C657008584FB /* ASTNode.cc */,
 				F480EF772922C657008584FB /* ASTNode.h */,
-				F4B53B3F2932AB8C0023B3AB /* Emitter.h */,
-				F4B53B402932AB8C0023B3AB /* Emitter.cc */,
-				F480EF7A2922C657008584FB /* A8Emitter.h */,
+				F480EF7B2922C657008584FB /* Compiler.cc */,
+				F480EF6D2922C657008584FB /* Compiler.h */,
 				F480EF732922C657008584FB /* A8Emitter.cc */,
+				F480EF7A2922C657008584FB /* A8Emitter.h */,
+				F4B53B402932AB8C0023B3AB /* Emitter.cc */,
+				F4B53B3F2932AB8C0023B3AB /* Emitter.h */,
 				F480EF702922C657008584FB /* Expression.cc */,
 				F480EF722922C657008584FB /* Expression.h */,
+				F44E9393295CB6D300A60C28 /* Locator.cc */,
+				F44E9392295CB6D300A60C28 /* Locator.h */,
 				F480EF792922C657008584FB /* Register.cc */,
 				F480EF6E2922C657008584FB /* Register.h */,
 				F480EF762922C657008584FB /* RegisterFile.cc */,
 				F480EF6F2922C657008584FB /* RegisterFile.h */,
 				F480EF752922C657008584FB /* Scanner.cc */,
 				F480EF6C2922C657008584FB /* Scanner.h */,
+				F4B53B482932E9300023B3AB /* Statement.cc */,
+				F4B53B472932E9300023B3AB /* Statement.h */,
+				F4B53B3A29329D950023B3AB /* Symbol.cc */,
+				F4B53B3929329D950023B3AB /* Symbol.h */,
+				F4B53B3D29329FBC0023B3AB /* SymbolTable.cc */,
+				F4B53B3C29329FBC0023B3AB /* SymbolTable.h */,
 				F480EF742922C657008584FB /* Token.cc */,
 				F480EF782922C657008584FB /* Token.h */,
-				F480EF7B2922C657008584FB /* Compiler.cc */,
-				F480EF6D2922C657008584FB /* Compiler.h */,
-				F480EF182922B512008584FB /* main.cc */,
-				F4B53B3929329D950023B3AB /* Symbol.h */,
-				F4B53B3A29329D950023B3AB /* Symbol.cc */,
-				F4B53B3C29329FBC0023B3AB /* SymbolTable.h */,
-				F4B53B3D29329FBC0023B3AB /* SymbolTable.cc */,
-				F4B53B472932E9300023B3AB /* Statement.h */,
-				F4B53B482932E9300023B3AB /* Statement.cc */,
-				F4B808A629385D550049B6EB /* Types.h */,
 				F4B808A729385D550049B6EB /* Types.cc */,
+				F4B808A629385D550049B6EB /* Types.h */,
 			);
 			path = "xtal-c";
 			sourceTree = "<group>";
@@ -650,6 +655,7 @@
 				F4B53B3E29329FBC0023B3AB /* SymbolTable.cc in Sources */,
 				F4B53B492932E9300023B3AB /* Statement.cc in Sources */,
 				F480EF802922C657008584FB /* Scanner.cc in Sources */,
+				F44E9394295CB6D300A60C28 /* Locator.cc in Sources */,
 				F4B53B412932AB8C0023B3AB /* Emitter.cc in Sources */,
 				F480EF812922C657008584FB /* RegisterFile.cc in Sources */,
 				F4B808A829385D550049B6EB /* Types.cc in Sources */,

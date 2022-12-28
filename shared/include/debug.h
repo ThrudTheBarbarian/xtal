@@ -72,7 +72,9 @@ enum
     snprintf(s_str, 65535, __VA_ARGS__);							\
     std::cout << "[" << __FILENAME__ << " "						    \
 			  << __FUNCTION__ << ": " << __LINE__ << "] " 		    \
-			  << s_str << std::endl;								\
+			  << s_str												\
+			  << " at " << LOCATOR->location() 						\
+			  << std::endl;											\
     std::exit(error);												\
     }
 
@@ -141,6 +143,7 @@ enum
 	ERR_TYPE,
 	ERR_TOKEN,
 	ERR_ARRAY,
+	ERR_LOCATION,
 	ERR_MAX
 	};
 

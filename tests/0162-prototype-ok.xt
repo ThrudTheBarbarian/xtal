@@ -1,13 +1,6 @@
 #import <stdio>
 
 void dummy(s32 a, u8 b, u16 c);
-
-void dummy(s32 a, u8 b, u16 c)
-	[
-	print a;
-	print b;
-	print c;
-	]
 	
 s32 main()
 	[
@@ -19,3 +12,10 @@ s32 main()
 	return (0);
 	]
 	
+
+void dummy(s32 a, u8 b, u16 c)
+	[
+	print a;
+	print b;
+	print c;
+	]
