@@ -173,6 +173,7 @@ void Compiler::_report(int line, std::string where, std::string msg)
 void Compiler::_handleImports(String& src)
 	{
 	bool needsAnotherPass = true;
+	StringList done;
 	
 	/*************************************************************************\
     |* Continue until we're done
@@ -185,6 +186,7 @@ void Compiler::_handleImports(String& src)
 		size_t at = src.find("#import");
 		if (at != String::npos)
 			{
+			needsAnotherPass = true;
 			String search = "#import";
 			String name = "";
 			
@@ -220,12 +222,18 @@ void Compiler::_handleImports(String& src)
 			if (name.length() == 0)
 				FATAL(ERR_INCLUDE, "Cannot find empty import");
 			
-
 			/*****************************************************************\
 			|* replace the import command with spaces
 			\*****************************************************************/
 			String spaces = std::string(search.length(), ' ');
 			src = replace(src, search, spaces, false);
+			
+			/*****************************************************************\
+			|* Make sure we don't add twice by mistake
+			\*****************************************************************/
+			if (std::find(done.begin(), done.end(), name) != done.end())
+				continue;
+			done.push_back(name);
 			
 			/*****************************************************************\
 			|* See if we can find name.h
