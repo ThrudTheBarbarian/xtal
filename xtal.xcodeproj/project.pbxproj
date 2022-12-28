@@ -14,8 +14,8 @@
 			);
 			dependencies = (
 				F4B808992931A6DB0049B6EB /* PBXTargetDependency */,
-				F4B8089B2931A6DB0049B6EB /* PBXTargetDependency */,
 				F4B8089D2931A6DB0049B6EB /* PBXTargetDependency */,
+				F4B8089B2931A6DB0049B6EB /* PBXTargetDependency */,
 			);
 			name = all;
 			productName = all;
@@ -46,7 +46,6 @@
 		F480EF592922BB66008584FB /* Stringutils.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF492922BB66008584FB /* Stringutils.cc */; };
 		F480EF5A2922BB66008584FB /* Stringutils.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF492922BB66008584FB /* Stringutils.cc */; };
 		F480EF5B2922BB66008584FB /* Stringutils.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF492922BB66008584FB /* Stringutils.cc */; };
-		F480EF692922BD77008584FB /* printReg.s in Copy Library Files */ = {isa = PBXBuildFile; fileRef = F480EF642922BC1A008584FB /* printReg.s */; };
 		F480EF6A2922BD7A008584FB /* stdmacros.s in Copy Library Files */ = {isa = PBXBuildFile; fileRef = F480EF652922BC1A008584FB /* stdmacros.s */; };
 		F480EF6B2922BDE5008584FB /* xtal-a in Copy Binaries */ = {isa = PBXBuildFile; fileRef = F480EF212922B564008584FB /* xtal-a */; };
 		F480EF7C2922C657008584FB /* Expression.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF702922C657008584FB /* Expression.cc */; };
@@ -65,7 +64,7 @@
 		F4B53B412932AB8C0023B3AB /* Emitter.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B53B402932AB8C0023B3AB /* Emitter.cc */; };
 		F4B53B492932E9300023B3AB /* Statement.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B53B482932E9300023B3AB /* Statement.cc */; };
 		F4B8088B29272F2A0049B6EB /* ContextMgr.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B8088A29272F2A0049B6EB /* ContextMgr.cc */; };
-		F4B8088E292DDA470049B6EB /* stdio.s in Copy Library Files */ = {isa = PBXBuildFile; fileRef = F4B8088C292DD9B70049B6EB /* stdio.s */; };
+		F4B8088E292DDA470049B6EB /* stdio.s in Copy stdio Module files */ = {isa = PBXBuildFile; fileRef = F4B8088C292DD9B70049B6EB /* stdio.s */; };
 		F4B80893292DE4E10049B6EB /* Function.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B80892292DE4E10049B6EB /* Function.cc */; };
 		F4B808A829385D550049B6EB /* Types.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B808A729385D550049B6EB /* Types.cc */; };
 /* End PBXBuildFile section */
@@ -95,6 +94,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		F44E938C295BCE0600A60C28 /* Copy stdio Module files */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /opt/xtal/lib/modules/stdio;
+			dstSubfolderSpec = 0;
+			files = (
+				F4B8088E292DDA470049B6EB /* stdio.s in Copy stdio Module files */,
+			);
+			name = "Copy stdio Module files";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F45E73ED294ACCCC0032D589 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -144,9 +154,7 @@
 			dstPath = /opt/xtal/lib;
 			dstSubfolderSpec = 0;
 			files = (
-				F480EF692922BD77008584FB /* printReg.s in Copy Library Files */,
 				F480EF6A2922BD7A008584FB /* stdmacros.s in Copy Library Files */,
-				F4B8088E292DDA470049B6EB /* stdio.s in Copy Library Files */,
 			);
 			name = "Copy Library Files";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -154,6 +162,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F44E938F295BCF9A00A60C28 /* stdio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stdio.h; sourceTree = "<group>"; };
+		F44E9390295BCFC200A60C28 /* stdio.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = stdio.xt; sourceTree = "<group>"; };
 		F45E73E82949873E0032D589 /* Bugs */ = {isa = PBXFileReference; lastKnownFileType = text; path = Bugs; sourceTree = "<group>"; };
 		F45E73EB294ACA6A0032D589 /* xtrt0.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = xtrt0.s; sourceTree = "<group>"; };
 		F480EF082922B472008584FB /* xtal */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = xtal; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -192,7 +202,6 @@
 		F480EF5E2922BC1A008584FB /* test02 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test02; sourceTree = "<group>"; };
 		F480EF5F2922BC1A008584FB /* test01 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test01; sourceTree = "<group>"; };
 		F480EF612922BC1A008584FB /* AssemblyFormat.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AssemblyFormat.txt; sourceTree = "<group>"; };
-		F480EF642922BC1A008584FB /* printReg.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = printReg.s; sourceTree = "<group>"; };
 		F480EF652922BC1A008584FB /* stdmacros.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = stdmacros.s; sourceTree = "<group>"; };
 		F480EF6C2922C657008584FB /* Scanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Scanner.h; path = Classes/Scanner.h; sourceTree = "<group>"; };
 		F480EF6D2922C657008584FB /* Compiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Compiler.h; path = Classes/Compiler.h; sourceTree = "<group>"; };
@@ -260,6 +269,31 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F44E938B295BCD2500A60C28 /* modules */ = {
+			isa = PBXGroup;
+			children = (
+				F4B8088C292DD9B70049B6EB /* stdio.s */,
+			);
+			path = modules;
+			sourceTree = "<group>";
+		};
+		F44E938D295BCF7900A60C28 /* modules */ = {
+			isa = PBXGroup;
+			children = (
+				F44E938E295BCF8100A60C28 /* stdio */,
+			);
+			path = modules;
+			sourceTree = "<group>";
+		};
+		F44E938E295BCF8100A60C28 /* stdio */ = {
+			isa = PBXGroup;
+			children = (
+				F44E938F295BCF9A00A60C28 /* stdio.h */,
+				F44E9390295BCFC200A60C28 /* stdio.xt */,
+			);
+			path = stdio;
+			sourceTree = "<group>";
+		};
 		F45E73E9294ACA4C0032D589 /* Rsrc */ = {
 			isa = PBXGroup;
 			children = (
@@ -271,6 +305,7 @@
 		F45E73EA294ACA590032D589 /* lib */ = {
 			isa = PBXGroup;
 			children = (
+				F44E938D295BCF7900A60C28 /* modules */,
 				F45E73EB294ACA6A0032D589 /* xtrt0.s */,
 			);
 			path = lib;
@@ -449,9 +484,8 @@
 		F480EF632922BC1A008584FB /* lib */ = {
 			isa = PBXGroup;
 			children = (
-				F480EF642922BC1A008584FB /* printReg.s */,
+				F44E938B295BCD2500A60C28 /* modules */,
 				F480EF652922BC1A008584FB /* stdmacros.s */,
-				F4B8088C292DD9B70049B6EB /* stdio.s */,
 			);
 			path = lib;
 			sourceTree = "<group>";
@@ -493,6 +527,7 @@
 				F480EF132922B512008584FB /* Frameworks */,
 				F480EF142922B512008584FB /* Copy Binaries */,
 				F45E73ED294ACCCC0032D589 /* CopyFiles */,
+				F44E9391295BCFE500A60C28 /* Install module code */,
 			);
 			buildRules = (
 			);
@@ -511,6 +546,7 @@
 				F480EF1E2922B564008584FB /* Frameworks */,
 				F480EF1F2922B564008584FB /* Copy Binaries */,
 				F480EF682922BD5C008584FB /* Copy Library Files */,
+				F44E938C295BCE0600A60C28 /* Copy stdio Module files */,
 			);
 			buildRules = (
 			);
@@ -564,6 +600,28 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		F44E9391295BCFE500A60C28 /* Install module code */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Install module code";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nBASE_DIR=/opt/xtal/lib\ncp -r $PROJECT_DIR/xtal-c/Rsrc/lib/modules $BASE_DIR\n\n\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		F480EF042922B472008584FB /* Sources */ = {

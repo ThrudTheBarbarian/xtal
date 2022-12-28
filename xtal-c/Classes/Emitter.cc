@@ -42,7 +42,6 @@ Emitter::~Emitter()
 \****************************************************************************/
 void Emitter::preamble(void)
 	{
-	_includes.insert(_printRegFile);
 	_includes.insert(_stdMacrosFile);
 	
 	RegisterFile::setOutputFile(_ofp);
@@ -57,13 +56,11 @@ void Emitter::preamble(void)
 					  "; ---------------\n"
 					  ".include %s\n"
 					  ".include %s\n"
-					  ".include %s\n"
 					  "\n"
 					  "%s\n"
 					  "call main\n"
 					  "rts\n",
 					  __TIME__, __DATE__,
-					  _printRegFile.c_str(),
 					  _stdMacrosFile.c_str(),
 					  _xtrt0.c_str(),
 					  _preamble.c_str());

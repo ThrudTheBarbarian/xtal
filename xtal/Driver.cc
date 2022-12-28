@@ -140,6 +140,8 @@ String Driver::_cCmd(void)
 	_asmFile = fs::temp_directory_path().string() + randomString(8) + ".asm";
 	cCmd += "-o " + _asmFile + " ";
 	
+	cCmd += "-xb " + _baseDir + " ";
+	
 	for (String srcfile : _ap->remainingArgs())
 		cCmd += "'" + srcfile + "' ";
 	
@@ -173,6 +175,8 @@ String Driver::_aCmd(void)
 	
 	if (_listFile != "")
 		aCmd += "-l '" + _listFile + "' ";
+	
+	aCmd += "-xb " + _baseDir + " ";
 	
 	aCmd += _asmFile;
 	

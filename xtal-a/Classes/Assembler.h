@@ -36,6 +36,7 @@ class Assembler
     GET(String, listFile);				// Output listing filename
     GET(MacroMap, macros);				// map of named macros
     GET(FunctionMap, functions);		// map of named functions
+    GET(String, baseDir);				// Compiler base directory
     
     private:
         /*********************************************************************\

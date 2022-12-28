@@ -1,3 +1,5 @@
+#import <stdio>
+
 void dummy(s32 a, u8 b);
 
 void dummy(s32 a, u8 b, u16 c)

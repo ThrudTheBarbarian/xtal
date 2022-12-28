@@ -1,0 +1,5 @@
+
+void printf(u32 a)
+	[
+	print a;
+	]

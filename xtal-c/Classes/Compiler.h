@@ -30,6 +30,7 @@ class Compiler
     GET(int, line);					// The current line number
     GET(Emitter *, emitter);		// How we produce assembly
     GET(bool, dumpAST);				// Whether to dump the AST tree
+    GET(String, baseDir);			// Compiler base directory
     
     private:
     
@@ -37,6 +38,11 @@ class Compiler
         |* General run() method
         \*********************************************************************/
         int _run(std::string content);
+    
+        /*********************************************************************\
+        |* Handle imports of library code
+        \*********************************************************************/
+        void _handleImports(String& src);
     
         /*********************************************************************\
         |* Handle statements

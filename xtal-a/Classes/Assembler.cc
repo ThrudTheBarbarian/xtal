@@ -51,12 +51,20 @@ int Assembler::main(int argc, const char *argv[])
 	{
 	_ap = new ArgParser(argc, argv);
 
+	/*************************************************************************\
+	|* Start off with a default value for where xtal is installed
+	\*************************************************************************/
+	const char *base = "/opt/xtal";
+	if (getenv("XTAL_BASEDIR") != NULL)
+		base = getenv("XTAL_BASEDIR");
+
+
 	_symbols				= _ap->listOf("-D", "--define", "Runtime",
 										  "Define constants in the symbol table");
     _debugLevel      		= _ap->flagFor("-d", "--debug", 0,
 										  "General",
 										  "increase the debug level");
-    _output					= _ap->stringFor("-o", "--output", "/tmp/out.com",
+    _output					= _ap->stringFor("-o", "--output", "a.out",
 										  "General",
 										  "Output filename");
     _hexOutput				= _ap->stringFor("-oh", "--output-hex", "",
@@ -68,6 +76,9 @@ int Assembler::main(int argc, const char *argv[])
 	_includeDirs			= _ap->listOf("-i", "--include",
 										  "Runtime",
 										  "Locations to look for library files");
+	_baseDir				= _ap->stringFor("-xb", "--xtal-base-dir", base,
+										  "Runtime",
+										  "Compiler base directory");
 	_includeDirs.push_back("/opt/xtal/lib");
 	
 	/*************************************************************************\

@@ -1,3 +1,5 @@
+#import <stdio>
+
 u8 main()
 	[
 	s32 i; i=18;
