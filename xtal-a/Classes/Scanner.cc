@@ -1097,10 +1097,10 @@ int Scanner::_handle6502(Token::TokenInfo info,
 	
 	
 	/************************************************************************\
-    |* Remove whitespace
+    |* Remove whitespace unless it's quoted (to cope with  LDA #' ')
     \************************************************************************/
-	args.erase(remove_if(args.begin(), args.end(), ::isspace), args.end());
-
+	removeUnquotedWhitespace(args);
+	
 	/************************************************************************\
     |* Figure out the addressing mode
     \************************************************************************/
@@ -1460,6 +1460,7 @@ Token Scanner::_hasLabel(String& s)
 
 		t.setType(T_LABEL);
 		t.setWhich(P_LABEL);
+		t.setAddr(_current);
 		t.setArg1(LOCATOR->identifier()+"_"+sanitised);
 		s = trim(s.substr(idx));
 		}

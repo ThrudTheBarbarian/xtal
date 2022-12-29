@@ -84,4 +84,9 @@ std::string replace(const std::string& src,
 \*****************************************************************************/
 std::string randomString(size_t length);
 
+/*****************************************************************************\
+|* Remove unquoted whitespace from a string
+\*****************************************************************************/
+std::string removeUnquotedWhitespace(const std::string& s);
+
 #endif /* stringutils_h */

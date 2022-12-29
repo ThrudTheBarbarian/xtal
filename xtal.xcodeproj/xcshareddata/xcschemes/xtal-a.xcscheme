@@ -58,7 +58,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-D &apos;org=0x6000&apos; -d -o &apos;/tmp/out.com&apos; /var/folders/th/63xq4hqx6yqcx57qgds7ry7r0000gn/T/5PN2qmWq.asm "
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-d"
@@ -77,12 +77,12 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "$PROJECT_DIR/xtal-a/Tests/test04"
-            isEnabled = "NO">
+            argument = "$PROJECT_DIR/atof.s"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-D org=$600"
-            isEnabled = "NO">
+            argument = "-D org=0x600"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-h"

@@ -198,3 +198,47 @@ std::string randomString( size_t length )
     std::generate_n( str.begin(), length, randchar );
     return str;
 	}
+
+/*****************************************************************************\
+|* Remove unquoted chars based on a predicate
+\*****************************************************************************/
+template <typename Predicate>
+std::string removeUnquotedChars(const std::string& s, Predicate p)
+	{
+	bool skip 	= false;
+	char q 		= '\0';
+	std::string result;
+
+	for (char c : s)
+		if (skip)
+			{
+			result.append( 1, c );
+			skip = false;
+			}
+		else if (q)
+			{
+			result.append( 1, c );
+			skip = (c == '\\');
+			if (c == q)
+				q = '\0';
+			}
+		else
+			{
+			if (!std::isspace( c ))
+				result.append( 1, c );
+			q = p(c) ? c : '\0';
+			}
+
+	return result;
+	}
+
+/*****************************************************************************\
+|* Remove unquoted chars based on a predicate
+\*****************************************************************************/
+std::string removeUnquotedWhitespace(const std::string& s)
+	{
+	return removeUnquotedChars(s, []( char c ) -> bool
+				{
+				return (c == '"') or (c == '\'');
+				});
+	}
