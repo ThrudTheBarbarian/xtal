@@ -1,2 +1,2 @@
-[Statement.cc _paramDeclaration: 532] Type doesn't match at index 3
+[Statement.cc _paramDeclaration: 527] Type doesn't match at index 3 at 0162-prototype-type-fail.xt:5
 atarisim: error reading binary file.
