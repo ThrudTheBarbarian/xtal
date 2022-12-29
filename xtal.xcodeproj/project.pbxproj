@@ -167,6 +167,7 @@
 		F44E9390295BCFC200A60C28 /* stdio.xt */ = {isa = PBXFileReference; lastKnownFileType = text; path = stdio.xt; sourceTree = "<group>"; };
 		F44E9392295CB6D300A60C28 /* Locator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Locator.h; path = Classes/Locator.h; sourceTree = "<group>"; };
 		F44E9393295CB6D300A60C28 /* Locator.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Locator.cc; path = Classes/Locator.cc; sourceTree = "<group>"; };
+		F44E9396295D2C0B00A60C28 /* math.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = math.s; sourceTree = "<group>"; };
 		F45E73E82949873E0032D589 /* Bugs */ = {isa = PBXFileReference; lastKnownFileType = text; path = Bugs; sourceTree = "<group>"; };
 		F45E73EB294ACA6A0032D589 /* xtrt0.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = xtrt0.s; sourceTree = "<group>"; };
 		F480EF082922B472008584FB /* xtal */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = xtal; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -283,6 +284,7 @@
 		F44E938D295BCF7900A60C28 /* modules */ = {
 			isa = PBXGroup;
 			children = (
+				F44E9395295D2BF000A60C28 /* math */,
 				F44E938E295BCF8100A60C28 /* stdio */,
 			);
 			path = modules;
@@ -295,6 +297,14 @@
 				F44E9390295BCFC200A60C28 /* stdio.xt */,
 			);
 			path = stdio;
+			sourceTree = "<group>";
+		};
+		F44E9395295D2BF000A60C28 /* math */ = {
+			isa = PBXGroup;
+			children = (
+				F44E9396295D2C0B00A60C28 /* math.s */,
+			);
+			path = math;
 			sourceTree = "<group>";
 		};
 		F45E73E9294ACA4C0032D589 /* Rsrc */ = {
