@@ -129,7 +129,7 @@ void Engine::incLabel(String stem)
 bool Engine::eval(String s)
 	{
 	bool ok = true;
-	_src 	= s+"\n";
+	_src 	= LOCATOR->labelValues() + s + "\n";
 	//fprintf(stderr, "[%s]\n", s.c_str());
 	_at 	= 0;
 	//fprintf(stderr, "Eval '%s'\n", s.c_str());
