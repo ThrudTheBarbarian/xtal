@@ -5,7 +5,7 @@
 //  Created by Thrud The Barbarian on 10/28/22.
 //
 
-#include "ContextMgr.h"
+#include "Locator.h"
 #include "Token.h"
 #include "Stringutils.h"
 
@@ -407,7 +407,7 @@ String Token::toString(int64_t at)
 				offset = "-" + std::to_string(delta);
 				}
 				
-			info += " " + CTXMGR->identifier()+"_"+_arg1 + " ; {" + offset;
+			info += " " + LOCATOR->identifier()+"_"+_arg1 + " ; {" + offset;
 			if (at != NO_ADDRESS)
 				info += " : " + toHexString((int)(at + 2 + delta), "$");
 			info += "}";
@@ -428,8 +428,7 @@ String Token::toString(int64_t at)
 			break;
 		
 		default:
-			FATAL(ERR_EMIT, "Unknown addressing mode!\n%s",
-				CTXMGR->location().c_str());
+			FATAL(ERR_EMIT, "Unknown addressing mode!\n");
 		}
 	return info;
 	}

@@ -1,26 +1,23 @@
 //
-//  ContextMgr.cc
+//  Locator.cc
 //  xtal-a
 //
 //  Created by Simon Gornall on 11/17/22.
 //
 
-// FIXME: Aliasing isn't working and fileList/ctxList are getting out of sync
-// maybe move to a linked list or vector[int] for the fileList/blockList
-
-#include "ContextMgr.h"
 #include "Engine.h"
+#include "Locator.h"
 #include "Stringutils.h"
 
 /******************************************************************************\
 |* The global instance
 \******************************************************************************/
-std::shared_ptr<ContextMgr> ContextMgr::_instance = nullptr;
+std::shared_ptr<Locator> Locator::_instance = nullptr;
 
 /*****************************************************************************\
 |* Constructor
 \*****************************************************************************/
-ContextMgr::ContextMgr()
+Locator::Locator()
 	{
 	reset();
 	_labels.clear();
@@ -29,12 +26,12 @@ ContextMgr::ContextMgr()
 /******************************************************************************\
 |* Return the shared instance
 \******************************************************************************/
-std::shared_ptr<ContextMgr> ContextMgr::sharedInstance(void)
+std::shared_ptr<Locator> Locator::sharedInstance(void)
     {
     static std::mutex mutex;
     std::lock_guard<std::mutex> lock(mutex);
     if (!_instance)
-        _instance = std::shared_ptr<ContextMgr>(new ContextMgr);
+        _instance = std::shared_ptr<Locator>(new Locator);
 
     return _instance;
     }
@@ -42,7 +39,7 @@ std::shared_ptr<ContextMgr> ContextMgr::sharedInstance(void)
 /******************************************************************************\
 |* Create and push the current context
 \******************************************************************************/
-ContextMgr::Context& ContextMgr::push(const String name,
+Locator::Context& Locator::push(const String name,
 									  ContextType type,
 									  int64_t line)
 	{
@@ -71,7 +68,7 @@ ContextMgr::Context& ContextMgr::push(const String name,
 /******************************************************************************\
 |* Create and push the current context
 \******************************************************************************/
-ContextMgr::Context& ContextMgr::push(const String name,
+Locator::Context& Locator::push(const String name,
 									  String type,
 									  int64_t line)
 	{
@@ -104,7 +101,7 @@ ContextMgr::Context& ContextMgr::push(const String name,
 |* the current file and block context (if we're in a block, we're guaranteed
 |* to be in a file)
 \******************************************************************************/
-int64_t ContextMgr::incLine(int64_t delta)
+int64_t Locator::incLine(int64_t delta)
 	{
 	int64_t currentCtxLine = -1;
 	/*
@@ -133,7 +130,7 @@ int64_t ContextMgr::incLine(int64_t delta)
 /******************************************************************************\
 |* Reset all the contexts
 \******************************************************************************/
-void ContextMgr::reset()
+void Locator::reset()
 	{
 	_ctxList.clear();
 	_fileList.clear();
@@ -144,7 +141,7 @@ void ContextMgr::reset()
 /******************************************************************************\
 |* Pop a context
 \******************************************************************************/
-void ContextMgr::pop(void)
+void Locator::pop(void)
 	{
 	if (_ctxList.size() > 0)
 		{
@@ -162,13 +159,13 @@ void ContextMgr::pop(void)
 		_ctxList.pop_back();
 		}
 	else
-		FATAL(ERR_CTX, "Cannot find context to pop!");
+		FATAL(ERR_CTX, "Cannot find context to pop!\n");
 	}
 
 /******************************************************************************\
 |* Return a location based on the current context hierarchy.
 \******************************************************************************/
-String ContextMgr::location(void)
+String Locator::location(void)
 	{
 	String msg 		= "";
 	String prefix 	= "";
@@ -189,7 +186,7 @@ String ContextMgr::location(void)
 /******************************************************************************\
 |* Return the current context identifier for label naming
 \******************************************************************************/
-String ContextMgr::identifier(void)
+String Locator::identifier(void)
 	{
 	String ident = "Uninitialised";
 	
@@ -206,7 +203,7 @@ String ContextMgr::identifier(void)
 		
 		}
 	else
-		FATAL(ERR_CTX, "Cannot find context to identify!");
+		FATAL(ERR_CTX, "Cannot find context to identify!\n");
 	
 	return ident;
 	}
@@ -215,7 +212,7 @@ String ContextMgr::identifier(void)
 |* Add a context-specific, or global label to point to a memory location
 |* within the current context
 \******************************************************************************/
-void ContextMgr::addLabel(String label, int location)
+void Locator::addLabel(String label, int location)
 	{
 	if (_ctxList.size() > 0)
 		{
@@ -231,14 +228,14 @@ void ContextMgr::addLabel(String label, int location)
 		_labels[contextId][label] = location;
 		}
 	else
-		FATAL(ERR_CTX, "Cannot find context to add label to!");
+		FATAL(ERR_CTX, "Cannot find context to add label to!\n");
 	}
 
 
 /******************************************************************************\
 |* Return a context-specific, or global label. If it doesn't exist, return -1
 \******************************************************************************/
-bool ContextMgr::labelValue(String label, int& value)
+bool Locator::labelValue(String label, int& value)
 	{
 	bool ok = false;
 	value = -1;
@@ -264,7 +261,7 @@ bool ContextMgr::labelValue(String label, int& value)
 /******************************************************************************\
 |* Return all the context label values
 \******************************************************************************/
-String ContextMgr::labelValues(void)
+String Locator::labelValues(void)
 	{
 	String results = "";
 	
@@ -286,7 +283,7 @@ String ContextMgr::labelValues(void)
 /******************************************************************************\
 |* Private method : Return a human-readable version of the type
 \******************************************************************************/
-String ContextMgr::_type(ContextType type)
+String Locator::_type(ContextType type)
 	{
 	String name = "Unknown";
 	
@@ -317,8 +314,7 @@ String ContextMgr::_type(ContextType type)
 			name = "while";
 			break;
 		default:
-			FATAL(ERR_CTX, "Asked for unknown context type\n%s",
-				location().c_str());
+			FATAL(ERR_CTX, "Asked for unknown context type\n");
 		}
 		
 	return name;

@@ -8,6 +8,8 @@
 #include "Token.h"
 #include "OutputBlock.h"
 
+#include "sharedDefines.h"
+
 /****************************************************************************\
 |* Constructor
 \****************************************************************************/
@@ -63,7 +65,7 @@ void OutputBlock::write(FILE *fp)
 	{
 	if (_data.size() > 6)
 		if (fwrite(_data.data(), 1, _data.size(), fp) != _data.size())
-			FATAL(ERR_OUTPUT, "Couldn't write block to file completely");
+			FATAL(ERR_OUTPUT, "Couldn't write block to file completely\n");
 	}
 
 /****************************************************************************\

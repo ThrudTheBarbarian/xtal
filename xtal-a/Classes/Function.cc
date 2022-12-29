@@ -8,12 +8,10 @@
 #include <ranges>
 
 #include "Function.h"
-#include "ContextMgr.h"
+#include "Locator.h"
 
 #define MAX_REGISTERS			(64*256)
 #define REG_BASE				(0xC0)
-
-#define CTXMGR					ContextMgr::sharedInstance()
 
 /*****************************************************************************\
 |* Constructor
@@ -66,8 +64,8 @@ void Function::enstack(StringList& assembly)
 			int regId;
 			sscanf(regName.c_str() + 1, "%d", &regId);
 			if (regId < 0 || regId > MAX_REGISTERS)
-				FATAL(ERR_FUNCTION, "Attempt to push reg '%s'\n%s",
-					regName.c_str(), CTXMGR->location().c_str());
+				FATAL(ERR_FUNCTION,
+					  "Attempt to push reg '%s'\n", regName.c_str());
 			int offset = REG_BASE + (regId % 64);
 			
 			char buf[1024];
@@ -111,8 +109,8 @@ void Function::destack(StringList& assembly)
 			int regId;
 			sscanf(regName.c_str() + 1, "%d", &regId);
 			if (regId < 0 || regId > MAX_REGISTERS)
-				FATAL(ERR_FUNCTION, "Attempt to pull reg '%s'\n%s",
-					regName.c_str(), CTXMGR->location().c_str());
+				FATAL(ERR_FUNCTION,
+					  "Attempt to pull reg '%s'\n", regName.c_str());
 			int offset = REG_BASE + (regId % 64);
 			char buf[1024];
 			assembly.push_back("pla");

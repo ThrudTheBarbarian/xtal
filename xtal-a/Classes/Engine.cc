@@ -5,10 +5,8 @@
 //  Created by Thrud The Barbarian on 10/29/22.
 //
 
-#include "ContextMgr.h"
 #include "Engine.h"
-
-#define CTXMGR					ContextMgr::sharedInstance()
+#include "Locator.h"
 
 extern int yyparse();
 	
@@ -44,12 +42,11 @@ int64_t Engine::parseNumber(void)
 				return c;
 				}
 			else
-				FATAL(ERR_PARSE, "Cannot understand number/base in '%s'\n%s",
-					_src.c_str(), CTXMGR->location().c_str());
+				FATAL(ERR_PARSE, "Cannot understand number/base in '%s'\n",
+					_src.c_str());
 			}
 		else
-			FATAL(ERR_PARSE, "Cannot understand number/base\n%s",
-					CTXMGR->location().c_str());
+			FATAL(ERR_PARSE, "Cannot understand number/base\n");
 		c = _next();
 		}
 

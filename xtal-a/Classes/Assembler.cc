@@ -11,8 +11,8 @@
 
 #include "ArgParser.h"
 #include "Assembler.h"
-#include "ContextMgr.h"
 #include "Engine.h"
+#include "Locator.h"
 #include "Scanner.h"
 #include "Stringutils.h"
 #include "Token.h"
@@ -119,7 +119,7 @@ int Assembler::main(int argc, const char *argv[])
 		}
 		
 	if (input.length() == 0)
-		FATAL(ERR_NO_SOURCE_FILES, "Cannot read input file(s)");
+		FATAL(ERR_NO_SOURCE_FILES, "Cannot read input file(s)\n");
 		
 	/*************************************************************************\
 	|* Handle any includes to create the composite source
@@ -192,7 +192,7 @@ int Assembler::_run(std::string source)
 		{
 		fprintf(stderr, "\n=====\n\n");
 		scanner.engine().dumpVars();
-		fprintf(stderr, "\n=====\n\n%s\n", CTXMGR->labelValues().c_str());
+		fprintf(stderr, "\n=====\n\n%s\n", LOCATOR->labelValues().c_str());
 		fprintf(stderr, "\n=====\n\n");
 		}
 	
@@ -200,7 +200,7 @@ int Assembler::_run(std::string source)
 	|* Run a sanity check on the if blocks being properly closed
 	\*************************************************************************/
 	if (scanner.ifState().size() != 0)
-		FATAL(ERR_IF, "Unterminated IF block");
+		FATAL(ERR_IF, "Unterminated IF block\n");
 
 	/*************************************************************************\
 	|* Run the second pass of the assembler, getting all the references right
@@ -259,13 +259,13 @@ int Assembler::_run(std::string source)
 		else if (token.which() == P_BYTE)
 			{
 			if (!foundOrigin)
-				FATAL(ERR_ORIGIN, "No origin defined!");
+				FATAL(ERR_ORIGIN, "No origin defined!\n");
 			_blocks.back().add(token);
 			}
 		else if (token.type() == T_6502)
 			{
 			if (!foundOrigin)
-				FATAL(ERR_ORIGIN, "No origin defined!");
+				FATAL(ERR_ORIGIN, "No origin defined!\n");
 			_blocks.back().add(token);
 			}
 		}
@@ -275,7 +275,7 @@ int Assembler::_run(std::string source)
 	\*************************************************************************/
 	FILE *fp = fopen(_output.c_str(), "wb");
 	if (fp == NULL)
-		FATAL(ERR_OUTPUT, "Cannot open %s for write", _output.c_str());
+		FATAL(ERR_OUTPUT, "Cannot open %s for write\n", _output.c_str());
 		
 	for (OutputBlock& block : _blocks)
 		{
@@ -291,7 +291,7 @@ int Assembler::_run(std::string source)
 		{
 		fp = fopen(_hexOutput.c_str(), "wb");
 		if (fp == NULL)
-			FATAL(ERR_OUTPUT, "Cannot open %s for hex write", _hexOutput.c_str());
+			FATAL(ERR_OUTPUT, "Cannot open %s for hex write\n", _hexOutput.c_str());
 
 		for (OutputBlock& block : _blocks)
 			block.writeHex(fp);
@@ -306,10 +306,7 @@ int Assembler::_run(std::string source)
 \*****************************************************************************/
 void Assembler::_report(std::string where, std::string msg)
 	{
-	fprintf(stderr, "Error %s:%s\n%s",
-			where.c_str(),
-			msg.c_str(),
-			CTXMGR->location().c_str());
+	fprintf(stderr, "Error %s:%s\n", where.c_str(), msg.c_str());
 	}
 
 
@@ -319,7 +316,6 @@ void Assembler::_report(std::string where, std::string msg)
 \*****************************************************************************/
 String Assembler::_preparse(String src)
 	{
-	auto ctxMgr					= ContextMgr::sharedInstance();
 	bool needsPass 				= true;
 	
 	while (needsPass)
@@ -343,8 +339,8 @@ String Assembler::_preparse(String src)
 				if (words.size() != 2)
 					{
 					FATAL(ERR_INCLUDE,
-						  "Malformed .include directive '%s'\n%s",
-						  line.c_str(), CTXMGR->location().c_str());
+						  "Malformed .include directive '%s'\n",
+						  line.c_str());
 					}
 				String fname   = trim(words[1]);
 				String content = _find(fname);
@@ -358,7 +354,7 @@ String Assembler::_preparse(String src)
 				else
 					{
 					FATAL(ERR_INCLUDE,
-						  "Cannot satisfy .include directice '%s'",
+						  "Cannot satisfy .include directice '%s'\n",
 						  line.c_str());
 					}
 				}
@@ -376,7 +372,7 @@ String Assembler::_preparse(String src)
 					macro.lines().push_back(ctx);
 					}
 				else
-					FATAL(ERR_MACRO, "Unnamed macro found: '%s'", line.c_str());
+					FATAL(ERR_MACRO, "Unnamed macro found: '%s'\n", line.c_str());
 				}
 			else if (lc.find(".endmacro") != std::string::npos)
 				{
@@ -402,8 +398,8 @@ String Assembler::_preparse(String src)
 						}
 					}
 				else
-					FATAL(ERR_FUNCTION, "Unnamed function found: '%s'\n%s",
-						line.c_str(), CTXMGR->location().c_str());
+					FATAL(ERR_FUNCTION, "Unnamed function found: '%s'\n",
+						line.c_str());
 				}
 			else if (lc.find(".endfunction") != std::string::npos)
 				{
@@ -440,8 +436,8 @@ String Assembler::_preparse(String src)
 						{
 						StringList words = split(trimmed, " \t");
 						if (words.size() < 2)
-							FATAL(ERR_FUNCTION, "Illegal clobber: '%s'\n%s",
-								line.c_str(), CTXMGR->location().c_str());
+							FATAL(ERR_FUNCTION, "Illegal clobber: '%s'\n",
+								line.c_str());
 						String arg = words[1];
 						StringList regs = split(arg, ",");
 						for (String reg : regs)

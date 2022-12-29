@@ -1,12 +1,12 @@
 //
-//  ContextMgr.h
+//  Locator.h
 //  xtal-a
 //
 //  Created by Simon Gornall on 11/17/22.
 //
 
-#ifndef ContextMgr_h
-#define ContextMgr_h
+#ifndef Locator_h
+#define Locator_h
 
 #include <cstdio>
 #include <string>
@@ -15,11 +15,11 @@
 #include "macros.h"
 #include "sharedDefines.h"
 
-#define CTXMGR					ContextMgr::sharedInstance()
+#define LOCATOR					Locator::sharedInstance()
 
-class ContextMgr
+class Locator
 	{
-    NON_COPYABLE_NOR_MOVEABLE(ContextMgr)
+    NON_COPYABLE_NOR_MOVEABLE(Locator)
  
 	/*************************************************************************\
     |* Enums etc.
@@ -44,12 +44,12 @@ class ContextMgr
         std::vector<int> 		_fileList;				// index of file ctxs
         int 					_nextContextId;			// Incrementing int
         
-        static std::shared_ptr<ContextMgr> _instance;	// Shared instance
+        static std::shared_ptr<Locator> _instance;	// Shared instance
  
 		/*********************************************************************\
         |* Constructors and Destructor
         \*********************************************************************/
-        explicit ContextMgr();
+        explicit Locator();
 
 		/*********************************************************************\
         |* A map of label:address pairs, built up by context-id
@@ -111,8 +111,8 @@ class ContextMgr
 	
         /**********************************************************************\
         |* This method returns the default global instance.          \**********************************************************************/
-        static std::shared_ptr<ContextMgr> sharedInstance();
+        static std::shared_ptr<Locator> sharedInstance();
 
 	};
 
-#endif /* ContextMgr_h */
+#endif /* Locator_h */

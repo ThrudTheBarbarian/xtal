@@ -64,7 +64,7 @@
 		F4B53B3E29329FBC0023B3AB /* SymbolTable.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B53B3D29329FBC0023B3AB /* SymbolTable.cc */; };
 		F4B53B412932AB8C0023B3AB /* Emitter.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B53B402932AB8C0023B3AB /* Emitter.cc */; };
 		F4B53B492932E9300023B3AB /* Statement.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B53B482932E9300023B3AB /* Statement.cc */; };
-		F4B8088B29272F2A0049B6EB /* ContextMgr.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B8088A29272F2A0049B6EB /* ContextMgr.cc */; };
+		F4B8088B29272F2A0049B6EB /* Locator.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B8088A29272F2A0049B6EB /* Locator.cc */; };
 		F4B8088E292DDA470049B6EB /* stdio.s in Copy stdio Module files */ = {isa = PBXBuildFile; fileRef = F4B8088C292DD9B70049B6EB /* stdio.s */; };
 		F4B80893292DE4E10049B6EB /* Function.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B80892292DE4E10049B6EB /* Function.cc */; };
 		F4B808A829385D550049B6EB /* Types.cc in Sources */ = {isa = PBXBuildFile; fileRef = F4B808A729385D550049B6EB /* Types.cc */; };
@@ -237,8 +237,8 @@
 		F4B53B402932AB8C0023B3AB /* Emitter.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Emitter.cc; path = Classes/Emitter.cc; sourceTree = "<group>"; };
 		F4B53B472932E9300023B3AB /* Statement.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Statement.h; path = Classes/Statement.h; sourceTree = "<group>"; };
 		F4B53B482932E9300023B3AB /* Statement.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Statement.cc; path = Classes/Statement.cc; sourceTree = "<group>"; };
-		F4B8088929272F2A0049B6EB /* ContextMgr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ContextMgr.h; path = Classes/ContextMgr.h; sourceTree = "<group>"; };
-		F4B8088A29272F2A0049B6EB /* ContextMgr.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ContextMgr.cc; path = Classes/ContextMgr.cc; sourceTree = "<group>"; };
+		F4B8088929272F2A0049B6EB /* Locator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Locator.h; path = Classes/Locator.h; sourceTree = "<group>"; };
+		F4B8088A29272F2A0049B6EB /* Locator.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Locator.cc; path = Classes/Locator.cc; sourceTree = "<group>"; };
 		F4B8088C292DD9B70049B6EB /* stdio.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = stdio.s; sourceTree = "<group>"; };
 		F4B80891292DE4E10049B6EB /* Function.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Function.h; path = Classes/Function.h; sourceTree = "<group>"; };
 		F4B80892292DE4E10049B6EB /* Function.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Function.cc; path = Classes/Function.cc; sourceTree = "<group>"; };
@@ -403,8 +403,8 @@
 				F480EF5C2922BC1A008584FB /* Tests */,
 				F480EF302922B81B008584FB /* Assembler.cc */,
 				F480EF332922B81B008584FB /* Assembler.h */,
-				F4B8088A29272F2A0049B6EB /* ContextMgr.cc */,
-				F4B8088929272F2A0049B6EB /* ContextMgr.h */,
+				F4B8088A29272F2A0049B6EB /* Locator.cc */,
+				F4B8088929272F2A0049B6EB /* Locator.h */,
 				F480EF2F2922B81B008584FB /* Engine.cc */,
 				F480EF282922B81A008584FB /* Engine.h */,
 				F480EF292922B81B008584FB /* Engine.yp */,
@@ -688,7 +688,7 @@
 				F480EF352922B81B008584FB /* Engine.yp in Sources */,
 				F480EF582922BB66008584FB /* HelpItem.cc in Sources */,
 				F480EF3A2922B81B008584FB /* OutputBlock.cc in Sources */,
-				F4B8088B29272F2A0049B6EB /* ContextMgr.cc in Sources */,
+				F4B8088B29272F2A0049B6EB /* Locator.cc in Sources */,
 				F480EF382922B81B008584FB /* Engine.cc in Sources */,
 				F480EF522922BB66008584FB /* ArgParser.cc in Sources */,
 				F480EF372922B81B008584FB /* Token.cc in Sources */,
