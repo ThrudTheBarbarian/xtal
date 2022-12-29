@@ -27,7 +27,7 @@ The assembler understands the following format:
 		$1C,$1D		: 65536 sets of 8K banks to function RAM at $6000 .. $7FFF
 		$1E,$1F		: 65536 sets of 8K banks to data/fn RAM at $8000 .. $9FFF
 		$80			: Page index for $C0..$CF  } compiler uses values here as
-		$81			: LocatorPage index for $D0..$DF  } 8, 16, or 32-bit vars as
+		$81			: Page index for $D0..$DF  } 8, 16, or 32-bit vars as
 		$82			: Page index for $E0..$EF  } necessary
 		$83			: Page index for $F0..$FF
 		$84			: varargs count,
@@ -38,10 +38,8 @@ The assembler understands the following format:
 		$8C..$8F	: floating point reg #2
 		$90..$91	: Stack pointer
 		$92..$9F	: global vars (not swapped, 14 bytes)
-		$A0..$AF	: 16 bytes of function-return-and-args. Not swapped
-	  * $B0..$BF	: 16 bytes of function scratch-space [indexed by $1C,$1D].
-					  Not preserved over fn-calls
-	  * $C0..$EF	: page-indexed variables [8,16,32-bit]
+		$A0..$BF	: 32 bytes of function-return-and-args. Not swapped
+	  * $C0..$EF	: 48 bytes of page-indexed variables [8,16,32-bit]
 	  * $F0..$FF	: float workspace (stock) or swapped (extended) vars
 	  
 	  * means these locns are affected by zero-page indices ($80…$83 or $1C,D)
