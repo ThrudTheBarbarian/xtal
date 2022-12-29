@@ -124,7 +124,9 @@ int yylex ()
 int yyerror(const String &s)
 	{
 	std::cerr << s << std::endl;
-	asm("svc 0");
+	
+	exit(-1);
+	//asm("svc 0");
 	return -1;
 	}
 
