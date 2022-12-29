@@ -29,7 +29,7 @@ class A8Emitter : public Emitter
 	/*************************************************************************\
     |* Public consts
     \*************************************************************************/
-    static const int SP	= 0x8D;
+    static const int SP	= 0x90;
     
     private:
         

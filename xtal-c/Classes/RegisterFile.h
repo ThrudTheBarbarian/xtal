@@ -15,25 +15,25 @@
 |* The expansion board also allows the remapping of page-0 to increase the
 |* number of registers available. Memory use is as follows:
 |*
-|*	 $1C,$1D	: 65536 sets of 8K banks to function RAM at $6000 .. $7FFF
-|*	 $1E,$1F	: 65536 sets of 8K banks to data/fn RAM at $8000 .. $9FFF
-|*	 $80		: Page index for $C0..$CF  } compiler uses values here as
-|*	 $81		: Page index for $D0..$DF  } 8, 16, or 32-bit vars as
-|*	 $82		: Page index for $E0..$EF  } necessary
-|*	 $83		: Page index for $F0..$FF
-|*	 $84		: varargs count,
-|*	 $85		: varargs page index (vars start @0)
-|*	 $86		: command buffer
-|*   $87 		: command arg1
-|*   $88		: command args fifo
-|*	 $89..$8C	: overflow register, used in some arithmetic code
-|*   $8D..$8E	: stack pointer
-|* 	 $8F..$90	: frame pointer
-|*	 $91..$9F	: global vars (not swapped, 14 bytes)
-|*	 $A0..$AF	: 16 bytes of function-return-and-args. Not swapped
-|* > $B0..$BF	: 16 bytes of function scratch-space [indexed by $1C,$1D].
-|*                               Not preserved over fn-calls
-|* > $C0..$FF	: page-indexed variables [8,16,32-bit]
+|*	$1C,$1D		: 65536 sets of 8K banks to function RAM at $6000 .. $7FFF
+|*	$1E,$1F		: 65536 sets of 8K banks to data/fn RAM at $8000 .. $9FFF
+|*	$80			: Page index for $C0..$CF  } compiler uses values here as
+|*	$81			: Page index for $D0..$DF  } 8, 16, or 32-bit vars as
+|*	$82			: Page index for $E0..$EF  } necessary
+|*	$83			: Page index for $F0..$FF
+|*	$84			: varargs count,
+|*	$85			: cmd buffer
+|*	$86			: fifo #1
+|*	$87			: fifo #2
+|*	$88..$8B	: floating point reg #1
+|*	$8C..$8F	: floating point reg #2
+|*	$90..$91	: Stack pointer
+|*	$92..$9F	: global vars (not swapped, 14 bytes)
+|*	$A0..$AF	: 16 bytes of function-return-and-args. Not swapped
+|*  * $B0..$BF	: 16 bytes of function scratch-space [indexed by $1C,$1D].
+|*				  Not preserved over fn-calls
+|*  * $C0..$EF	: page-indexed variables [8,16,32-bit]
+|*  * $F0..$FF	: float workspace (stock) or swapped (extended) vars
 |*
 |* >  means these variables are affected by the indices in zero-page
 |*    ($80…$83 or $1C,D)

@@ -31,19 +31,19 @@ The assembler understands the following format:
 		$82			: Page index for $E0..$EF  } necessary
 		$83			: Page index for $F0..$FF
 		$84			: varargs count,
-		$85			: varargs page index (vars start @0)
-		$86			: cmd buffer
-		$87			: fifo #1
-		$88			: fifo #2
-		$89..$8A	: overflow register, used in some arithmetic code
-		$8B..$8C	: Frame pointer, used for function calls
-		$8D..$8E	: Stack pointer
-		$8F..$9F	: global vars (not swapped, 16 bytes)
+		$85			: cmd buffer
+		$86			: fifo #1
+		$87			: fifo #2
+		$88..$8B	: floating point reg #1
+		$8C..$8F	: floating point reg #2
+		$90..$91	: Stack pointer
+		$92..$9F	: global vars (not swapped, 14 bytes)
 		$A0..$AF	: 16 bytes of function-return-and-args. Not swapped
 	  * $B0..$BF	: 16 bytes of function scratch-space [indexed by $1C,$1D].
-								Not preserved over fn-calls
-	  * $C0..$FF	: page-indexed variables [8,16,32-bit]
-	
+					  Not preserved over fn-calls
+	  * $C0..$EF	: page-indexed variables [8,16,32-bit]
+	  * $F0..$FF	: float workspace (stock) or swapped (extended) vars
+	  
 	  * means these locns are affected by zero-page indices ($80…$83 or $1C,D)
 
 - There are 16 registers names r0 through r15 which correspond to memory in

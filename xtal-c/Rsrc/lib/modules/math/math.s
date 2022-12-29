@@ -2,21 +2,21 @@
 ; Floating math support for xtal based on Rankin / Woz code
 ;
 
-f_x1		= $a4				; Exponent for floating reg #1
-f_m1		= $a5				; Mantissa for floating reg #1
+f_x1		= $88				; Exponent for floating reg #1
+f_m1		= $89				; Mantissa for floating reg #1
 
-f_x2		= $a0				; Exponent for floating reg #2
-f_m2		= $a1				; Mantissa for floating reg #2
+f_x2		= $8c				; Exponent for floating reg #2
+f_m2		= $8d				; Mantissa for floating reg #2
 
-f_sign		= $a8				; sign storage
-f_int		= $a9				; integer flag
+f_err		= $85				; Error-flag register
+f_sign		= $86				; sign storage
+f_int		= $87				; integer value (8-bit)
 
-f_e			= $b0				; scratch workspace
-f_z			= $b4				; scratch workspace
-f_t			= $b8				; scratch workspace
-f_sExp		= $bc				; scratch workspace
+f_e			= $f0				; scratch workspace
+f_z			= $f4				; scratch workspace
+f_t			= $f8				; scratch workspace
+f_sExp		= $fc				; scratch workspace
 
-f_err		= $89				; Error-flag register
 
 
 
@@ -43,9 +43,9 @@ setup:
 	brk
 
 one:
-	.byte $88, $40, $03, $00
+	.byte $80, $40, $00, $00
 two:
-	.byte $8e, $01, $03, $00
+	.byte $81, $40, $00, $00
 
 ; ---------------------------------------------------------------------------
 ; Natural log
@@ -58,6 +58,8 @@ two:
 
 
 logf:
+	lda #0
+	sta f_err					; Initialise the error register
 	lda	f_m1
 	beq error					; Can't take log(0)
 	bpl ok						; Can work with >0
@@ -215,6 +217,8 @@ l10:
 ;
 
 exp:
+	lda #0						; initialise the error register
+	sta f_err
 	ldx #3						; set up for 4-byte transfer
 	lda f_l2e,x					; load exp/mant2 with log(base 2) of E
 	sta f_x2,x
@@ -254,7 +258,7 @@ zero:
 	sta f_x1,x
 	dex
 	bpl zero
-	rt
+	rts
 
 ovflw:
 	lda #3
@@ -432,7 +436,7 @@ float:
 	sta f_x1					; Set exponent-1 to 14 dec
 	lda #0
 	sta f_m1+2					; clear lowest byte of m1 mantissa
-	beq norm					; normalise the result
+	beq norml					; normalise the result
 
 norm1:
 	dec f_x1					; decrement exponent-1
@@ -441,7 +445,7 @@ norm1:
 	rol f_m1+1
 	rol f_m1
 	
-norm:
+norml:
 	lda f_m1					; Mantissa-1 high-byte
 	asl							; upper 2 bits unequal ?
 	eor f_m1
@@ -456,11 +460,16 @@ rts1:
 ; fadd / fsub
 
 fsub:
+	lda #0						; initialise the error register
+	sta f_err
 	jsr fcompl					; Complement mantissa, clears carry unless 0
 swpalg:
 	jsr algnsw					; Right shift M1 or swap with M2 on carry
+	; fall through into fadd
 	
 fadd:
+	lda #0						; initialise the error register
+	sta f_err
 	lda f_x2					; compare exp1 with exp2
 	cmp f_x1
 	bne swpalg					; if unequal swap addends, or align mantissas
@@ -468,7 +477,7 @@ fadd:
 	jsr add						; Add aligned mantissas
 
 addend:
-	bvc norm					; no overflow, normalise results
+	bvc norml					; no overflow, normalise results
 	bvs rtlog					; ov: shift mant1 right, note carry is correct sign
 
 algnsw:
@@ -517,7 +526,7 @@ mdend:
 	lsr f_sign					; test sign (even/odd)
 
 normx:
-	bcc norm					; if even, normalise product, else complement
+	bcc norml					; if even, normalise product, else complement
 
 fcompl:
 	sec							; set the carry
@@ -535,6 +544,8 @@ compl1:
 ; fdiv
 
 fdiv:
+	lda #0						; initialise the error register
+	sta f_err
 	jsr md1						; Take abs value of mant1, mant2
 	sbc f_x1					; subtract exp1 from exp2
 	jsr md2						; Save as quotient exp
@@ -603,7 +614,7 @@ rtrn:
 
 	
 f_r22:
-	.byte $80, $5a, $02, $7a	; sqrt(2)	.float 1.4142136
+	.byte $80, $5a, $82, $7a	; sqrt(2)	.float 1.4142136
 
 f_c:
 	.byte $80, $6a, $08, $66	; .float 1.6567626
