@@ -1089,6 +1089,8 @@ int Scanner::_handle6502(Token::TokenInfo info,
 						   TokenList &tokens,
 						   int pass)
 	{
+	int addr = 0; // at this level to help debugging :)
+	
 	Engine& e 		= Engine::getInstance();
 	bool isBranch	= 	(info.which >= P_BCC)
 					&&	(info.which <= P_BVS);
@@ -1149,19 +1151,19 @@ int Scanner::_handle6502(Token::TokenInfo info,
 		// Handle indirect addressing
 		if (endsWith(args, ",x)", false))
 			{
-			int addr 	= _evaluateLabel(args.substr(1, args.length()-4));
+			addr 	= _evaluateLabel(args.substr(1, args.length()-4));
 			bytes[0] 	= addr & 0xFF;
 			amode 		= A_XINDEX_INDIRECT;
 			}
 		else if (endsWith(args, "),y", false))
 			{
-			int addr 	= _evaluateLabel(args.substr(1, args.length()-4));
+			addr 	= _evaluateLabel(args.substr(1, args.length()-4));
 			bytes[0] 	= addr & 0xFF;
 			amode 		= A_INDIRECT_YINDEX;
 			}
 		else
 			{
-			int addr 	= _evaluateLabel(args.substr(1, args.length()-2));
+			addr 	= _evaluateLabel(args.substr(1, args.length()-2));
 			bytes[0] 	= (addr	    ) & 0xFF;
 			bytes[1] 	= (addr >> 8) & 0xFF;
 			amode 		= A_INDIRECT;
@@ -1170,7 +1172,7 @@ int Scanner::_handle6502(Token::TokenInfo info,
 	else if (endsWith(args, ",x", false))
 		{
 		String arg = args.substr(0, args.length()-2);
-		int addr   = _evaluateLabel(arg);
+		addr   = _evaluateLabel(arg);
 		if (addr <= 0xFF)
 			{
 			bytes[0] 	= addr & 0xFF;
@@ -1186,7 +1188,7 @@ int Scanner::_handle6502(Token::TokenInfo info,
 	else if (endsWith(args, ",y", false))
 		{
 		String arg = args.substr(0, args.length()-2);
-		int addr   = _evaluateLabel(arg);
+		addr   = _evaluateLabel(arg);
 		if ((pass == 2) && addr == UNDEFINED_VALUE)
 			FATAL(ERR_PARSE, "Undefined symbol '%s'\n", arg.c_str());
 				
@@ -1212,8 +1214,8 @@ int Scanner::_handle6502(Token::TokenInfo info,
     \************************************************************************/
     int opcode = Token::opcode(info.which, amode);
     if ((pass == 2) && (opcode < 0))
-		FATAL(ERR_PARSE, "Illegal addressing mode '%s' for %s\n",
-				args.c_str(), info.name.c_str());
+		FATAL(ERR_PARSE, "Illegal addressing mode '%s' for %s [%x]\n",
+				args.c_str(), info.name.c_str(), addr);
 	
 	/************************************************************************\
     |* Create a token to represent the opcode and add it to the stream
