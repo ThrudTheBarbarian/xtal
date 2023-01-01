@@ -3,7 +3,7 @@
 ;
 
 .include stdmacros.s
-
+.include modules/stdio/stdio.s
 
 ; Register definitions in zero-page
 ;
@@ -36,7 +36,7 @@ flt_currVar		= $f4			; Current var address, low byte
 flt_vecl		= $f5			; low  byte of vector to float to compare to
 flt_vech		= $f6			; high byte of vector to float to compare to
 
-; fvec is used as a general purpose vector when calling into routines
+; flt_vec is used as a general purpose vector when calling into routines
 ; which don't use the external hardware
 flt_vec			= $92			; and $93
 
@@ -58,12 +58,7 @@ PLUS_3			= $03			; X or Y plus 3
 
 ; ---------------------------------------------------------------------------
 
-	ldx #16
 init:
-	lda #0
-	sta flt_e,x
-	dex
-	bpl init
 	
 
 	ldx #3
@@ -76,7 +71,14 @@ setup:
 	bpl setup
 	
 	jsr fp_div
+lda $44
+
+	_movi16 str,flt_vec
+	jsr fp_toString
+	brk
 	
+	_movi16 str,f0
+	;call printLine
 	brk
 
 one:
@@ -84,6 +86,9 @@ one:
 two:
 	.byte $81, $40, $00, $00
 
+str:
+	.byte "                     "
+	
 ; ---------------------------------------------------------------------------
 ; ASCII to float. Expects the address of the source buffer to be
 ; in flt_vec and the floating point number will end up in F1
@@ -148,7 +153,7 @@ fp_toString:
 	lda #'-'
 
 f2s_plus:
-	sta (fvec),y
+	sta (flt_vec),y
 	; clear sign bit
 	sty flt_len					; Save the character index
 	iny							; increment index
@@ -157,7 +162,7 @@ f2s_plus:
 	
 	lda #'0';					; Short-circuit it to just "0"
 	iny							; increment index
-	sta (fvec),y				; Save to output string
+	sta (flt_vec),y				; Save to output string
 	jmp f2s_terminate
 
 f2s_not0:
@@ -229,14 +234,14 @@ f2s_nodigits:
 	ldy flt_len					; Get output string index
 	lda #'.'					; decimal point
 	iny							; increment index
-	sta (fvec),y				; Save to output string
+	sta (flt_vec),y				; Save to output string
 
 	txa
 	beq f2s_noZero
 	
 	lda #'0'					; literal '0' char
 	iny							; increment index
-	sta (fvec),y				; save to output string
+	sta (flt_vec),y				; save to output string
 
 f2s_noZero:
 	sty flt_len					; save output string index
@@ -285,13 +290,13 @@ f2s_pldigits:
 	iny							; increment index
 	tax							; copy character to x
 	and #$7f					; get rid of any high bit
-	sta (fvec),y				; save to output string
+	sta (flt_vec),y				; save to output string
 	
 	dec flt_numExp				; decrement the number of chars before '.'
 	bne f2s_notDot				; if this isn't where the dot goes, branch
 	lda #'.'					; set the character to be '.'
 	iny							; increment index
-	sta (fvec),y				; save to output string
+	sta (flt_vec),y				; save to output string
 
 f2s_notDot:
 	sty flt_len					; save output string index
@@ -310,7 +315,7 @@ f2s_notDot:
 	ldy flt_len
 	
 f2s_last0:
-	lda (fvec),Y				; get character from output string
+	lda (flt_vec),Y				; get character from output string
 	dey							; decrement string index
 	cmp #'0'					; is this a zero ?
 	beq f2s_last0
@@ -326,7 +331,7 @@ f2s_skipdot:
 	; exponent is not zero, so append to the string
 	iny
 	lda #'E'					; add an 'E' to the string
-	sta (fvec),y
+	sta (flt_vec),y
 	lda #'+'					; prepare for adding '+'
 	
 	ldx flt_expCnt				; get the exponent count again
@@ -340,7 +345,7 @@ f2s_skipdot:
 
 f2s_posexp:
 	iny							; increment the string index
-	sta (fvec),y				; store the + or - char
+	sta (flt_vec),y				; store the + or - char
 	txa							; get the exponent count back
 	
 	ldx #'0' - 1				; get one less than the '0' char
@@ -355,15 +360,15 @@ f2s_exp10:
 	pha
 	txa
 	iny							; increment the string index
-	sta (fvec),y				; store the 10's character
+	sta (flt_vec),y				; store the 10's character
 	pla
 	iny							; increment the string index
-	sta (fvec),y				; store the units character
+	sta (flt_vec),y				; store the units character
 	
 f2s_terminate:
 	lda #0						; terminate the string with \0
 	iny
-	sta (fvec),y				; store the units character
+	sta (flt_vec),y				; store the units character
 	rts
 	
 
@@ -372,13 +377,13 @@ f2s_terminate:
 ; Internal routine: Increment the character pointer and get the next one in A
 ;
 f_incGetCh:						; increment the pointer prior ..
-	inc fvec					; to fetching another character ..
+	inc flt_vec					; to fetching another character ..
 	bne f_getCh					; from the string pointer
-	inc fvec+1
+	inc flt_vec+1
 	
 f_getCh:						; fetch a character from the string
 	ldy	#0
-	lda (fvec),y
+	lda (flt_vec),y
 	
 	cmp #' '					; checking for ' ' and fetching ..
 	beq f_incGetCh				; the next one if we find a ' '
