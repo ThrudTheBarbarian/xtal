@@ -10,6 +10,7 @@
 #include <cmath>
 
 #include "Engine.h"
+#include "Locator.h"
 
 extern int yydebug;
 int yylex();
@@ -124,6 +125,7 @@ int yylex ()
 int yyerror(const String &s)
 	{
 	std::cerr << s << std::endl;
+	std::cerr << LOCATOR->location() << std::endl;
 	
 	exit(-1);
 	//asm("svc 0");
