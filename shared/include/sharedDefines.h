@@ -66,7 +66,7 @@ typedef enum
 	C_PARAM 				// A parameter for a function
 	} Storage;
 	
-#define STACK_PTR			"$90"			// Stack pointer address (+$8E)
+#define STACK_PTR			"SP"			// Stack pointer address ($90,$91)
 
 
 #include "Locator.h"

@@ -2200,12 +2200,12 @@ Register A8Emitter::_genFuncCall(ASTNode *node, String label)
 			case 1:
 				saves.push_back("\t_xferpn8"
 							    +toHexString(sv, " $")
-							    +toHexString(SP, ",$")
+							    +",SP"
 							    +toHexString(sv-FN_PARAM_MIN, ",$"));
 				restore.insert(restore.begin(),
 								"\t_xferbn8"
 							    +toHexString(sv, " $")
-							    +toHexString(SP, ",$")
+							    +",SP"
 							    +toHexString(sv-FN_PARAM_MIN, ",$"));
 				sv ++;
 				moves.push_back("\tmove.1 " + reg.name() + toHexString(at, " $"));
@@ -2214,12 +2214,12 @@ Register A8Emitter::_genFuncCall(ASTNode *node, String label)
 			case 2:
 				saves.push_back("\t_xferpn16"
 							    +toHexString(sv, " $")
-							    +toHexString(SP, ",$")
+							    +",SP"
 							    +toHexString(sv-FN_PARAM_MIN, ",$"));
 				restore.insert(restore.begin(),
 								"\t_xferbn16"
 							    +toHexString(sv, " $")
-							    +toHexString(SP, ",$")
+							    +",SP"
 							    +toHexString(sv-FN_PARAM_MIN, ",$"));
 				sv +=2;
 				moves.push_back("\tmove.2 " + reg.name() + toHexString(at, " $"));
@@ -2228,12 +2228,12 @@ Register A8Emitter::_genFuncCall(ASTNode *node, String label)
 			case 4:
 				saves.push_back("\t_xferpn32"
 							    +toHexString(sv, " $")
-							    +toHexString(SP, ",$")
+							    +",SP"
 							    +toHexString(sv-FN_PARAM_MIN, ",$"));
 				restore.insert(restore.begin(),
 								"\t_xferbn32"
 							    +toHexString(sv, " $")
-							    +toHexString(SP, ",$")
+							    +",SP"
 							    +toHexString(sv-FN_PARAM_MIN, ",$"));
 				sv +=4;
 				moves.push_back("\tmove.4 " + reg.name() + toHexString(at, " $"));
@@ -2276,7 +2276,7 @@ Register A8Emitter::_genFuncCall(ASTNode *node, String label)
 		// Adjust the stack pointer down by the number of bytes we need
 		if (bytes > 0)
 			fprintf(_ofp, "\t;push stack by %d\n"
-						  "\t_sub16i $%x,%d\n", bytes, SP, bytes);
+						  "\t_sub16i SP,%d\n", bytes, bytes);
 			
 		// Copy the function register data to the stack storage
 		for (String cmd : saves)
@@ -2307,7 +2307,7 @@ Register A8Emitter::_genFuncCall(ASTNode *node, String label)
 		// Adjust the stack pointer down by the number of bytes we used
 		if (bytes > 0)
 			fprintf(_ofp, "\t; pop stack by %d\n"
-						  "\t_add16i $%x,%d\n", bytes, SP, bytes);
+						  "\t_add16i SP,%d\n", bytes, bytes);
 		}
 		
 	//RegisterFile::clear();

@@ -5,7 +5,7 @@
 ;
 
 ; initialise the stack and frame pointers
-_movi16 $9fff,sp
+_movi16 $9fff,SP
 
 
 

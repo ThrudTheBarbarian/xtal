@@ -26,18 +26,19 @@ The assembler understands the following format:
 	
 		$1C,$1D		: 65536 sets of 8K banks to function RAM at $6000 .. $7FFF
 		$1E,$1F		: 65536 sets of 8K banks to data/fn RAM at $8000 .. $9FFF
-		$80			: Page index for $C0..$CF  } compiler uses values here as
-		$81			: Page index for $D0..$DF  } 8, 16, or 32-bit vars as
-		$82			: Page index for $E0..$EF  } necessary
-		$83			: Page index for $F0..$FF
-		$84			: varargs count,
-		$85			: cmd buffer
-		$86			: fifo #1
-		$87			: fifo #2
-		$88..$8B	: floating point reg #1
-		$8C..$8F	: floating point reg #2
-		$90..$91	: Stack pointer
-		$92..$9F	: global vars (not swapped, 14 bytes)
+		$80..$83	: floating point reg #1 {E,3M}
+		$84..$87	: floating point reg #2 {E,3M}
+		$88..$8B	: floating point scratch register {E,3M}
+		$8C			: Page index for $C0..$CF  } compiler uses values here as
+		$8D			: Page index for $D0..$DF  } 8, 16, or 32-bit vars as
+		$8E			: Page index for $E0..$EF  } necessary
+		$8F			: Page index for $F0..$FF
+		$90			: Stack pointer
+		$92			: floating point vector (general purpose)
+		$94			: cmd buffer
+		$95			: fifo #1
+		$96			: fifo #2
+		$97..$9F	: global vars (not swapped, 9 bytes)
 		$A0..$BF	: 32 bytes of function-return-and-args. Not swapped
 	  * $C0..$EF	: 48 bytes of page-indexed variables [8,16,32-bit]
 	  * $F0..$FF	: float workspace (stock) or swapped (extended) vars
