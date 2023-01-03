@@ -7,10 +7,10 @@
 
 ; Register definitions in zero-page
 ;
-flt_x1			= $80			; Exponent for floating reg #1
-flt_m1			= $81			; Mantissa for floating reg #1 [3 bytes]
-flt_x2			= $84			; Exponent for floating reg #2
-flt_m2			= $85			; Mantissa for floating reg #2 [3 bytes]
+flt_x2			= $80			; Exponent for floating reg #1
+flt_m2			= $81			; Mantissa for floating reg #1 [3 bytes]
+flt_x1			= $84			; Exponent for floating reg #2
+flt_m1			= $85			; Mantissa for floating reg #2 [3 bytes]
 flt_e			= $88			; scratch workspace adjacent to F2
 
 flt_z			= $f0			; scratch workspace
@@ -60,6 +60,20 @@ PLUS_3			= $03			; X or Y plus 3
 
 init:
 	
+	_xfer32 two,flt_x1		; 1 - 2
+	_xfer32 one,flt_x2
+	jsr fp_sub				; expect 1 (80:C00000) in flt_x1
+	brk
+	
+	_xfer32 one,flt_x2		; 2 + 1
+	_xfer32 two,flt_x1
+	jsr fp_add				; expect 81:600000 in flt_x1
+	brk
+
+	_xfer32 one,flt_x2		; 1 / 2
+	_xfer32 two,flt_x1
+	jsr fp_div				; expect 7f:400000 in flt_x1
+	brk
 
 	ldx #3
 setup:
@@ -435,7 +449,7 @@ fp_clrMantissa:
 fp_div10:
 	_xfer32 flt_x1,flt_x2		; copy F1 to F2
 	_xfer32 f_ten,flt_x1		; copy '10' to F1
-	jsr fp_div					; divide, leaving result in F1
+	jmp fp_div					; divide, leaving result in F1
 
 
 	
@@ -927,9 +941,6 @@ swap1:
 float:
 	lda #$8E
 	sta flt_x1					; Set exponent-1 to 14 dec
-	lda #0
-	sta flt_m1+2				; clear lowest byte of m1 mantissa
-	beq norml					; normalise the result
 
 norm1:
 	dec flt_x1					; decrement exponent-1
@@ -938,12 +949,12 @@ norm1:
 	rol flt_m1+1
 	rol flt_m1
 	
-norml:
+norm:
 	lda flt_m1					; Mantissa-1 high-byte
-	asl	a						; upper 2 bits unequal ?
+	asl a
 	eor flt_m1
-	bmi rts1					; yes, return with mantissa-1 normalised
-	lda flt_x1					; exponent-1 = 0 ?
+	bmi rts1
+	lda flt_x1
 	bne norm1					; no, continue normalising
 rts1:
 	rts							; all done
@@ -952,8 +963,9 @@ rts1:
 ; ---------------------------------------------------------------------------
 ; fp_sub
 ;
-; The minuend is in FP1 and the subtrahend is in FP2.  Both should be
-; normalized to retain maximum precision prior to calling FSUB.
+; The minuend (subtract from) is in FP1 and the subtrahend (val to subtract)
+; is in FP2.  Both should be normalized to retain maximum precision prior
+; to calling FSUB.
 ;
 ; Uses: FCOMPL, ALGNSWP, FADD, ADD, NORM, RTLOG.
 ;
@@ -966,6 +978,7 @@ fp_sub:
 	lda #0						; initialise the error register
 	sta flt_err
 	jsr fcompl					; Complement mantissa, clears carry unless 0
+
 swpalg:
 	jsr algnsw					; Right shift M1 or swap with M2 on carry
 	; fall through into fp_add
@@ -993,7 +1006,7 @@ fp_add:
 	jsr add						; Add aligned mantissas
 
 addend:
-	bvc norml					; no overflow, normalise results
+	bvc norm					; no overflow, normalise results
 	bvs rtlog					; ov: shift mant1 right, note carry is correct sign
 
 algnsw:
@@ -1010,13 +1023,7 @@ rtlog:
 rtlog1:
 	ldx #$fa					; index for 6-byte right-shift
 ror1:
-	lda #$80
-	bcs ror2
-	asl a
-ror2:
-	lsr flt_e+3,x				; simulate ror E+3,x
-	ora flt_e+3,x
-	sta flt_e+3,x
+	ror flt_e+3,x
 	inx							; next byte of shift
 	bne ror1					; loop until done
 	rts
@@ -1054,7 +1061,7 @@ mdend:
 	lsr flt_sign				; test sign (even/odd)
 
 normx:
-	bcc norml					; if even, normalise product, else complement
+	bcc norm					; if even, normalise product, else complement
 
 fcompl:
 	sec							; set the carry
@@ -1156,14 +1163,29 @@ ovfl:
 ; 	A = 1,		if FP1 >  (AY)
 ; 	A = $FF,	if FP1 <  (AY)
 ;
+fix1:
 	jsr rtar					; shift mant1 right and inc Exponent
 fix:
 	lda flt_x1					; check Exponent
+	bpl undfl
 	cmp #$8E					; is exponent 14 ?
-	bne fix-3					; no, shift
+	bne fix1					; no, shift
+	bit flt_m1
+	bpl rtrn
+	lda flt_m1+2
+	beq rtrn
+	inc flt_m1+1
+	bne rtrn
+	inc m1
 rtrn:
 	rts
 
+undfl:
+	lda #0
+	sta flt_m1
+	sta flt_m1+1
+	rts
+	
 ; ---------------------------------------------------------------------------
 ; fp_compare
 ;
