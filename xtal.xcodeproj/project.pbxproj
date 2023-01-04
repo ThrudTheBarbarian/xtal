@@ -25,6 +25,18 @@
 /* Begin PBXBuildFile section */
 		F44E9394295CB6D300A60C28 /* Locator.cc in Sources */ = {isa = PBXBuildFile; fileRef = F44E9393295CB6D300A60C28 /* Locator.cc */; };
 		F45E73EE294ACCE20032D589 /* xtrt0.s in CopyFiles */ = {isa = PBXBuildFile; fileRef = F45E73EB294ACA6A0032D589 /* xtrt0.s */; };
+		F45E73F7296549920032D589 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F45E73F6296549920032D589 /* AppDelegate.m */; };
+		F45E73F9296549930032D589 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F45E73F8296549930032D589 /* Assets.xcassets */; };
+		F45E73FC296549930032D589 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = F45E73FA296549930032D589 /* MainMenu.xib */; };
+		F45E73FE296549930032D589 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F45E73FD296549930032D589 /* main.m */; };
+		F45E7406296551440032D589 /* MemoryView.m in Sources */ = {isa = PBXBuildFile; fileRef = F45E7405296551440032D589 /* MemoryView.m */; };
+		F45E74092965516D0032D589 /* CpuStateView.m in Sources */ = {isa = PBXBuildFile; fileRef = F45E74082965516D0032D589 /* CpuStateView.m */; };
+		F45E740C296551890032D589 /* HeatMapView.m in Sources */ = {isa = PBXBuildFile; fileRef = F45E740B296551890032D589 /* HeatMapView.m */; };
+		F45E740F296551A70032D589 /* HeatMapControlsView.m in Sources */ = {isa = PBXBuildFile; fileRef = F45E740E296551A70032D589 /* HeatMapControlsView.m */; };
+		F45E7412296551CB0032D589 /* PointsView.m in Sources */ = {isa = PBXBuildFile; fileRef = F45E7411296551CB0032D589 /* PointsView.m */; };
+		F45E7415296551E70032D589 /* AssemblyView.m in Sources */ = {isa = PBXBuildFile; fileRef = F45E7414296551E70032D589 /* AssemblyView.m */; };
+		F45E7418296551FE0032D589 /* VcrControlsView.m in Sources */ = {isa = PBXBuildFile; fileRef = F45E7417296551FE0032D589 /* VcrControlsView.m */; };
+		F45E741B296556E60032D589 /* Design in Resources */ = {isa = PBXBuildFile; fileRef = F45E741A296556E60032D589 /* Design */; };
 		F480EF0C2922B472008584FB /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF0B2922B472008584FB /* main.cc */; };
 		F480EF192922B512008584FB /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF182922B512008584FB /* main.cc */; };
 		F480EF242922B564008584FB /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = F480EF232922B564008584FB /* main.cc */; };
@@ -170,6 +182,28 @@
 		F44E9396295D2C0B00A60C28 /* math.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = math.s; sourceTree = "<group>"; };
 		F45E73E82949873E0032D589 /* Bugs */ = {isa = PBXFileReference; lastKnownFileType = text; path = Bugs; sourceTree = "<group>"; };
 		F45E73EB294ACA6A0032D589 /* xtrt0.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = xtrt0.s; sourceTree = "<group>"; };
+		F45E73F3296549910032D589 /* xtal-ui.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "xtal-ui.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F45E73F5296549920032D589 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		F45E73F6296549920032D589 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		F45E73F8296549930032D589 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F45E73FB296549930032D589 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		F45E73FD296549930032D589 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		F45E73FF296549930032D589 /* xtal_ui.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = xtal_ui.entitlements; sourceTree = "<group>"; };
+		F45E7404296551440032D589 /* MemoryView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MemoryView.h; sourceTree = "<group>"; };
+		F45E7405296551440032D589 /* MemoryView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MemoryView.m; sourceTree = "<group>"; };
+		F45E74072965516D0032D589 /* CpuStateView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CpuStateView.h; sourceTree = "<group>"; };
+		F45E74082965516D0032D589 /* CpuStateView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CpuStateView.m; sourceTree = "<group>"; };
+		F45E740A296551890032D589 /* HeatMapView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HeatMapView.h; sourceTree = "<group>"; };
+		F45E740B296551890032D589 /* HeatMapView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HeatMapView.m; sourceTree = "<group>"; };
+		F45E740D296551A70032D589 /* HeatMapControlsView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HeatMapControlsView.h; sourceTree = "<group>"; };
+		F45E740E296551A70032D589 /* HeatMapControlsView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HeatMapControlsView.m; sourceTree = "<group>"; };
+		F45E7410296551CB0032D589 /* PointsView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PointsView.h; sourceTree = "<group>"; };
+		F45E7411296551CB0032D589 /* PointsView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PointsView.m; sourceTree = "<group>"; };
+		F45E7413296551E70032D589 /* AssemblyView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AssemblyView.h; sourceTree = "<group>"; };
+		F45E7414296551E70032D589 /* AssemblyView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AssemblyView.m; sourceTree = "<group>"; };
+		F45E7416296551FE0032D589 /* VcrControlsView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VcrControlsView.h; sourceTree = "<group>"; };
+		F45E7417296551FE0032D589 /* VcrControlsView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VcrControlsView.m; sourceTree = "<group>"; };
+		F45E741A296556E60032D589 /* Design */ = {isa = PBXFileReference; lastKnownFileType = text; path = Design; sourceTree = "<group>"; };
 		F480EF082922B472008584FB /* xtal */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = xtal; sourceTree = BUILT_PRODUCTS_DIR; };
 		F480EF0B2922B472008584FB /* main.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cc; sourceTree = "<group>"; };
 		F480EF162922B512008584FB /* xtal-c */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "xtal-c"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -249,6 +283,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		F45E73F0296549910032D589 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F480EF052922B472008584FB /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -324,6 +365,50 @@
 			path = lib;
 			sourceTree = "<group>";
 		};
+		F45E73F4296549920032D589 /* xtal-ui */ = {
+			isa = PBXGroup;
+			children = (
+				F45E7419296556C60032D589 /* Docs */,
+				F45E7403296551230032D589 /* Views */,
+				F45E73F5296549920032D589 /* AppDelegate.h */,
+				F45E73F6296549920032D589 /* AppDelegate.m */,
+				F45E73F8296549930032D589 /* Assets.xcassets */,
+				F45E73FA296549930032D589 /* MainMenu.xib */,
+				F45E73FD296549930032D589 /* main.m */,
+				F45E73FF296549930032D589 /* xtal_ui.entitlements */,
+			);
+			path = "xtal-ui";
+			sourceTree = "<group>";
+		};
+		F45E7403296551230032D589 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				F45E7404296551440032D589 /* MemoryView.h */,
+				F45E7405296551440032D589 /* MemoryView.m */,
+				F45E74072965516D0032D589 /* CpuStateView.h */,
+				F45E74082965516D0032D589 /* CpuStateView.m */,
+				F45E740A296551890032D589 /* HeatMapView.h */,
+				F45E740B296551890032D589 /* HeatMapView.m */,
+				F45E740D296551A70032D589 /* HeatMapControlsView.h */,
+				F45E740E296551A70032D589 /* HeatMapControlsView.m */,
+				F45E7410296551CB0032D589 /* PointsView.h */,
+				F45E7411296551CB0032D589 /* PointsView.m */,
+				F45E7413296551E70032D589 /* AssemblyView.h */,
+				F45E7414296551E70032D589 /* AssemblyView.m */,
+				F45E7416296551FE0032D589 /* VcrControlsView.h */,
+				F45E7417296551FE0032D589 /* VcrControlsView.m */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		F45E7419296556C60032D589 /* Docs */ = {
+			isa = PBXGroup;
+			children = (
+				F45E741A296556E60032D589 /* Design */,
+			);
+			path = Docs;
+			sourceTree = "<group>";
+		};
 		F480EEFF2922B472008584FB = {
 			isa = PBXGroup;
 			children = (
@@ -331,6 +416,7 @@
 				F480EF0A2922B472008584FB /* xtal */,
 				F480EF172922B512008584FB /* xtal-c */,
 				F480EF222922B564008584FB /* xtal-a */,
+				F45E73F4296549920032D589 /* xtal-ui */,
 				F480EF092922B472008584FB /* Products */,
 			);
 			sourceTree = "<group>";
@@ -341,6 +427,7 @@
 				F480EF082922B472008584FB /* xtal */,
 				F480EF162922B512008584FB /* xtal-c */,
 				F480EF212922B564008584FB /* xtal-a */,
+				F45E73F3296549910032D589 /* xtal-ui.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -517,6 +604,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		F45E73F2296549910032D589 /* xtal-ui */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F45E7400296549930032D589 /* Build configuration list for PBXNativeTarget "xtal-ui" */;
+			buildPhases = (
+				F45E73EF296549910032D589 /* Sources */,
+				F45E73F0296549910032D589 /* Frameworks */,
+				F45E73F1296549910032D589 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "xtal-ui";
+			productName = "xtal-ui";
+			productReference = F45E73F3296549910032D589 /* xtal-ui.app */;
+			productType = "com.apple.product-type.application";
+		};
 		F480EF072922B472008584FB /* xtal */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F480EF0F2922B472008584FB /* Build configuration list for PBXNativeTarget "xtal" */;
@@ -581,6 +685,9 @@
 				BuildIndependentTargetsInParallel = 1;
 				LastUpgradeCheck = 1410;
 				TargetAttributes = {
+					F45E73F2296549910032D589 = {
+						CreatedOnToolsVersion = 14.0.1;
+					};
 					F480EF072922B472008584FB = {
 						CreatedOnToolsVersion = 14.1;
 					};
@@ -612,9 +719,23 @@
 				F480EF152922B512008584FB /* xtal-c */,
 				F480EF202922B564008584FB /* xtal-a */,
 				F4B808942931A6CA0049B6EB /* all */,
+				F45E73F2296549910032D589 /* xtal-ui */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F45E73F1296549910032D589 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F45E741B296556E60032D589 /* Design in Resources */,
+				F45E73F9296549930032D589 /* Assets.xcassets in Resources */,
+				F45E73FC296549930032D589 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
 		F44E9391295BCFE500A60C28 /* Install module code */ = {
@@ -639,6 +760,22 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		F45E73EF296549910032D589 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F45E7406296551440032D589 /* MemoryView.m in Sources */,
+				F45E7412296551CB0032D589 /* PointsView.m in Sources */,
+				F45E74092965516D0032D589 /* CpuStateView.m in Sources */,
+				F45E73FE296549930032D589 /* main.m in Sources */,
+				F45E7415296551E70032D589 /* AssemblyView.m in Sources */,
+				F45E73F7296549920032D589 /* AppDelegate.m in Sources */,
+				F45E7418296551FE0032D589 /* VcrControlsView.m in Sources */,
+				F45E740C296551890032D589 /* HeatMapView.m in Sources */,
+				F45E740F296551A70032D589 /* HeatMapControlsView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F480EF042922B472008584FB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -719,7 +856,72 @@
 		};
 /* End PBXTargetDependency section */
 
+/* Begin PBXVariantGroup section */
+		F45E73FA296549930032D589 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F45E73FB296549930032D589 /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
 /* Begin XCBuildConfiguration section */
+		F45E7401296549930032D589 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "xtal-ui/xtal_ui.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = S9DMW7WK55;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainNibFile = MainMenu;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "net.moebius-tech.xtal-ui";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Debug;
+		};
+		F45E7402296549930032D589 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "xtal-ui/xtal_ui.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = S9DMW7WK55;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainNibFile = MainMenu;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "net.moebius-tech.xtal-ui";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Release;
+		};
 		F480EF0D2922B472008584FB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -933,6 +1135,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		F45E7400296549930032D589 /* Build configuration list for PBXNativeTarget "xtal-ui" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F45E7401296549930032D589 /* Debug */,
+				F45E7402296549930032D589 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		F480EF032922B472008584FB /* Build configuration list for PBXProject "xtal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
