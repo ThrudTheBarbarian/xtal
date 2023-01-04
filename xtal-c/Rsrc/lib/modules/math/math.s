@@ -59,34 +59,14 @@ PLUS_3			= $03			; X or Y plus 3
 ; ---------------------------------------------------------------------------
 
 init:
-	
-	_xfer32 two,flt_x1		; 1 - 2
-	_xfer32 one,flt_x2
-	jsr fp_sub				; expect 1 (80:C00000) in flt_x1
-	brk
-	
-	_xfer32 one,flt_x2		; 2 + 1
-	_xfer32 two,flt_x1
-	jsr fp_add				; expect 81:600000 in flt_x1
-	brk
-
-	_xfer32 one,flt_x2		; 1 / 2
-	_xfer32 two,flt_x1
-	jsr fp_div				; expect 7f:400000 in flt_x1
-	brk
 
 	ldx #3
 setup:
-	lda one,x
-	sta flt_x2,x
 	lda two,x
 	sta flt_x1,x
 	dex
 	bpl setup
 	
-	jsr fp_div
-lda $44
-
 	_movi16 str,flt_vec
 	jsr fp_toString
 	brk
@@ -162,13 +142,14 @@ f_noDpoint:
 fp_toString:
 	ldy #0						; Set the character index
 	lda #' '					; By default we're +ve
-	bit flt_x1					; Test for -ve
+	bit flt_m1					; Test for -ve
 	bpl f2s_plus				; skip if Y
+	and  #$7f					; clear sign bit
+	sta flt_m1					; and store
 	lda #'-'
 
 f2s_plus:
 	sta (flt_vec),y
-	; clear sign bit
 	sty flt_len					; Save the character index
 	iny							; increment index
 	ldx flt_x1					; load the exponent
@@ -414,7 +395,7 @@ f_done:
 ; Multiply F1 by 10
 ;
 fp_mult10:
-	_xfer32 flt_x1,flt_x2		; copy F1 to F2
+	_xfer32 flt_x2,flt_x1		; copy F1 to F2
 	tax							; copy exponent, returns with exp in A
 	beq f_done					; return if 0 exponent
 	
@@ -1151,17 +1132,10 @@ ovfl:
 
 
 ; ---------------------------------------------------------------------------
-; fp_compare
+; fix
 ;
-; Entry: The value to compare against is in F1, and (AY) points to the value
-; to compare with
+; Entry: Convert a 16-bit integer to floating point format
 ;
-; Uses:
-;
-; Exit:
-; 	A = 0, 		if FP1 == (AY)
-; 	A = 1,		if FP1 >  (AY)
-; 	A = $FF,	if FP1 <  (AY)
 ;
 fix1:
 	jsr rtar					; shift mant1 right and inc Exponent
@@ -1214,7 +1188,7 @@ fp_compare:
 	eor flt_m1					; compare to m1 (only interested in sign bit)
 	bmi fp_sign1				; if signed not equal, return sign as above
 	
-	cpx flt_e1					; compare (AY) exponent with FP1 exponent
+	cpx flt_x1					; compare (AY) exponent with FP1 exponent
 	bne fp_cmp_diff				; branch if different
 	
 	lda (flt_vecl),Y			; get the first byte of the mantissa
