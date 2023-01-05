@@ -13,25 +13,27 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
+include_directories(ui ../shared/include)
 
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cc
-        mainwindow.h
-        mainwindow.ui
-        memorywidget.h
-        memorywidget.cc
-        statewidget.h
-        statewidget.cc
-        heatmapwidget.h
-        heatmapwidget.cc
-        pointswidget.h
-        pointswidget.cc
-        asmwidget.h
-        asmwidget.cc
-        vcrwidget.h
-        vcrwidget.cc
+        main.cc
+        ui/mainwindow.cc
+        ui/mainwindow.h
+        ui/mainwindow.ui
+        ui/memorywidget.h
+        ui/memorywidget.cc
+        ui/statewidget.h
+        ui/statewidget.cc
+        ui/heatmapwidget.h
+        ui/heatmapwidget.cc
+        ui/pointswidget.h
+        ui/pointswidget.cc
+        ui/asmwidget.h
+        ui/asmwidget.cc
+        ui/vcrwidget.h
+        ui/vcrwidget.cc
+        sim/simulator.h
+        sim/simulator.cc
     )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
