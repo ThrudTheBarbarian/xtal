@@ -13,7 +13,7 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-include_directories(ui ../shared/include)
+include_directories(ui ../shared/include ../shared/Classes/Util)
 
 set(PROJECT_SOURCES
         main.cc

@@ -427,8 +427,48 @@ void Simulator::addRAM(uint32_t address, uint8_t *data, uint32_t length)
 		}
 	}
 
+
+/*****************************************************************************\
+|* Run until some error completion
+\*****************************************************************************/
+void Simulator::run(uint32_t address, Registers *regs)
+	{
+	/*************************************************************************\
+	|* If we're supplied registers, use them
+	\*************************************************************************/
+	if (regs)
+		_regs = *regs;
+
+	/*************************************************************************\
+	|* Save off the PC
+	\*************************************************************************/
+	uint16_t oldPC = _regs.pc;
+
+	/*************************************************************************\
+	|* use 0xFFFF as the return address and set up the callback
+	\*************************************************************************/
+	_regs.pc = 0xFFFF;
+
+	SIM_CB cb = _rtsCallback;
+	addCallback(cb, 0xFFFF, CB_EXEC);
+	}
+
+
+
+
 #pragma mark -- Private Methods
 
+
+/*****************************************************************************\
+|* Read (PC); set appropriate error status
+\*****************************************************************************/
+Simulator::ErrorCode Simulator::_rtsCallback(Simulator *sim,
+											 Registers *regs,
+											 uint32_t address,
+											 int data)
+	{
+
+	}
 
 /*****************************************************************************\
 |* Read (PC); set appropriate error status
@@ -464,7 +504,7 @@ uint8_t Simulator::_readByte(uint32_t address)
 		\*********************************************************************/
 		if ((_memState[address] & MS_CALLBACK) && _readCbs[address])
 			{
-			ErrorCode e = _readCbs[address](this,address, CB_READ);
+			ErrorCode e = _readCbs[address](this, &_regs, address, CB_READ);
 			setError(e, address);
 			_writeMem = true;
 			return e;
@@ -552,7 +592,7 @@ void Simulator::_writeByte(uint32_t address, uint8_t val)
 			_memState[address]	= 0;
 			}
 		else if ((_memState[address] & MS_CALLBACK) && _writeCbs[address])
-			setError(_writeCbs[address](this, address, val), address);
+			setError(_writeCbs[address](this, &_regs, address, val), address);
 
 		else if (_memState[address] & MS_UNDEFINED)
 			setError(E_WR_UNDEF, address);
@@ -844,7 +884,7 @@ void Simulator::_next(void)
 	\*************************************************************************/
 	if (_execCbs[_regs.pc] != nullptr)
 		{
-		setError(_execCbs[_regs.pc](this, _regs.pc, CB_EXEC), _regs.pc);
+		setError(_execCbs[_regs.pc](this, &_regs, _regs.pc, CB_EXEC), _regs.pc);
 		if (shouldExit())
 			return;
 		}

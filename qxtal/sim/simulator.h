@@ -79,7 +79,7 @@ class Simulator : public QObject
 			/*********************************************************************\
 			|* Simulator error codes
 			\*********************************************************************/
-			typedef enum
+			enum
 				{						// Error level
 				E_NONE			= 0,
 				E_EX_UNDEF		= -1,   // 0
@@ -93,7 +93,8 @@ class Simulator : public QObject
 				E_CALL_RET		= -9,   // 0
 				E_CYCLE_LIMIT	= -10,  // 0
 				E_USER			= -11   // 0
-				} ErrorCode;
+				};
+			typedef int ErrorCode;
 
 			/*********************************************************************\
 			|* Callback types
@@ -143,11 +144,23 @@ class Simulator : public QObject
 			typedef std::map<uint32_t, String> AddressMap;
 
 			/*********************************************************************\
-			|* std::bind target for callbacks
+			|* callback function type
+			|*
+			|* @param s sim65 state.
+			|* @param regs simulator register values before the instruction.
+			|* @param addr address of memory causing the callback.
+			|* @param data type of callback:
+			|*             CB_READ = read memory
+			|*             CB_EXEC = execute address
+			|*             other   = write memory, data is the value to write.
+			|*
+			|* @returns the value (0-255) in case of CB_READ, or a negative value
+			|*          from enum ErrorCode.
 			\*********************************************************************/
-			typedef std::function<ErrorCode(Simulator* sim,
-											uint32_t addr,
-											int data)> SIM_CB;
+			typedef ErrorCode (*SIM_CB)(Simulator *sim,
+								  Registers *regs,
+								  uint32_t addr,
+								  int data);
 
 		/*************************************************************************\
 		|* Properties
@@ -255,6 +268,14 @@ class Simulator : public QObject
 			void _next(void);
 
 			/*********************************************************************\
+			|* Runtime: callback on termination of execution
+			\*********************************************************************/
+			static ErrorCode _rtsCallback(Simulator *sim,
+										  Registers *regs,
+										  uint32_t address,
+										  int data);
+
+			/*********************************************************************\
 			|* Trace printing: trace the execution
 			\*********************************************************************/
 			void _traceRegs(void);
@@ -347,6 +368,11 @@ class Simulator : public QObject
 			|* a valid address to read
 			\*********************************************************************/
 			int getByte(uint32_t address);
+
+			/*********************************************************************\
+			|* Runtime: process instructions
+			\*********************************************************************/
+			void run(uint32_t address, Registers *regs = nullptr);
 
 		};
 

@@ -72,7 +72,6 @@ typedef struct NotifyData
     float 		fVal;
     void * 		vVal;
     uint64_t 	cron;
-	uint32_t 	addr;
 		
     String 		name;
 
@@ -83,7 +82,6 @@ typedef struct NotifyData
     NotifyData(uint64_t x)      { setCronValue(x); }
 
     inline int          integerValue()          { return iVal; }
-    inline uint32_t     addrValue()             { return addr; }
     inline uint64_t     cronValue()             { return cron; }
     inline std::string  stringValue()           { return sVal; }
     inline float        floatValue()            { return fVal; }
@@ -94,7 +92,6 @@ typedef struct NotifyData
     inline void setStringValue(std::string x)   { sVal = x; }
     inline void setFloatValue(float x)          { fVal = x; }
     inline void setVoidValue(void *x)           { vVal = x; }
-    inline void setAddrValue(uint32_t x)        { addr = x; }
     } NotifyData;
 
 /*****************************************************************************\
