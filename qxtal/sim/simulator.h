@@ -10,12 +10,6 @@
 #include "debug.h"
 
 /*****************************************************************************\
-|* Client interface definition
-\*****************************************************************************/
-class Simulator;
-typedef std::function<void(const Simulator& sim, uint32_t addr, int data)> SIM_CB;
-
-/*****************************************************************************\
 |* Simulator definition
 \*****************************************************************************/
 class Simulator : public QObject
@@ -29,6 +23,19 @@ class Simulator : public QObject
 			enum
 				{
 				INVALID_ADDRESS = 0x100
+				};
+
+			/*********************************************************************\
+			|* Flag bit values
+			\*********************************************************************/
+			enum {
+				 FLAG_C = 0x01,
+				 FLAG_Z = 0x02,
+				 FLAG_I = 0x04,
+				 FLAG_D = 0x08,
+				 FLAG_B = 0x10,
+				 FLAG_V = 0x40,
+				 FLAG_N = 0x80
 				};
 
 			/*********************************************************************\
@@ -135,6 +142,13 @@ class Simulator : public QObject
 			\*********************************************************************/
 			typedef std::map<uint32_t, String> AddressMap;
 
+			/*********************************************************************\
+			|* std::bind target for callbacks
+			\*********************************************************************/
+			typedef std::function<ErrorCode(Simulator* sim,
+											uint32_t addr,
+											int data)> SIM_CB;
+
 		/*************************************************************************\
 		|* Properties
 		\*************************************************************************/
@@ -174,6 +188,88 @@ class Simulator : public QObject
 			|* Return any known label for this address
 			\*********************************************************************/
 			const String& _getLabel(uint32_t address);
+
+
+			/*********************************************************************\
+			|* Read (PC); set appropriate error status
+			\*********************************************************************/
+			uint8_t _readPC(void);
+
+			/*********************************************************************\
+			|* Read a byte at an address; set appropriate error status
+			\*********************************************************************/
+			uint8_t  _readByte(uint32_t addr);
+
+			/*********************************************************************\
+			|* Read a byte using the X-indexed addressing mode
+			\*********************************************************************/
+			uint8_t  _readIndX(uint32_t addr);
+
+			/*********************************************************************\
+			|* Read a byte using the Y-indexed addressing mode
+			\*********************************************************************/
+			uint8_t  _readIndY(uint32_t addr);
+
+			/*********************************************************************\
+			|* Read a word at an address; set appropriate error status
+			\*********************************************************************/
+			uint16_t _readWord(uint32_t addr);
+
+			/*********************************************************************\
+			|* Write a byte to an address; set appropriate error status
+			\*********************************************************************/
+			void _writeByte(uint32_t address, uint8_t val);
+
+			/*********************************************************************\
+			|* Write a byte using the X-indexed addressing mode
+			\*********************************************************************/
+			void _writeIndX(uint32_t address, uint8_t val);
+
+			/*********************************************************************\
+			|* Write a byte using the Y-indexed addressing mode
+			\*********************************************************************/
+			void _writeIndY(uint32_t address, uint8_t val);
+
+
+			/*********************************************************************\
+			|* Instructions
+			\*********************************************************************/
+			void _adc(uint8_t val);
+			void _sbc(uint8_t val);
+			void _branch(int8_t off, uint8_t mask, int cond);
+			void _bit(uint32_t address);
+			void _jsr(uint32_t address);
+			void _rts(void);
+			void _rti(void);
+
+			/*********************************************************************\
+			|* Extra cycles due to page boundaries
+			\*********************************************************************/
+			void _handleExtraAbsoluteX(uint32_t address);
+			void _handleExtraAbsoluteY(uint32_t address);
+
+
+			/*********************************************************************\
+			|* Runtime: process the next instruction
+			\*********************************************************************/
+			void _next(void);
+
+			/*********************************************************************\
+			|* Trace printing: trace the execution
+			\*********************************************************************/
+			void _traceRegs(void);
+			void _printCurrentInsn(uint16_t pc, char *buf, int hint);
+			void _printMemCount(char *buf, uint32_t address, unsigned len);
+			void _printMem(char *buf, uint32_t addess);
+
+			char * _printLabelMax(char *buf, const String& label, int max);
+			char * _printIndLabel(char *buf, uint16_t address, char idx, int hint);
+			char * _printZpLabel(char *buf, uint16_t address, char idx);
+			char * _printAbsLabel(char *buf, uint16_t address, char idx);
+
+			char * _hex2(char *c, uint8_t x);
+			char * _hex4(char *c, uint16_t x);
+			char * _hex8(char *c, uint32_t x);
 
 		public:
 			/*********************************************************************\
@@ -251,8 +347,6 @@ class Simulator : public QObject
 			|* a valid address to read
 			\*********************************************************************/
 			int getByte(uint32_t address);
-
-		signals:
 
 		};
 
