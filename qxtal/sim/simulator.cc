@@ -600,6 +600,18 @@ bool Simulator::isBranch(uint32_t address)
 
 
 /*****************************************************************************\
+|* Return a byte to the outside world
+\*****************************************************************************/
+int  Simulator::getByte(uint32_t address)
+	{
+	if (address >= _maxRam)
+		return INVALID_ADDRESS;
+	if (_memState[address] & MS_INVALID)
+		return INVALID_ADDRESS;
+	return _mem[address];
+	}
+
+/*****************************************************************************\
 |* Return a copy of the profile data
 \*****************************************************************************/
 Simulator::ProfileData Simulator::profileInfo(void)
