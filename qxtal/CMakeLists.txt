@@ -38,6 +38,12 @@ set(PROJECT_SOURCES
         sim/mathpack.cc
         sim/atarihw.h
         sim/atarihw.cc
+        sim/atari.h
+        sim/atari.cc
+        sim/io.h
+        sim/io.cc
+        sim/display.h
+        sim/display.cc
     )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

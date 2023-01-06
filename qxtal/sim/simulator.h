@@ -14,7 +14,7 @@
 \*****************************************************************************/
 class Simulator : public QObject
 	{
-		Q_OBJECT
+	Q_OBJECT
 
 		public:
 			/*********************************************************************\
@@ -191,6 +191,8 @@ class Simulator : public QObject
 			int _cycleLimit;						// Limit on simulation time
 			FILE * _traceFile;						// Where to trace to
 			ProfileData _profileData;				// Where statistics are stored
+
+
 
 			/*********************************************************************\
 			|* Set the processor status flags with a mask
