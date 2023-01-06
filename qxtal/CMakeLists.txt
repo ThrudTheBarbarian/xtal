@@ -34,6 +34,10 @@ set(PROJECT_SOURCES
         ui/vcrwidget.cc
         sim/simulator.h
         sim/simulator.cc
+        sim/mathpack.h
+        sim/mathpack.cc
+        sim/atarihw.h
+        sim/atarihw.cc
     )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

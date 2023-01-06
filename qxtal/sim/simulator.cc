@@ -166,6 +166,20 @@ static const char *_hexDigits = "0123456789ABCDEF";
 
 
 
+#pragma mark -- Callbacks
+/*****************************************************************************\
+|* Read (PC); set appropriate error status
+\*****************************************************************************/
+static Simulator::ErrorCode _rtsCallback(Simulator *sim,
+										 Simulator::Registers *regs,
+										 uint32_t address,
+										 int data)
+	{
+	return Simulator::E_CALL_RET;
+	}
+
+
+
 /*****************************************************************************\
 |* Constructor
 \*****************************************************************************/
@@ -251,6 +265,18 @@ void Simulator::addCallback(SIM_CB cb, uint32_t address, CallbackType type)
 
 
 /*****************************************************************************\
+|* Add a callback over a range of memory
+\*****************************************************************************/
+void Simulator::addCallback(SIM_CB cb,
+							uint32_t address,
+							uint32_t len,
+							CallbackType type)
+	{
+	for (int i=address; (i<address + len) && (i<_maxRam); i++)
+		addCallback(cb, i, type);
+	}
+
+/*****************************************************************************\
 |* Log a warning if the debuglevel is high enough
 \*****************************************************************************/
 int Simulator::warn(const char *format, ...)
@@ -261,27 +287,58 @@ int Simulator::warn(const char *format, ...)
 
 	if (_debug >= DBG_MESSAGE)
 		{
-		/*************************************************************************\
+		/*********************************************************************\
 		|* Print original message to a string
-		\*************************************************************************/
+		\*********************************************************************/
 		va_start(ap, format);
-		vsnprintf(buf, 1024, format, ap);
+		vsnprintf(buf, 16384, format, ap);
 		va_end(ap);
 
-		/*************************************************************************\
+		/*********************************************************************\
 		|* Print to stderr always
-		\*************************************************************************/
+		\*********************************************************************/
 		if (_debug < DBG_TRACE || _traceFile != stderr)
 			size = fprintf(stderr, "sim: %s\n", buf);
 
-		/*************************************************************************\
+		/*********************************************************************\
 		|* And print to trace file, if trace is active
-		\*************************************************************************/
+		\*********************************************************************/
 		if (_debug >= DBG_TRACE)
 			size = fprintf(_traceFile, "%08" PRIX64 ": %s\n", _cycles, buf);
 		}
 	else
 		size = 0;
+
+	return size;
+	}
+
+/*****************************************************************************\
+|* Print an error
+\*****************************************************************************/
+int Simulator::error(const char *format, ...)
+	{
+	char buf[16384];
+	int size;
+	va_list ap;
+
+	/*************************************************************************\
+	|* Print original message to a string
+	\*************************************************************************/
+	va_start(ap, format);
+	vsnprintf(buf, 16384, format, ap);
+	va_end(ap);
+
+	/*************************************************************************\
+	|* Print to stderr always
+	\*************************************************************************/
+	if (_debug < DBG_TRACE || _traceFile != stderr)
+		size = fprintf(stderr, "sim: ERROR, %s\n", buf);
+
+	/*************************************************************************\
+	|* And print to trace file, if trace is active
+	\*************************************************************************/
+	if (_debug >= DBG_TRACE)
+		size = fprintf(_traceFile, "%08" PRIX64 ": ERROR, %s\n", _cycles, buf);
 
 	return size;
 	}
@@ -427,11 +484,49 @@ void Simulator::addRAM(uint32_t address, uint8_t *data, uint32_t length)
 		}
 	}
 
+/*****************************************************************************\
+|* Add initialised memory to the simulator
+\*****************************************************************************/
+void Simulator::addROM(uint32_t address, uint8_t *data, uint32_t length)
+	{
+	uint32_t end = address + length;
+	if (address >= _maxRam)
+		return;
+	if (end >= _maxRam)
+		end = _maxRam;
+
+	for (; address < end; address++, data++)
+		{
+		_memState[address]	&= ~(MS_UNDEFINED | MS_INVALID);
+		_memState[address]	|= MS_ROM;
+		_mem[address]		 = *data;
+		}
+	}
+
 
 /*****************************************************************************\
 |* Run until some error completion
 \*****************************************************************************/
-void Simulator::run(uint32_t address, Registers *regs)
+Simulator::ErrorCode Simulator::run(uint32_t address, Registers *regs)
+	{
+	if (regs != nullptr)
+		_regs = *regs;
+
+	_error		= E_NONE;
+	_regs.pc	= address & 0xFFFF;
+	while (!shouldExit())
+		_next();
+
+	if (regs)
+		*regs = _regs;
+
+	return _error;
+	}
+
+/*****************************************************************************\
+|* Call a subroutine
+\*****************************************************************************/
+Simulator::ErrorCode Simulator::call(uint32_t address, Registers *regs)
 	{
 	/*************************************************************************\
 	|* If we're supplied registers, use them
@@ -449,26 +544,234 @@ void Simulator::run(uint32_t address, Registers *regs)
 	\*************************************************************************/
 	_regs.pc = 0xFFFF;
 
-	SIM_CB cb = _rtsCallback;
-	addCallback(cb, 0xFFFF, CB_EXEC);
+	addCallback(::_rtsCallback, 0xFFFF, CB_EXEC);
+
+	/*************************************************************************\
+	|* Execute the JSR and continue
+	\*************************************************************************/
+	_jsr(address);
+
+	ErrorCode err = run(address, regs);
+
+	/*************************************************************************\
+	|* If we got here from a JSR return, just return ok
+	\*************************************************************************/
+	if (err == E_CALL_RET)
+		{
+		// Return to old address
+		_regs.pc = oldPC;
+		err = _error = E_NONE;
+		}
+
+	return err;
 	}
 
 
+/*****************************************************************************\
+|* Set the trace output
+\*****************************************************************************/
+void Simulator::setTraceFile(FILE *fp)
+	{
+	_traceFile = (fp == nullptr) ? stderr : fp;
+	}
+
+
+/*****************************************************************************\
+|* Determine if the instruction at an address is a branch
+\*****************************************************************************/
+bool Simulator::isBranch(uint32_t address)
+	{
+	uint32_t insn = _mem[address & 0xFFFF];
+	switch (insn)
+		{
+		case 0x10:
+		case 0x30:
+		case 0x50:
+		case 0x70:
+		case 0x90:
+		case 0xB0:
+		case 0xD0:
+		case 0xF0:
+			return 1;
+		default:
+			return 0;
+		}
+	}
+
+
+/*****************************************************************************\
+|* Return a copy of the profile data
+\*****************************************************************************/
+Simulator::ProfileData Simulator::profileInfo(void)
+	{
+	ProfileData copy = _profileData;
+	return copy;
+	}
+
+#pragma mark -- labels
+
+
+/*****************************************************************************\
+|* Labels: add a label
+\*****************************************************************************/
+void Simulator::addLabel(uint32_t address, String label)
+	{
+	if (label.length() > 0)
+		_labels[address] = label;
+	}
+
+/*****************************************************************************\
+|* Labels: load labels from a file
+\*****************************************************************************/
+int Simulator::loadLabels(String path)
+	{
+	int ok		= -1;
+	int line	= 0;
+
+	FILE *fp = fopen(path.c_str(), "r");
+	if (fp)
+		{
+		ok = 0;
+		forever
+			{
+			char name[1024], str[256];
+			unsigned addr = 0, page = 0;
+
+			int e = fscanf(fp, "%255[^\n\r]\n", str);
+			if (e == EOF)
+				{
+				fclose(fp);
+				break;
+				}
+
+			line ++;
+			// Try parsing a CC65 line:
+			if (2 != sscanf(str, "al %6x .%31s", &addr, name))
+				{
+				// No, try parsing MADS line:
+				if (3 != sscanf(str, "%02x %04x %31s", &page, &addr, name))
+					{
+					// Ignore line
+					error("%s[%d]: invalid line on label file",
+						 path.c_str(), line);
+					continue;
+					}
+				}
+			if (addr <= 0xFFFF && page == 0)
+				addLabel(addr, name);
+			}
+		}
+
+	return ok;
+	}
+
+
+#pragma mark -- Profiling
+
+/*****************************************************************************\
+|* Save a profile
+\*****************************************************************************/
+int Simulator::saveProfile(String path)
+	{
+	int ok				= 1;
+	uint16_t version	= 0x101;
+	int e				= 0;
+	FILE *fp			= fopen(path.c_str(), "wb");
+	ProfileData pd		= _profileData;
+
+	if (fp)
+		{
+		e = fprintf(fp, "SIM:PROF\n") < 0;
+		e |= fwrite(&version, sizeof(version), 1, fp) < 1;
+		e |= fwrite(&_maxRam, sizeof(_maxRam), 1, fp) < 1;
+		e |= fwrite(&pd.cycles[0],    sizeof(pd.cycles[0]), _maxRam, fp) < _maxRam;
+		e |= fwrite(&pd.branch[0],    sizeof(pd.branch[0]), _maxRam, fp) < _maxRam;
+		e |= fwrite(&pd.extra[0],     sizeof(pd.extra[0]), _maxRam, fp) < _maxRam;
+		e |= fwrite(&pd.mflag[0],     sizeof(pd.mflag[0]), _maxRam, fp) < _maxRam;
+		e |= fwrite(&pd.branch_skip,  sizeof(pd.branch_skip), 1, fp) < 1;
+		e |= fwrite(&pd.branch_taken, sizeof(pd.branch_taken), 1, fp) < 1;
+		e |= fwrite(&pd.branch_extra, sizeof(pd.branch_extra), 1, fp) < 1;
+		e |= fwrite(&pd.abs_x_extra,  sizeof(pd.abs_x_extra), 1, fp) < 1;
+		e |= fwrite(&pd.abs_y_extra,  sizeof(pd.abs_y_extra), 1, fp) < 1;
+		e |= fwrite(&pd.ind_y_extra,  sizeof(pd.ind_y_extra), 1, fp) < 1;
+		e |= fwrite(&pd.instructions, sizeof(pd.instructions), 1, fp) < 1;
+		e |= fclose(fp) != 0;
+
+		if (e)
+			error("Can't save profile data", strerror(errno));
+		else
+			ok = 0;
+		}
+
+	return ok;
+	}
+
+
+
+/*****************************************************************************\
+|* Save a profile
+\*****************************************************************************/
+int Simulator::loadProfile(String path)
+	{
+	int e					= 0;
+	uint16_t version		= 0;
+	FILE *fp				= fopen(path.c_str(), "rb");
+	if(!fp)
+		{
+		if (errno == ENOENT)
+			{
+			warn("missing profile data");
+			return 0;
+			}
+
+		error("can't load profile data", strerror(errno));
+		return 1;
+		}
+
+	char buf[32];
+	if (!fgets(buf, 16, fp) || strcmp(buf, "SIM:PROF\n") )
+		{
+		fclose(fp);
+		error("not a profile data file");
+		return 1;
+		}
+
+	if (fread(&version, sizeof(version), 1, fp) < 1 || version != 0x100 )
+		{
+		fclose(fp);
+		error("invalid profile data file version %04x", version);
+		return 1;
+		}
+
+	if (fread(&_maxRam, sizeof(_maxRam), 1, fp) < 1)
+		{
+		fclose(fp);
+		error("Cannot read maximum memory for profile file");
+		return 1;
+		}
+
+	e |= fread(&_profileData.cycles[0],    sizeof(_profileData.cycles[0]), _maxRam, fp) < _maxRam;
+	e |= fread(&_profileData.branch[0],    sizeof(_profileData.branch[0]), _maxRam, fp) < _maxRam;
+	e |= fread(&_profileData.extra[0],     sizeof(_profileData.extra[0]), _maxRam, fp) < _maxRam;
+	e |= fread(&_profileData.mflag[0],     sizeof(_profileData.mflag[0]), _maxRam, fp) < _maxRam;
+	e |= fread(&_profileData.branch_skip,  sizeof(_profileData.branch_skip), 1, fp) < 1;
+	e |= fread(&_profileData.branch_taken, sizeof(_profileData.branch_taken), 1, fp) < 1;
+	e |= fread(&_profileData.branch_extra, sizeof(_profileData.branch_extra), 1, fp) < 1;
+	e |= fread(&_profileData.abs_x_extra,  sizeof(_profileData.abs_x_extra), 1, fp) < 1;
+	e |= fread(&_profileData.abs_y_extra,  sizeof(_profileData.abs_y_extra), 1, fp) < 1;
+	e |= fread(&_profileData.ind_y_extra,  sizeof(_profileData.ind_y_extra), 1, fp) < 1;
+	e |= fread(&_profileData.instructions, sizeof(_profileData.instructions), 1, fp) < 1;
+
+	if (e)
+		error("can't read profile data", strerror(errno));
+	fclose(fp);
+
+	return e;
+	}
 
 
 #pragma mark -- Private Methods
 
-
-/*****************************************************************************\
-|* Read (PC); set appropriate error status
-\*****************************************************************************/
-Simulator::ErrorCode Simulator::_rtsCallback(Simulator *sim,
-											 Registers *regs,
-											 uint32_t address,
-											 int data)
-	{
-
-	}
 
 /*****************************************************************************\
 |* Read (PC); set appropriate error status
@@ -877,7 +1180,7 @@ void Simulator::_next(void)
 	{
 	uint32_t val;
 	uint64_t old_cycles = 0;
-	Registers old_regs;
+	Registers old_regs = {0,0,0,0,0,0,0};
 
 	/*************************************************************************\
 	|* Handle the return-from-processing states
@@ -1625,3 +1928,11 @@ void Simulator::_printMem(char *buf, uint32_t address)
 		memcpy(buf, "[NN]", 4);
 	}
 
+/*****************************************************************************\
+|* Trace printing: disassemble
+\*****************************************************************************/
+char * Simulator::disassemble(char *buf, uint32_t address)
+	{
+	_printCurrentInsn(address, buf, 0);
+	return buf;
+	}

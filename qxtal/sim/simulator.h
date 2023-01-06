@@ -101,9 +101,9 @@ class Simulator : public QObject
 			\*********************************************************************/
 			typedef enum
 				{
-				CB_READ			= 0,
-				CB_WRITE,
-				CB_EXEC
+				CB_WRITE		= 0,
+				CB_READ			= -1,
+				CB_EXEC			= -2
 				} CallbackType;
 
 			/*********************************************************************\
@@ -173,10 +173,8 @@ class Simulator : public QObject
 		GETSET(bool, doProfiling, DoProfiling);		// Whether to profile
 		GET(Registers, regs);						// Registers in the CPU
 		GETSET(int, maxRam, MaxRam);				// Amount of memory to offer
-		GET(ProfileData, profileData);				// Profiling data
 		GET(bool, writeMem);						// Profiler: detect writes
 		GETSET(AddressMap, labels, Labels);			// Assembly labels
-		GETSET(FILE*, traceFile, TraceFile);		// Where to trace to
 
 		/*************************************************************************\
 		|* Internal state
@@ -191,6 +189,8 @@ class Simulator : public QObject
 			SIM_CB * _writeCbs;						// Write callbacks
 			SIM_CB * _execCbs;						// Execute callbacks
 			int _cycleLimit;						// Limit on simulation time
+			FILE * _traceFile;						// Where to trace to
+			ProfileData _profileData;				// Where statistics are stored
 
 			/*********************************************************************\
 			|* Set the processor status flags with a mask
@@ -268,14 +268,6 @@ class Simulator : public QObject
 			void _next(void);
 
 			/*********************************************************************\
-			|* Runtime: callback on termination of execution
-			\*********************************************************************/
-			static ErrorCode _rtsCallback(Simulator *sim,
-										  Registers *regs,
-										  uint32_t address,
-										  int data);
-
-			/*********************************************************************\
 			|* Trace printing: trace the execution
 			\*********************************************************************/
 			void _traceRegs(void);
@@ -291,6 +283,8 @@ class Simulator : public QObject
 			char * _hex2(char *c, uint8_t x);
 			char * _hex4(char *c, uint16_t x);
 			char * _hex8(char *c, uint32_t x);
+
+
 
 		public:
 			/*********************************************************************\
@@ -329,7 +323,7 @@ class Simulator : public QObject
 			int error(const char *format, ...);
 
 			/*********************************************************************\
-			|* Log an error
+			|* Return a human-readable string for a given error-code
 			\*********************************************************************/
 			String errorString(ErrorCode e);
 
@@ -369,11 +363,63 @@ class Simulator : public QObject
 			\*********************************************************************/
 			int getByte(uint32_t address);
 
+
+
+
+			/*********************************************************************\
+			|* Profiling: Get any simulation profiling data
+			\*********************************************************************/
+			ProfileData profileInfo(void);
+
+			/*********************************************************************\
+			|* Profiling: Save a profile
+			\*********************************************************************/
+			int saveProfile(String path);
+
+			/*********************************************************************\
+			|* Profiling: Load a profile
+			\*********************************************************************/
+			int loadProfile(String path);
+
+
+
 			/*********************************************************************\
 			|* Runtime: process instructions
 			\*********************************************************************/
-			void run(uint32_t address, Registers *regs = nullptr);
+			ErrorCode run(uint32_t address, Registers *regs = nullptr);
 
+			/*********************************************************************\
+			|* Runtime: call a subroutine
+			\*********************************************************************/
+			ErrorCode call(uint32_t address, Registers *regs = nullptr);
+
+			/*********************************************************************\
+			|* Runtime: set where to trace to, defaults to stderr if null
+			\*********************************************************************/
+			void setTraceFile(FILE *fp);
+
+
+
+			/*********************************************************************\
+			|* Disassemble at address
+			\*********************************************************************/
+			char * disassemble(char * buf, uint32_t addr);
+
+			/*********************************************************************\
+			|* Is this instruction a branch ?
+			\*********************************************************************/
+			bool isBranch(uint32_t addr);
+
+
+			/*********************************************************************\
+			|* Labels: add a label for an address
+			\*********************************************************************/
+			void addLabel(uint32_t address, String label);
+
+			/*********************************************************************\
+			|* Labels: add a label for an address
+			\*********************************************************************/
+			int loadLabels(String filename);
 		};
 
 #endif // SIMULATOR_H
