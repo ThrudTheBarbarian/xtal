@@ -44,6 +44,8 @@ set(PROJECT_SOURCES
         sim/io.cc
         sim/display.h
         sim/display.cc
+        ../shared/Classes/Util/StringUtils.h
+        ../shared/Classes/Util/StringUtils.cc
     )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

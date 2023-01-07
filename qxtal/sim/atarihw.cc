@@ -125,18 +125,18 @@ static Simulator::ErrorCode _antic(Simulator *sim,
 /*****************************************************************************\
 |* Initialise the atari hardware
 \*****************************************************************************/
-void AtariHW::initialise(Simulator &sim)
+void AtariHW::init(Simulator *sim)
 	{
 	// HW registers
-	sim.addCallback(_gtia,	0xD000, 0x100, Simulator::CB_READ);
-	sim.addCallback(_pokey,	0xD200, 0x100, Simulator::CB_READ);
-	sim.addCallback(_pia,	0xD300, 0x100, Simulator::CB_READ);
-	sim.addCallback(_antic,	0xD400, 0x100, Simulator::CB_READ);
+	sim->addCallback(_gtia,		0xD000, 0x100, Simulator::CB_READ);
+	sim->addCallback(_pokey,	0xD200, 0x100, Simulator::CB_READ);
+	sim->addCallback(_pia,		0xD300, 0x100, Simulator::CB_READ);
+	sim->addCallback(_antic,	0xD400, 0x100, Simulator::CB_READ);
 
-	sim.addCallback(_gtia,	0xD000, 0x100, Simulator::CB_WRITE);
-	sim.addCallback(_pokey,	0xD200, 0x100, Simulator::CB_WRITE);
-	sim.addCallback(_pia,	0xD300, 0x100, Simulator::CB_WRITE);
-	sim.addCallback(_antic,	0xD400, 0x100, Simulator::CB_WRITE);
+	sim->addCallback(_gtia,		0xD000, 0x100, Simulator::CB_WRITE);
+	sim->addCallback(_pokey,	0xD200, 0x100, Simulator::CB_WRITE);
+	sim->addCallback(_pia,		0xD300, 0x100, Simulator::CB_WRITE);
+	sim->addCallback(_antic,	0xD400, 0x100, Simulator::CB_WRITE);
 
-	sim.addCallback(_execError,	0xD000, 0x7FF, Simulator::CB_EXEC);
+	sim->addCallback(_execError,0xD000, 0x7FF, Simulator::CB_EXEC);
 	}

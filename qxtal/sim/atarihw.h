@@ -18,7 +18,7 @@ class AtariHW : public QObject
 		/*************************************************************************\
 		|* Initialise
 		\*************************************************************************/
-		static void initialise(Simulator &sim);
+		static void init(Simulator *sim);
 	signals:
 
 	};

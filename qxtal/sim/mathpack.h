@@ -15,7 +15,7 @@ class MathPack  : public QObject
 		/*************************************************************************\
 		|* Load the math pack into the simulator
 		\*************************************************************************/
-		static int load(Simulator& sim);
+		static int load(Simulator* sim);
 	};
 
 #endif // MATHPACK_H

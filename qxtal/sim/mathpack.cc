@@ -187,8 +187,8 @@ MathPack::MathPack(QObject *parent)
 /*****************************************************************************\
 |* Load the Altirra math-pack into the simulator at the correct position
 \*****************************************************************************/
-int MathPack::load(Simulator &sim)
+int MathPack::load(Simulator *sim)
 	{
-	sim.addROM(0xD800, mathpack_bin, mathpack_bin_len);
+	sim->addROM(0xD800, mathpack_bin, mathpack_bin_len);
 	return 0;
 	}
