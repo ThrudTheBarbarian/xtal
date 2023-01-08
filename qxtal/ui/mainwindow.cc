@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
 	_sim	= new Simulator(0x10000, this);
 	_atari	= Atari::instance(_sim, _io, true);
 
+	//_sim->setDebug(Simulator::DBG_TRACE);
 	_sim->setDebug(Simulator::DBG_MESSAGE);
 	}
 
