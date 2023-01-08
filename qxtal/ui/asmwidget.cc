@@ -1,7 +1,7 @@
 #include "asmwidget.h"
 
 #include "notifications.h"
-#include "sim/simulator.h"
+#include "sim/atari.h"
 
 #include <QPainter>
 #include <QColor>
@@ -37,17 +37,23 @@ void AsmWidget::paintEvent(QPaintEvent *)
 \*****************************************************************************/
 void AsmWidget::_binaryLoaded(NotifyData& nd)
 	{
-	uint32_t addr = nd.integerValue();
+	uint32_t addr	= _org = nd.integerValue();
+	uint8_t badMem	= Simulator::MS_INVALID | Simulator::MS_UNDEFINED;
 
 	StringList lines;
-	std::vector<Simulator::InstructionInfo> info;
-/*
+
 	bool done = false;
 	while (!done)
 		{
-		Simulator::InstructionInfo info =
+		Simulator::InstructionInfo info = _hw->sim()->insnInfo(addr);
+		if ((info.state & badMem) == 0)
+			{
+			_infoList.push_back(info);
+			addr += info.bytes;
+			}
+		else done = true;
 		}
-*/
+
 
 	}
 
