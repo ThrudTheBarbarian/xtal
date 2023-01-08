@@ -339,7 +339,7 @@ int Assembler::_run(std::string source)
 	uint16_t vec = 0;
 	for (int i=0; i<_blocks.size(); i++)
 		{
-		if (_blocks[i].isData())
+		if (!_blocks[i].isData())
 			{
 			vec = _blocks[i].baseAddress();
 			break;

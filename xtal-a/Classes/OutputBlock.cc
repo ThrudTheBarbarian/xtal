@@ -15,6 +15,7 @@
 \****************************************************************************/
 OutputBlock::OutputBlock(int baseAddress)
 			:_baseAddress(baseAddress)
+			,_isData(false)
 	{
 	clear();
 	}
