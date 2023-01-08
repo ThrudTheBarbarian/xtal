@@ -20,6 +20,63 @@ static const uint8_t _insnLength[256] =
 	};
 
 /*****************************************************************************\
+|* Addressing modes of each instruction
+\*****************************************************************************/
+typedef enum
+	{
+	anon	= -1,		// None, illegal op
+	aACC	= 0,		// Accumulator
+	aABS,				// Absolute
+	aABX,				// Absolute, X
+	aABY,				// Absolute, Y
+	aIMM,				// Immediate
+	aIMP,				// Implied
+	aIND,				// Indirect
+	aXIN,				// X,Indirect
+	aINY,				// Indirect,Y
+	aREL,				// Relative
+	aZPG,				// Zero-page
+	aZPX,				// Zero-page,X
+	aZPY				// Zero-page,Y
+	} AddressingMode;
+
+static const AddressingMode _insnMode[256] =
+	{
+	/* 00 */	aIMP, aXIN, anon, anon, anon, aZPG, aZPG, anon,
+	/* 08 */	aIMP, aIMM, aACC, anon, anon, aABS, aABS, anon,
+	/* 10 */	aREL, aINY, anon, anon, anon, aZPX, aZPX, anon,
+	/* 18 */	aIMP, aABY, anon, anon, anon, aABX, aABX, anon,
+	/* 20 */	aABS, aXIN, anon, anon, aZPG, aZPG, aZPG, anon,
+	/* 28 */	aIMP, aIMM, aACC, anon, aABS, aABS, aABS, anon,
+	/* 30 */	aREL, aINY, anon, anon, anon, aZPX, aZPX, anon,
+	/* 38 */	aIMP, aABY, anon, anon, anon, aABX, aABX, anon,
+	/* 40 */	aIMP, aXIN, anon, anon, anon, aZPG, aZPG, anon,
+	/* 48 */	aIMP, aIMM, aACC, anon, aABS, aABS, aABS, anon,
+	/* 50 */	aREL, aINY, anon, anon, anon, aZPX, aZPX, anon,
+	/* 58 */	aIMP, aABY, anon, anon, anon, aABX, aABX, anon,
+	/* 60 */	aIMP, aXIN, anon, anon, anon, aZPG, aZPG, anon,
+	/* 68 */	aIMP, aIMM, aACC, anon, aIND, aABS, aABS, anon,
+	/* 70 */	aREL, aINY, anon, anon, anon, aZPX, aZPX, anon,
+	/* 78 */	aIMP, aABY, anon, anon, anon, aABX, aABX, anon,
+	/* 80 */	anon, aXIN, anon, anon, aZPG, aZPG, aZPG, anon,
+	/* 88 */	aIMP, anon, aIMP, anon, aABS, aABS, aABS, anon,
+	/* 90 */	aREL, aINY, anon, anon, aZPX, aZPX, aZPY, anon,
+	/* 98 */	aIMP, aABY, aIMP, anon, anon, aABX, anon, anon,
+	/* A0 */	aIMM, aXIN, aIMM, anon, aZPG, aZPG, aZPG, anon,
+	/* A8 */	aIMP, aIMM, aIMP, anon, aABS, aABS, aABS, anon,
+	/* B0 */	aREL, aINY, anon, anon, aZPX, aZPX, aZPY, anon,
+	/* B8 */	aIMP, aABY, aIMP, anon, aABX, aABX, aABY, anon,
+	/* C0 */	aIMM, aXIN, anon, anon, aZPG, aZPG, aZPG, anon,
+	/* C8 */	aIMP, aIMM, aIMP, anon, aABS, aABS, aABS, anon,
+	/* D0 */	aREL, aINY, anon, anon, anon, aZPX, aZPX, anon,
+	/* D8 */	aIMP, aABY, anon, anon, anon, aABX, aABX, anon,
+	/* E0 */	aIMM, aXIN, anon, anon, aZPG, aZPG, aZPG, anon,
+	/* E8 */	aIMP, aIMM, aIMP, anon, aABS, aABS, aABS, anon,
+	/* F0 */	aREL, aINY, anon, anon, anon, aZPX, aZPX, anon,
+	/* F8 */	aIMP, aABY, anon, anon, anon, aABX, aABX, anon,
+	};
+
+/*****************************************************************************\
 |* Macros to make the code easier to read : Status flags
 \*****************************************************************************/
 #define SETZ(a) setFlags(FLAG_Z,  ((a) & 0xFF)	? 0		 : FLAG_Z)
@@ -788,6 +845,94 @@ int Simulator::loadProfile(String path)
 	}
 
 
+#pragma mark -- Instruction disassembly
+
+
+/*****************************************************************************\
+|* Trace printing: disassemble
+\*****************************************************************************/
+char * Simulator::disassemble(char *buf, uint32_t address)
+	{
+	_printCurrentInsn(address, buf, 0);
+	return buf;
+	}
+
+/*****************************************************************************\
+|* Get instruction information
+\*****************************************************************************/
+Simulator::InstructionInfo Simulator::insnInfo(uint32_t address)
+	{
+	static InstructionInfo invalid = {0,0,0, "",MS_INVALID,0,0,""};
+
+	if (address >= _maxRam)
+		return invalid;
+
+	InstructionInfo info;
+
+	info.addr		= (uint16_t) address;
+	info.insn		= _mem[address];
+	info.bytes		= _insnLength[info.insn];
+	info.arg1		= ((info.bytes > 1) && (address < _maxRam-1))
+					? _mem[address+1]
+					: 0;
+	info.arg2		= ((info.bytes > 1) && (address < _maxRam-2))
+					? _mem[address+2]
+					: 0;
+	info.state		= _memState[address];
+	info.label		= _getLabel(address);
+
+	int vec		= address;
+	int8_t rel	= (int8_t)(info.arg1);
+
+	switch (_insnMode[info.insn])
+		{
+		case anon:
+			warn("Attempt to get info for invalid instructin at $%04x", address);
+			break;
+
+		case aACC:
+		case aIMM:
+		case aIMP:
+			break;
+
+		case aZPG:
+		case aABS:
+			 _getLabel(vec, 16, info.argLabel);
+			break;
+
+		case aZPX:
+		case aABX:
+			_getLabel(vec + _regs.x, 16, info.argLabel);
+			break;
+
+		case aZPY:
+		case aABY:
+			_getLabel(vec + _regs.y, 16, info.argLabel);
+			break;
+
+		case aIND:
+			vec = _readWord(address);
+			_getLabel(vec, 16, info.argLabel);
+			break;
+
+		case aXIN:
+			vec = _readWord(address + _regs.x);
+			_getLabel(vec, 16, info.argLabel);
+			break;
+
+		case aINY:
+			vec = _readWord(address) + _regs.y;
+			_getLabel(vec, 16, info.argLabel);
+			break;
+
+		case aREL:;
+			_getLabel(vec + rel + 2, 16, info.argLabel);
+			break;
+		}
+
+	return info;
+	}
+
 #pragma mark -- Private Methods
 
 
@@ -955,7 +1100,38 @@ const String& Simulator::_getLabel(uint32_t address)
 	AddressMap::iterator it = _labels.find(address);
 	if (it != _labels.end())
 		return  it->second;
+
 	return none;
+	}
+
+/*****************************************************************************\
+|* Return any known label for this address
+\*****************************************************************************/
+void Simulator::_getLabel(uint32_t address, int slack, String &label)
+	{
+	static const String none = "";
+
+	if (slack == 0)
+		{
+		label =_getLabel(address);
+		return;
+		}
+
+	int delta = 1;
+	while (delta <= slack)
+		{
+		AddressMap::iterator it = _labels.find(address+delta);
+		if (it != _labels.end())
+			label = it->second + " + "+ std::to_string(delta);
+
+		it = _labels.find(address-delta);
+		if (it != _labels.end())
+			label = it->second + " - " + std::to_string(delta);
+
+		delta ++;
+		}
+
+	label = none;
 	}
 
 
@@ -1944,13 +2120,4 @@ void Simulator::_printMem(char *buf, uint32_t address)
 		memcpy(buf, "[UU]", 4);
 	else
 		memcpy(buf, "[NN]", 4);
-	}
-
-/*****************************************************************************\
-|* Trace printing: disassemble
-\*****************************************************************************/
-char * Simulator::disassemble(char *buf, uint32_t address)
-	{
-	_printCurrentInsn(address, buf, 0);
-	return buf;
 	}

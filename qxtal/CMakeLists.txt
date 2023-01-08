@@ -13,10 +13,11 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-include_directories(ui ../shared/include ../shared/Classes/Util)
+include_directories(ui ../shared/include ../shared/Classes/Util include)
 
 set(PROJECT_SOURCES
         main.cc
+        include/notifications.h
         ui/mainwindow.cc
         ui/mainwindow.h
         ui/mainwindow.ui
@@ -46,6 +47,8 @@ set(PROJECT_SOURCES
         sim/display.cc
         ../shared/Classes/Util/StringUtils.h
         ../shared/Classes/Util/StringUtils.cc
+        ../shared/Classes/Util/NotifyCenter.h
+        ../shared/Classes/Util/NotifyCenter.cc
         resources.qrc
     )
 

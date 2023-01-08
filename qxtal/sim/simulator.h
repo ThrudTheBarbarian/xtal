@@ -162,6 +162,25 @@ class Simulator : public QObject
 								  uint32_t addr,
 								  int data);
 
+			/*********************************************************************\
+			|* Used to describe an instruction at an address
+			\*********************************************************************/
+			typedef struct InstructionInfo
+				{
+				uint16_t addr;			// The address of the instruction
+				uint8_t insn;			// The byte-code for this insn
+				uint8_t bytes;			// The total number of bytes used
+
+				String label;			// Any label at this memory location
+				uint8_t state;			// What memory state at the passed-address
+
+				uint8_t arg1;			// The 1st-argument byte, if used
+				uint8_t arg2;			// The 2nd-argument byte, if used
+				String argLabel;		// Any label matching the target address, +/-16
+
+				} InstructionInfo;
+
+
 		/*************************************************************************\
 		|* Properties
 		\*************************************************************************/
@@ -203,7 +222,7 @@ class Simulator : public QObject
 			|* Return any known label for this address
 			\*********************************************************************/
 			const String& _getLabel(uint32_t address);
-
+			void _getLabel(uint32_t address, int slack, String& label);
 
 			/*********************************************************************\
 			|* Read (PC); set appropriate error status
@@ -411,6 +430,11 @@ class Simulator : public QObject
 			|* Is this instruction a branch ?
 			\*********************************************************************/
 			bool isBranch(uint32_t addr);
+
+			/*********************************************************************\
+			|* Return any data we know about this location
+			\*********************************************************************/
+			InstructionInfo insnInfo(uint32_t addr);
 
 
 			/*********************************************************************\

@@ -9,6 +9,8 @@
 #include "sim/io.h"
 #include "sim/simulator.h"
 
+#include "notifications.h"
+
 
 /*****************************************************************************\
 |* Constructor
@@ -36,6 +38,12 @@ MainWindow::MainWindow(QWidget *parent)
 
 	//_sim->setDebug(Simulator::DBG_TRACE);
 	_sim->setDebug(Simulator::DBG_MESSAGE);
+
+	/*************************************************************************\
+	|* Announce to who cares what the object pointers are
+	\*************************************************************************/
+	auto nc = NotifyCenter::defaultNotifyCenter();
+	nc->notify(NTFY_SIM_AVAILABLE, _atari);
 	}
 
 /*****************************************************************************\

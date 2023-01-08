@@ -9,6 +9,9 @@
 #include "mathpack.h"
 #include "simulator.h"
 
+#include "notifications.h"
+
+#include "NotifyCenter.h"
 #include "Stringutils.h"
 
 /*****************************************************************************\
@@ -732,7 +735,9 @@ Simulator::ErrorCode Atari::load(const String& filename)
 					runAddr = sAddr;
 					}
 
-				e = _sim->call(runAddr);
+				auto nc = NotifyCenter::defaultNotifyCenter();
+				nc->notify(NTFY_BINARY_LOADED, runAddr);
+				//e = _sim->call(runAddr);
 				break;
 				}
 
