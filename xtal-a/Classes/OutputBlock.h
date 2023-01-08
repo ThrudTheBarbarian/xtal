@@ -22,6 +22,7 @@ class OutputBlock
     |* Properties
     \************************************************************************/
     GET(int, baseAddress);			// Where this block starts
+    GETSET(bool, isData, IsData);	// If this block contains no code
     
     private:
 		std::vector<uint8_t> _data;	// Actual data
@@ -37,6 +38,14 @@ class OutputBlock
         void add(Token& token);
 
         /********************************************************************\
+        |* Add raw data into the block
+        \********************************************************************/
+        void add(char *data, int len);
+        void add(const char *data, int len);
+        void add(uint8_t *data, int len);
+        void add(const uint8_t *data, int len);
+
+        /********************************************************************\
         |* Write the length to the block
         \********************************************************************/
         void finalise(void);
@@ -50,6 +59,22 @@ class OutputBlock
         |* Write the block to a file as hex data
         \********************************************************************/
         void writeHex(FILE *fp);
+        
+        /********************************************************************\
+        |* Return the number of bytes in the block
+        \********************************************************************/
+        int size(void);
+        
+        /********************************************************************\
+        |* Reset the block so it can be re-used
+        \********************************************************************/
+        void clear(void);
+        
+        /********************************************************************\
+        |* Add the 16-bit checksum to the end of the block
+        \********************************************************************/
+        void addChecksum(void);
+        
 	};
 
 typedef std::vector<OutputBlock> BlockList;

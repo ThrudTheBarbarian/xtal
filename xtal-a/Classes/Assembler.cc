@@ -79,6 +79,9 @@ int Assembler::main(int argc, const char *argv[])
 	_baseDir				= _ap->stringFor("-xb", "--xtal-base-dir", base,
 										  "Runtime",
 										  "Compiler base directory");
+	_outputSymbols			= _ap->flagFor("-s", "--symbol-table", false,
+										  "General",
+										  "Embed a symbol table in output");
 	_includeDirs.push_back("/opt/xtal/lib");
 	
 	/*************************************************************************\
@@ -269,7 +272,85 @@ int Assembler::_run(std::string source)
 			_blocks.back().add(token);
 			}
 		}
+
+	/*************************************************************************\
+	|* Find the address and size of the largest block
+	\*************************************************************************/
+	if (_outputSymbols)
+		{
+        /********************************************************************\
+        |* Determine how much space we can use per symbol table block
+        \********************************************************************/
+		uint16_t symAddress = 0;
+		uint16_t symLength	= 0;
+		for (OutputBlock& block : _blocks)
+			{
+			if (block.size() > symLength)
+				{
+				symLength 	= block.size();
+				symAddress	= block.baseAddress();
+				}
+			}
+		if (symLength < 256)
+			symLength = 256;
+		
+        /********************************************************************\
+        |* Start adding tokens from the Engine's symbol table
+        \********************************************************************/
+		Engine::Symbols &symbols = scanner.engine().symbols();
+		OutputBlock symBlock(symAddress);
+		symBlock.add("`SYM", 4);	// RTS then SYM
+		symBlock.setIsData(true);	// Not code
+		
+		for (Elements<String,Engine::Symbol> kv : symbols)
+			{
+			if (symBlock.size() -2 > symLength)
+				{
+				symBlock.addChecksum();
+				_blocks.insert(_blocks.begin(), symBlock);
+				symBlock.clear();
+				symBlock.add("`SYM", 4);	// RTS then SYM
+				}
 			
+			uint8_t hdr[3];
+			hdr[0] = kv.value.value & 0xFF;
+			hdr[1] = (kv.value.value >> 8) & 0xFF;
+			hdr[2] = (uint8_t)(kv.key.length());
+			symBlock.add(hdr, 3);
+			symBlock.add(kv.key.c_str(), (int) kv.key.length());
+			}
+		
+        /********************************************************************\
+        |* Add any trailing block
+        \********************************************************************/
+		if (symBlock.size() > 6)
+			{
+			symBlock.addChecksum();
+			_blocks.insert(_blocks.begin(), symBlock);
+			symBlock.clear();
+			symBlock.add("`SYM", 4);	// RTS then SYM
+			}
+		}
+
+	/*************************************************************************\
+	|* Finally write a block to set the execution address explicitly
+	\*************************************************************************/
+	OutputBlock exBlk(0x02E0);
+	uint16_t vec = 0;
+	for (int i=0; i<_blocks.size(); i++)
+		{
+		if (_blocks[i].isData())
+			{
+			vec = _blocks[i].baseAddress();
+			break;
+			}
+		}
+	uint8_t start[2];
+	start[0] = vec & 0xFF;
+	start[1] = vec >> 8;
+	exBlk.add(start, 2);
+	_blocks.push_back(exBlk);
+
 	/*************************************************************************\
 	|* For each output block, finalise it, and write to disk
 	\*************************************************************************/

@@ -16,12 +16,7 @@
 OutputBlock::OutputBlock(int baseAddress)
 			:_baseAddress(baseAddress)
 	{
-	_data.push_back(0xFF);
-	_data.push_back(0xFF);
-	_data.push_back(baseAddress & 0xFF);
-	_data.push_back((baseAddress >> 8) & 0xFF);
-	_data.push_back(0);
-	_data.push_back(0);
+	clear();
 	}
 
 /****************************************************************************\
@@ -48,6 +43,47 @@ void OutputBlock::add(Token &token)
 			token.toString().c_str());
 	}
 
+
+/****************************************************************************\
+|* Add raw data to the block
+\****************************************************************************/
+void OutputBlock::add(uint8_t *data, int len)
+	{
+	const uint8_t * bytes = const_cast<uint8_t *>(data);
+	add(bytes, len);
+	}
+	
+void OutputBlock::add(char *data, int len)
+	{
+	const char * bytes = const_cast<char *>(data);
+	add(bytes, len);
+	}
+	
+void OutputBlock::add(const char *data, int len)
+	{
+	const uint8_t * bytes = reinterpret_cast<const uint8_t *>(data);
+	add(bytes, len);
+	}
+	
+void OutputBlock::add(const uint8_t *data, int len)
+	{
+	for (int i=0; i<len; i++)
+		_data.push_back(data[i]);
+	}
+	
+	
+/****************************************************************************\
+|* Checksum this block
+\****************************************************************************/
+void OutputBlock::addChecksum(void)
+	{
+	uint16_t value = 0;
+	for (int i=6; i<_data.size(); i++)
+		value += _data[i];
+	_data.push_back(value & 0xFF);
+	_data.push_back(value >> 8);
+	}
+	
 /****************************************************************************\
 |* Finalise this block
 \****************************************************************************/
@@ -58,6 +94,28 @@ void OutputBlock::finalise(void)
 	_data[5] = (end >> 8) & 0xFF;
 	}
 
+/****************************************************************************\
+|* Return the size of the block data
+\****************************************************************************/
+int OutputBlock::size(void)
+	{
+	return (int)(_data.size() - 6);
+	}
+
+/****************************************************************************\
+|* Reset the block
+\****************************************************************************/
+void OutputBlock::clear(void)
+	{
+	_data.clear();
+	_data.push_back(0xFF);
+	_data.push_back(0xFF);
+	_data.push_back(_baseAddress & 0xFF);
+	_data.push_back((_baseAddress >> 8) & 0xFF);
+	_data.push_back(0);
+	_data.push_back(0);
+	}
+	
 /****************************************************************************\
 |* Write data to the provided file
 \****************************************************************************/
