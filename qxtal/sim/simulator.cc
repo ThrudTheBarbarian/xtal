@@ -188,6 +188,9 @@ Simulator::Simulator(int maxRam,
 		  :QObject{parent}
 		  ,_maxRam(maxRam)
 		  ,_traceFile(stderr)
+		  ,_cycles(0)
+		  ,_cycleLimit(0)
+		  ,_errorLevel(EL_NONE)
 	{
 	/*************************************************************************\
 	|* Set up the dynamic memory arrays
@@ -214,8 +217,7 @@ Simulator::Simulator(int maxRam,
 	/*************************************************************************\
 	|* And other state
 	\*************************************************************************/
-	_regs.s			= 0xFF;
-	_regs.p_valid	= 0xFF;
+	_regs = {0, 0, 0, 0, 0xFF, 0, 0xFF};
 	setFlags(0xFF, 0x34);
 	}
 
@@ -933,7 +935,7 @@ void Simulator::_writeIndX(uint32_t address, uint8_t val)
 \*****************************************************************************/
 void Simulator::_writeIndY(uint32_t address, uint8_t val)
 	{
-	_cycles += 5;
+	_cycles += 6;
 	address = _readWord(address & 0xFF);
 	_writeByte(0xFFFF & (address + _regs.y), val);
 	}

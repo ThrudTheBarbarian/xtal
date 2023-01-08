@@ -1,0 +1,5 @@
+ <RCC>
+    <qresource prefix="/icon">
+        <file>rsrc/icons/xex.png</file>
+    </qresource>
+</RCC>

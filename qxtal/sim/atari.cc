@@ -22,6 +22,26 @@ static const int _numc[] = { 256, 256, 256, 4,   2,   4,   2,   4,
 							 2,   16,  16,  16,  256, 256, 2,   4 };
 
 /*****************************************************************************\
+|* LOAD/EXEC defs
+\*****************************************************************************/
+#define RUNADDR		0x2E0		// Binary-load global-run address
+#define INITADDR	0x2E2		// Binary-load block-init address
+
+enum
+	{
+	READ_HDR1	= 0,
+	READ_HDR2,
+	READ_START1,
+	READ_START2,
+	READ_END1,
+	READ_END2,
+	READ_DATA,
+	READ_NEXT1,
+	READ_NEXT2
+	};
+typedef int LoadState;
+
+/*****************************************************************************\
 |* EDITOR defs
 \*****************************************************************************/
 #define LMARGN (0x52)			// left margin
@@ -605,9 +625,200 @@ Atari * Atari::instance(Simulator* sim, IO *io, bool loadLabels)
 	return _a8;
 	}
 
+/*****************************************************************************\
+|* Load a binary file. This (slightly ab)uses the Atari binary load format to
+|* optionally provide embedded symbol tables as well as binary data.
+|*
+|* Atari binary format is:
+|*
+|* $FF $FF		- First two bytes indicate it's a binary file
+|* $lo $lo		- Next two bytes are the start address to load data at
+|* $hi $hi		- Next two bytes are the last address to fill with data
+|*
+|* There then follows sufficient data to fill $hi - $lo + 1 bytes (note the
+|* +1, this is an *inclusive* range)
+|*
+|* A series of these blocks can be catenated together, and will load data in
+|* sequence to different ranges of addresses
+|*
+|* If a block covers $02E0,$02E1, then it is considered the execution address
+|* for the entire file once loaded, and the computer will JSR to that location
+|* once the file is completely loaded.
+|*
+|* If a block covers $02E2,$02E3, then it is considered a mid-load call, and
+|* once the block has finished loading, the computer will immediately JSR to
+|* the address in $02E2,$02E3.
+|*
+|* For both of these locations, the routine should end with RTS
+|*
+|*
+|* qxtal slightly abuses this to provide an embedded symbol table. The
+|* idea is that the assembler will create a block (or multiple ones if the
+|* block length is longer than the code) at the start of the binary
+|* file which is just data, loaded at the same offset as the actual binary
+|* code (so it will be over-written by the code). That said, if the code
+|* is < 256 bytes and the symbol table is more than 256 bytes, then the
+|* block-size for the symbol table will be 256 bytes
+|*
+|* The symbol-table data within each block follows the form:
+|*
+|* $60			- the hex code for RTS, in case this is ever executed (!)
+|* $53			- the hex code for 'S'
+|* $59			- the hex code for 'Y'
+|* $4D			- the hex code for 'M'
+|*
+|* Then a series of chunks:
+|*
+|*  $lo, $hi	- two bytes to represent the address
+|*  $len		- one byte to represent how long the string is
+|*  <len bytes>	- the string that forms the label name
+|*  ...         - repeated until all the symbols are defined
+|*
+|* Followed by two more bytes which are a checksum of the entire block apart
+|* from the checksum itself. The checksum is simply the sum of all bytes in
+|* the block, modulo 16 bits.
+|*
+|* $lo, $hi		- checksum
+|*
+|* If the symbol table is ever left in the binary, it ought to be loaded and
+|* discarded, then overwritten (finally) by the binary, and the binary can
+|* still be executed.
+|*
+|* qxtal however, can load and parse the symbols, and use them in the UI.
+\*****************************************************************************/
+
+Simulator::ErrorCode Atari::load(const String& filename)
+	{
+	Simulator::ErrorCode e = Simulator::E_NONE;	// What to return
+
+	LoadState state = READ_HDR1;	// State-machine for block-loading
+	uint16_t sAddr = 0;				// Address of memory to load first byte
+	uint16_t eAddr = 0;				// Address of memory to load last byte
+	uint16_t runAddr = 0;			// Address to call into
+
+	uint16_t vec;					// General purpose address vector
+
+	std::vector<uint8_t> chunk;		// Actual data within block
+
+	/*************************************************************************\
+	|* Open the file and begin reading
+	\*************************************************************************/
+	FILE *fp = fopen(filename.c_str(), "rb");
+	if (fp == NULL)
+		e = Simulator::E_USER;
+	else
+		{
+		/*********************************************************************\
+		|* Initialise both vectors to 0
+		\*********************************************************************/
+		_dpoke(RUNADDR, 0);
+		_dpoke(INITADDR, 0);
+
+		while (e == Simulator::E_NONE)
+			{
+			uint8_t data;
+			int c = fgetc(fp);
+			if (c == EOF)
+				{
+				vec = _dpeek(RUNADDR);
+				if (vec != 0)
+					{
+					_sim->warn("call RUN vector at $%04x", vec);
+					runAddr = vec;
+					}
+				else
+					{
+					_sim->warn("call XEX load vector at $%04x", sAddr);
+					runAddr = sAddr;
+					}
+
+				e = _sim->call(runAddr);
+				break;
+				}
+
+			/*****************************************************************\
+			|* Run through the state machine, loading the block
+			\*****************************************************************/
+			switch (state)
+				{
+				case READ_HDR1:
+				case READ_HDR2:
+					if (c != 0xFF)
+						e = Simulator::E_USER;
+					break;
+
+				case READ_START1:
+					sAddr = c;
+					break;
+
+				case READ_START2:
+					sAddr |= (c<<8);
+					vec = sAddr;
+					break;
+
+				case READ_END1:
+					eAddr = c;
+					break;
+
+				case READ_END2:
+					eAddr |= (c<<8);
+					chunk.clear();
+					break;
+
+				case READ_DATA:
+					chunk.push_back(c & 0xFF);
+					if (vec != eAddr)
+						{
+						vec ++;
+						continue;
+						}
+
+					/*********************************************************\
+					|* We've loaded the memory, check to see if it's a symbol
+					|* table, and if so parse, otherwise laod to RAM
+					\*********************************************************/
+					_sim->addRAM(sAddr,chunk.data(), chunk.size());
+
+					/*********************************************************\
+					|* Since we're at the end of a data section, check the init
+					|* address and see if we should call it
+					\*********************************************************/
+					vec = _dpeek(INITADDR);
+					if (vec != 0)
+						{
+						_sim->warn("call INIT vector at $%04x", vec);
+						e = _sim->call(vec);
+						_dpoke(INITADDR, 0);
+						}
+					break;
+
+				case READ_NEXT1:
+					sAddr = c;
+					break;
+
+				case READ_NEXT2:
+					sAddr |= (c<<8);
+					if (sAddr == 0xFFFF)
+						state = READ_START1;
+					else
+						state = READ_END1;
+					continue;
+				}
+
+			state ++;
+			}
+
+		fclose(fp);
+		}
+
+	return e;
+	}
+
+
+
+
+
 #pragma mark -- screen handling
-
-
 
 /*****************************************************************************\
 |* Handle a screen command

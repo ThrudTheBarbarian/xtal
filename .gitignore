@@ -34,5 +34,5 @@
 .DS_Store
 build*
 xtal.xcodeproj/project.xcworkspace/xcuserdata/simon.xcuserdatad/UserInterfaceState.xcuserstate
-test.xt
+test.*
 trace

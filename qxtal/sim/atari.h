@@ -124,71 +124,74 @@ class Atari
 								bool loadLabels = true);
 
 
+		/*********************************************************************\
+		|* Load a binary
+		\*********************************************************************/
+		Simulator::ErrorCode load(const String& filename);
 
 		/*********************************************************************\
-		|* CIO: Handle CIO
+		|* Callbacks: Handle CIO
 		\*********************************************************************/
 		Simulator::ErrorCode cioCB(A8_CB_ARGS);
-
 		Simulator::ErrorCode cioErrCB(A8_CB_ARGS);
 
 		/*********************************************************************\
-		|* Editor : Handle Editor
+		|* Callback: Handle Editor
 		\*********************************************************************/
 		Simulator::ErrorCode editorCB(A8_CB_ARGS);
 
 		/*********************************************************************\
-		|* Editor (ish): Handle Keyboard
+		|* Callback: Handle Keyboard
 		\*********************************************************************/
 		Simulator::ErrorCode keyboardCB(A8_CB_ARGS);
 
 		/*********************************************************************\
-		|* PIO:  Handle Printer
+		|* Callback:  Handle Printer
 		\*********************************************************************/
 		Simulator::ErrorCode printerCB(A8_CB_ARGS);
 
 		/*********************************************************************\
-		|* PIO : Handle Cassette
+		|* Callback: Handle Cassette
 		\*********************************************************************/
 		Simulator::ErrorCode cassetteCB(A8_CB_ARGS);
 
 		/*********************************************************************\
-		|* PIO : Handle Disk
+		|* Callback: Handle Disk
 		\*********************************************************************/
 		Simulator::ErrorCode diskCB(A8_CB_ARGS);
 
 		/*********************************************************************\
-		|* Screen: handler for driver
+		|* Callback: handler for driver
 		\*********************************************************************/
 		Simulator::ErrorCode screenCB(A8_CB_ARGS);
 
 		/*********************************************************************\
-		|* Screen: Open the screen
+		|* Callback: Open the screen
 		\*********************************************************************/
 		Simulator::ErrorCode screenOpenCB(A8_CB_ARGS);
 
 		/*********************************************************************\
-		|* Screen: Plot to the screen
+		|* Callback: Plot to the screen
 		\*********************************************************************/
 		Simulator::ErrorCode screenPlotCB(A8_CB_ARGS);
 
 		/*********************************************************************\
-		|* Screen: Draw or fill to the screen
+		|* Callback: Draw or fill to the screen
 		\*********************************************************************/
 		Simulator::ErrorCode screenDrawCB(A8_CB_ARGS);
 
 		/*********************************************************************\
-		|* Screen: Move to position on the screen
+		|* Callback: Move to position on the screen
 		\*********************************************************************/
 		Simulator::ErrorCode screenLocateCB(A8_CB_ARGS);
 
 		/*********************************************************************\
-		|* System:  Real-time clock
+		|* Callback:  Real-time clock
 		\*********************************************************************/
 		Simulator::ErrorCode rtcCB(A8_CB_ARGS);
 
 		/*********************************************************************\
-		|* System:  keyboard scan
+		|* Callback:  keyboard scan
 		\*********************************************************************/
 		Simulator::ErrorCode keyCodeCB(A8_CB_ARGS);
 	};
