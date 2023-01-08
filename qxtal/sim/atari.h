@@ -111,6 +111,11 @@ class Atari
 		void _addRtsCallback(uint32_t address, int len, Simulator::SIM_CB cb);
 
 		/*********************************************************************\
+		|* Determine if the block is actually a symbol table, if so, load it
+		\*********************************************************************/
+		bool _isSymbolTable(const std::vector<uint8_t> &data);
+
+		/*********************************************************************\
 		|* Constructor
 		\*********************************************************************/
 		Atari(Simulator* sim, IO* io, bool loadLabels);

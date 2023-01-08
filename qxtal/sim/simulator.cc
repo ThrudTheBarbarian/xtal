@@ -255,6 +255,10 @@ void Simulator::addCallback(SIM_CB cb, uint32_t address, CallbackType type)
 				break;
 			case CB_EXEC:
 				_execCbs[address] = cb;
+
+				// Allow read from next location, as CPU always reads 2 bytes
+				if (address + 1 < _maxRam)
+					_memState[address + 1] &= ~(MS_UNDEFINED | MS_INVALID);
 				break;
 			default:
 				WARN("Unknown callback type %d requested!", type);
@@ -388,7 +392,7 @@ bool Simulator::shouldExit(void)
 
 	if (!e)
 		{
-		warn("%s at address %04x", errorString(_error).c_str(), _errorAddress);
+		warn("%s at address $%04x", errorString(_error).c_str(), _errorAddress);
 		_error = E_NONE;
 		return 0;
 		}

@@ -775,9 +775,13 @@ Simulator::ErrorCode Atari::load(const String& filename)
 
 					/*********************************************************\
 					|* We've loaded the memory, check to see if it's a symbol
-					|* table, and if so parse, otherwise laod to RAM
+					|* table, and if so parse, otherwise load to RAM
 					\*********************************************************/
-					_sim->addRAM(sAddr,chunk.data(), chunk.size());
+					if (!_isSymbolTable(chunk))
+						{
+						_sim->addRAM(sAddr,chunk.data(), chunk.size());
+						_sim->warn("Loading block at $%04x", sAddr);
+						}
 
 					/*********************************************************\
 					|* Since we're at the end of a data section, check the init
@@ -815,7 +819,62 @@ Simulator::ErrorCode Atari::load(const String& filename)
 	}
 
 
+/*****************************************************************************\
+|* Check if a block is a symbol table, and if so, load it
+\*****************************************************************************/
+bool Atari::_isSymbolTable(const std::vector<uint8_t> &data)
+	{
+	bool isSymTab = false;
 
+	/*************************************************************************\
+	|* First check the signature bytes
+	\*************************************************************************/
+	if (data.size() > 5)	// Signature + checksum
+		{
+		Simulator::AddressMap labels;
+
+		uint16_t cksum = 0x60 + 'S' + 'Y' + 'M';
+
+		const uint8_t *bytes = data.data();
+		int idx = 4;
+		if ((bytes[0] == 0x60) /*RTS*/ &&
+			(bytes[1] == 'S') &&
+			(bytes[2] == 'Y') &&
+			(bytes[3] == 'M'))
+			{
+			while (idx + 3 < data.size() - 2)
+				{
+				int addr = bytes[idx+1];
+				addr	 = (addr << 8) + bytes[idx];
+				int size = bytes[idx+2];
+				cksum   += bytes[idx] + bytes[idx+1] + bytes[idx+2];
+
+				String label = "";
+				for (int i=0; i<size; i++)
+					{
+					label += bytes[idx+3+i];
+					cksum += bytes[idx+3+i];
+					}
+				labels[addr] = label;
+				idx += size + 3;
+				}
+			}
+
+		/*********************************************************************\
+		|* If the checksum matches, then we store the labels
+		\*********************************************************************/
+		uint16_t blocksum	= bytes[idx+1];
+		blocksum			= (blocksum << 8) | bytes[idx];
+		if (blocksum == cksum)
+			{
+			isSymTab = true;
+			for (Elements<uint32_t, String> kv : labels)
+				_sim->addLabel(kv.key, kv.value);
+			_sim->warn("Parsing, found %d symbols", labels.size());
+			}
+		}
+	return isSymTab;
+	}
 
 
 #pragma mark -- screen handling
