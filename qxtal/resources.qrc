@@ -1,5 +1,10 @@
- <RCC>
+<RCC>
     <qresource prefix="/icon">
         <file>rsrc/icons/xex.png</file>
+        <file>rsrc/icons/play-back.png</file>
+        <file>rsrc/icons/play-forward.png</file>
+        <file>rsrc/icons/step-back.png</file>
+        <file>rsrc/icons/step-forward.png</file>
+        <file>rsrc/icons/stop.png</file>
     </qresource>
 </RCC>

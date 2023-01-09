@@ -211,6 +211,7 @@ class Simulator : public QObject
 		GETSET(int, maxRam, MaxRam);				// Amount of memory to offer
 		GET(bool, writeMem);						// Profiler: detect writes
 		GETSET(AddressMap, labels, Labels);			// Assembly labels
+		GET(int, labelRange);			// How far +/- to search for offsets
 
 		/*************************************************************************\
 		|* Internal state

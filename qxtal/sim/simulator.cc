@@ -268,6 +268,7 @@ Simulator::Simulator(int maxRam,
 		  ,_cycles(0)
 		  ,_cycleLimit(0)
 		  ,_errorLevel(EL_NONE)
+		  ,_labelRange(6)
 	{
 	/*************************************************************************\
 	|* Set up the dynamic memory arrays
@@ -903,6 +904,7 @@ Simulator::InstructionInfo Simulator::insnInfo(uint32_t address)
 	info.label		= _getLabel(address);
 
 	int vec		= address;
+	int abs		= info.arg1 + 256 * info.arg2;
 	int8_t rel	= (int8_t)(info.arg1);
 
 	switch (_insnMode[info.insn])
@@ -917,37 +919,46 @@ Simulator::InstructionInfo Simulator::insnInfo(uint32_t address)
 			break;
 
 		case aZPG:
+			_getLabel(info.arg1, _labelRange, info.argLabel);
+			break;
+
 		case aABS:
-			 _getLabel(vec, 16, info.argLabel);
+			 _getLabel(abs, _labelRange, info.argLabel);
 			break;
 
 		case aZPX:
-		case aABX:
-			_getLabel(vec + _regs.x, 16, info.argLabel);
+			_getLabel(info.arg1 + _regs.x, _labelRange, info.argLabel);
 			break;
 
 		case aZPY:
+			_getLabel(info.arg1 + _regs.y, _labelRange, info.argLabel);
+			break;
+
+		case aABX:
+			_getLabel(abs + _regs.x, _labelRange, info.argLabel);
+			break;
+
 		case aABY:
-			_getLabel(vec + _regs.y, 16, info.argLabel);
+			_getLabel(abs + _regs.y, _labelRange, info.argLabel);
 			break;
 
 		case aIND:
-			vec = _readWord(address);
-			_getLabel(vec, 16, info.argLabel);
+			vec = _readWord(abs);
+			_getLabel(vec, _labelRange, info.argLabel);
 			break;
 
 		case aXIN:
-			vec = _readWord(address + _regs.x);
-			_getLabel(vec, 16, info.argLabel);
+			vec = _readByte(info.arg1 + _regs.x) * 256;
+			_getLabel(vec, _labelRange, info.argLabel);
 			break;
 
 		case aINY:
-			vec = _readWord(address) + _regs.y;
-			_getLabel(vec, 16, info.argLabel);
+			vec = _readByte(info.arg1) * 256 + _regs.y;
+			_getLabel(vec, _labelRange, info.argLabel);
 			break;
 
 		case aREL:;
-			_getLabel(vec + rel + 2, 16, info.argLabel);
+			_getLabel(address + rel + 2, _labelRange, info.argLabel);
 			break;
 		}
 
@@ -1131,28 +1142,31 @@ const String& Simulator::_getLabel(uint32_t address)
 void Simulator::_getLabel(uint32_t address, int slack, String &label)
 	{
 	static const String none = "";
+	label = none;
 
-	if (slack == 0)
-		{
-		label =_getLabel(address);
+	label =_getLabel(address);
+	if ((slack == 0) || (label.length() > 0))
 		return;
-		}
 
 	int delta = 1;
 	while (delta <= slack)
 		{
 		AddressMap::iterator it = _labels.find(address+delta);
 		if (it != _labels.end())
+			{
 			label = it->second + " + "+ std::to_string(delta);
+			break;
+			}
 
 		it = _labels.find(address-delta);
 		if (it != _labels.end())
+			{
 			label = it->second + " - " + std::to_string(delta);
+			break;
+			}
 
 		delta ++;
 		}
-
-	label = none;
 	}
 
 

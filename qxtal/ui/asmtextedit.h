@@ -16,29 +16,29 @@ class AsmTextEdit : public QTextEdit
 	{
 	Q_OBJECT
 
-		/*************************************************************************\
-		|* Make the instruction collections easier on the fingers
-		\*************************************************************************/
-		typedef std::vector<Simulator::InstructionInfo> InfoList;
-		typedef std::map<InsnType, String> InsnMap;
+	/*************************************************************************\
+	|* Make the instruction collections easier on the fingers
+	\*************************************************************************/
+	typedef std::vector<Simulator::InstructionInfo> InfoList;
+	typedef std::map<InsnType, String> InsnMap;
 
-		/*************************************************************************\
-		|* Hold both the rendered text and a link to the entry in _infoList
-		\*************************************************************************/
-		typedef struct
-			{
-			uint32_t	infoIdx;		// Index of data in instruction stream
+	/*************************************************************************\
+	|* Hold both the rendered text and a link to the entry in _infoList
+	\*************************************************************************/
+	typedef struct
+		{
+		uint32_t	infoIdx;		// Index of data in instruction stream
+		} InsnText;
 
-			}InsnText;
-
-		/*************************************************************************\
-		|* Properties
-		\*************************************************************************/
-		GET(Atari*, hw);				// Hardware being simulated
-		GET(uint32_t, org);				// Start of program
-		GET(InfoList, infoList);		// Instruction stream
-		GET(InsnMap, insnMap);			// Map of instruction to mnemonic
-		GET(bool, upperCase);			// Use uppercase
+	/*************************************************************************\
+	|* Properties
+	\*************************************************************************/
+	GET(Atari*, hw);				// Hardware being simulated
+	GET(uint32_t, org);				// Start of program
+	GET(InfoList, infoList);		// Instruction stream
+	GET(InsnMap, insnMap);			// Map of instruction to mnemonic
+	GET(bool, upperCase);			// Use uppercase
+	GET(QColor, highlight);			// Colour to highlight a line with
 
 	private:
 		/*********************************************************************\
@@ -57,6 +57,13 @@ class AsmTextEdit : public QTextEdit
 
 	signals:
 
+
+	public slots:
+
+		/*********************************************************************\
+		|* Detect the cursor being changed in any way
+		\*********************************************************************/
+		void cursorChanged(void);
 	};
 
 #endif // ASMTEXTEDIT_H

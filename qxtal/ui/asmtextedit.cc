@@ -5,6 +5,7 @@
 #include "sim/atari.h"
 
 #include <QHeaderView>
+#include <QTextBrowser>
 #include <QPainter>
 #include <QColor>
 #include <QCoreApplication>
@@ -31,6 +32,7 @@ AsmTextEdit::AsmTextEdit(QWidget *parent)
 	_insnMap[iBIT] = "bit";
 	_insnMap[iBMI] = "bmi";
 	_insnMap[iBNE] = "bne";
+	_insnMap[iBPL] = "bpl";
 	_insnMap[iBRK] = "brk";
 	_insnMap[iBVC] = "bvc";
 	_insnMap[iBVS] = "bvs";
@@ -76,10 +78,43 @@ AsmTextEdit::AsmTextEdit(QWidget *parent)
 	_insnMap[iTXA] = "txa";
 	_insnMap[iTXS] = "txs";
 	_insnMap[iTYA] = "tya";
+
+	/*************************************************************************\
+	|* Configure for assembly display
+	\*************************************************************************/
+	setReadOnly(true);
+	_highlight = QColor(100,200,50,50);
+
+	/*************************************************************************\
+	|* Connect signals/slots
+	\*************************************************************************/
+	QObject::connect(this, &AsmTextEdit::cursorPositionChanged,
+					 this, &AsmTextEdit::cursorChanged);
 	}
 
 
-#pragma mark -- Private methods
+#pragma mark -- Events
+
+/*****************************************************************************\
+|* Cursor event
+\*****************************************************************************/
+void AsmTextEdit::cursorChanged(void)
+	{
+	auto selections = extraSelections();
+	selections.clear();
+
+	QTextBrowser::ExtraSelection selection ;
+	selection.format.setBackground(_highlight);
+	selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+	selection.cursor = textCursor();
+	selection.cursor.clearSelection();
+	selections.append(selection);
+	setExtraSelections(selections);
+	}
+
+
+
+#pragma mark -- Notifications
 
 /*****************************************************************************\
 |* A binary was loaded
@@ -148,8 +183,10 @@ void AsmTextEdit::_binaryLoaded(NotifyData& nd)
 				if (info.argLabel.length() > 0)
 					txt += " "+info.argLabel;
 				else
-					tmp = toHexString(info.arg1 + 16*info.arg2, " $");
+					{
+					tmp = toHexString(info.arg1 + 256*info.arg2, " $");
 					txt += _upperCase ? ucase(tmp) : tmp;
+					}
 				break;
 
 			case aABX:
@@ -157,7 +194,7 @@ void AsmTextEdit::_binaryLoaded(NotifyData& nd)
 					txt += " "+info.argLabel+X;
 				else
 					{
-					tmp  = toHexString(info.arg1 + 16*info.arg2, " $") + X;
+					tmp  = toHexString(info.arg1 + 256*info.arg2, " $") + X;
 					txt += _upperCase ? ucase(tmp) : tmp;
 					}
 				break;
@@ -167,7 +204,7 @@ void AsmTextEdit::_binaryLoaded(NotifyData& nd)
 					txt += " "+info.argLabel+Y;
 				else
 					{
-					tmp = toHexString(info.arg1 + 16*info.arg2, " $") + Y;
+					tmp = toHexString(info.arg1 + 256*info.arg2, " $") + Y;
 					txt += _upperCase ? ucase(tmp) : tmp;
 					}
 				break;
@@ -185,7 +222,7 @@ void AsmTextEdit::_binaryLoaded(NotifyData& nd)
 					txt += " ("+info.argLabel+")";
 				else
 					{
-					tmp  = toHexString(info.arg1 + 16*info.arg2, " ($") + ")";
+					tmp  = toHexString(info.arg1 + 256*info.arg2, " ($") + ")";
 					txt += _upperCase ? ucase(tmp) : tmp;
 					}
 				break;
