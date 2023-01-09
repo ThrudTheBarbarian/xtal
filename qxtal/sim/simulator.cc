@@ -1,5 +1,6 @@
 #include "macros.h"
 #include "simulator.h"
+#include "instructions.h"
 
 #define HAVE_BUILTIN_EXPECT 1
 #include "likely.h"
@@ -22,23 +23,6 @@ static const uint8_t _insnLength[256] =
 /*****************************************************************************\
 |* Addressing modes of each instruction
 \*****************************************************************************/
-typedef enum
-	{
-	anon	= -1,		// None, illegal op
-	aACC	= 0,		// Accumulator
-	aABS,				// Absolute
-	aABX,				// Absolute, X
-	aABY,				// Absolute, Y
-	aIMM,				// Immediate
-	aIMP,				// Implied
-	aIND,				// Indirect
-	aXIN,				// X,Indirect
-	aINY,				// Indirect,Y
-	aREL,				// Relative
-	aZPG,				// Zero-page
-	aZPX,				// Zero-page,X
-	aZPY				// Zero-page,Y
-	} AddressingMode;
 
 static const AddressingMode _insnMode[256] =
 	{
@@ -74,6 +58,42 @@ static const AddressingMode _insnMode[256] =
 	/* E8 */	aIMP, aIMM, aIMP, anon, aABS, aABS, aABS, anon,
 	/* F0 */	aREL, aINY, anon, anon, anon, aZPX, aZPX, anon,
 	/* F8 */	aIMP, aABY, anon, anon, anon, aABX, aABX, anon,
+	};
+
+static const InsnType _insnTypes[256] =
+	{
+	/* 00 */	iBRK, iORA, inon, inon, inon, iORA, iASL, inon,
+	/* 08 */	iPHP, iORA, iASL, inon, inon, iORA, iASL, inon,
+	/* 10 */	iBPL, iORA, inon, inon, inon, iORA, iASL, inon,
+	/* 18 */	iCLC, iORA, inon, inon, inon, iORA, iASL, inon,
+	/* 20 */	iJSR, iAND, inon, inon, iBIT, iAND, iROL, inon,
+	/* 28 */	iPLP, iAND, iROL, inon, iBIT, iAND, iROL, inon,
+	/* 30 */	iBMI, iAND, inon, inon, inon, iAND, iROL, inon,
+	/* 38 */	iSEC, iAND, inon, inon, inon, iAND, iROL, inon,
+	/* 40 */	iRTI, iEOR, inon, inon, inon, iEOR, iLSR, inon,
+	/* 48 */	iPHA, iEOR, iLSR, inon, iJMP, iEOR, iLSR, inon,
+	/* 50 */	iBVC, iEOR, inon, inon, inon, iEOR, iLSR, inon,
+	/* 58 */	iCLI, iEOR, inon, inon, inon, iEOR, iLSR, inon,
+	/* 60 */	iRTS, iADC, inon, inon, inon, iADC, iROR, inon,
+	/* 68 */	iPLA, iADC, iROR, inon, iJMP, iADC, iROR, inon,
+	/* 70 */	iBVS, iADC, inon, inon, inon, iADC, iROR, inon,
+	/* 78 */	iSEI, iADC, inon, inon, inon, iADC, iROR, inon,
+	/* 80 */	inon, iSTA, inon, inon, iSTY, iSTA, iSTX, inon,
+	/* 88 */	iDEY, inon, iTXA, inon, iSTY, iSTA, iSTX, inon,
+	/* 90 */	iBCC, iSTA, inon, inon, iSTY, iSTA, iSTX, inon,
+	/* 98 */	iTYA, iSTA, iTXS, inon, inon, iSTA, inon, inon,
+	/* A0 */	iLDY, iLDA, iLDX, inon, iLDY, iLDA, iLDX, inon,
+	/* A8 */	iTAY, iLDA, iTAX, inon, iLDY, iLDA, iLDX, inon,
+	/* B0 */	iBCS, iLDA, inon, inon, iLDY, iLDA, iLDX, inon,
+	/* B8 */	iCLV, iLDA, iTSX, inon, iLDY, iLDA, iLDX, inon,
+	/* C0 */	iCPY, iCMP, inon, inon, iCPY, iCMP, iDEC, inon,
+	/* C8 */	iINY, iCMP, iDEX, inon, iCPY, iCMP, iDEC, inon,
+	/* D0 */	iBNE, iCMP, inon, inon, inon, iCMP, iDEC, inon,
+	/* D8 */	iCLD, iCMP, inon, inon, inon, iCMP, iDEC, inon,
+	/* E0 */	iCPX, iSBC, inon, inon, iCPX, iSBC, iINC, inon,
+	/* E8 */	iINX, iSBC, iNOP, inon, iCPX, iSBC, iINC, inon,
+	/* F0 */	iBEQ, iSBC, inon, inon, inon, iSBC, iINC, inon,
+	/* F8 */	iSED, iSBC, inon, inon, inon, iSBC, iINC, inon,
 	};
 
 /*****************************************************************************\

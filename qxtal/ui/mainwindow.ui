@@ -85,35 +85,27 @@
      </widget>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
       <item>
-       <widget class="QScrollArea" name="scrollAsm">
-        <property name="minimumSize">
-         <size>
-          <width>120</width>
-          <height>200</height>
-         </size>
-        </property>
-        <property name="widgetResizable">
-         <bool>true</bool>
-        </property>
-        <widget class="AsmWidget" name="scrollAreaWidgetContents_2">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>347</width>
-           <height>874</height>
-          </rect>
-         </property>
-        </widget>
-       </widget>
+       <widget class="AsmTextEdit" name="asmTextEdit"/>
       </item>
       <item>
        <widget class="VcrWidget" name="vcrWidget" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="minimumSize">
          <size>
-          <width>120</width>
+          <width>349</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16000000</width>
           <height>40</height>
          </size>
         </property>
@@ -191,16 +183,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>AsmWidget</class>
-   <extends>QWidget</extends>
-   <header>asmwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>VcrWidget</class>
    <extends>QWidget</extends>
    <header>vcrwidget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>AsmTextEdit</class>
+   <extends>QTextEdit</extends>
+   <header>asmtextedit.h</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -17,6 +17,7 @@ include_directories(ui ../shared/include ../shared/Classes/Util include)
 
 set(PROJECT_SOURCES
         main.cc
+        include/instructions.h
         include/notifications.h
         ui/mainwindow.cc
         ui/mainwindow.h
@@ -29,8 +30,8 @@ set(PROJECT_SOURCES
         ui/heatmapwidget.cc
         ui/pointswidget.h
         ui/pointswidget.cc
-        ui/asmwidget.h
-        ui/asmwidget.cc
+        ui/asmtextedit.h
+        ui/asmtextedit.cc
         ui/vcrwidget.h
         ui/vcrwidget.cc
         sim/simulator.h

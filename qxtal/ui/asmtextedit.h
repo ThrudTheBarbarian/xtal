@@ -1,34 +1,39 @@
-#ifndef ASMWIDGET_H
-#define ASMWIDGET_H
+#ifndef ASMTEXTEDIT_H
+#define ASMTEXTEDIT_H
 
 #include <QObject>
-#include <QWidget>
+#include <QTextEdit>
 
 #include "NotifyCenter.h"
 #include "sim/simulator.h"
 
 class Atari;
 
-class AsmWidget : public QWidget
+class AsmTextEdit : public QTextEdit
 	{
 	Q_OBJECT
-		
+
 		/*************************************************************************\
-		|* Make the list-of-instructions-s
+		|* Make the list-of-instructions-stream easier on the fingers
 		\*************************************************************************/
 		typedef std::vector<Simulator::InstructionInfo> InfoList;
 
 		/*************************************************************************\
-		|* Hold both the rendered text and a link to the entry
+		|* Hold both the rendered text and a link to the entry in _infoList
 		\*************************************************************************/
-		
+		typedef struct
+			{
+			uint32_t	infoIdx;		// Index of data in instruction stream
+
+			}InsnText;
+
 		/*************************************************************************\
 		|* Properties
 		\*************************************************************************/
 		GET(Atari*, hw);				// Hardware being simulated
 		GET(uint32_t, org);				// Start of program
 		GET(InfoList, infoList);		// Instruction stream
-		
+
 	private:
 		/*********************************************************************\
 		|* Notification: a binary was just loaded
@@ -41,15 +46,11 @@ class AsmWidget : public QWidget
 		void _simulatorReady(NotifyData &nd);
 
 	public:
-		explicit AsmWidget(QWidget *parent = nullptr);
+		explicit AsmTextEdit(QWidget *parent = nullptr);
 
-		/*********************************************************************\
-		|* Draw the widget
-		\*********************************************************************/
-		void paintEvent(QPaintEvent *e);
 
 	signals:
 
 	};
 
-#endif // ASMWIDGET_H
+#endif // ASMTEXTEDIT_H

@@ -9,6 +9,7 @@
 #include "sim/io.h"
 #include "sim/simulator.h"
 
+#include "NotifyCenter.h"
 #include "notifications.h"
 
 

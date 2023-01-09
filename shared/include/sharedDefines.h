@@ -65,7 +65,7 @@ typedef enum
 	C_LOCAL,				// And a local symbol
 	C_PARAM 				// A parameter for a function
 	} Storage;
-	
+
 #define STACK_PTR			"SP"			// Stack pointer address ($90,$91)
 
 
