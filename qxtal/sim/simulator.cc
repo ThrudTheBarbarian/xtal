@@ -882,15 +882,16 @@ char * Simulator::disassemble(char *buf, uint32_t address)
 \*****************************************************************************/
 Simulator::InstructionInfo Simulator::insnInfo(uint32_t address)
 	{
-	static InstructionInfo invalid = {0,0,0, "",MS_INVALID,0,0,""};
-
 	if (address >= _maxRam)
-		return invalid;
+		return InstructionInfo();
 
 	InstructionInfo info;
 
 	info.addr		= (uint16_t) address;
 	info.insn		= _mem[address];
+	info.op			= _insnTypes[info.insn];
+	info.mode		= _insnMode[info.insn];
+
 	info.bytes		= _insnLength[info.insn];
 	info.arg1		= ((info.bytes > 1) && (address < _maxRam-1))
 					? _mem[address+1]

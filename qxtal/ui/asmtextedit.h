@@ -1,11 +1,14 @@
 #ifndef ASMTEXTEDIT_H
 #define ASMTEXTEDIT_H
 
+#include <map>
+
 #include <QObject>
 #include <QTextEdit>
 
 #include "NotifyCenter.h"
 #include "sim/simulator.h"
+#include "instructions.h"
 
 class Atari;
 
@@ -14,9 +17,10 @@ class AsmTextEdit : public QTextEdit
 	Q_OBJECT
 
 		/*************************************************************************\
-		|* Make the list-of-instructions-stream easier on the fingers
+		|* Make the instruction collections easier on the fingers
 		\*************************************************************************/
 		typedef std::vector<Simulator::InstructionInfo> InfoList;
+		typedef std::map<InsnType, String> InsnMap;
 
 		/*************************************************************************\
 		|* Hold both the rendered text and a link to the entry in _infoList
@@ -33,6 +37,8 @@ class AsmTextEdit : public QTextEdit
 		GET(Atari*, hw);				// Hardware being simulated
 		GET(uint32_t, org);				// Start of program
 		GET(InfoList, infoList);		// Instruction stream
+		GET(InsnMap, insnMap);			// Map of instruction to mnemonic
+		GET(bool, upperCase);			// Use uppercase
 
 	private:
 		/*********************************************************************\

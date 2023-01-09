@@ -7,6 +7,7 @@
 #include <map>
 
 #include "properties.h"
+#include "instructions.h"
 #include "debug.h"
 
 /*****************************************************************************\
@@ -174,10 +175,26 @@ class Simulator : public QObject
 				String label;			// Any label at this memory location
 				uint8_t state;			// What memory state at the passed-address
 
-				uint8_t arg1;			// The 1st-argument byte, if used
-				uint8_t arg2;			// The 2nd-argument byte, if used
+				int arg1;				// The 1st-argument byte, if used
+				int arg2;				// The 2nd-argument byte, if used
 				String argLabel;		// Any label matching the target address, +/-16
 
+				InsnType op;			// Which type of opcode we have
+				AddressingMode mode;	// Whicbh addressing mode for this op
+
+				InstructionInfo(void)
+					{
+					addr		= 0;
+					insn		= 0;
+					bytes		= 0;
+					state		= 0;
+					arg1		= 0;
+					arg2		= 0;
+					op			= inon;
+					mode		= anon;
+					argLabel	= "";
+					label		= "";
+					};
 				} InstructionInfo;
 
 

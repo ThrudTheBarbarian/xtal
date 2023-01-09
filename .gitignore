@@ -36,3 +36,4 @@ build*
 xtal.xcodeproj/project.xcworkspace/xcuserdata/simon.xcuserdatad/UserInterfaceState.xcuserstate
 test.*
 trace
+*.xex
