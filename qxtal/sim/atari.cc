@@ -8,6 +8,7 @@
 #include "io.h"
 #include "mathpack.h"
 #include "simulator.h"
+#include "worker.h"
 
 #include "notifications.h"
 
@@ -502,6 +503,12 @@ Atari::Atari(Simulator* sim, IO *io, bool loadLabels)
 	  ,_lastRow(0)
 	  ,_lastCol(0)
 	{
+	/*************************************************************************\
+	|* Create the background worker for simulation
+	\*************************************************************************/
+	_worker = new Worker(this);
+	_worker->start();
+
 	/*************************************************************************\
 	|* Create the display
 	\*************************************************************************/

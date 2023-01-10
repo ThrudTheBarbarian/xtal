@@ -6,20 +6,22 @@
 
 #include "notifications.h"
 #include "vcrwidget.h"
+#include "sim/atari.h"
+#include "sim/worker.h"
 
 #define ICON_SIZE		(50)
 #define ICON_OFF		(QIcon::Disabled)
 #define ICON_ACTIVE		(QIcon::Selected)
 #define ICON_PRESSED	(QIcon::Normal)
 
-enum
+typedef enum
 	{
 	BTN_PLAY_BACK = 0,
 	BTN_STEP_BACK,
 	BTN_STOP,
 	BTN_STEP_FORWARD,
 	BTN_PLAY_FORWARD
-	};
+	} ButtonAction;
 
 static String _notifications[] =
 	{
@@ -51,6 +53,7 @@ VcrWidget::VcrWidget(QWidget *parent)
 
 	auto nc = NotifyCenter::defaultNotifyCenter();
 	nc->addObserver([=](NotifyData &nd){_binaryLoaded(nd);}, NTFY_BINARY_LOADED);
+	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);
 	}
 
 
@@ -96,8 +99,31 @@ void VcrWidget::mousePressEvent(QMouseEvent *event)
 		{
 		_current[which] = ICON_PRESSED;
 
-		auto nc = NotifyCenter::defaultNotifyCenter();
-		nc->notify(_notifications[which], which);
+		//auto nc = NotifyCenter::defaultNotifyCenter();
+		//nc->notify(_notifications[which], which);
+		switch (which)
+			{
+			case BTN_PLAY_BACK:
+				_hw->worker()->schedule(CMD_PLAY_BACK);
+				break;
+
+			case BTN_STEP_BACK:
+				_hw->worker()->schedule(CMD_STEP_BACK);
+				break;
+
+			case BTN_STEP_FORWARD:
+				_hw->worker()->schedule(CMD_STEP_FORWARD);
+				break;
+
+			case BTN_PLAY_FORWARD:
+				_hw->worker()->schedule(CMD_PLAY_FORWARD);
+				break;
+
+			case BTN_STOP:
+				break;
+			}
+
+		if (which != BTN_STOP)
 
 		repaint();
 		}
@@ -132,3 +158,13 @@ void VcrWidget::_binaryLoaded(NotifyData& nd)
 	_current[BTN_PLAY_FORWARD] = ICON_ACTIVE;
 	repaint();
 	}
+
+
+/*****************************************************************************\
+|* The simulator is ready to run
+\*****************************************************************************/
+void VcrWidget::_simulatorReady(NotifyData& nd)
+	{
+	_hw = static_cast<Atari *>(nd.voidValue());
+	}
+

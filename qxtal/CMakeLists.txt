@@ -19,6 +19,7 @@ set(PROJECT_SOURCES
         main.cc
         include/instructions.h
         include/notifications.h
+        include/commands.h
         ui/mainwindow.cc
         ui/mainwindow.h
         ui/mainwindow.ui
@@ -46,6 +47,8 @@ set(PROJECT_SOURCES
         sim/io.cc
         sim/display.h
         sim/display.cc
+        sim/worker.h
+        sim/worker.cc
         ../shared/Classes/Util/StringUtils.h
         ../shared/Classes/Util/StringUtils.cc
         ../shared/Classes/Util/NotifyCenter.h

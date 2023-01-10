@@ -338,7 +338,7 @@ void AsmTextEdit::_binaryLoaded(NotifyData& nd)
 
 
 /*****************************************************************************\
-|* A binary was loaded
+|* The simulator is ready to run
 \*****************************************************************************/
 void AsmTextEdit::_simulatorReady(NotifyData& nd)
 	{

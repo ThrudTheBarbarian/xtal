@@ -8,6 +8,8 @@
 #include "NotifyCenter.h"
 #include "properties.h"
 
+class Atari;
+
 class VcrWidget : public QWidget
 	{
 	Q_OBJECT
@@ -15,7 +17,8 @@ class VcrWidget : public QWidget
 	/*************************************************************************\
 	|* Properties
 	\*************************************************************************/
-	GET(int, offset);					// Icon offset from left (=0)
+	GET(int, offset);				// Icon offset from left (=0)
+	GET(Atari*, hw);				// Hardware being simulated
 
 	private:
 		std::vector<QIcon> _icons;
@@ -26,6 +29,11 @@ class VcrWidget : public QWidget
 		|* Notification: a binary was just loaded
 		\*********************************************************************/
 		void _binaryLoaded(NotifyData &nd);
+
+		/*********************************************************************\
+		|* Notification: the simulator has initialises
+		\*********************************************************************/
+		void _simulatorReady(NotifyData &nd);
 
 	public:
 		explicit VcrWidget(QWidget *parent = nullptr);

@@ -10,6 +10,8 @@
 
 class Display;
 class IO;
+class Worker;
+
 class Atari
 	{
 	/*************************************************************************\
@@ -18,6 +20,7 @@ class Atari
 	GETSET(IO*, io, Io);				// Input/Output channel
 	GETSET(Simulator*, sim, Sim);		// Simulator engine
 	GETSET(Display *, dpy, Dpy);		// Simulated screen
+	GET(Worker*, worker);				// Worker thread
 
 	public:
 		/*********************************************************************\
