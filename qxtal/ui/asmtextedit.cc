@@ -5,6 +5,7 @@
 #include "sim/atari.h"
 
 #include <QHeaderView>
+#include <QTextBlock>
 #include <QTextBrowser>
 #include <QPainter>
 #include <QColor>
@@ -100,19 +101,54 @@ AsmTextEdit::AsmTextEdit(QWidget *parent)
 \*****************************************************************************/
 void AsmTextEdit::cursorChanged(void)
 	{
-	auto selections = extraSelections();
-	selections.clear();
+	int line	= _lineNumber();
+	if ((line >= 0) && (line < _lines.size()))
+		{
+		int infoId	= _lines[line];
+		if ((infoId >= 0) && (infoId <_infoList.size()))
+			{
+			fprintf(stderr, "%5d => [%5d] =>", line, infoId);
+			_infoList[infoId].dump();
 
-	QTextBrowser::ExtraSelection selection ;
-	selection.format.setBackground(_highlight);
-	selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-	selection.cursor = textCursor();
-	selection.cursor.clearSelection();
-	selections.append(selection);
-	setExtraSelections(selections);
+			auto selections = extraSelections();
+			selections.clear();
+
+			QTextBrowser::ExtraSelection selection ;
+			selection.format.setBackground(_highlight);
+			selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+			selection.cursor = textCursor();
+			selection.cursor.clearSelection();
+			selections.append(selection);
+			setExtraSelections(selections);
+			}
+		}
 	}
 
 
+/*****************************************************************************\
+|* Figure out the line number from the cursor position
+\*****************************************************************************/
+int AsmTextEdit::_lineNumber(void)
+	{
+	QTextCursor cursor = textCursor();
+	cursor.movePosition(QTextCursor::StartOfLine);
+
+	int lines = 0;
+	while(cursor.positionInBlock()>0)
+		{
+		cursor.movePosition(QTextCursor::Up);
+		lines++;
+		}
+	QTextBlock block = cursor.block().previous();
+
+	while(block.isValid())
+		{
+		lines += block.lineCount();
+		block = block.previous();
+		}
+
+	return lines;
+	}
 
 #pragma mark -- Notifications
 
@@ -150,19 +186,24 @@ void AsmTextEdit::_binaryLoaded(NotifyData& nd)
 	/*************************************************************************\
 	|* Render to something we can display
 	\*************************************************************************/
-	int idx = 0;
-	String txt = "<pre>";
+	int infoId = 0;
+	String txt = "<pre>\n";
 	for (Simulator::InstructionInfo& info : _infoList)
 		{
 		if (info.label.length() > 0)
+			{
 			txt += "\n" + info.label + ":\n   ";
+			_lines.push_back(-1);
+			_lines.push_back(infoId);
+			}
 		else
 			txt += "   ";
+		_lines.push_back(infoId++);
 
 		String tmp = toHexString(info.addr, "$");
 		txt += _upperCase ? ucase(tmp) : tmp;
 
-		tmp  = " " + _insnMap[info.op];
+		tmp  = "  :  " + _insnMap[info.op];
 		txt += _upperCase ? ucase(tmp) : tmp;
 
 		String X	= ",x";

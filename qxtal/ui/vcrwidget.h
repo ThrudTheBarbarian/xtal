@@ -5,6 +5,7 @@
 #include <QPushButton>
 #include <QWidget>
 
+#include "NotifyCenter.h"
 #include "properties.h"
 
 class VcrWidget : public QWidget
@@ -14,11 +15,17 @@ class VcrWidget : public QWidget
 	/*************************************************************************\
 	|* Properties
 	\*************************************************************************/
-
+	GET(int, offset);					// Icon offset from left (=0)
 
 	private:
 		std::vector<QIcon> _icons;
-		int _clicked;
+		std::vector<QIcon::Mode> _current;
+		std::vector<QIcon::Mode> _normal;
+
+		/*********************************************************************\
+		|* Notification: a binary was just loaded
+		\*********************************************************************/
+		void _binaryLoaded(NotifyData &nd);
 
 	public:
 		explicit VcrWidget(QWidget *parent = nullptr);

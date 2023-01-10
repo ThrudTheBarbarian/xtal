@@ -195,6 +195,20 @@ class Simulator : public QObject
 					argLabel	= "";
 					label		= "";
 					};
+
+				void dump(void)
+					{
+					char s_arg1[16] = "";
+					if (bytes > 1)
+							snprintf(s_arg1, 16, " %02x", arg1);
+
+					char s_arg2[16] = "";
+					if (bytes > 2)
+							snprintf(s_arg2, 16, " %02x", arg2);
+
+					fprintf(stderr, "Info: @$%04x: %02x %s%s\n",
+									addr, insn, s_arg1, s_arg2);
+					}
 				} InstructionInfo;
 
 

@@ -20,6 +20,7 @@ class AsmTextEdit : public QTextEdit
 	|* Make the instruction collections easier on the fingers
 	\*************************************************************************/
 	typedef std::vector<Simulator::InstructionInfo> InfoList;
+	typedef std::vector<int> LineList;
 	typedef std::map<InsnType, String> InsnMap;
 
 	/*************************************************************************\
@@ -36,11 +37,18 @@ class AsmTextEdit : public QTextEdit
 	GET(Atari*, hw);				// Hardware being simulated
 	GET(uint32_t, org);				// Start of program
 	GET(InfoList, infoList);		// Instruction stream
+	GET(LineList, lines);			// Look up insn info by text line
 	GET(InsnMap, insnMap);			// Map of instruction to mnemonic
 	GET(bool, upperCase);			// Use uppercase
 	GET(QColor, highlight);			// Colour to highlight a line with
 
 	private:
+
+		/*********************************************************************\
+		|* Return the line number for the current cursor
+		\*********************************************************************/
+		int _lineNumber(void);
+
 		/*********************************************************************\
 		|* Notification: a binary was just loaded
 		\*********************************************************************/
