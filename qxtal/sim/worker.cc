@@ -1,5 +1,8 @@
 #include <QDebug>
 
+#include "atari.h"
+#include "notifications.h"
+#include "NotifyCenter.h"
 #include "worker.h"
 
 /*****************************************************************************\
@@ -14,7 +17,7 @@ Worker::Worker(Atari *hw)
 /*****************************************************************************\
 |* Public method: schedule a task. Return if we were previously active
 \*****************************************************************************/
-bool Worker::schedule(Command cmd)
+bool Worker::schedule(Command cmd, uint32_t arg)
 	{
 	_sync.lock();
 	bool wasActive = _active;
@@ -23,7 +26,12 @@ bool Worker::schedule(Command cmd)
 	|* Set the state (active)
 	\*************************************************************************/
 	_active = true;
-	_queue.push_back(cmd);
+
+	WorkItem wi;
+	wi.arg = arg;
+	wi.cmd = cmd;
+
+	_queue.push_back(wi);
 
 	/*************************************************************************\
 	|* Release the kraken
@@ -35,13 +43,24 @@ bool Worker::schedule(Command cmd)
 	}
 
 /*****************************************************************************\
+|* Public method: clear the queue stop any in-progress work
+\*****************************************************************************/
+void Worker::stop(void)
+	{
+	_sync.lock();
+	_queue.clear();
+	_sync.unlock();
+	requestInterruption();
+	}
+
+/*****************************************************************************\
 |* Protected method: operate on the queue
 \*****************************************************************************/
 void Worker::run(void)
 	{
 	forever
 		{
-		Command cmd = CMD_NONE;
+		WorkItem wi = {CMD_NONE,0};
 
 		/*********************************************************************\
 		|* See if we're active, and if not, wait on the condition to be woken
@@ -57,14 +76,14 @@ void Worker::run(void)
 			_active = false;
 		else
 			{
-			cmd		= _queue.takeLast();
+			wi		= _queue.takeLast();
 			_active	= true;
 			}
 
 		_sync.unlock();
 
 
-		switch (cmd)
+		switch (wi.cmd)
 			{
 			case CMD_NONE:
 				break;
@@ -85,11 +104,11 @@ void Worker::run(void)
 				break;
 
 			case CMD_PLAY_FORWARD:
-				_playForward();
+				_playForward(wi.arg);
 				break;
 
 			default:
-				qDebug() << "Unknown command received by worker: " << cmd;
+				qDebug() << "Unknown command received by worker: " << wi.cmd;
 			}
 		}
 	}
@@ -128,10 +147,29 @@ void Worker::_stepForward(void)
 /*****************************************************************************\
 |* Private method: play forwards
 \*****************************************************************************/
-void Worker::_playForward(void)
+void Worker::_playForward(uint32_t address)
 	{
 	qDebug() << "Play forward";
-	QThread::sleep(2);
+
+	//auto nc = NotifyCenter::defaultNotifyCenter();
+	//nc->notify(NTFY_WRK_PLAY_FORWARD);
+
+	Simulator *sim = _hw->sim();
+
+	sim->setError(Simulator::E_NONE, 0);
+	sim->regs().pc = _address = address;
+
+
+	while (!sim->shouldExit())
+		{
+		if (isInterruptionRequested())
+			break;
+		sim->next();
+		_address = sim->regs().pc;
+		fprintf(stderr, "address: $%04x\n", _address);
+		}
+
+	_address = sim->regs().pc;
 	}
 
 

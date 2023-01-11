@@ -316,11 +316,6 @@ class Simulator : public QObject
 
 
 			/*********************************************************************\
-			|* Runtime: process the next instruction
-			\*********************************************************************/
-			void _next(void);
-
-			/*********************************************************************\
 			|* Trace printing: trace the execution
 			\*********************************************************************/
 			void _traceRegs(void);
@@ -450,6 +445,11 @@ class Simulator : public QObject
 			|* Runtime: set where to trace to, defaults to stderr if null
 			\*********************************************************************/
 			void setTraceFile(FILE *fp);
+
+			/*********************************************************************\
+			|* Runtime: process the next instruction
+			\*********************************************************************/
+			void next(void);
 
 
 

@@ -7,17 +7,32 @@
 #include <QWaitCondition>
 
 #include "commands.h"
+#include "properties.h"
 
 class Atari;
 class Worker : public QThread
 	{
 	Q_OBJECT
 
+	/*************************************************************************\
+	|* Typedefs
+	\*************************************************************************/
+	typedef struct
+		{
+		Command cmd;						// The command to execute
+		uint32_t arg;						// Argument for the command
+		} WorkItem;
+
+	/*************************************************************************\
+	|* Properties
+	\*************************************************************************/
+	GETSET(uint32_t, address, Address);		// Current address
+
 	private:
 		QMutex				_sync;			// Synchronisation between threads
 		QWaitCondition		_pauseCond;		// Allow thread to wait efficiently
 		bool				_active;		// Currently busy
-		QVector<Command>	_queue;			// List of things to do
+		QVector<WorkItem>	_queue;			// List of things to do
 		Atari *				_hw;			// Hardware weak reference
 
 		/*********************************************************************\
@@ -38,7 +53,7 @@ class Worker : public QThread
 		/*********************************************************************\
 		|* Play forwards
 		\*********************************************************************/
-		void _playForward(void);
+		void _playForward(uint32_t address);
 
 	protected:
 		/*********************************************************************\
@@ -55,7 +70,12 @@ class Worker : public QThread
 		/*********************************************************************\
 		|* Schedule a task
 		\*********************************************************************/
-		bool schedule(Command cmd);
+		bool schedule(Command cmd, uint32_t arg);
+
+		/*********************************************************************\
+		|* CLear the queue
+		\*********************************************************************/
+		void stop(void);
 
 
 	};

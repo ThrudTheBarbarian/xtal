@@ -22,4 +22,9 @@
 #define NTFY_BTN_STEP_FORWARD	"N:button:step forward"
 #define NTFY_BTN_PLAY_FORWARD	"N:button:play forward"
 
+/*************************************************************************\
+|* Notification constant: States were entered
+\*************************************************************************/
+#define NTFY_WRK_PLAY_FORWARD	"N:wrk:play forward"
+
 #endif // NOTIFICATIONS_H

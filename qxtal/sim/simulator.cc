@@ -599,7 +599,7 @@ Simulator::ErrorCode Simulator::run(uint32_t address, Registers *regs)
 	_error		= E_NONE;
 	_regs.pc	= address & 0xFFFF;
 	while (!shouldExit())
-		_next();
+		next();
 
 	if (regs)
 		*regs = _regs;
@@ -1405,7 +1405,7 @@ void Simulator::_handleExtraAbsoluteY(uint32_t address)
 /*****************************************************************************\
 |* Run the next instruction
 \*****************************************************************************/
-void Simulator::_next(void)
+void Simulator::next(void)
 	{
 	uint32_t val;
 	uint64_t old_cycles = 0;

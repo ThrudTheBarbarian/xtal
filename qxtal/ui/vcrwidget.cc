@@ -104,22 +104,27 @@ void VcrWidget::mousePressEvent(QMouseEvent *event)
 		switch (which)
 			{
 			case BTN_PLAY_BACK:
-				_hw->worker()->schedule(CMD_PLAY_BACK);
+				_hw->worker()->schedule(CMD_PLAY_BACK, _address);
 				break;
 
 			case BTN_STEP_BACK:
-				_hw->worker()->schedule(CMD_STEP_BACK);
+				_hw->worker()->schedule(CMD_STEP_BACK, _address);
 				break;
 
 			case BTN_STEP_FORWARD:
-				_hw->worker()->schedule(CMD_STEP_FORWARD);
+				_hw->worker()->schedule(CMD_STEP_FORWARD, _address);
 				break;
 
 			case BTN_PLAY_FORWARD:
-				_hw->worker()->schedule(CMD_PLAY_FORWARD);
+				_normal[BTN_STOP] = ICON_ACTIVE;
+				_current[BTN_STOP] = ICON_ACTIVE;
+				_hw->worker()->schedule(CMD_PLAY_FORWARD, _address);
 				break;
 
 			case BTN_STOP:
+				_normal[BTN_STOP] = ICON_OFF;
+				_current[BTN_STOP] = ICON_OFF;
+				_hw->worker()->stop();
 				break;
 			}
 
@@ -151,6 +156,8 @@ void VcrWidget::mouseReleaseEvent(QMouseEvent *event)
 \*****************************************************************************/
 void VcrWidget::_binaryLoaded(NotifyData& nd)
 	{
+	_address = nd.integerValue();
+
 	_normal[BTN_STEP_FORWARD] = ICON_ACTIVE;
 	_current[BTN_STEP_FORWARD] = ICON_ACTIVE;
 

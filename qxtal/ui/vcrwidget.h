@@ -19,6 +19,7 @@ class VcrWidget : public QWidget
 	\*************************************************************************/
 	GET(int, offset);				// Icon offset from left (=0)
 	GET(Atari*, hw);				// Hardware being simulated
+	GET(uint32_t, address);			// Where to run from
 
 	private:
 		std::vector<QIcon> _icons;
