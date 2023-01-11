@@ -151,22 +151,36 @@ void Worker::_playForward(uint32_t address)
 	{
 	qDebug() << "Play forward";
 
-	//auto nc = NotifyCenter::defaultNotifyCenter();
-	//nc->notify(NTFY_WRK_PLAY_FORWARD);
-
+	/*************************************************************************\
+	|* Set up in a known state
+	\*************************************************************************/
 	Simulator *sim = _hw->sim();
-
 	sim->setError(Simulator::E_NONE, 0);
 	sim->regs().pc = _address = address;
 
 
+	/*************************************************************************\
+	|* Loop while we need to
+	\*************************************************************************/
 	while (!sim->shouldExit())
 		{
+		/*********************************************************************\
+		|* Check to see if we've been requested to stop
+		\*********************************************************************/
 		if (isInterruptionRequested())
 			break;
+
+		/*********************************************************************\
+		|* Disassemble and throw over to the UI thread
+		\*********************************************************************/
+		char buf[1024];
+		sim->disassemble(buf,_address);
+
+		/*********************************************************************\
+		|* Execute it
+		\*********************************************************************/
 		sim->next();
 		_address = sim->regs().pc;
-		fprintf(stderr, "address: $%04x\n", _address);
 		}
 
 	_address = sim->regs().pc;

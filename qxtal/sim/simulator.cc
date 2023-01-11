@@ -269,6 +269,7 @@ Simulator::Simulator(int maxRam,
 		  ,_cycleLimit(0)
 		  ,_errorLevel(EL_NONE)
 		  ,_labelRange(6)
+		  ,_error(E_NONE)
 	{
 	/*************************************************************************\
 	|* Set up the dynamic memory arrays
@@ -470,7 +471,10 @@ bool Simulator::shouldExit(void)
 
 	if (!e)
 		{
-		warn("%s at address $%04x", errorString(_error).c_str(), _errorAddress);
+		warn("%s at address $%04x, PC=$%04x",
+			 errorString(_error).c_str(),
+			 _errorAddress, _regs.pc);
+
 		_error = E_NONE;
 		return 0;
 		}

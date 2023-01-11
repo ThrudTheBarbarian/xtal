@@ -526,9 +526,9 @@ Atari::Atari(Simulator* sim, IO *io, bool loadLabels)
 	AtariHW::init(_sim);
 
 	/*************************************************************************\
-	|* Adds 32 bytes of zeroed RAM at $80
+	|* Initialise ZP and the stack to be 0
 	\*************************************************************************/
-	_sim->addRAM(0x80, 0x20, true);
+	_sim->addRAM(0x0, 0x200, true);
 
 	/*************************************************************************\
 	|* Adds a ROM at 0xE000, to support reads to ROM start
