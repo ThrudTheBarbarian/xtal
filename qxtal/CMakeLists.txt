@@ -31,6 +31,8 @@ set(PROJECT_SOURCES
         ui/heatmapwidget.cc
         ui/pointswidget.h
         ui/pointswidget.cc
+        ui/tracewidget.h
+        ui/tracewidget.cc
         ui/asmtextedit.h
         ui/asmtextedit.cc
         ui/vcrwidget.h

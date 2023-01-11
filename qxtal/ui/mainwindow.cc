@@ -4,10 +4,12 @@
 #include <QFileDialog>
 #include <QResource>
 #include <QSettings>
+#include <QVBoxLayout>
 
 #include "sim/atari.h"
 #include "sim/io.h"
 #include "sim/simulator.h"
+#include "tracewidget.h"
 
 #include "NotifyCenter.h"
 #include "notifications.h"
@@ -29,6 +31,11 @@ MainWindow::MainWindow(QWidget *parent)
 	QCoreApplication::setOrganizationName("MoebiusTechLLC");
 	QCoreApplication::setOrganizationDomain("https://github.com/ThrudTheBarbarian/xtal");
 	QCoreApplication::setApplicationName("qxtal");
+
+	/*************************************************************************\
+	|* Configure the UI object
+	\*************************************************************************/
+#warning use QListView instead
 
 	/*************************************************************************\
 	|* Create the simulator

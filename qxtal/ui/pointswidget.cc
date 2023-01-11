@@ -1,7 +1,7 @@
 #include "pointswidget.h"
 
-#include <QPainter>
 #include <QColor>
+#include <QPainter>
 
 /*****************************************************************************\
 |* Constructor
@@ -9,7 +9,6 @@
 PointsWidget::PointsWidget(QWidget *parent)
 	: QWidget{parent}
 	{
-
 	}
 
 /*****************************************************************************\

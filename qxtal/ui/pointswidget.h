@@ -14,7 +14,7 @@ class PointsWidget : public QWidget
 		/*********************************************************************\
 		|* Draw the widget
 		\*********************************************************************/
-		void paintEvent(QPaintEvent *e);
+		void paintEvent(QPaintEvent *e) override;
 
 	signals:
 
