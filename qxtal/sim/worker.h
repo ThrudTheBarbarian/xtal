@@ -8,6 +8,7 @@
 
 #include "commands.h"
 #include "properties.h"
+#include "sim/simulator.h"
 
 class Atari;
 class Worker : public QThread
@@ -78,7 +79,8 @@ class Worker : public QThread
 		void stop(void);
 
 	signals:
-		void simulationStep(const QString& description);
+		void simulationStep(const QString& description,
+							Simulator::Registers regs);
 
 	};
 

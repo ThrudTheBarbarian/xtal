@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1242</width>
-    <height>1047</height>
+    <width>1565</width>
+    <height>1123</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -65,55 +65,43 @@
      </layout>
     </item>
     <item>
-     <widget class="QWidget" name="widget" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>1</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>500</width>
-        <height>0</height>
-       </size>
-      </property>
-      <widget class="QWidget" name="verticalLayoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>-10</x>
-         <y>0</y>
-         <width>511</width>
-         <height>951</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="midVL">
-        <item>
-         <widget class="TraceWidget" name="listWidget">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>1</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QListWidget" name="listWidget_2">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>200</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </widget>
+     <layout class="QVBoxLayout" name="midVL" stretch="1,1">
+      <item>
+       <widget class="TraceWidget" name="traceWidget">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QListWidget" name="pointsWidget">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>200</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="rightVL" stretch="0,1">
+     <layout class="QVBoxLayout" name="rightVL" stretch="0,0">
       <item>
        <widget class="AsmTextEdit" name="asmTextEdit"/>
       </item>
@@ -148,7 +136,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1242</width>
+     <width>1565</width>
      <height>24</height>
     </rect>
    </property>

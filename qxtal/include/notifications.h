@@ -23,8 +23,13 @@
 #define NTFY_BTN_PLAY_FORWARD	"N:button:play forward"
 
 /*************************************************************************\
-|* Notification constant: States were entered
+|* Notification constant: Worker entered a new state
 \*************************************************************************/
 #define NTFY_WRK_PLAY_FORWARD	"N:wrk:play forward"
+
+/*************************************************************************\
+|* Notification constant: Trace selection changed
+\*************************************************************************/
+#define NTFY_TRACE_SEL_CHG		"N:trace:sel:chg"
 
 #endif // NOTIFICATIONS_H

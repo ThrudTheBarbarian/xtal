@@ -44,14 +44,17 @@ TraceWidget::TraceWidget(QWidget *parent)
 
 	auto nc = NotifyCenter::defaultNotifyCenter();
 	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);
+
+	QObject::connect(this, &TraceWidget::currentItemChanged,
+					 this, &TraceWidget::_handleSelectionChanged);
 	}
 
 /*****************************************************************************\
 |* Public slot - add an item
 \*****************************************************************************/
-void TraceWidget::addTraceItem(const QString& text)
+void TraceWidget::addTraceItem(const QString& text, Simulator::Registers regs)
 	{
-	TraceItem *item = new TraceItem("  "+text);
+	TraceItem *item = new TraceItem("  "+text, regs);
 	item->setData(Qt::FontRole, _font);
 
 	addItem(item);
@@ -67,4 +70,19 @@ void TraceWidget::_simulatorReady(NotifyData &nd)
 	_hw = static_cast<Atari *>(nd.voidValue());
 	QObject::connect(_hw->worker(), &Worker::simulationStep,
 					 this, &TraceWidget::addTraceItem);
+	}
+
+
+/*****************************************************************************\
+|* Signal handler: our selection changed
+\*****************************************************************************/
+void TraceWidget::_handleSelectionChanged(QListWidgetItem *current,
+										  QListWidgetItem *previous)
+	{
+	TraceItem *item = static_cast<TraceItem *>(current);
+
+	auto nc = NotifyCenter::defaultNotifyCenter();
+	nc->notify(NTFY_TRACE_SEL_CHG, item);
+
+	fprintf(stderr, "now: $%04x\n", item->regs().pc);
 	}

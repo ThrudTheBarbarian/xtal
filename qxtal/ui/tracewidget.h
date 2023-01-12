@@ -23,6 +23,12 @@ class TraceWidget : public QListWidget
 		\*********************************************************************/
 		void _simulatorReady(NotifyData &nd);
 
+		/*********************************************************************\
+		|* Listen for the simulator to become ready
+		\*********************************************************************/
+		void _handleSelectionChanged(QListWidgetItem *current,
+									 QListWidgetItem *previous);
+
 	public:
 		/*********************************************************************\
 		|* Constructor
@@ -34,7 +40,8 @@ class TraceWidget : public QListWidget
 
 
 	public slots:
-		void addTraceItem(const QString& text);
+		void addTraceItem(const QString& text,
+						  Simulator::Registers regs);
 	};
 
 #endif // TRACEWIDGET_H
