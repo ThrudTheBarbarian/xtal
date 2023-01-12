@@ -1,7 +1,6 @@
 #include <QFontDatabase>
 
 #include "tracewidget.h"
-#include "sim/atari.h"
 #include "traceitem.h"
 
 #include "notifications.h"

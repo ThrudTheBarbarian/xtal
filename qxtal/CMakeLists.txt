@@ -23,6 +23,10 @@ set(PROJECT_SOURCES
         ui/mainwindow.cc
         ui/mainwindow.h
         ui/mainwindow.ui
+        ui/asmwidget.h
+        ui/asmwidget.cc
+        ui/asmitem.h
+        ui/asmitem.cc
         ui/memorywidget.h
         ui/memorywidget.cc
         ui/statewidget.h
@@ -35,8 +39,6 @@ set(PROJECT_SOURCES
         ui/tracewidget.cc
         ui/traceitem.h
         ui/traceitem.cc
-        ui/asmtextedit.h
-        ui/asmtextedit.cc
         ui/vcrwidget.h
         ui/vcrwidget.cc
         sim/simulator.h

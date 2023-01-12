@@ -103,7 +103,7 @@
     <item>
      <layout class="QVBoxLayout" name="rightVL" stretch="0,0">
       <item>
-       <widget class="AsmTextEdit" name="asmTextEdit"/>
+       <widget class="AsmWidget" name="asmWidget"/>
       </item>
       <item>
        <widget class="VcrWidget" name="vcrWidget" native="true">
@@ -199,14 +199,14 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>AsmTextEdit</class>
-   <extends>QTextEdit</extends>
-   <header>asmtextedit.h</header>
-  </customwidget>
-  <customwidget>
    <class>TraceWidget</class>
    <extends>QListWidget</extends>
    <header>tracewidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>AsmWidget</class>
+   <extends>QListWidget</extends>
+   <header>asmwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources>
