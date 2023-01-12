@@ -2,27 +2,38 @@
 #define TRACEWIDGET_H
 
 #include <QObject>
-#include <QWidget>
+#include <QListWidget>
 
-class TraceWidget : public QWidget
+#include "sim/atari.h"
+#include "NotifyCenter.h"
+
+class TraceWidget : public QListWidget
 	{
-		Q_OBJECT
+	Q_OBJECT
+
+	/*************************************************************************\
+	|* Properties
+	\*************************************************************************/
+	GET(Atari*, hw);				// Hardware being simulated
+
+	private:
+		/*********************************************************************\
+		|* Listen for the simulator to become ready
+		\*********************************************************************/
+		void _simulatorReady(NotifyData &nd);
+
 	public:
+		/*********************************************************************\
+		|* Constructor
+		\*********************************************************************/
 		explicit TraceWidget(QWidget *parent = nullptr);
 
-		/*********************************************************************\
-		|* Draw the widget
-		\*********************************************************************/
-		void paintEvent(QPaintEvent *e) override;
-
-		/*********************************************************************\
-		|* Override the size hint to help out the QScrollArea parent
-		\*********************************************************************/
-		virtual QSize sizeHint(void) const override;
-		virtual QSize minimumSizeHint(void) const override;
 
 	signals:
 
+
+	public slots:
+		void addTraceItem(const QString& text);
 	};
 
 #endif // TRACEWIDGET_H

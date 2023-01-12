@@ -175,6 +175,7 @@ void Worker::_playForward(uint32_t address)
 		\*********************************************************************/
 		char buf[1024];
 		sim->disassemble(buf,_address);
+		emit simulationStep(buf);
 
 		/*********************************************************************\
 		|* Execute it

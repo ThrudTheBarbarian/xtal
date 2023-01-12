@@ -9,7 +9,6 @@
 #include "sim/atari.h"
 #include "sim/io.h"
 #include "sim/simulator.h"
-#include "tracewidget.h"
 
 #include "NotifyCenter.h"
 #include "notifications.h"
@@ -35,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
 	/*************************************************************************\
 	|* Configure the UI object
 	\*************************************************************************/
-#warning use QListView instead
+	ui->midVL->setSpacing(0);
 
 	/*************************************************************************\
 	|* Create the simulator

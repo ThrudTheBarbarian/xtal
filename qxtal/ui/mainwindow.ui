@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1048</width>
+    <width>1242</width>
     <height>1047</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QVBoxLayout" name="leftVL">
       <item>
        <widget class="MemoryWidget" name="memoryWidget" native="true">
         <property name="minimumSize">
@@ -65,30 +65,55 @@
      </layout>
     </item>
     <item>
-     <widget class="QScrollArea" name="scrollPts">
+     <widget class="QWidget" name="widget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
       <property name="minimumSize">
        <size>
-        <width>120</width>
-        <height>260</height>
+        <width>500</width>
+        <height>0</height>
        </size>
       </property>
-      <property name="widgetResizable">
-       <bool>true</bool>
-      </property>
-      <widget class="PointsWidget" name="scrollAreaWidgetContents">
+      <widget class="QWidget" name="verticalLayoutWidget">
        <property name="geometry">
         <rect>
-         <x>0</x>
+         <x>-10</x>
          <y>0</y>
-         <width>349</width>
-         <height>910</height>
+         <width>511</width>
+         <height>951</height>
         </rect>
        </property>
+       <layout class="QVBoxLayout" name="midVL">
+        <item>
+         <widget class="TraceWidget" name="listWidget">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="listWidget_2">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>200</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
+     <layout class="QVBoxLayout" name="rightVL" stretch="0,1">
       <item>
        <widget class="AsmTextEdit" name="asmTextEdit"/>
       </item>
@@ -123,7 +148,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1048</width>
+     <width>1242</width>
      <height>24</height>
     </rect>
    </property>
@@ -180,12 +205,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>PointsWidget</class>
-   <extends>QWidget</extends>
-   <header>pointswidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>VcrWidget</class>
    <extends>QWidget</extends>
    <header>vcrwidget.h</header>
@@ -195,6 +214,11 @@
    <class>AsmTextEdit</class>
    <extends>QTextEdit</extends>
    <header>asmtextedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TraceWidget</class>
+   <extends>QListWidget</extends>
+   <header>tracewidget.h</header>
   </customwidget>
  </customwidgets>
  <resources>

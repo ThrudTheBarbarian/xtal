@@ -33,6 +33,8 @@ set(PROJECT_SOURCES
         ui/pointswidget.cc
         ui/tracewidget.h
         ui/tracewidget.cc
+        ui/traceitem.h
+        ui/traceitem.cc
         ui/asmtextedit.h
         ui/asmtextedit.cc
         ui/vcrwidget.h

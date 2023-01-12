@@ -77,6 +77,8 @@ class Worker : public QThread
 		\*********************************************************************/
 		void stop(void);
 
+	signals:
+		void simulationStep(const QString& description);
 
 	};
 

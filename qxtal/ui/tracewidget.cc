@@ -1,32 +1,38 @@
 #include "tracewidget.h"
+#include "sim/atari.h"
+#include "traceitem.h"
 
-#include <QColor>
-#include <QPainter>
+#include "notifications.h"
+#include "sim/worker.h"
 
+/*****************************************************************************\
+|* Constructor
+\*****************************************************************************/
 TraceWidget::TraceWidget(QWidget *parent)
-	: QWidget{parent}
+			:QListWidget{parent}
 	{
+	auto nc = NotifyCenter::defaultNotifyCenter();
+	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);
 	}
+
+
+
+/*****************************************************************************\
+|* Public slot - add an item
+\*****************************************************************************/
+void TraceWidget::addTraceItem(const QString& text)
+	{
+	new TraceItem(text, this);
+	}
+
 
 
 /*****************************************************************************\
-|* Paint the widget
+|* Notification: Listen for the simulator to become ready
 \*****************************************************************************/
-void TraceWidget::paintEvent(QPaintEvent *)
+void TraceWidget::_simulatorReady(NotifyData &nd)
 	{
-	QPainter painter(this);
-	painter.setBrush(QColor(0, 255, 255, 127));
-	painter.fillRect(rect(), painter.brush());
-	}
-
-/*****************************************************************************\
-|* Override the size hint to help out the QScrollArea parent
-\*****************************************************************************/
-QSize TraceWidget::sizeHint(void) const
-	{
-	return QSize(width(), 3000);
-	}
-QSize TraceWidget::minimumSizeHint(void) const
-	{
-	return QSize(width(), 1000);
+	_hw = static_cast<Atari *>(nd.voidValue());
+	QObject::connect(_hw->worker(), &Worker::simulationStep,
+					 this, &TraceWidget::addTraceItem);
 	}
