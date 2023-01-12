@@ -1,36 +1,9 @@
 #include "asmwidget.h"
 #include "asmitem.h"
 
+#include "ui/fontmgr.h"
 #include "notifications.h"
-#include "sim/worker.h"
 #include "Stringutils.h"
-
-/*****************************************************************************\
-|* Get a monospaced font
-\*****************************************************************************/
-static bool isFixedPitch(const QFont &font)
-	{
-	const QFontInfo fi(font);
-	return fi.fixedPitch();
-	}
-
-static QFont getMonospaceFont()
-	{
-	QFont font("monospace");
-	if (isFixedPitch(font)) return font;
-
-	font.setStyleHint(QFont::Monospace);
-	if (isFixedPitch(font)) return font;
-
-	font.setStyleHint(QFont::TypeWriter);
-	if (isFixedPitch(font)) return font;
-
-	font.setFamily("courier");
-	if (isFixedPitch(font)) return font;
-
-	return font;
-	}
-
 
 /*****************************************************************************\
 |* Constructor
@@ -39,7 +12,7 @@ AsmWidget::AsmWidget(QWidget *parent)
 		  :QListWidget{parent}
 		  ,_upperCase(false)
 	{
-	_font = getMonospaceFont();
+	_font = FontMgr::monospacedFont();
 
 	auto nc = NotifyCenter::defaultNotifyCenter();
 	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);

@@ -27,6 +27,8 @@ set(PROJECT_SOURCES
         ui/asmwidget.cc
         ui/asmitem.h
         ui/asmitem.cc
+        ui/fontmgr.h
+        ui/fontmgr.cc
         ui/memorywidget.h
         ui/memorywidget.cc
         ui/statewidget.h

@@ -5,33 +5,7 @@
 
 #include "notifications.h"
 #include "sim/worker.h"
-
-/*****************************************************************************\
-|* Get a monospaced font
-\*****************************************************************************/
-static bool isFixedPitch(const QFont &font)
-	{
-	const QFontInfo fi(font);
-	return fi.fixedPitch();
-	}
-
-static QFont getMonospaceFont()
-	{
-	QFont font("monospace");
-	if (isFixedPitch(font)) return font;
-
-	font.setStyleHint(QFont::Monospace);
-	if (isFixedPitch(font)) return font;
-
-	font.setStyleHint(QFont::TypeWriter);
-	if (isFixedPitch(font)) return font;
-
-	font.setFamily("courier");
-	if (isFixedPitch(font)) return font;
-
-	return font;
-	}
-
+#include "ui/fontmgr.h"
 
 /*****************************************************************************\
 |* Constructor
@@ -39,7 +13,7 @@ static QFont getMonospaceFont()
 TraceWidget::TraceWidget(QWidget *parent)
 			:QListWidget{parent}
 	{
-	_font = getMonospaceFont();
+	_font = FontMgr::monospacedFont();
 
 	auto nc = NotifyCenter::defaultNotifyCenter();
 	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);
