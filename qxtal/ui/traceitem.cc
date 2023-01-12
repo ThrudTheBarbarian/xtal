@@ -5,5 +5,6 @@
 \*****************************************************************************/
 TraceItem::TraceItem(const QString& text, QListWidget *parent)
 		  :QListWidgetItem(text, parent)
-	{}
+	{
+	}
 

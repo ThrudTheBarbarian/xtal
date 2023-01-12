@@ -1,3 +1,5 @@
+#include <QFontDatabase>
+
 #include "tracewidget.h"
 #include "sim/atari.h"
 #include "traceitem.h"
@@ -6,23 +8,53 @@
 #include "sim/worker.h"
 
 /*****************************************************************************\
+|* Get a monospaced font
+\*****************************************************************************/
+static bool isFixedPitch(const QFont &font)
+	{
+	const QFontInfo fi(font);
+	return fi.fixedPitch();
+	}
+
+static QFont getMonospaceFont()
+	{
+	QFont font("monospace");
+	if (isFixedPitch(font)) return font;
+
+	font.setStyleHint(QFont::Monospace);
+	if (isFixedPitch(font)) return font;
+
+	font.setStyleHint(QFont::TypeWriter);
+	if (isFixedPitch(font)) return font;
+
+	font.setFamily("courier");
+	if (isFixedPitch(font)) return font;
+
+	return font;
+	}
+
+
+/*****************************************************************************\
 |* Constructor
 \*****************************************************************************/
 TraceWidget::TraceWidget(QWidget *parent)
 			:QListWidget{parent}
 	{
+	_font = getMonospaceFont();
+
 	auto nc = NotifyCenter::defaultNotifyCenter();
 	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);
 	}
-
-
 
 /*****************************************************************************\
 |* Public slot - add an item
 \*****************************************************************************/
 void TraceWidget::addTraceItem(const QString& text)
 	{
-	new TraceItem(text, this);
+	TraceItem *item = new TraceItem("  "+text);
+	item->setData(Qt::FontRole, _font);
+
+	addItem(item);
 	}
 
 

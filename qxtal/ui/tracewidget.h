@@ -15,6 +15,7 @@ class TraceWidget : public QListWidget
 	|* Properties
 	\*************************************************************************/
 	GET(Atari*, hw);				// Hardware being simulated
+	GET(QFont, font);				// Monospaced font
 
 	private:
 		/*********************************************************************\
