@@ -1,10 +1,10 @@
 #include "asmwidget.h"
 #include "asmitem.h"
 
-#include "ui/fontmgr.h"
 #include "notifications.h"
 #include "Stringutils.h"
 #include "traceitem.h"
+#include "ui/fontmgr.h"
 
 /*****************************************************************************\
 |* Constructor

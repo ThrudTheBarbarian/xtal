@@ -15,7 +15,8 @@ class TraceWidget : public QListWidget
 	/*************************************************************************\
 	|* Make the instruction collections easier on the fingers
 	\*************************************************************************/
-	typedef std::map<int,TraceItem*> ItemMap;
+	typedef std::map<int,std::vector<TraceItem*>> ItemMap;
+	typedef std::vector<TraceItem *> SelectionList;
 
 	/*************************************************************************\
 	|* Properties
@@ -24,6 +25,7 @@ class TraceWidget : public QListWidget
 	GET(QFont, font);				// Monospaced font
 	GET(bool, propagateSelection);	// Whether to send selection messages
 	GET(ItemMap, itemMap);			// Map of address to item
+	GET(SelectionList, selected);	// List of currently selected items
 
 	private:
 		/*********************************************************************\
@@ -41,6 +43,11 @@ class TraceWidget : public QListWidget
 		\*********************************************************************/
 		void _handleSelectionChanged(QListWidgetItem *current,
 									 QListWidgetItem *previous);
+
+		/*********************************************************************\
+		|* Clear the current selection before selecting any more
+		\*********************************************************************/
+		void _clearCurrentSelection(void);
 
 	public:
 		/*********************************************************************\

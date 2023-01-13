@@ -31,10 +31,29 @@ void TraceWidget::addTraceItem(const QString& text, Simulator::Registers regs)
 	{
 	TraceItem *item = new TraceItem("  "+text, regs);
 	item->setData(Qt::FontRole, _font);
-	_itemMap[regs.pc] = item;
+	_itemMap[regs.pc].push_back(item);
 
 	addItem(item);
 	}
+
+
+
+#pragma mark -- Private Methods
+
+
+
+/*****************************************************************************\
+|* Private method: Clear any current selections
+\*****************************************************************************/
+void TraceWidget::_clearCurrentSelection(void)
+	{
+	for (TraceItem * item : _selected)
+		item->setSelected(false);
+	_selected.clear();
+	}
+
+
+#pragma mark -- Notifications
 
 
 
@@ -57,8 +76,36 @@ void TraceWidget::_asmSelectionChanged(NotifyData &nd)
 	int address = nd.integerValue();
 	if (_itemMap.find(address) != _itemMap.end())
 		{
+		/*********************************************************************\
+		|* Clear any previous selection, do not propagate the selection-change
+		|* to the AsmWidget (because the user didn't get here by selecting
+		|* something in this widget), and allow for multiple selection
+		\*********************************************************************/
+		_clearCurrentSelection();
 		_propagateSelection = false;
-		setCurrentItem(_itemMap[address]);
+		setSelectionMode(QAbstractItemView::MultiSelection);
+
+		/*********************************************************************\
+		|* For each call to the address, set it to be selected so it can be
+		|* seen
+		\*********************************************************************/
+		for (TraceItem * item : _itemMap[address])
+			{
+			item->setSelected(true);
+			_selected.push_back(item);
+			}
+
+
+		/*********************************************************************\
+		|* For now, zoom in on the first-selected item. Should probably check
+		|* for any of the just-selected items being visible and not move if
+		|* so. In fact: FIXME: do that
+		\*********************************************************************/
+		if (_selected.size())
+			{
+			scrollToItem(_selected[0], QAbstractItemView::EnsureVisible);
+			setCurrentItem(_selected[0]);
+			}
 		}
 	}
 
@@ -70,12 +117,23 @@ void TraceWidget::_handleSelectionChanged(QListWidgetItem *current,
 	{
 	if (_propagateSelection)
 		{
+		/*********************************************************************\
+		|* Clear any previous selection, and set single selection
+		\*********************************************************************/
+		_clearCurrentSelection();
 		TraceItem *item = static_cast<TraceItem *>(current);
+		setSelectionMode(QAbstractItemView::SingleSelection);
 
+		/*********************************************************************\
+		|* Add this to the selection list so it will be cleared later
+		\*********************************************************************/
+		_selected.push_back(item);
+
+		/*********************************************************************\
+		|* Tell the world that we have a selection
+		\*********************************************************************/
 		auto nc = NotifyCenter::defaultNotifyCenter();
 		nc->notify(NTFY_TRACE_SEL_CHG, item);
-
-		fprintf(stderr, "trce: $%04x\n", item->regs().pc);
 		}
 	else
 		_propagateSelection = true;
