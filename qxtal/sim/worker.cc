@@ -174,7 +174,7 @@ void Worker::_playForward(uint32_t address)
 		|* Disassemble and throw over to the UI thread
 		\*********************************************************************/
 		char buf[1024];
-		snprintf(buf, 1024, "$%04x : ", _address);
+		snprintf(buf, 1024, "$%04X : ", _address);
 		sim->disassemble(buf+8,_address);
 		Simulator::Registers regs = sim->regs();
 		emit simulationStep(buf, regs);

@@ -153,7 +153,7 @@ std::string toHexString(int value, std::string prefix, int width)
 	   << std::right
 	   << std::hex
 	   << value;
-	return ss.str();
+	return ucase(ss.str());
 	}
 
 

@@ -32,7 +32,6 @@ void TraceWidget::addTraceItem(const QString& text, Simulator::Registers regs)
 	TraceItem *item = new TraceItem("  "+text, regs);
 	item->setData(Qt::FontRole, _font);
 	_itemMap[regs.pc].push_back(item);
-
 	addItem(item);
 	}
 
@@ -104,7 +103,7 @@ void TraceWidget::_asmSelectionChanged(NotifyData &nd)
 		if (_selected.size())
 			{
 			scrollToItem(_selected[0], QAbstractItemView::EnsureVisible);
-			setCurrentItem(_selected[0]);
+			setCurrentItem(_selected[0], QItemSelectionModel::Current);
 			}
 		}
 	}
