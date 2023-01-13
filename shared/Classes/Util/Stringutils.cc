@@ -6,7 +6,9 @@
 //  Copyright © 2020 All rights reserved.
 //
 
-#include "Stringutils.h"
+#include <iomanip>
+
+#include "StringUtils.h"
 
 const std::string WHITESPACE = " \n\r\t\f\v";
 
@@ -142,13 +144,19 @@ bool endsWith (std::string const &haystack,
 /*****************************************************************************\
 |* Turn am int into a hex string, optionally with a prefix
 \*****************************************************************************/
-std::string toHexString(int value, std::string prefix)
+std::string toHexString(int value, std::string prefix, int width)
 	{
 	std::ostringstream ss;
-	ss << prefix << std::hex << value;
+	ss << prefix
+	   << std::setfill('0')
+	   << std::setw(width)
+	   << std::right
+	   << std::hex
+	   << value;
 	return ss.str();
 	}
-	
+
+
 /*****************************************************************************\
 |* replace any occurrence of a substring with another string and return it
 \*****************************************************************************/

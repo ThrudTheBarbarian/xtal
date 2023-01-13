@@ -24,13 +24,13 @@
        <widget class="MemoryWidget" name="memoryWidget" native="true">
         <property name="minimumSize">
          <size>
-          <width>300</width>
+          <width>330</width>
           <height>300</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>300</width>
+          <width>330</width>
           <height>16777215</height>
          </size>
         </property>
@@ -40,13 +40,13 @@
        <widget class="StateWidget" name="stateWidget" native="true">
         <property name="minimumSize">
          <size>
-          <width>300</width>
+          <width>330</width>
           <height>80</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>300</width>
+          <width>16777215</width>
           <height>80</height>
          </size>
         </property>
@@ -56,7 +56,7 @@
        <widget class="HeatMapWidget" name="heatMapWidget" native="true">
         <property name="minimumSize">
          <size>
-          <width>300</width>
+          <width>330</width>
           <height>80</height>
          </size>
         </property>

@@ -68,8 +68,8 @@ bool startsWith (std::string const &haystack,
 /*****************************************************************************\
 |* Turn am int into a hex string, optionally with a prefix
 \*****************************************************************************/
-std::string toHexString(int value, std::string prefix = "");
-		
+std::string toHexString(int value, std::string prefix = "", int width=2);
+
 /*****************************************************************************\
 |* replace any occurrence of a substring with another string and return it
 \*****************************************************************************/

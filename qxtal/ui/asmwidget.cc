@@ -2,7 +2,7 @@
 #include "asmitem.h"
 
 #include "notifications.h"
-#include "Stringutils.h"
+#include "StringUtils.h"
 #include "traceitem.h"
 #include "ui/fontmgr.h"
 

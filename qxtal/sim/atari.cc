@@ -13,7 +13,7 @@
 #include "notifications.h"
 
 #include "NotifyCenter.h"
-#include "Stringutils.h"
+#include "StringUtils.h"
 
 /*****************************************************************************\
 |* screen mode settings
