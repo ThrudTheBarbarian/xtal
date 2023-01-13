@@ -7,6 +7,7 @@
 #include "sim/atari.h"
 #include "NotifyCenter.h"
 
+class AsmItem;
 class AsmWidget : public QListWidget
 	{
 	Q_OBJECT
@@ -16,6 +17,7 @@ class AsmWidget : public QListWidget
 	\*************************************************************************/
 	typedef std::vector<Simulator::InstructionInfo> InfoList;
 	typedef std::vector<int> LineList;
+	typedef std::map<int,AsmItem*> ItemMap;
 	typedef std::map<InsnType, String> InsnMap;
 
 	/*************************************************************************\
@@ -27,7 +29,9 @@ class AsmWidget : public QListWidget
 	GET(InfoList, infoList);		// Instruction stream
 	GET(LineList, lines);			// Look up insn info by text line
 	GET(InsnMap, insnMap);			// Map of instruction to mnemonic
+	GET(ItemMap, itemMap);			// Map of address to item
 	GET(bool, upperCase);			// Use uppercase
+	GET(bool, propagateSelection);	// Whether to send selection messages
 
 	private:
 		/*********************************************************************\
@@ -40,6 +44,17 @@ class AsmWidget : public QListWidget
 		\*********************************************************************/
 		void _binaryLoaded(NotifyData &nd);
 
+		/*********************************************************************\
+		|* Notification: a selection was made in the trace window
+		\*********************************************************************/
+		void _traceSelection(NotifyData &nd);
+
+
+		/*********************************************************************\
+		|* Handle selection
+		\*********************************************************************/
+		void _handleSelectionChanged(QListWidgetItem *current,
+									 QListWidgetItem *previous);
 
 
 	public:

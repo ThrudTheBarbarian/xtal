@@ -32,4 +32,9 @@
 \*************************************************************************/
 #define NTFY_TRACE_SEL_CHG		"N:trace:sel:chg"
 
+/*************************************************************************\
+|* Notification constant: Assembly selection changed
+\*************************************************************************/
+#define NTFY_ASM_SEL_CHG		"N:asm:sel:chg"
+
 #endif // NOTIFICATIONS_H
