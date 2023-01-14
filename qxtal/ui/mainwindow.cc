@@ -51,6 +51,13 @@ MainWindow::MainWindow(QWidget *parent)
 	\*************************************************************************/
 	auto nc = NotifyCenter::defaultNotifyCenter();
 	nc->notify(NTFY_SIM_AVAILABLE, _atari);
+
+	/*************************************************************************\
+	|* Tell the trace widget to talk to the memory widget
+	\*************************************************************************/
+	QObject::connect(ui->traceWidget, &TraceWidget::updateMemory,
+					 ui->memoryWidget, &MemoryWidget::updateState);
+
 	}
 
 /*****************************************************************************\

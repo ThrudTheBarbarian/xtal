@@ -26,6 +26,7 @@ class TraceWidget : public QListWidget
 	GET(bool, propagateSelection);	// Whether to send selection messages
 	GET(ItemMap, itemMap);			// Map of address to item
 	GET(SelectionList, selected);	// List of currently selected items
+	GET(int, previousRow);			// Previously selected row
 
 	private:
 		/*********************************************************************\
@@ -56,10 +57,14 @@ class TraceWidget : public QListWidget
 		explicit TraceWidget(QWidget *parent = nullptr);
 
 	signals:
+		void updateMemory(std::vector<MemoryOp>& ops,
+						  bool forwards);
 
 	public slots:
 		void addTraceItem(const QString& text,
-						  Simulator::Registers regs);
+						  Simulator::Registers regs,
+						  MemoryOp op0,
+						  MemoryOp op1);
 	};
 
 #endif // TRACEWIDGET_H

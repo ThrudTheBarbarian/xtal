@@ -1073,8 +1073,18 @@ uint8_t Simulator::_readIndY(uint32_t address)
 \*****************************************************************************/
 void Simulator::_writeByte(uint32_t address, uint8_t val)
 	{
+	MemoryOp op ;
+	op.pc		= _oldPC;
+	op.address	= address & 0xFFFF;
+	op.oldVal	= _mem[address];
+	op.isValid	= false;
+	op.isRead	= false;
+
 	if (likely(!(_memState[address]) && (!_doProfiling)))
+		{
 		_mem[address] = val;
+		op.isValid = true;
+		}
 	else
 		{
 		if (!_memState[address])
@@ -1092,6 +1102,7 @@ void Simulator::_writeByte(uint32_t address, uint8_t val)
 			{
 			_mem[address]		= val;
 			_memState[address]	= 0;
+			op.isValid = true;
 			}
 		else if ((_memState[address] & MS_CALLBACK) && _writeCbs[address])
 			setError(_writeCbs[address](this, &_regs, address, val), address);
@@ -1101,6 +1112,12 @@ void Simulator::_writeByte(uint32_t address, uint8_t val)
 
 		else if (_memState[address] & MS_ROM)
 			setError(E_WR_ROM, address);
+		}
+
+	if (op.isValid)
+		{
+		op.newVal = val;
+		_memOpList.push_back(op);
 		}
 	}
 
@@ -1416,6 +1433,11 @@ void Simulator::next(void)
 	Registers old_regs = {0,0,0,0,0,0,0};
 
 	/*************************************************************************\
+	|* Clear the list of memory operations
+	\*************************************************************************/
+	_memOpList.clear();
+
+	/*************************************************************************\
 	|* Handle the return-from-processing states
 	\*************************************************************************/
 	if (_execCbs[_regs.pc] != nullptr)
@@ -1457,6 +1479,7 @@ void Simulator::next(void)
 	/*************************************************************************\
 	|* Update PC
 	\*************************************************************************/
+	_oldPC	  = _regs.pc;
 	_regs.pc += _insnLength[insn];
 
 	/*************************************************************************\

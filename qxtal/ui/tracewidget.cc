@@ -1,5 +1,6 @@
 #include <QFontDatabase>
 
+#include "memorywidget.h"
 #include "tracewidget.h"
 #include "traceitem.h"
 
@@ -13,6 +14,7 @@
 TraceWidget::TraceWidget(QWidget *parent)
 			:QListWidget{parent}
 			,_propagateSelection(true)
+			,_previousRow(0)
 	{
 	_font = FontMgr::monospacedFont();
 
@@ -22,17 +24,27 @@ TraceWidget::TraceWidget(QWidget *parent)
 
 	QObject::connect(this, &TraceWidget::currentItemChanged,
 					 this, &TraceWidget::_handleSelectionChanged);
+
 	}
 
 /*****************************************************************************\
 |* Public slot - add an item
 \*****************************************************************************/
-void TraceWidget::addTraceItem(const QString& text, Simulator::Registers regs)
+void TraceWidget::addTraceItem(const QString& text,
+							   Simulator::Registers regs,
+							   MemoryOp op0,
+							   MemoryOp op1)
 	{
-	TraceItem *item = new TraceItem("  "+text, regs);
+	TraceItem *item = new TraceItem("  "+text, regs, op0, op1);
 	item->setData(Qt::FontRole, _font);
 	_itemMap[regs.pc].push_back(item);
 	addItem(item);
+//	if (op0.isValid)
+//		fprintf(stderr, "$%04x : write $%02x to $%04x replacing $%02x\n",
+//				op0.pc, op0.newVal, op0.address, op0.oldVal);
+//	if (op1.isValid)
+//		fprintf(stderr, "      : write $%02x to $%04x replacing $%02x\n",
+//				op1.newVal, op1.address, op1.oldVal);
 	}
 
 
@@ -68,7 +80,7 @@ void TraceWidget::_simulatorReady(NotifyData &nd)
 
 
 /*****************************************************************************\
-|* Notification: Listen for the simulator to become ready
+|* Notification: Selection changed in the Assembly widget
 \*****************************************************************************/
 void TraceWidget::_asmSelectionChanged(NotifyData &nd)
 	{
@@ -120,19 +132,58 @@ void TraceWidget::_handleSelectionChanged(QListWidgetItem *current,
 		|* Clear any previous selection, and set single selection
 		\*********************************************************************/
 		_clearCurrentSelection();
-		TraceItem *item = static_cast<TraceItem *>(current);
+		TraceItem *theItem = static_cast<TraceItem *>(current);
 		setSelectionMode(QAbstractItemView::SingleSelection);
 
 		/*********************************************************************\
 		|* Add this to the selection list so it will be cleared later
 		\*********************************************************************/
-		_selected.push_back(item);
+		_selected.push_back(theItem);
 
 		/*********************************************************************\
 		|* Tell the world that we have a selection
 		\*********************************************************************/
 		auto nc = NotifyCenter::defaultNotifyCenter();
-		nc->notify(NTFY_TRACE_SEL_CHG, item);
+		nc->notify(NTFY_TRACE_SEL_CHG, theItem);
+
+		/*********************************************************************\
+		|* Figure out the memory differences between the previous selection
+		|* and the current one
+		\*********************************************************************/
+		std::vector<MemoryOp> ops;
+		int thisRow		= currentRow();
+		bool forwards	= true;
+
+		if (_previousRow < thisRow)
+			for (int i=_previousRow; i<thisRow; i++)
+				{
+				TraceItem *ti = dynamic_cast<TraceItem *>(item(i));
+				MemoryOp op   = ti->op0();
+				if (op.isValid)
+					ops.push_back(op);
+				op = ti->op1();
+				if (op.isValid)
+					ops.push_back(op);
+				}
+
+		else if (_previousRow > thisRow)
+			{
+			for (int i=_previousRow-1; i>=thisRow; i--)
+				{
+				TraceItem *ti = dynamic_cast<TraceItem *>(item(i));
+				MemoryOp op   = ti->op0();
+				if (op.isValid)
+					ops.push_back(op);
+				op = ti->op1();
+				if (op.isValid)
+					ops.push_back(op);
+				}
+			forwards = false;
+			}
+
+		if (ops.size() > 0)
+			emit updateMemory(ops, forwards);
+		_previousRow = thisRow;
 		}
 	else
 		_propagateSelection = true;

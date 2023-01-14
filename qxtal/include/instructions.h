@@ -8,6 +8,7 @@
 #ifndef instructions_h
 #define instructions_h
 
+#include <cstdint>
 
 /*****************************************************************************\
 |* Addressing modes of each instruction
@@ -93,6 +94,20 @@ typedef enum
 	iTXS,
 	iTYA
 	} InsnType;
+
+
+/*****************************************************************************\
+|* Memory ops
+\*****************************************************************************/
+typedef struct
+	{
+	uint16_t pc;			// PC at the point the operation happens
+	uint16_t address;		// Address of the operation
+	uint8_t oldVal;			// Value of the memory location before operation
+	uint8_t newVal;			// Value of the memory location after operation
+	bool isRead;			// true=read, false=write
+	bool isValid;			// true=yes this really happened
+	} MemoryOp;
 
 #endif // ! instructions_h
 

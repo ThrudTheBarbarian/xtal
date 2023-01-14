@@ -2,7 +2,6 @@
 
 #include "atari.h"
 #include "notifications.h"
-#include "NotifyCenter.h"
 #include "worker.h"
 
 /*****************************************************************************\
@@ -170,6 +169,10 @@ void Worker::_playForward(uint32_t address)
 		if (isInterruptionRequested())
 			break;
 
+		MemoryOp op0, op1;
+		memset(&op0, 0, sizeof(MemoryOp));
+		memset(&op1, 0, sizeof(MemoryOp));
+
 		/*********************************************************************\
 		|* Disassemble and throw over to the UI thread
 		\*********************************************************************/
@@ -177,13 +180,25 @@ void Worker::_playForward(uint32_t address)
 		snprintf(buf, 1024, "$%04X : ", _address);
 		sim->disassemble(buf+8,_address);
 		Simulator::Registers regs = sim->regs();
-		emit simulationStep(buf, regs);
 
 		/*********************************************************************\
 		|* Execute it
 		\*********************************************************************/
+		uint16_t pc = _address;
 		sim->next();
 		_address = sim->regs().pc;
+
+
+		/*********************************************************************\
+		|* If we altered memory, the post off the new memory values
+		\*********************************************************************/
+		if (sim->memOpList().size() > 0)
+			op0 = sim->memOpList()[0];
+		if (sim->memOpList().size() > 1)
+			op1 = sim->memOpList()[1];
+
+		emit simulationStep(buf, regs, op0, op1);
+
 		}
 
 	_address = sim->regs().pc;

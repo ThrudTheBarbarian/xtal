@@ -87,6 +87,8 @@ AsmWidget::AsmWidget(QWidget *parent)
 
 #pragma mark -- Notifications
 
+
+
 /*****************************************************************************\
 |* Notification: A binary was loaded
 \*****************************************************************************/

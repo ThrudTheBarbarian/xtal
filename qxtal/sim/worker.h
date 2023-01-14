@@ -24,6 +24,8 @@ class Worker : public QThread
 		uint32_t arg;						// Argument for the command
 		} WorkItem;
 
+
+
 	/*************************************************************************\
 	|* Properties
 	\*************************************************************************/
@@ -80,7 +82,10 @@ class Worker : public QThread
 
 	signals:
 		void simulationStep(const QString& description,
-							Simulator::Registers regs);
+							Simulator::Registers regs,
+							MemoryOp op0,
+							MemoryOp op1);
+
 
 	};
 

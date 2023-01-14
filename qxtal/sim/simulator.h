@@ -108,6 +108,11 @@ class Simulator : public QObject
 				} CallbackType;
 
 			/*********************************************************************\
+			|* Memory operation
+			\*********************************************************************/
+			typedef std::vector<MemoryOp> MemOpList;
+
+			/*********************************************************************\
 			|* Processor registers
 			\*********************************************************************/
 			typedef struct
@@ -225,7 +230,8 @@ class Simulator : public QObject
 		GETSET(int, maxRam, MaxRam);				// Amount of memory to offer
 		GET(bool, writeMem);						// Profiler: detect writes
 		GETSET(AddressMap, labels, Labels);			// Assembly labels
-		GET(int, labelRange);			// How far +/- to search for offsets
+		GET(int, labelRange);						// +/- to search for offsets
+		GET(MemOpList, memOpList);					// List of memory ops in next()
 
 		/*************************************************************************\
 		|* Internal state
@@ -242,7 +248,7 @@ class Simulator : public QObject
 			int _cycleLimit;						// Limit on simulation time
 			FILE * _traceFile;						// Where to trace to
 			ProfileData _profileData;				// Where statistics are stored
-
+			uint16_t _oldPC;						// PC value during next()
 
 
 			/*********************************************************************\
