@@ -34,19 +34,19 @@
            <x>0</x>
            <y>0</y>
            <width>330</width>
-           <height>443</height>
+           <height>310</height>
           </rect>
          </property>
          <property name="minimumSize">
           <size>
            <width>330</width>
-           <height>300</height>
+           <height>310</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
            <width>330</width>
-           <height>16777215</height>
+           <height>310</height>
           </size>
          </property>
          <widget class="QLabel" name="label">
@@ -77,7 +77,7 @@
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>444</y>
+           <y>310</y>
            <width>330</width>
            <height>80</height>
           </rect>
