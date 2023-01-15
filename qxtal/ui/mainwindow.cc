@@ -4,15 +4,16 @@
 #include <QFileDialog>
 #include <QResource>
 #include <QSettings>
+#include <QToolBar>
 #include <QVBoxLayout>
 
 #include "sim/atari.h"
 #include "sim/io.h"
 #include "sim/simulator.h"
+#include "sim/worker.h"
 
-#include "NotifyCenter.h"
 #include "notifications.h"
-
+#include "commands.h"
 
 /*****************************************************************************\
 |* Constructor
@@ -22,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
 		   ,ui(new Ui::MainWindow)
 	{
 	QResource::registerResource("resources.qrc");
-    ui->setupUi(this);
+	ui->setupUi(this);
 
 	/*************************************************************************\
 	|* Set up the defaults parameters
@@ -30,6 +31,12 @@ MainWindow::MainWindow(QWidget *parent)
 	QCoreApplication::setOrganizationName("MoebiusTechLLC");
 	QCoreApplication::setOrganizationDomain("https://github.com/ThrudTheBarbarian/xtal");
 	QCoreApplication::setApplicationName("qxtal");
+
+	/*************************************************************************\
+	|* Listen for binary-loaded notifications
+	\*************************************************************************/
+	auto nc = NotifyCenter::defaultNotifyCenter();
+	nc->addObserver([=](NotifyData &nd){_binaryLoaded(nd);}, NTFY_BINARY_LOADED);
 
 	/*************************************************************************\
 	|* Configure the UI object
@@ -42,11 +49,30 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->memoryWidget->setMemStartEditor(ui->memStart);
 
 	/*************************************************************************\
+	|* Tell the trace widget to talk to the memory widget
+	\*************************************************************************/
+	QObject::connect(ui->traceWidget, &TraceWidget::updateMemory,
+					 ui->memoryWidget, &MemoryWidget::updateState);
+
+	/*************************************************************************\
+	|* Connect up the toolbar
+	\*************************************************************************/
+	QObject::connect(ui->toolBar, &QToolBar::actionTriggered,
+					 this, &MainWindow::_toolbarAction);
+
+	/*************************************************************************\
+	|* Connect up the menu for what counts/pages to display
+	\*************************************************************************/
+	QObject::connect(ui->countType, &QComboBox::currentIndexChanged,
+					 ui->memoryWidget, &MemoryWidget::_countTypeChanged);
+
+
+	/*************************************************************************\
 	|* Create the simulator
 	\*************************************************************************/
 	_io		= new IO();
 	_sim	= new Simulator(0x10000, this);
-	_atari	= Atari::instance(_sim, _io, true);
+	_hw		= Atari::instance(_sim, _io, true);
 
 	//_sim->setDebug(Simulator::DBG_TRACE);
 	_sim->setDebug(Simulator::DBG_MESSAGE);
@@ -54,17 +80,7 @@ MainWindow::MainWindow(QWidget *parent)
 	/*************************************************************************\
 	|* Announce to who cares what the object pointers are
 	\*************************************************************************/
-	auto nc = NotifyCenter::defaultNotifyCenter();
-	nc->notify(NTFY_SIM_AVAILABLE, _atari);
-
-	/*************************************************************************\
-	|* Tell the trace widget to talk to the memory & heatmap widgets
-	\*************************************************************************/
-	QObject::connect(ui->traceWidget, &TraceWidget::updateMemory,
-					 ui->memoryWidget, &MemoryWidget::updateState);
-	/*QObject::connect(ui->traceWidget, &TraceWidget::updateMemory,
-					 ui->heatMapWidget, &HeatMapWidget::updateState);
-*/
+	nc->notify(NTFY_SIM_AVAILABLE, _hw);
 	}
 
 /*****************************************************************************\
@@ -72,15 +88,31 @@ MainWindow::MainWindow(QWidget *parent)
 \*****************************************************************************/
 MainWindow::~MainWindow()
 	{
-    delete ui;
+	delete ui;
 	}
 
+
+
+#pragma mark -- Toolbar
 
 
 /*****************************************************************************\
 |* Toolbar action - we want to load an XEX
 \*****************************************************************************/
-void MainWindow::on_actionLoad_XEX_triggered()
+void MainWindow::_toolbarAction(QAction *a)
+	{
+	if (a->text() == "Load XEX")
+		_toolbarLoadXEX();
+	else if (a->text() == "Simulate")
+		_toolbarRunSim();
+	else if (a->text() == "Stop")
+		_toolbarStopSim();
+	}
+
+/*****************************************************************************\
+|* Toolbar action - we want to load an XEX
+\*****************************************************************************/
+void MainWindow::_toolbarLoadXEX(void)
 	{
 	QSettings settings;
 	QString defaultPath = getenv("HOME");
@@ -102,6 +134,37 @@ void MainWindow::on_actionLoad_XEX_triggered()
 		}
 
 	if (files.length() > 0)
-		_atari->load(files.at(0).toStdString());
+		_hw->load(files.at(0).toStdString());
+	}
+
+
+/*****************************************************************************\
+|* Toolbar action - we want to run the simulator
+\*****************************************************************************/
+void MainWindow::_toolbarRunSim(void)
+	{
+	_hw->worker()->schedule(CMD_PLAY_FORWARD, _address);
+	}
+
+
+/*****************************************************************************\
+|* Toolbar action - we want to run the simulator
+\*****************************************************************************/
+void MainWindow::_toolbarStopSim(void)
+	{
+	_hw->worker()->stop();
+	}
+
+
+
+#pragma mark -- Notifications
+
+
+/*****************************************************************************\
+|* A binary was loaded
+\*****************************************************************************/
+void MainWindow::_binaryLoaded(NotifyData& nd)
+	{
+	_address = nd.integerValue();
 	}
 

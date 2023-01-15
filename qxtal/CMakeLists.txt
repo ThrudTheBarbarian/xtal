@@ -33,16 +33,12 @@ set(PROJECT_SOURCES
         ui/memorywidget.cc
         ui/statewidget.h
         ui/statewidget.cc
-        ui/heatmapwidget.h
-        ui/heatmapwidget.cc
         ui/pointswidget.h
         ui/pointswidget.cc
         ui/tracewidget.h
         ui/tracewidget.cc
         ui/traceitem.h
         ui/traceitem.cc
-        ui/vcrwidget.h
-        ui/vcrwidget.cc
         sim/simulator.h
         sim/simulator.cc
         sim/mathpack.h

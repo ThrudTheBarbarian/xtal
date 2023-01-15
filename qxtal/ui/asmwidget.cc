@@ -106,6 +106,7 @@ void AsmWidget::_binaryLoaded(NotifyData& nd)
 	/*************************************************************************\
 	|* Fetch the information on each assembly instruction
 	\*************************************************************************/
+	_hw->sim()->setTraceMemory(false);
 	bool done = false;
 	while (!done)
 		{
@@ -117,6 +118,7 @@ void AsmWidget::_binaryLoaded(NotifyData& nd)
 			}
 		else done = true;
 		}
+	_hw->sim()->setTraceMemory(true);
 
 	/*************************************************************************\
 	|* Render to something we can display

@@ -23,7 +23,10 @@ MemoryWidget::MemoryWidget(QWidget *parent)
 	memset(_wr, 0x00, sizeof(_wr));
 	memset(_pc, 0x00, sizeof(_pc));
 	memset(_rd, 0x00, sizeof(_rd));
-	memset(_pg, 0x00, sizeof(_pg));
+
+	memset(_pgWr, 0x00, sizeof(_pgWr));
+	memset(_pgRd, 0x00, sizeof(_pgRd));
+	memset(_pgPc, 0x00, sizeof(_pgPc));
 
 	/*************************************************************************\
 	|* Fetch the font
@@ -50,6 +53,30 @@ MemoryWidget::MemoryWidget(QWidget *parent)
 	auto nc = NotifyCenter::defaultNotifyCenter();
 	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);
 	nc->addObserver([=](NotifyData &nd){_assemblyComplete(nd);}, NTFY_ASM_DONE);
+
+
+	/*************************************************************************\
+	|* Set up the heatmap rects
+	\*************************************************************************/
+	int w = 256;
+	int h = 256;
+	int x = (330 - w) / 2;
+	_hm1Rect = QRect(x, 355, w, h);
+	_hm2Rect = QRect(x, 650, w, h);
+
+	_hm1Str = "";
+	_hm2Str = "";
+
+	/*************************************************************************\
+	|* We want mouse tracking without having to press the button
+	\*************************************************************************/
+	setMouseTracking(true);
+
+	/*************************************************************************\
+	|* Set up for writes to start off with
+	\*************************************************************************/
+	_counts = _wr;
+	_page	= _pgWr;
 	}
 
 /*****************************************************************************\
@@ -71,7 +98,7 @@ void MemoryWidget::setMemStartEditor(QLineEdit *editor)
 void MemoryWidget::paintEvent(QPaintEvent *)
 	{
 	int ox = 30;
-	int oy = 40;
+	int oy = 70;
 	int dx = 18;
 	int dy = 15;
 
@@ -135,19 +162,32 @@ void MemoryWidget::paintEvent(QPaintEvent *)
 			}
 		}
 
-	_heatmap(painter, _wr, 340);
-	_heatmap(painter, _pg, 650);
+	/*************************************************************************\
+	|* Draw the heatmap rects
+	\*************************************************************************/
+	_heatmap(painter, _counts, _hm1Rect, _offset);
+	painter.drawText(_hm1Rect.x(),
+					 _hm1Rect.y() + _hm1Rect.height() + 20,
+					 _hm1Str);
+	_heatmap(painter, _page, _hm2Rect, 0);
+	painter.drawText(_hm2Rect.x(),
+					 _hm2Rect.y() + _hm2Rect.height() + 20,
+					 _hm2Str);
 	}
 
 
 /*****************************************************************************\
 |* Paint a heatmap
 \*****************************************************************************/
-void MemoryWidget::_heatmap(QPainter &painter, uint32_t *data, int y)
+void MemoryWidget::_heatmap(QPainter &painter,
+							uint32_t *data,
+							QRect& r,
+							int offset)
 	{
-	int w = 256;
-	int h = 256;
-	int x = (rect().width() - w) / 2;
+	int x = r.x();
+	int y = r.y();
+	int w = r.width();
+	int h = r.height();
 
 	painter.setPen(QColor(128,128,128,255));
 	painter.drawRect(x,y,w+1,h+1);
@@ -160,7 +200,7 @@ void MemoryWidget::_heatmap(QPainter &painter, uint32_t *data, int y)
 
 	const int dx	= 16;
 	const int dw	= dx - 1;
-	int idx			= _offset;
+	int idx			= offset;
 
 	for (int i=0; i<16; i++)
 		{
@@ -173,17 +213,35 @@ void MemoryWidget::_heatmap(QPainter &painter, uint32_t *data, int y)
 				if (val <= 4)
 					P.fillRect(j*dx,i*dx,dw,dw,_grn[val -1]);
 
-				else if (val <= 16)
-					P.fillRect(j*dx,i*dx,dw,dw,_blu[val/4 -1]);
+				else if (val < 4 + 16)
+					P.fillRect(j*dx,i*dx,dw,dw,_blu[(val-4)/4]);
 
-				else if (val <= 64)
-					P.fillRect(j*dx,i*dx,dw,dw,_red[val/16 -1]);
+				else if (val < 4 + 16 + 64)
+					P.fillRect(j*dx,i*dx,dw,dw,_red[(val-16-4)/16]);
 
-				else
+				else if (val <= 4 + 16 + 64 + 256)
 					{
 					P.fillRect(j*dx,i*dx,dw,dw,_black);
-					P.fillRect(j*dx+dw/4,i*dx+dw/4,dw/2,dw/2,_white);
+					int col = (val - 64 - 16 - 4) / 64;
+					P.fillRect(j*dx+dw/4+1,i*dx+dw/4+1,dw/2,dw/2,_grn[col]);
 					}
+
+				else if (val <= 4 + 16 + 64 + 256 + 1024)
+					{
+					P.fillRect(j*dx,i*dx,dw,dw,_black);
+					int col = (val - 256 - 64 - 16 - 4) / 256;
+					P.fillRect(j*dx+dw/4+1,i*dx+dw/4+1,dw/2,dw/2,_blu[col]);
+					}
+
+				else if (val <= 4 + 16 + 64 + 256 + 1024 + 4096)
+					{
+					P.fillRect(j*dx,i*dx,dw,dw,_black);
+					int col = (val - 1024 - 256 - 64 - 16 - 4) / 1024;
+					P.fillRect(j*dx+dw/4+1,i*dx+dw/4+1,dw/2,dw/2,_red[col]);
+					}
+
+				else
+					P.fillRect(j*dx,i*dx,dw,dw,_black);
 				}
 			}
 		}
@@ -207,22 +265,54 @@ void MemoryWidget::updateState(std::vector<MemoryOp>& ops, bool forwards)
 	if (forwards)
 		for (MemoryOp& op : ops)
 			{
-			_mem[op.address] = op.newVal;
-			_written[op.address] = 1;
-			if (op.isRead)
-				_rd[op.address] ++;
-			else
-				_wr[op.address] ++;
+			uint16_t addr	= op.address & 0xFFFF;
+			uint8_t pgAddr	= addr >> 8;
+
+			switch (op.type)
+				{
+				case OP_READ:
+					_rd[addr] ++;
+					_pgRd[pgAddr] ++;
+					break;
+
+				case OP_WRITE:
+					_wr[addr] ++;
+					_pgWr[pgAddr] ++;
+					_mem[addr] = op.newVal;
+					_written[addr] = 1;
+					break;
+
+				case OP_INSN:
+					_pc[addr] ++;
+					_pgPc[pgAddr] ++;
+					break;
+				}
 			}
 	else
 		for (MemoryOp& op: ops)
 			{
-			_mem[op.address] = op.oldVal;
-			_written[op.address] = 1;
-			if (op.isRead)
-				_rd[op.address] --;
-			else
-				_wr[op.address] --;
+			uint16_t addr	= op.address & 0xFFFF;
+			uint8_t pgAddr	= addr >> 8;
+
+			switch (op.type)
+				{
+				case OP_READ:
+					_rd[addr] --;
+					_pgRd[pgAddr] --;
+					break;
+
+				case OP_WRITE:
+					_wr[addr] --;
+					_pgWr[pgAddr] --;
+					_mem[op.address] = op.oldVal;
+					_written[op.address] = 1;
+					break;
+
+				case OP_INSN:
+					_pc[addr] --;
+					_pgPc[pgAddr] --;
+					break;
+				}
 			}
 
 	repaint();
@@ -270,4 +360,78 @@ void MemoryWidget::_assemblyComplete(NotifyData &nd)
 			}
 	}
 
+
+
+#pragma mark -- Combo box for count-types
+
+/*****************************************************************************\
+|* Pulldown menu - The type-of-counts-to-display changed
+\*****************************************************************************/
+void MemoryWidget::_countTypeChanged(int idx)
+	{
+	switch (idx)
+		{
+		case 0:
+			_counts = _wr;
+			_page   = _pgWr;
+			break;
+
+		case 1:
+			_counts = _rd;
+			_page   = _pgRd;
+			break;
+
+		case 2:
+			_counts = _pc;
+			_page   = _pgPc;
+			break;
+
+		default:
+			fprintf(stderr, "unknown count-type received: %d\n", idx);
+			break;
+		}
+	repaint();
+	}
+
+
+
+#pragma mark -- Events
+
+
+/*****************************************************************************\
+|* Event: We got a mouse-move (without needing a button). Check to see if we
+|* want to update the memory region text
+\*****************************************************************************/
+void MemoryWidget:: mouseMoveEvent( QMouseEvent *e )
+	{
+	int x = e->pos().x();
+	int y = e->pos().y();
+
+	if (_hm1Rect.contains(x,y))
+		{
+		int X		= (x - _hm1Rect.x()) / 16;
+		int Y		= (y - _hm1Rect.y()) / 16;
+		int idx		= X + Y*16;
+		_hm1Str		= QString("Count at $%1 is %2")
+						.arg(_offset+idx, 2, 16,QLatin1Char('0'))
+						.arg(_counts[_offset+idx]);
+		}
+	else
+		_hm1Str = "";
+
+	if (_hm2Rect.contains(x, y))
+		{
+		int X		= (x - _hm2Rect.x()) / 16;
+		int Y		= (y - _hm2Rect.y()) / 16;
+		int idx		= X + Y*16;
+		_hm2Str		= QString("Count for page $%1 is %2")
+						.arg(idx, 2, 16,QLatin1Char('0'))
+						.arg(_page[idx]);
+
+		}
+	else
+		_hm2Str = "";
+
+	repaint();
+	}
 

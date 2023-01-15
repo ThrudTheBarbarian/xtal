@@ -270,6 +270,7 @@ Simulator::Simulator(int maxRam,
 		  ,_errorLevel(EL_NONE)
 		  ,_labelRange(6)
 		  ,_error(E_NONE)
+		  ,_traceMemory(false)
 	{
 	/*************************************************************************\
 	|* Set up the dynamic memory arrays
@@ -979,6 +980,16 @@ uint8_t Simulator::_readPC(void)
 	{
 	uint32_t address = _regs.pc;
 
+	MemoryOp op ;
+	op.pc		= _oldPC;
+	op.address	= address & 0xFFFF;
+	op.oldVal	= _mem[address];
+	op.newVal	= _mem[address];
+	op.isValid	= _traceMemory;
+	op.type		= OP_INSN;
+	if (op.isValid)
+		_memOpList.push_back(op);
+
 	if (likely(!(_memState[address] & (MS_UNDEFINED | MS_INVALID))))
 		return _mem[address];
 	else
@@ -997,8 +1008,21 @@ uint8_t Simulator::_readPC(void)
 \*****************************************************************************/
 uint8_t Simulator::_readByte(uint32_t address)
 	{
+	MemoryOp op ;
+	op.pc		= _oldPC;
+	op.address	= address & 0xFFFF;
+	op.oldVal	= _mem[address];
+	op.newVal	= _mem[address];
+	op.isValid	= false;
+	op.type		= _readingInsn ? OP_INSN : OP_READ;
+
 	if (likely(!(_memState[address] & (MS_UNDEFINED|MS_INVALID|MS_CALLBACK))))
+		{
+		op.isValid		= _traceMemory;
+		if (op.isValid)
+			_memOpList.push_back(op);
 		return _mem[address];
+		}
 	else
 		{
 		/*********************************************************************\
@@ -1009,6 +1033,9 @@ uint8_t Simulator::_readByte(uint32_t address)
 			ErrorCode e = _readCbs[address](this, &_regs, address, CB_READ);
 			setError(e, address);
 			_writeMem = true;
+			op.isValid = _traceMemory;
+			if (op.isValid)
+				_memOpList.push_back(op);
 			return e;
 			}
 		else
@@ -1024,6 +1051,9 @@ uint8_t Simulator::_readByte(uint32_t address)
 				setError(E_RD_UNINIT, address);
 				_memState[address] &= ~MS_INVALID; // Initializes the memory
 				}
+			op.isValid = _traceMemory;
+			if (op.isValid)
+				_memOpList.push_back(op);
 			return _mem[address];
 			}
 		}
@@ -1078,12 +1108,12 @@ void Simulator::_writeByte(uint32_t address, uint8_t val)
 	op.address	= address & 0xFFFF;
 	op.oldVal	= _mem[address];
 	op.isValid	= false;
-	op.isRead	= false;
+	op.type		= OP_WRITE;
 
 	if (likely(!(_memState[address]) && (!_doProfiling)))
 		{
 		_mem[address] = val;
-		op.isValid = true;
+		op.isValid = _traceMemory;
 		}
 	else
 		{
@@ -1093,9 +1123,10 @@ void Simulator::_writeByte(uint32_t address, uint8_t val)
 				{
 				_writeMem		= true;
 				_mem[address]	= val;
-				op.isValid		= true;
+				op.isValid		= _traceMemory;
 				op.newVal		= val;
-				_memOpList.push_back(op);
+				if (op.isValid)
+					_memOpList.push_back(op);
 				}
 			return;
 			}
@@ -1105,7 +1136,7 @@ void Simulator::_writeByte(uint32_t address, uint8_t val)
 			{
 			_mem[address]		= val;
 			_memState[address]	= 0;
-			op.isValid			= true;
+			op.isValid			= _traceMemory;
 			}
 		else if ((_memState[address] & MS_CALLBACK) && _writeCbs[address])
 			setError(_writeCbs[address](this, &_regs, address, val), address);
@@ -1119,6 +1150,8 @@ void Simulator::_writeByte(uint32_t address, uint8_t val)
 
 	if (op.isValid)
 		{
+		op.newVal		= val;
+		_memOpList.push_back(op);
 		}
 	}
 
@@ -1458,14 +1491,25 @@ void Simulator::next(void)
 		}
 
 	/*************************************************************************\
-	|* Read instruction and data - always prefetched in real 6502 CPU
+	|* Read instruction
 	\*************************************************************************/
-	uint32_t insn = _readPC();
+	_readingInsn	= true;
+	uint32_t insn	= _readPC();
+
+	/*************************************************************************\
+	|* Remember PC
+	\*************************************************************************/
+	_oldPC	  = _regs.pc;
+
+	/*************************************************************************\
+	|* Read data - always prefetched in real 6502 CPU
+	\*************************************************************************/
 	uint32_t data = _readByte(_regs.pc + 1);
 
 	// And if instruction is 3 bytes, read high byte of data
 	if (_insnLength[insn] > 2)
 		data |= ((uint32_t)(_readByte(_regs.pc + 2))) << 8;
+	_readingInsn = false;
 
 	/*************************************************************************\
 	|* If profiling, store old info
@@ -1480,7 +1524,6 @@ void Simulator::next(void)
 	/*************************************************************************\
 	|* Update PC
 	\*************************************************************************/
-	_oldPC	  = _regs.pc;
 	_regs.pc += _insnLength[insn];
 
 	/*************************************************************************\

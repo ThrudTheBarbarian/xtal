@@ -19,12 +19,14 @@ class TraceItem : public QObject, public QListWidgetItem
 	GET(Simulator::Registers, regs);		// Processor state
 	GET(MemoryOp, op0);						// First memory op, if needed
 	GET(MemoryOp, op1);						// Second memory op, if needed
+	GET(MemoryOp, op2);						// Second memory op, if needed
 
 	public:
 		TraceItem(const QString& text,
 				  Simulator::Registers& regs,
 				  MemoryOp &op0,
 				  MemoryOp &op1,
+				  MemoryOp &op2,
 				  QListWidget *parent = nullptr);
 
 	};

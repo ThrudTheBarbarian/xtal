@@ -29,195 +29,167 @@
      <height>1012</height>
     </size>
    </property>
-   <widget class="QWidget" name="">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>1551</width>
-      <height>1031</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,1">
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
-       <property name="sizeConstraint">
-        <enum>QLayout::SetDefaultConstraint</enum>
-       </property>
-       <item>
-        <widget class="StateWidget" name="stateWidget" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>330</width>
-           <height>80</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>330</width>
-           <height>80</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="MemoryWidget" name="memoryWidget" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>1</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>330</width>
-           <height>310</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>330</width>
-           <height>160000</height>
-          </size>
-         </property>
-         <widget class="QLabel" name="label">
-          <property name="geometry">
-           <rect>
-            <x>40</x>
-            <y>280</y>
-            <width>51</width>
-            <height>16</height>
-           </rect>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,1">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
+        </property>
+        <item>
+         <widget class="StateWidget" name="stateWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-          <property name="text">
-           <string>Start : $</string>
+          <property name="minimumSize">
+           <size>
+            <width>330</width>
+            <height>80</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>330</width>
+            <height>80</height>
+           </size>
           </property>
          </widget>
-         <widget class="QLineEdit" name="memStart">
-          <property name="geometry">
-           <rect>
-            <x>93</x>
-            <y>277</y>
-            <width>51</width>
-            <height>21</height>
-           </rect>
+        </item>
+        <item>
+         <widget class="MemoryWidget" name="memoryWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>330</width>
+            <height>310</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>330</width>
+            <height>160000</height>
+           </size>
+          </property>
+          <widget class="QLabel" name="label">
+           <property name="geometry">
+            <rect>
+             <x>7</x>
+             <y>10</y>
+             <width>51</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Start : $</string>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="memStart">
+           <property name="geometry">
+            <rect>
+             <x>60</x>
+             <y>7</y>
+             <width>51</width>
+             <height>21</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QComboBox" name="countType">
+           <property name="geometry">
+            <rect>
+             <x>50</x>
+             <y>320</y>
+             <width>230</width>
+             <height>32</height>
+            </rect>
+           </property>
+           <item>
+            <property name="text">
+             <string>Memory writes</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Memory Reads</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Program counter</string>
+            </property>
+           </item>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="midVL" stretch="1,1">
+        <item>
+         <widget class="TraceWidget" name="traceWidget">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
           </property>
          </widget>
-         <widget class="QComboBox" name="comboBox">
-          <property name="geometry">
-           <rect>
-            <x>50</x>
-            <y>610</y>
-            <width>230</width>
-            <height>32</height>
-           </rect>
+        </item>
+        <item>
+         <widget class="QListWidget" name="pointsWidget">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>200</height>
+           </size>
           </property>
-          <item>
-           <property name="text">
-            <string>Memory writes</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Memory Reads</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Program counter</string>
-           </property>
-          </item>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>200</height>
+           </size>
+          </property>
          </widget>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="midVL" stretch="1,1">
-       <item>
-        <widget class="TraceWidget" name="traceWidget">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>1</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QListWidget" name="pointsWidget">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>200</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>200</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="rightVL" stretch="0,1">
-       <item>
-        <widget class="AsmWidget" name="asmWidget">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>1</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="VcrWidget" name="vcrWidget" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>1</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>349</width>
-           <height>40</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16000000</width>
-           <height>40</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="rightVL" stretch="0">
+        <item>
+         <widget class="AsmWidget" name="asmWidget">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>1</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -241,6 +213,8 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionLoad_XEX"/>
+   <addaction name="actionSimulate"/>
+   <addaction name="actionStop"/>
   </widget>
   <action name="actionLoad_XEX">
    <property name="icon">
@@ -260,6 +234,33 @@
     <string>Ctrl+O</string>
    </property>
   </action>
+  <action name="actionSimulate">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icon/rsrc/icons/play-forward.png</normaloff>:/icon/rsrc/icons/play-forward.png</iconset>
+   </property>
+   <property name="text">
+    <string>Simulate</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Simulate code&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icon/rsrc/icons/stop.png</normaloff>:/icon/rsrc/icons/stop.png</iconset>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+   <property name="toolTip">
+    <string>Stop</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -272,12 +273,6 @@
    <class>StateWidget</class>
    <extends>QWidget</extends>
    <header>statewidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>VcrWidget</class>
-   <extends>QWidget</extends>
-   <header>vcrwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

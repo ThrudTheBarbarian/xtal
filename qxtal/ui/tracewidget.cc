@@ -33,9 +33,10 @@ TraceWidget::TraceWidget(QWidget *parent)
 void TraceWidget::addTraceItem(const QString& text,
 							   Simulator::Registers regs,
 							   MemoryOp op0,
-							   MemoryOp op1)
+							   MemoryOp op1,
+							   MemoryOp op2)
 	{
-	TraceItem *item = new TraceItem(" "+text, regs, op0, op1);
+	TraceItem *item = new TraceItem(" "+text, regs, op0, op1, op2);
 	//fprintf(stderr, "$%04x: %d %d\n", regs.pc, op0.isValid, op1.isValid);
 
 	item->setData(Qt::FontRole, _font);
@@ -160,6 +161,9 @@ void TraceWidget::_handleSelectionChanged(QListWidgetItem *current,
 				op = ti->op1();
 				if (op.isValid)
 					ops.push_back(op);
+				op = ti->op2();
+				if (op.isValid)
+					ops.push_back(op);
 				}
 
 		else if (_previousRow > thisRow)
@@ -171,6 +175,9 @@ void TraceWidget::_handleSelectionChanged(QListWidgetItem *current,
 				if (op.isValid)
 					ops.push_back(op);
 				op = ti->op1();
+				if (op.isValid)
+					ops.push_back(op);
+				op = ti->op2();
 				if (op.isValid)
 					ops.push_back(op);
 				}

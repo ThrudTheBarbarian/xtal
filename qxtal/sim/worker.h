@@ -84,7 +84,8 @@ class Worker : public QThread
 		void simulationStep(const QString& description,
 							Simulator::Registers regs,
 							MemoryOp op0,
-							MemoryOp op1);
+							MemoryOp op1,
+							MemoryOp op2);
 
 
 	};

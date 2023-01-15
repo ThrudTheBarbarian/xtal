@@ -233,6 +233,8 @@ class Simulator : public QObject
 		GET(int, labelRange);						// +/- to search for offsets
 		GET(MemOpList, memOpList);					// List of memory ops in next()
 		GET(uint8_t *, mem);						// Simulator RAM
+		GETSET(bool, traceMemory, TraceMemory);		// Whether to trace access
+		GET(bool, readingInsn);						// Currently reading insns
 
 		/*************************************************************************\
 		|* Internal state

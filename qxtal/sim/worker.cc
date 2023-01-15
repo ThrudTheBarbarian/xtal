@@ -169,9 +169,10 @@ void Worker::_playForward(uint32_t address)
 		if (isInterruptionRequested())
 			break;
 
-		MemoryOp op0, op1;
+		MemoryOp op0, op1, op2;
 		memset(&op0, 0, sizeof(MemoryOp));
 		memset(&op1, 0, sizeof(MemoryOp));
+		memset(&op2, 0, sizeof(MemoryOp));
 
 		/*********************************************************************\
 		|* Disassemble and throw over to the UI thread
@@ -184,7 +185,6 @@ void Worker::_playForward(uint32_t address)
 		/*********************************************************************\
 		|* Execute it
 		\*********************************************************************/
-		uint16_t pc = _address;
 		sim->next();
 		_address = sim->regs().pc;
 
@@ -196,8 +196,10 @@ void Worker::_playForward(uint32_t address)
 			op0 = sim->memOpList()[0];
 		if (sim->memOpList().size() > 1)
 			op1 = sim->memOpList()[1];
+		if (sim->memOpList().size() > 2)
+			op2 = sim->memOpList()[2];
 
-		emit simulationStep(buf, regs, op0, op1);
+		emit simulationStep(buf, regs, op0, op1, op2);
 
 		}
 

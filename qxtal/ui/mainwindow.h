@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 
+#include "NotifyCenter.h"
 #include "properties.h"
 
 QT_BEGIN_NAMESPACE
@@ -25,17 +26,43 @@ class MainWindow : public QMainWindow
 	\*************************************************************************/
 	GETSET(Simulator*, sim, Sim);		// Simulator engine
 	GETSET(IO*, io, Io);				// Input/Output channel
-	GETSET(Atari*, atari, Atari);		// Atari model with BIOS etc
+	GETSET(Atari*, hw, Hw);				// Atari model with BIOS etc
+	GET(uint32_t, address);				// Where to run from
+
+	private:
+		Ui::MainWindow *ui;
+
+		/*********************************************************************\
+		|* Notification: a binary was just loaded
+		\*********************************************************************/
+		void _binaryLoaded(NotifyData &nd);
+
+		/*********************************************************************\
+		|* UI : Load an XEX file
+		\*********************************************************************/
+		void _toolbarLoadXEX(void);
+
+		/*********************************************************************\
+		|* UI : Run the simulator
+		\*********************************************************************/
+		void _toolbarRunSim(void);
+
+		/*********************************************************************\
+		|* UI : Stop the simulator
+		\*********************************************************************/
+		void _toolbarStopSim(void);
+
 
 	public:
 	  MainWindow(QWidget *parent = nullptr);
 	  ~MainWindow();
 
+
 	private slots:
 
-	  void on_actionLoad_XEX_triggered();
-
-	private:
-	 Ui::MainWindow *ui;
+	  /*********************************************************************\
+	  |* UI : we clicked on the load button
+	  \*********************************************************************/
+	  void _toolbarAction(QAction *a);
 	};
 #endif // MAINWINDOW_H

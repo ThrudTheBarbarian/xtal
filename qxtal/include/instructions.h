@@ -99,13 +99,21 @@ typedef enum
 /*****************************************************************************\
 |* Memory ops
 \*****************************************************************************/
+
+typedef enum
+	{
+	OP_READ = 0,
+	OP_WRITE,
+	OP_INSN
+	} MemOpType;
+
 typedef struct
 	{
 	uint16_t pc;			// PC at the point the operation happens
 	uint16_t address;		// Address of the operation
 	uint8_t oldVal;			// Value of the memory location before operation
 	uint8_t newVal;			// Value of the memory location after operation
-	bool isRead;			// true=read, false=write
+	MemOpType type;			// One of the enumerations above
 	bool isValid;			// true=yes this really happened
 	} MemoryOp;
 
