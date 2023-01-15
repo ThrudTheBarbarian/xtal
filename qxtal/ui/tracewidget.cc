@@ -41,12 +41,6 @@ void TraceWidget::addTraceItem(const QString& text,
 	item->setData(Qt::FontRole, _font);
 	_itemMap[regs.pc].push_back(item);
 	addItem(item);
-//	if (op0.isValid)
-//		fprintf(stderr, "$%04x : write $%02x to $%04x replacing $%02x\n",
-//				op0.pc, op0.newVal, op0.address, op0.oldVal);
-//	if (op1.isValid)
-//		fprintf(stderr, "      : write $%02x to $%04x replacing $%02x\n",
-//				op1.newVal, op1.address, op1.oldVal);
 	}
 
 

@@ -58,11 +58,13 @@ MainWindow::MainWindow(QWidget *parent)
 	nc->notify(NTFY_SIM_AVAILABLE, _atari);
 
 	/*************************************************************************\
-	|* Tell the trace widget to talk to the memory widget
+	|* Tell the trace widget to talk to the memory & heatmap widgets
 	\*************************************************************************/
 	QObject::connect(ui->traceWidget, &TraceWidget::updateMemory,
 					 ui->memoryWidget, &MemoryWidget::updateState);
-
+	/*QObject::connect(ui->traceWidget, &TraceWidget::updateMemory,
+					 ui->heatMapWidget, &HeatMapWidget::updateState);
+*/
 	}
 
 /*****************************************************************************\

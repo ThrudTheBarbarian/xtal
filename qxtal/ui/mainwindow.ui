@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1565</width>
-    <height>1123</height>
+    <height>1154</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,25 +17,62 @@
    <enum>Qt::ToolButtonTextUnderIcon</enum>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <item>
-     <layout class="QVBoxLayout" name="leftVL">
-      <item>
-       <widget class="HeatMapWidget" name="heatMapWidget" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>330</width>
-          <height>80</height>
-         </size>
-        </property>
-        <widget class="MemoryWidget" name="memoryWidget" native="true">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>1</horstretch>
+     <verstretch>1</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>1565</width>
+     <height>1012</height>
+    </size>
+   </property>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>1551</width>
+      <height>1031</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,1">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
+       <item>
+        <widget class="StateWidget" name="stateWidget" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
            <width>330</width>
-           <height>310</height>
-          </rect>
+           <height>80</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>330</width>
+           <height>80</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="MemoryWidget" name="memoryWidget" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>1</verstretch>
+          </sizepolicy>
          </property>
          <property name="minimumSize">
           <size>
@@ -46,7 +83,7 @@
          <property name="maximumSize">
           <size>
            <width>330</width>
-           <height>310</height>
+           <height>160000</height>
           </size>
          </property>
          <widget class="QLabel" name="label">
@@ -72,99 +109,115 @@
            </rect>
           </property>
          </widget>
+         <widget class="QComboBox" name="comboBox">
+          <property name="geometry">
+           <rect>
+            <x>50</x>
+            <y>610</y>
+            <width>230</width>
+            <height>32</height>
+           </rect>
+          </property>
+          <item>
+           <property name="text">
+            <string>Memory writes</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Memory Reads</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Program counter</string>
+           </property>
+          </item>
+         </widget>
         </widget>
-        <widget class="StateWidget" name="stateWidget" native="true">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>310</y>
-           <width>330</width>
-           <height>80</height>
-          </rect>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="midVL" stretch="1,1">
+       <item>
+        <widget class="TraceWidget" name="traceWidget">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>1</verstretch>
+          </sizepolicy>
          </property>
          <property name="minimumSize">
           <size>
-           <width>330</width>
-           <height>80</height>
+           <width>0</width>
+           <height>0</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>80</height>
+           <height>16777215</height>
           </size>
          </property>
         </widget>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="midVL" stretch="1,1">
-      <item>
-       <widget class="TraceWidget" name="traceWidget">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QListWidget" name="pointsWidget">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>200</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>200</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="rightVL" stretch="0,0">
-      <item>
-       <widget class="AsmWidget" name="asmWidget"/>
-      </item>
-      <item>
-       <widget class="VcrWidget" name="vcrWidget" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>1</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>349</width>
-          <height>40</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16000000</width>
-          <height>40</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-   </layout>
+       </item>
+       <item>
+        <widget class="QListWidget" name="pointsWidget">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>200</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>200</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="rightVL" stretch="0,1">
+       <item>
+        <widget class="AsmWidget" name="asmWidget">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>1</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="VcrWidget" name="vcrWidget" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>349</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16000000</width>
+           <height>40</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -219,12 +272,6 @@
    <class>StateWidget</class>
    <extends>QWidget</extends>
    <header>statewidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>HeatMapWidget</class>
-   <extends>QWidget</extends>
-   <header>heatmapwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

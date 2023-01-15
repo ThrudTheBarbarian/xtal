@@ -26,6 +26,22 @@ class MemoryWidget : public QWidget
 		uint8_t _last[65536];		// Last values of memory
 		QFont   _font;				// Font to draw the memory with
 
+		uint32_t _rd[65536];		// Read operation heat-map
+		uint32_t _wr[65536];		// Write operation heat-map
+		uint32_t _pc[65536];		// PC heat-map
+		uint32_t _pg[256];			// Page heat-map
+
+		QColor _red[4];				// Red colours
+		QColor _grn[4];				// Green colours
+		QColor _blu[4];				// Blue colours
+		QColor _black;				// Black
+		QColor _white;				// White
+
+		/*********************************************************************\
+		|* Paint a heatmap
+		\*********************************************************************/
+		void _heatmap(QPainter &P, uint32_t *data, int y);
+
 		/*********************************************************************\
 		|* Listen for the simulator to become ready
 		\*********************************************************************/

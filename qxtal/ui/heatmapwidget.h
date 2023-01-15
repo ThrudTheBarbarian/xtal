@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QPainter>
 #include <QWidget>
+#include <QColor>
 
 #include "sim/atari.h"
 
@@ -21,6 +22,12 @@ class HeatMapWidget : public QWidget
 		uint32_t _wr[65536];		// Write operation heat-map
 		uint32_t _pc[65536];		// PC heat-map
 
+		QColor _red[8];				// Red colours
+		QColor _grn[8];				// Green colours
+		QColor _blu[8];				// Blue colours
+		QColor _black;				// Black
+		QColor _white;				// White
+
 		/*********************************************************************\
 		|* Paint a heatmap
 		\*********************************************************************/
@@ -34,6 +41,12 @@ class HeatMapWidget : public QWidget
 		\*********************************************************************/
 		void paintEvent(QPaintEvent *e);
 
+
+	public slots:
+		/*********************************************************************\
+		|* Get told to update the current map
+		\*********************************************************************/
+		void updateState(std::vector<MemoryOp>& ops, bool forwards);
 	};
 
 #endif // HEATMAPWIDGET_H
