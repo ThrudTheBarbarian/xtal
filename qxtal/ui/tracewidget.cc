@@ -35,7 +35,9 @@ void TraceWidget::addTraceItem(const QString& text,
 							   MemoryOp op0,
 							   MemoryOp op1)
 	{
-	TraceItem *item = new TraceItem("  "+text, regs, op0, op1);
+	TraceItem *item = new TraceItem(" "+text, regs, op0, op1);
+	//fprintf(stderr, "$%04x: %d %d\n", regs.pc, op0.isValid, op1.isValid);
+
 	item->setData(Qt::FontRole, _font);
 	_itemMap[regs.pc].push_back(item);
 	addItem(item);
@@ -157,7 +159,7 @@ void TraceWidget::_handleSelectionChanged(QListWidgetItem *current,
 		if (_previousRow < thisRow)
 			for (int i=_previousRow; i<thisRow; i++)
 				{
-				TraceItem *ti = dynamic_cast<TraceItem *>(item(i));
+				TraceItem *ti = static_cast<TraceItem *>(item(i));
 				MemoryOp op   = ti->op0();
 				if (op.isValid)
 					ops.push_back(op);
@@ -170,7 +172,7 @@ void TraceWidget::_handleSelectionChanged(QListWidgetItem *current,
 			{
 			for (int i=_previousRow-1; i>=thisRow; i--)
 				{
-				TraceItem *ti = dynamic_cast<TraceItem *>(item(i));
+				TraceItem *ti = static_cast<TraceItem *>(item(i));
 				MemoryOp op   = ti->op0();
 				if (op.isValid)
 					ops.push_back(op);

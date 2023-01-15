@@ -1093,6 +1093,9 @@ void Simulator::_writeByte(uint32_t address, uint8_t val)
 				{
 				_writeMem		= true;
 				_mem[address]	= val;
+				op.isValid		= true;
+				op.newVal		= val;
+				_memOpList.push_back(op);
 				}
 			return;
 			}
@@ -1102,7 +1105,7 @@ void Simulator::_writeByte(uint32_t address, uint8_t val)
 			{
 			_mem[address]		= val;
 			_memState[address]	= 0;
-			op.isValid = true;
+			op.isValid			= true;
 			}
 		else if ((_memState[address] & MS_CALLBACK) && _writeCbs[address])
 			setError(_writeCbs[address](this, &_regs, address, val), address);
@@ -1116,8 +1119,6 @@ void Simulator::_writeByte(uint32_t address, uint8_t val)
 
 	if (op.isValid)
 		{
-		op.newVal = val;
-		_memOpList.push_back(op);
 		}
 	}
 

@@ -278,6 +278,9 @@ void AsmWidget::_binaryLoaded(NotifyData& nd)
 
 		infoId++;
 		}
+
+	auto nc = NotifyCenter::defaultNotifyCenter();
+	nc->notify(NTFY_ASM_DONE, &_infoList);
 	}
 
 

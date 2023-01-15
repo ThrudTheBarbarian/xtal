@@ -21,38 +21,6 @@
     <item>
      <layout class="QVBoxLayout" name="leftVL">
       <item>
-       <widget class="MemoryWidget" name="memoryWidget" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>330</width>
-          <height>300</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>330</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="StateWidget" name="stateWidget" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>330</width>
-          <height>80</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>80</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="HeatMapWidget" name="heatMapWidget" native="true">
         <property name="minimumSize">
          <size>
@@ -60,6 +28,73 @@
           <height>80</height>
          </size>
         </property>
+        <widget class="MemoryWidget" name="memoryWidget" native="true">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>330</width>
+           <height>443</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>330</width>
+           <height>300</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>330</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <widget class="QLabel" name="label">
+          <property name="geometry">
+           <rect>
+            <x>40</x>
+            <y>280</y>
+            <width>51</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Start : $</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="memStart">
+          <property name="geometry">
+           <rect>
+            <x>93</x>
+            <y>277</y>
+            <width>51</width>
+            <height>21</height>
+           </rect>
+          </property>
+         </widget>
+        </widget>
+        <widget class="StateWidget" name="stateWidget" native="true">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>444</y>
+           <width>330</width>
+           <height>80</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>330</width>
+           <height>80</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>80</height>
+          </size>
+         </property>
+        </widget>
        </widget>
       </item>
      </layout>

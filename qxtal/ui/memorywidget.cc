@@ -1,22 +1,44 @@
-#include "memorywidget.h"
 
-#include <QPainter>
 #include <QColor>
+#include <QPainter>
 
+#include "memorywidget.h"
 #include "notifications.h"
+
+typedef std::vector<Simulator::InstructionInfo> InfoList;
 
 /*****************************************************************************\
 |* Constructor
 \*****************************************************************************/
 MemoryWidget::MemoryWidget(QWidget *parent)
 			 :QWidget(parent)
-			 ,_page(0)
+			 ,_offset(0)
 	{
-	memset(_mem, 0x00, sizeof(_mem));
 	memset(_written, 0x00, sizeof(_written));
 	memset(_last, 0x00, sizeof(_last));
 	_font = FontMgr::monospacedFont();
 	_font.setPointSize(12);
+
+	/*************************************************************************\
+	|* Announce to who cares what the object pointers are
+	\*************************************************************************/
+	auto nc = NotifyCenter::defaultNotifyCenter();
+	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);
+	nc->addObserver([=](NotifyData &nd){_assemblyComplete(nd);}, NTFY_ASM_DONE);
+
+	}
+
+/*****************************************************************************\
+|* Set the editable box
+\*****************************************************************************/
+void MemoryWidget::setMemStartEditor(QLineEdit *editor)
+	{
+	_memStart = editor;
+	_memStart->setFont(_font);
+	_memStart->setText("0000");
+
+	QObject::connect(_memStart, &QLineEdit::textChanged,
+					 this,		&MemoryWidget::memStartChanged);
 	}
 
 /*****************************************************************************\
@@ -56,7 +78,8 @@ void MemoryWidget::paintEvent(QPaintEvent *)
 	|* Draw values for the current page
 	\*************************************************************************/
 	painter.setPen(QColor(0,0,0,255));
-	int offset = _page * 256;
+	int offset = _offset;
+
 	for (int i=0; i<16; i++)
 		{
 		int x = ox;
@@ -89,13 +112,18 @@ void MemoryWidget::paintEvent(QPaintEvent *)
 	}
 
 
+
+
+#pragma mark -- slots
+
+
 /*****************************************************************************\
 |* Handle an update incoming
 \*****************************************************************************/
 void MemoryWidget::updateState(std::vector<MemoryOp>& ops, bool forwards)
 	{
-	fprintf(stderr, "Got %ld %s ops\n", ops.size(),
-			(forwards ? ("forwards") : ("backwards")));
+	//fprintf(stderr, "Got %ld %s ops\n", ops.size(),
+	//		(forwards ? ("forwards") : ("backwards")));
 
 	if (forwards)
 		for (MemoryOp& op : ops)
@@ -111,6 +139,48 @@ void MemoryWidget::updateState(std::vector<MemoryOp>& ops, bool forwards)
 			}
 
 	repaint();
+	}
+
+/*****************************************************************************\
+|* User changed the offset
+\*****************************************************************************/
+void MemoryWidget::memStartChanged(const QString& text)
+	{
+	uint32_t val;
+	sscanf(text.toStdString().c_str(), "%x", &val);
+	_offset = val & 0xFFFF;
+	repaint();
+	}
+
+
+
+
+
+#pragma mark -- notifications
+
+
+/*****************************************************************************\
+|* Notification: Listen for the simulator to become ready
+\*****************************************************************************/
+void MemoryWidget::_simulatorReady(NotifyData &nd)
+	{
+	_hw		= static_cast<Atari *>(nd.voidValue());
+	_mem	= _hw->sim()->mem();
+	}
+
+
+/*****************************************************************************\
+|* Notification: Listen for the simulator to become ready
+\*****************************************************************************/
+void MemoryWidget::_assemblyComplete(NotifyData &nd)
+	{
+	InfoList * items = static_cast<InfoList *>(nd.voidValue());
+	for (Simulator::InstructionInfo& info : *items)
+		for (int i=0; i<info.bytes; i++)
+			{
+			_written[info.addr+i] = 1;
+			_last[info.addr+i] = _mem[info.addr+i];
+			}
 	}
 
 

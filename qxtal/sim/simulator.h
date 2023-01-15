@@ -232,6 +232,7 @@ class Simulator : public QObject
 		GETSET(AddressMap, labels, Labels);			// Assembly labels
 		GET(int, labelRange);						// +/- to search for offsets
 		GET(MemOpList, memOpList);					// List of memory ops in next()
+		GET(uint8_t *, mem);						// Simulator RAM
 
 		/*************************************************************************\
 		|* Internal state
@@ -240,7 +241,6 @@ class Simulator : public QObject
 			/*********************************************************************\
 			|* Simulator state
 			\*********************************************************************/
-			uint8_t * _mem;							// RAM
 			uint8_t * _memState;					// RAM state
 			SIM_CB * _readCbs;						// Read callbacks
 			SIM_CB * _writeCbs;						// Write callbacks
