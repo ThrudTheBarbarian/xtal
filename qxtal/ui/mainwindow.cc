@@ -147,6 +147,10 @@ void MainWindow::_toolbarLoadXEX(void)
 void MainWindow::_toolbarRunSim(void)
 	{
 	ui->actionStop->setEnabled(true);
+
+	auto nc = NotifyCenter::defaultNotifyCenter();
+	nc->notify(NTFY_SIM_START, (int)_address);
+
 	_hw->worker()->schedule(CMD_PLAY_FORWARD, _address);
 	}
 

@@ -6,5 +6,6 @@
         <file>rsrc/icons/step-back.png</file>
         <file>rsrc/icons/step-forward.png</file>
         <file>rsrc/icons/stop.png</file>
+        <file>rsrc/icons/red-dot.png</file>
     </qresource>
 </RCC>

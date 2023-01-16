@@ -49,6 +49,16 @@ class AsmWidget : public QListWidget
 		\*********************************************************************/
 		void _traceSelection(NotifyData &nd);
 
+		/*********************************************************************\
+		|* Notification: prepare to simulate
+		\*********************************************************************/
+		void _prepareToSimulate(NotifyData &nd);
+
+		/*********************************************************************\
+		|* PRivate method: Toggle breakpoint at an instruction
+		\*********************************************************************/
+		void _toggleBreakpoint(AsmItem *item);
+
 
 		/*********************************************************************\
 		|* Handle selection
@@ -56,6 +66,15 @@ class AsmWidget : public QListWidget
 		void _handleSelectionChanged(QListWidgetItem *current,
 									 QListWidgetItem *previous);
 
+
+		QIcon _blank;
+		QIcon _redDot;
+
+	protected:
+		/*********************************************************************\
+		|* Event: check if we want to toggle a breakpoint
+		\*********************************************************************/
+		void mousePressEvent(QMouseEvent *event);
 
 	public:
 		/*********************************************************************\

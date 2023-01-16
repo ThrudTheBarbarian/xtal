@@ -432,9 +432,9 @@ int Simulator::error(const char *format, ...)
 /*****************************************************************************\
 |* Set the current error if we haven't already seen one
 \*****************************************************************************/
-void Simulator::setError(ErrorCode e, uint32_t addr)
+void Simulator::setError(ErrorCode e, uint32_t addr, bool force)
 	{
-	if (e < 0 && !_error)
+	if (force || (e < 0 && !_error))
 		{
 		_error			= e;
 		_errorAddress	= addr;
@@ -465,6 +465,7 @@ bool Simulator::shouldExit(void)
 		case E_INVALID_INSN:
 		case E_CALL_RET:
 		case E_CYCLE_LIMIT:
+		case E_BREAKPOINT:
 		case E_USER:
 			// Exit always
 			return 1;
@@ -501,6 +502,7 @@ String Simulator::errorString(ErrorCode e)
 		"invalid instruction executed",
 		"return from emulator",
 		"cycle limit reached",
+		"breakpoint hit",
 		"user defined error"
 		};
 
@@ -707,6 +709,24 @@ Simulator::ProfileData Simulator::profileInfo(void)
 	{
 	ProfileData copy = _profileData;
 	return copy;
+	}
+
+
+/*****************************************************************************\
+|* Runtime: toggle a breakpoint on/off, returning if it now active
+\*****************************************************************************/
+bool Simulator::toggleBreakpoint(int address)
+	{
+	bool active	= false;
+	address &= 0xFFFF;
+	if ((_memState[address] & MS_BREAKPOINT) == MS_BREAKPOINT)
+		_memState[address] &= ~MS_BREAKPOINT;
+	else
+		{
+		_memState[address] |= MS_BREAKPOINT;
+		active = true;
+		}
+	return active;
 	}
 
 #pragma mark -- labels
@@ -1487,6 +1507,12 @@ void Simulator::next(void)
 	if (_cycleLimit && _cycles >= _cycleLimit)
 		{
 		setError(E_CYCLE_LIMIT, _regs.pc);
+		return;
+		}
+
+	if ((_memState[_regs.pc] & MS_BREAKPOINT) == MS_BREAKPOINT)
+		{
+		setError(E_BREAKPOINT, _regs.pc);
 		return;
 		}
 

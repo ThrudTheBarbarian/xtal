@@ -149,13 +149,11 @@ void Worker::_stepForward(void)
 \*****************************************************************************/
 void Worker::_playForward(uint32_t address)
 	{
-	qDebug() << "Play forward";
-
 	/*************************************************************************\
 	|* Set up in a known state
 	\*************************************************************************/
 	Simulator *sim = _hw->sim();
-	sim->setError(Simulator::E_NONE, 0);
+	sim->setError(Simulator::E_NONE, 0, true);
 	sim->regs().pc = _address = address;
 
 
@@ -164,6 +162,7 @@ void Worker::_playForward(uint32_t address)
 	\*************************************************************************/
 	while (!sim->shouldExit())
 		{
+		fprintf(stderr, "address: $%04x\n", sim->regs().pc);
 		/*********************************************************************\
 		|* Check to see if we've been requested to stop
 		\*********************************************************************/

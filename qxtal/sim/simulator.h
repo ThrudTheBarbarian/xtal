@@ -47,7 +47,8 @@ class Simulator : public QObject
 				MS_UNDEFINED	= 1,
 				MS_ROM			= 2,
 				MS_INVALID		= 4,
-				MS_CALLBACK		= 8
+				MS_CALLBACK		= 8,
+				MS_BREAKPOINT	= 16
 				} MemoryState;
 
 			/*********************************************************************\
@@ -93,7 +94,9 @@ class Simulator : public QObject
 				E_INVALID_INSN	= -8,   // 0
 				E_CALL_RET		= -9,   // 0
 				E_CYCLE_LIMIT	= -10,  // 0
-				E_USER			= -11   // 0
+				E_BREAKPOINT	= -11,	// 0
+				E_USER			= -12   // 0
+
 				};
 			typedef int ErrorCode;
 
@@ -386,7 +389,7 @@ class Simulator : public QObject
 			/*********************************************************************\
 			|* Set the current error status
 			\*********************************************************************/
-			void setError(ErrorCode e, uint32_t address);
+			void setError(ErrorCode e, uint32_t address, bool force=false);
 
 			/*********************************************************************\
 			|* Set the processor status flags with a mask
@@ -458,6 +461,12 @@ class Simulator : public QObject
 			|* Runtime: process the next instruction
 			\*********************************************************************/
 			void next(void);
+
+
+			/*********************************************************************\
+			|* Runtime: toggle a breakpoint on/off, returning if it now active
+			\*********************************************************************/
+			bool toggleBreakpoint(int address);
 
 
 

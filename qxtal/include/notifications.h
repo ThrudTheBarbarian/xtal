@@ -43,6 +43,11 @@
 #define NTFY_ASM_DONE			"N:asm:done"
 
 /*************************************************************************\
+|* Notification constant: Prepare to simulate
+\*************************************************************************/
+#define NTFY_SIM_START			"N:sim:start"
+
+/*************************************************************************\
 |* Notification constant: Simulation complete
 \*************************************************************************/
 #define NTFY_SIM_DONE			"N:sim:done"

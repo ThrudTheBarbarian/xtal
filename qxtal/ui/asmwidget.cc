@@ -1,3 +1,5 @@
+#include <QMouseEvent>
+
 #include "asmwidget.h"
 #include "asmitem.h"
 
@@ -20,8 +22,20 @@ AsmWidget::AsmWidget(QWidget *parent)
 	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);
 	nc->addObserver([=](NotifyData &nd){_binaryLoaded(nd);}, NTFY_BINARY_LOADED);
 	nc->addObserver([=](NotifyData &nd){_traceSelection(nd);}, NTFY_TRACE_SEL_CHG);
+	nc->addObserver([=](NotifyData &nd){_prepareToSimulate(nd);}, NTFY_SIM_START);
 
 
+	/*************************************************************************\
+	|* Create the icons
+	\*************************************************************************/
+	QPixmap blank = QPixmap(12,12);
+	blank.fill(Qt::transparent);
+	_blank	= QIcon(blank);
+	_redDot	= QIcon(":/icon/rsrc/icons/red-dot.png");
+
+	/*************************************************************************\
+	|* Map instructions
+	\*************************************************************************/
 	_insnMap[iADC] = "adc";
 	_insnMap[iAND] = "and";
 	_insnMap[iASL] = "asl";
@@ -79,6 +93,9 @@ AsmWidget::AsmWidget(QWidget *parent)
 	_insnMap[iTYA] = "tya";
 
 
+	/*************************************************************************\
+	|* Connect up the selection-changed handler
+	\*************************************************************************/
 	QObject::connect(this, &AsmWidget::currentItemChanged,
 					 this, &AsmWidget::_handleSelectionChanged);
 	}
@@ -136,6 +153,7 @@ void AsmWidget::_binaryLoaded(NotifyData& nd)
 			item->setText(QString::fromStdString(info.label + ":"));
 			item->setInfoId(infoId);
 			item->setData(Qt::FontRole, _font);
+			item->setIcon(_blank);
 			addItem(item);
 			}
 
@@ -274,6 +292,7 @@ void AsmWidget::_binaryLoaded(NotifyData& nd)
 		item->setText(QString::fromStdString(txt));
 		item->setInfoId(infoId);
 		item->setData(Qt::FontRole, _font);
+		item->setIcon(_blank);
 		addItem(item);
 
 		_itemMap[info.addr] = item;
@@ -294,6 +313,20 @@ void AsmWidget::_simulatorReady(NotifyData& nd)
 	_hw = static_cast<Atari *>(nd.voidValue());
 	}
 
+
+/*****************************************************************************\
+|* The simulator is about to run
+\*****************************************************************************/
+void AsmWidget::_prepareToSimulate(NotifyData& nd)
+	{
+	//int address = nd.integerValue();
+	//if (address == _org)
+	//	{
+		_infoList.clear();
+		_lines.clear();
+		_itemMap.clear();
+	//	}
+	}
 
 
 /*****************************************************************************\
@@ -339,4 +372,53 @@ void AsmWidget::_handleSelectionChanged(QListWidgetItem *current,
 			}
 		}
 	_propagateSelection = true;
+	}
+
+
+
+#pragma mark -- events
+
+/*****************************************************************************\
+|* Event: check if we want to toggle a breakpoint
+\*****************************************************************************/
+void AsmWidget::mousePressEvent(QMouseEvent *event)
+	{
+	if (event->button() != Qt::RightButton)
+		{
+		event->ignore();
+		QListWidget::mousePressEvent(event);
+		return;
+		}
+
+	AsmItem *item	= static_cast<AsmItem *>(itemAt(event->pos()));
+	if (item != nullptr)
+		{
+		if (item->type() != AsmItem::TYPE_BLANK)
+			{
+			int infoId		= item->infoId();
+			if (infoId >=0 && infoId < _infoList.size())
+				_toggleBreakpoint(item);
+			}
+		}
+	}
+
+
+
+
+#pragma mark -- Private methods
+
+
+
+/*****************************************************************************\
+|* Private Method: toggle a breakpoint on or off
+\*****************************************************************************/
+void AsmWidget::_toggleBreakpoint(AsmItem *item)
+	{
+	int infoId = item->infoId();
+	Simulator::InstructionInfo info = _infoList[infoId];
+	bool active = _hw->sim()->toggleBreakpoint(info.addr);
+
+	item->setIcon(active ? _redDot : _blank);
+
+	fprintf(stderr, "Toggling breakkpoint at $%04x\n", info.addr);
 	}
