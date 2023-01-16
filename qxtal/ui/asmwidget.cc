@@ -22,7 +22,6 @@ AsmWidget::AsmWidget(QWidget *parent)
 	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);
 	nc->addObserver([=](NotifyData &nd){_binaryLoaded(nd);}, NTFY_BINARY_LOADED);
 	nc->addObserver([=](NotifyData &nd){_traceSelection(nd);}, NTFY_TRACE_SEL_CHG);
-	nc->addObserver([=](NotifyData &nd){_prepareToSimulate(nd);}, NTFY_SIM_START);
 
 
 	/*************************************************************************\
@@ -314,20 +313,6 @@ void AsmWidget::_simulatorReady(NotifyData& nd)
 	}
 
 
-/*****************************************************************************\
-|* The simulator is about to run
-\*****************************************************************************/
-void AsmWidget::_prepareToSimulate(NotifyData& nd)
-	{
-	//int address = nd.integerValue();
-	//if (address == _org)
-	//	{
-		_infoList.clear();
-		_lines.clear();
-		_itemMap.clear();
-	//	}
-	}
-
 
 /*****************************************************************************\
 |* Notification: A binary was loaded
@@ -335,7 +320,7 @@ void AsmWidget::_prepareToSimulate(NotifyData& nd)
 void AsmWidget::_traceSelection(NotifyData& nd)
 	{
 	TraceItem *item = static_cast<TraceItem *>(nd.voidValue());
-	if (_itemMap.find(item->regs().pc) != _itemMap.end())
+	if ((item != nullptr) && _itemMap.find(item->regs().pc) != _itemMap.end())
 		{
 		_propagateSelection = false;
 		setCurrentItem(_itemMap[item->regs().pc]);

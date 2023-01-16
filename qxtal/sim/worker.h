@@ -58,6 +58,11 @@ class Worker : public QThread
 		\*********************************************************************/
 		void _playForward(uint32_t address);
 
+		/*********************************************************************\
+		|* Reset the simulator
+		\*********************************************************************/
+		void _reset(uint32_t address);
+
 	protected:
 		/*********************************************************************\
 		|* Main loop that performs the scheduled tasks in order

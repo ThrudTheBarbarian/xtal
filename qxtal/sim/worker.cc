@@ -107,6 +107,10 @@ void Worker::run(void)
 				_playForward(wi.arg);
 				break;
 
+			case CMD_RESET:
+				_reset(wi.arg);
+				break;
+
 			default:
 				qDebug() << "Unknown command received by worker: " << wi.cmd;
 			}
@@ -162,7 +166,6 @@ void Worker::_playForward(uint32_t address)
 	\*************************************************************************/
 	while (!sim->shouldExit())
 		{
-		fprintf(stderr, "address: $%04x\n", sim->regs().pc);
 		/*********************************************************************\
 		|* Check to see if we've been requested to stop
 		\*********************************************************************/
@@ -210,6 +213,13 @@ void Worker::_playForward(uint32_t address)
 	}
 
 
+/*****************************************************************************\
+|* Private method: reset the simulator
+\*****************************************************************************/
+void Worker::_reset(uint32_t address)
+	{
+	_hw->sim()->reset();
+	}
 
 
 

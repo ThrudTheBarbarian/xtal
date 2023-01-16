@@ -95,6 +95,9 @@ void StateWidget::paintEvent(QPaintEvent *)
 void StateWidget::_stateChanged(NotifyData &nd)
 	{
 	TraceItem *item = static_cast<TraceItem *>(nd.voidValue());
-	_regs = item->regs();
-	repaint();
+	if (item)
+		{
+		_regs = item->regs();
+		repaint();
+		}
 	}

@@ -21,6 +21,7 @@ TraceWidget::TraceWidget(QWidget *parent)
 	auto nc = NotifyCenter::defaultNotifyCenter();
 	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);
 	nc->addObserver([=](NotifyData &nd){_asmSelectionChanged(nd);}, NTFY_ASM_SEL_CHG);
+	nc->addObserver([=](NotifyData &nd){_prepareToSimulate(nd);}, NTFY_SIM_START);
 
 	QObject::connect(this, &TraceWidget::currentItemChanged,
 					 this, &TraceWidget::_handleSelectionChanged);
@@ -117,6 +118,24 @@ void TraceWidget::_asmSelectionChanged(NotifyData &nd)
 		}
 	}
 
+
+/*****************************************************************************\
+|* The simulator is about to run
+\*****************************************************************************/
+void TraceWidget::_prepareToSimulate(NotifyData& nd)
+	{
+	clear();
+	_selected.clear();
+	_itemMap.clear();
+	_previousRow = 0;
+	}
+
+
+#pragma mark -- Events
+
+
+
+
 /*****************************************************************************\
 |* Signal handler: our selection changed
 \*****************************************************************************/
@@ -155,15 +174,18 @@ void TraceWidget::_handleSelectionChanged(QListWidgetItem *current,
 			for (int i=_previousRow; i<thisRow; i++)
 				{
 				TraceItem *ti = static_cast<TraceItem *>(item(i));
-				MemoryOp op   = ti->op0();
-				if (op.isValid)
-					ops.push_back(op);
-				op = ti->op1();
-				if (op.isValid)
-					ops.push_back(op);
-				op = ti->op2();
-				if (op.isValid)
-					ops.push_back(op);
+				if (ti != nullptr)
+					{
+					MemoryOp op   = ti->op0();
+					if (op.isValid)
+						ops.push_back(op);
+					op = ti->op1();
+					if (op.isValid)
+						ops.push_back(op);
+					op = ti->op2();
+					if (op.isValid)
+						ops.push_back(op);
+					}
 				}
 
 		else if (_previousRow > thisRow)
@@ -171,15 +193,18 @@ void TraceWidget::_handleSelectionChanged(QListWidgetItem *current,
 			for (int i=_previousRow-1; i>=thisRow; i--)
 				{
 				TraceItem *ti = static_cast<TraceItem *>(item(i));
-				MemoryOp op   = ti->op0();
-				if (op.isValid)
-					ops.push_back(op);
-				op = ti->op1();
-				if (op.isValid)
-					ops.push_back(op);
-				op = ti->op2();
-				if (op.isValid)
-					ops.push_back(op);
+				if (ti != nullptr)
+					{
+					MemoryOp op   = ti->op0();
+					if (op.isValid)
+						ops.push_back(op);
+					op = ti->op1();
+					if (op.isValid)
+						ops.push_back(op);
+					op = ti->op2();
+					if (op.isValid)
+						ops.push_back(op);
+					}
 				}
 			forwards = false;
 			}

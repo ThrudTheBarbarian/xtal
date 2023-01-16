@@ -29,6 +29,12 @@ class TraceWidget : public QListWidget
 	GET(int, previousRow);			// Previously selected row
 
 	private:
+
+		/*********************************************************************\
+		|* Notification: prepare to simulate
+		\*********************************************************************/
+		void _prepareToSimulate(NotifyData &nd);
+
 		/*********************************************************************\
 		|* Listen for the simulator to become ready
 		\*********************************************************************/

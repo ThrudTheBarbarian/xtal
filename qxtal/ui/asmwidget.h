@@ -50,11 +50,6 @@ class AsmWidget : public QListWidget
 		void _traceSelection(NotifyData &nd);
 
 		/*********************************************************************\
-		|* Notification: prepare to simulate
-		\*********************************************************************/
-		void _prepareToSimulate(NotifyData &nd);
-
-		/*********************************************************************\
 		|* PRivate method: Toggle breakpoint at an instruction
 		\*********************************************************************/
 		void _toggleBreakpoint(AsmItem *item);

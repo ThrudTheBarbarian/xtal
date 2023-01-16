@@ -151,6 +151,7 @@ void MainWindow::_toolbarRunSim(void)
 	auto nc = NotifyCenter::defaultNotifyCenter();
 	nc->notify(NTFY_SIM_START, (int)_address);
 
+	_hw->worker()->schedule(CMD_RESET, _address);
 	_hw->worker()->schedule(CMD_PLAY_FORWARD, _address);
 	}
 

@@ -13,7 +13,8 @@ typedef enum
 	CMD_STEP_BACK,
 	CMD_STOP,
 	CMD_STEP_FORWARD,
-	CMD_PLAY_FORWARD
+	CMD_PLAY_FORWARD,
+	CMD_RESET
 	} Command;
 
 #endif // COMMANDS_H
