@@ -11,6 +11,8 @@
 #include "sim/atari.h"
 #include "NotifyCenter.h"
 
+class MainWindow;
+
 class MemoryWidget : public QWidget
 	{
 	Q_OBJECT
@@ -18,9 +20,9 @@ class MemoryWidget : public QWidget
 	/*************************************************************************\
 	|* Properties
 	\*************************************************************************/
-	GET(Atari*, hw);				// Hardware being simulated
-	GET(uint16_t, offset);			// Where to display values for
-	GET(QLineEdit *, memStart);		// Pointer to mem-start editor
+	GET(Atari*, hw);						// Hardware being simulated
+	GET(uint16_t, offset);					// Where to display values for
+	GET(QLineEdit *, memStart);				// Pointer to mem-start editor
 
 	private:
 		uint8_t *_mem;				// Pointer to simulator memory
@@ -50,6 +52,7 @@ class MemoryWidget : public QWidget
 		QRect	_hm2Rect;			// Box for heatmap 2
 		QString _hm2Str;			// String for display
 
+
 		/*********************************************************************\
 		|* Paint a heatmap
 		\*********************************************************************/
@@ -71,6 +74,11 @@ class MemoryWidget : public QWidget
 		|* Handle mouse moves
 		\*********************************************************************/
 		void mouseMoveEvent(QMouseEvent *e);
+
+		/*********************************************************************\
+		|* Handle mouse clicks
+		\*********************************************************************/
+		void mousePressEvent(QMouseEvent *e);
 
 	public:
 		MemoryWidget(QWidget *parent = nullptr);

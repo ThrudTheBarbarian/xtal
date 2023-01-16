@@ -2,6 +2,7 @@
 #include <QColor>
 #include <QPainter>
 
+#include "mainwindow.h"
 #include "memorywidget.h"
 #include "notifications.h"
 
@@ -428,6 +429,31 @@ void MemoryWidget:: mouseMoveEvent( QMouseEvent *e )
 						.arg(idx, 2, 16,QLatin1Char('0'))
 						.arg(_page[idx]);
 
+		}
+	else
+		_hm2Str = "";
+
+	repaint();
+	}
+
+
+/*****************************************************************************\
+|* Event: We got a mouse-move (without needing a button). Check to see if we
+|* want to update the memory region text
+\*****************************************************************************/
+void MemoryWidget:: mousePressEvent( QMouseEvent *e )
+	{
+	int x = e->pos().x();
+	int y = e->pos().y();
+
+	if (_hm2Rect.contains(x, y))
+		{
+		int X		= (x - _hm2Rect.x()) / 16;
+		int Y		= (y - _hm2Rect.y()) / 16;
+		_offset		= 256 * (X + Y*16);
+
+		QString txt = QString("%1").arg(_offset, 2, 16, QLatin1Char('0'));
+		_memStart->setText(txt);
 		}
 	else
 		_hm2Str = "";

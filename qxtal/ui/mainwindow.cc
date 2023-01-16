@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
 	\*************************************************************************/
 	auto nc = NotifyCenter::defaultNotifyCenter();
 	nc->addObserver([=](NotifyData &nd){_binaryLoaded(nd);}, NTFY_BINARY_LOADED);
+	nc->addObserver([=](NotifyData &nd){_simulationDone(nd);}, NTFY_SIM_DONE);
 
 	/*************************************************************************\
 	|* Configure the UI object
@@ -55,10 +56,12 @@ MainWindow::MainWindow(QWidget *parent)
 					 ui->memoryWidget, &MemoryWidget::updateState);
 
 	/*************************************************************************\
-	|* Connect up the toolbar
+	|* Configure the toolbar
 	\*************************************************************************/
 	QObject::connect(ui->toolBar, &QToolBar::actionTriggered,
 					 this, &MainWindow::_toolbarAction);
+	ui->actionSimulate->setEnabled(false);
+	ui->actionStop->setEnabled(false);
 
 	/*************************************************************************\
 	|* Connect up the menu for what counts/pages to display
@@ -143,6 +146,7 @@ void MainWindow::_toolbarLoadXEX(void)
 \*****************************************************************************/
 void MainWindow::_toolbarRunSim(void)
 	{
+	ui->actionStop->setEnabled(true);
 	_hw->worker()->schedule(CMD_PLAY_FORWARD, _address);
 	}
 
@@ -166,5 +170,15 @@ void MainWindow::_toolbarStopSim(void)
 void MainWindow::_binaryLoaded(NotifyData& nd)
 	{
 	_address = nd.integerValue();
+	ui->actionSimulate->setEnabled(true);
+	}
+
+
+/*****************************************************************************\
+|* Simulation is complete
+\*****************************************************************************/
+void MainWindow::_simulationDone(NotifyData& nd)
+	{
+	ui->actionStop->setEnabled(false);
 	}
 

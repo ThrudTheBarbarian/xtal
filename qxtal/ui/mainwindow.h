@@ -24,10 +24,10 @@ class MainWindow : public QMainWindow
 	/*************************************************************************\
 	|* Properties
 	\*************************************************************************/
-	GETSET(Simulator*, sim, Sim);		// Simulator engine
-	GETSET(IO*, io, Io);				// Input/Output channel
-	GETSET(Atari*, hw, Hw);				// Atari model with BIOS etc
-	GET(uint32_t, address);				// Where to run from
+	GETSET(Simulator*, sim, Sim);					// Simulator engine
+	GETSET(IO*, io, Io);							// Input/Output channel
+	GETSET(Atari*, hw, Hw);							// Atari model with BIOS etc
+	GET(uint32_t, address);							// Where to run from
 
 	private:
 		Ui::MainWindow *ui;
@@ -36,6 +36,11 @@ class MainWindow : public QMainWindow
 		|* Notification: a binary was just loaded
 		\*********************************************************************/
 		void _binaryLoaded(NotifyData &nd);
+
+		/*********************************************************************\
+		|* Notification: simulation over
+		\*********************************************************************/
+		void _simulationDone(NotifyData &nd);
 
 		/*********************************************************************\
 		|* UI : Load an XEX file

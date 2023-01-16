@@ -1,6 +1,7 @@
 #include <QDebug>
 
 #include "atari.h"
+#include "NotifyCenter.h"
 #include "notifications.h"
 #include "worker.h"
 
@@ -204,6 +205,9 @@ void Worker::_playForward(uint32_t address)
 		}
 
 	_address = sim->regs().pc;
+
+	auto nc = NotifyCenter::defaultNotifyCenter();
+	nc->notify(NTFY_SIM_DONE, (int)_address);
 	}
 
 
