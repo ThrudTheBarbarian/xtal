@@ -720,23 +720,6 @@ Simulator::ProfileData Simulator::profileInfo(void)
 	}
 
 
-/*****************************************************************************\
-|* Runtime: toggle a breakpoint on/off, returning if it now active
-\*****************************************************************************/
-bool Simulator::toggleBreakpoint(int address)
-	{
-	bool active	= false;
-	address &= 0xFFFF;
-	if ((_memState[address] & MS_BREAKPOINT) == MS_BREAKPOINT)
-		_memState[address] &= ~MS_BREAKPOINT;
-	else
-		{
-		_memState[address] |= MS_BREAKPOINT;
-		active = true;
-		}
-	return active;
-	}
-
 #pragma mark -- labels
 
 
@@ -996,6 +979,47 @@ Simulator::InstructionInfo Simulator::insnInfo(uint32_t address)
 		}
 
 	return info;
+	}
+
+
+#pragma mark -- Breakpoints
+
+
+/*****************************************************************************\
+|* Breakpoint: return a breakpoint if one is active
+\*****************************************************************************/
+PredicateInfo Simulator::breakpointAt(uint32_t address)
+	{
+	PredicateInfo info = PredicateInfo::nilPredicate();
+
+	address &= 0xFFFF;
+	if (_breakpoints.count(address) != 0)
+		if ((_memState[address] & MS_BREAKPOINT) == MS_BREAKPOINT)
+			info = _breakpoints[address];
+
+	return info;
+	}
+
+
+/*****************************************************************************\
+|* Breakpoint: set a breakpoint
+\*****************************************************************************/
+void Simulator::setBreakpoint(int address, PredicateInfo info)
+	{
+	address &= 0xFFFF;
+	_memState[address] |= MS_BREAKPOINT;
+	_breakpoints[address] = info;
+	}
+
+
+/*****************************************************************************\
+|* Breakpoint: clear a breakpoint
+\*****************************************************************************/
+void Simulator::clearBreakpoint(int address)
+	{
+	address &= 0xFFFF;
+	_memState[address] &= ~MS_BREAKPOINT;
+	_breakpoints[address] = PredicateInfo::nilPredicate();
 	}
 
 #pragma mark -- Private Methods

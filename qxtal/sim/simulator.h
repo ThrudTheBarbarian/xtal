@@ -6,6 +6,7 @@
 #include <cstdarg>
 #include <map>
 
+#include "predicates/predicateinfo.h"
 #include "properties.h"
 #include "instructions.h"
 #include "debug.h"
@@ -220,6 +221,11 @@ class Simulator : public QObject
 				} InstructionInfo;
 
 
+			/*********************************************************************\
+			|* Associate predicates describing a breakpoint to a memory location
+			\*********************************************************************/
+			typedef std::map<uint32_t, PredicateInfo> BreakpointMap;
+
 		/*************************************************************************\
 		|* Properties
 		\*************************************************************************/
@@ -238,6 +244,7 @@ class Simulator : public QObject
 		GET(uint8_t *, mem);						// Simulator RAM
 		GETSET(bool, traceMemory, TraceMemory);		// Whether to trace access
 		GET(bool, readingInsn);						// Currently reading insns
+		GET(BreakpointMap, breakpoints);			// Map of breakpoints
 
 		/*************************************************************************\
 		|* Internal state
@@ -353,6 +360,24 @@ class Simulator : public QObject
 							   QObject *parent = nullptr);
 			~Simulator(void);
 
+
+			/*********************************************************************\
+			|* Breakpoint: return a breakpoint if one is active
+			\*********************************************************************/
+			PredicateInfo breakpointAt(uint32_t address);
+
+			/*****************************************************************************\
+			|* Breakpoint: set a breakpoint
+			\*****************************************************************************/
+			void setBreakpoint(int address, PredicateInfo info);
+
+			/*****************************************************************************\
+			|* Breakpoint: clear a breakpoint
+			\*****************************************************************************/
+			void clearBreakpoint(int address);
+
+
+
 			/*********************************************************************\
 			|* Add a callback
 			\*********************************************************************/
@@ -466,12 +491,6 @@ class Simulator : public QObject
 			|* Runtime: process the next instruction
 			\*********************************************************************/
 			void next(void);
-
-
-			/*********************************************************************\
-			|* Runtime: toggle a breakpoint on/off, returning if it now active
-			\*********************************************************************/
-			bool toggleBreakpoint(int address);
 
 
 

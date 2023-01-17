@@ -7,6 +7,7 @@
 #include "sim/atari.h"
 #include "NotifyCenter.h"
 
+struct PredicateInfo;
 class AsmItem;
 class AsmWidget : public QListWidget
 	{
@@ -50,7 +51,7 @@ class AsmWidget : public QListWidget
 		void _traceSelection(NotifyData &nd);
 
 		/*********************************************************************\
-		|* PRivate method: Toggle breakpoint at an instruction
+		|* Private method: Toggle breakpoint at an instruction
 		\*********************************************************************/
 		void _toggleBreakpoint(AsmItem *item, int x);
 
@@ -78,6 +79,14 @@ class AsmWidget : public QListWidget
 		explicit AsmWidget(QWidget *parent = nullptr);
 
 	public slots:
+
+	private slots:
+
+		/*********************************************************************\
+		|* Private slot: Toggle breakpoint at an instruction
+		\*********************************************************************/
+		void _bpEdited(PredicateInfo info);
+
 	};
 
 #endif // ASMWIDGET_H

@@ -10,6 +10,15 @@
 
 #include "predicates/predicateeditor.h"
 
+
+typedef struct
+	{
+	uint32_t address;
+	AsmItem *item;
+
+	} PredicateContextInfo;
+
+
 /*****************************************************************************\
 |* Constructor
 \*****************************************************************************/
@@ -395,7 +404,6 @@ void AsmWidget::mousePressEvent(QMouseEvent *event)
 #pragma mark -- Private methods
 
 
-
 /*****************************************************************************\
 |* Private Method: toggle a breakpoint on or off
 \*****************************************************************************/
@@ -404,12 +412,18 @@ void AsmWidget::_toggleBreakpoint(AsmItem *item, int x)
 	int infoId = item->infoId();
 	Simulator::InstructionInfo info = _infoList[infoId];
 
-	bool active = _hw->sim()->toggleBreakpoint(info.addr);
-	item->setIcon(active ? _redDot : _blank);
+	PredicateInfo bpInfo = _hw->sim()->breakpointAt(info.addr);
+	bool active = (bpInfo.num > 0);
 
-	if (active)
+	if (!active)
 		{
+		fprintf(stderr, "Editing breakkpoint at $%04x\n", info.addr);
 		PredicateEditor *pe = new PredicateEditor("Configure breakpoint", this);
+		PredicateContextInfo *pci = new PredicateContextInfo();
+		pci->item = item;
+		pci->address = info.addr;
+
+		pe->setContext(pci);
 
 		QStringList what = {"Always", "A", "X", "Y", "Status", "Memory", "022222"};
 		pe->setWhat(what);
@@ -422,8 +436,39 @@ void AsmWidget::_toggleBreakpoint(AsmItem *item, int x)
 							"is not equal to"};
 		pe->setConditions(cond);
 		pe->addRow();
+
+		connect(pe, &PredicateEditor::ok, this, &AsmWidget::_bpEdited);
 		pe->show();
 		}
+	else
+		{
+		// Clear
+		bpInfo.release();
+		_hw->sim()->clearBreakpoint(info.addr);
+		item->setIcon(_blank);
+		fprintf(stderr, "Clearing breakkpoint at $%04x\n", info.addr);
+		}
 
-	fprintf(stderr, "Toggling breakkpoint at $%04x\n", info.addr);
+	}
+
+
+
+
+#pragma mark -- Private slots
+
+
+
+/*****************************************************************************\
+|* Private Method: Breakpoint edited ok
+\*****************************************************************************/
+void AsmWidget::_bpEdited(PredicateInfo info)
+	{
+	PredicateEditor *editor = static_cast<PredicateEditor *>(sender());
+	auto pci = static_cast<PredicateContextInfo *>(editor->context());
+
+	_hw->sim()->setBreakpoint(pci->address, info);
+	pci->item->setIcon(_redDot);
+
+	delete pci;
+	editor->deleteLater();
 	}

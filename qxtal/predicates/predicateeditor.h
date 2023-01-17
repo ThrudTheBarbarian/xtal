@@ -9,6 +9,7 @@ class QLabel;
 class QVBoxLayout;
 
 #include "properties.h"
+#include "predicateinfo.h"
 
 class PredicateEditor : public QDialog
 	{
@@ -39,17 +40,21 @@ class PredicateEditor : public QDialog
 	GET(QVBoxLayout*, saLayout);				// Scrollarea layout
 	GET(QStringList, what);						// Possible values for 'what'
 	GETSET(QStringList, conditions, Conditions);// Possible conditions
+	GETSET(void*, context, Context);			// Context key
 
 	private:
 		QWidget *_lastEntry;					// Dummy last predicate widget
 		IntList _how;							// How to represent predicate
 		RefMap _condMap;						// Condition-widget map
 		RefMap _valMap;							// Value-widget map
+		RefMap _delMap;							// Delete-widget map
+		RefMap _hideMap;						// What to hide if <2 items
+
 
 		/*********************************************************************\
-		|* Add a row (callback from signal)
+		|* Check to see if there's only one real item left in the list
 		\*********************************************************************/
-		void _addRow(void);
+		void _checkIfLastItem(void);
 
 	public:
 		PredicateEditor(QString title = "",QWidget *parent = 0);
@@ -77,11 +82,30 @@ class PredicateEditor : public QDialog
 		QSize sizeHint(void);
 
 	private slots:
+
 		/*********************************************************************\
 		|* User changed 'what'
 		\*********************************************************************/
 		void _whatChanged(int index);
 
+		/*********************************************************************\
+		|* OK / Cancel callbacks
+		\*********************************************************************/
+		void _cancel(void);
+		void _ok(void);
+
+		/*********************************************************************\
+		|* Add/delete a row (callback from signal)
+		\*********************************************************************/
+		void _addRow(void);
+		void _delRow(void);
+
+	signals:
+		/*********************************************************************\
+		|* User cancelled out
+		\*********************************************************************/
+		void cancel(void);
+		void ok(PredicateInfo info);
 	};
 
 #endif // PREDICATEEDITOR_H

@@ -55,6 +55,7 @@ set(PROJECT_SOURCES
         sim/worker.cc
         predicates/predicateeditor.h
         predicates/predicateeditor.cc
+        predicates/predicateinfo.h
         ../shared/Classes/Util/StringUtils.h
         ../shared/Classes/Util/StringUtils.cc
         ../shared/Classes/Util/NotifyCenter.h
