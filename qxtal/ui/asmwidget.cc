@@ -8,6 +8,8 @@
 #include "traceitem.h"
 #include "ui/fontmgr.h"
 
+#include "predicates/predicateeditor.h"
+
 /*****************************************************************************\
 |* Constructor
 \*****************************************************************************/
@@ -382,7 +384,7 @@ void AsmWidget::mousePressEvent(QMouseEvent *event)
 			{
 			int infoId		= item->infoId();
 			if (infoId >=0 && infoId < _infoList.size())
-				_toggleBreakpoint(item);
+				_toggleBreakpoint(item, event->pos().x());
 			}
 		}
 	}
@@ -397,13 +399,31 @@ void AsmWidget::mousePressEvent(QMouseEvent *event)
 /*****************************************************************************\
 |* Private Method: toggle a breakpoint on or off
 \*****************************************************************************/
-void AsmWidget::_toggleBreakpoint(AsmItem *item)
+void AsmWidget::_toggleBreakpoint(AsmItem *item, int x)
 	{
 	int infoId = item->infoId();
 	Simulator::InstructionInfo info = _infoList[infoId];
-	bool active = _hw->sim()->toggleBreakpoint(info.addr);
 
+	bool active = _hw->sim()->toggleBreakpoint(info.addr);
 	item->setIcon(active ? _redDot : _blank);
+
+	if (active)
+		{
+		PredicateEditor *pe = new PredicateEditor("Configure breakpoint", this);
+
+		QStringList what = {"Always", "A", "X", "Y", "Status", "Memory", "022222"};
+		pe->setWhat(what);
+
+		QStringList cond = {"is less than",
+							"is less than or equal to",
+							"is equal to",
+							"is greater than or equal to",
+							"is greater than",
+							"is not equal to"};
+		pe->setConditions(cond);
+		pe->addRow();
+		pe->show();
+		}
 
 	fprintf(stderr, "Toggling breakkpoint at $%04x\n", info.addr);
 	}

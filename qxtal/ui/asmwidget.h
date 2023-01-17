@@ -52,7 +52,7 @@ class AsmWidget : public QListWidget
 		/*********************************************************************\
 		|* PRivate method: Toggle breakpoint at an instruction
 		\*********************************************************************/
-		void _toggleBreakpoint(AsmItem *item);
+		void _toggleBreakpoint(AsmItem *item, int x);
 
 
 		/*********************************************************************\

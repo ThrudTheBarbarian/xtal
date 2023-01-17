@@ -53,6 +53,8 @@ set(PROJECT_SOURCES
         sim/display.cc
         sim/worker.h
         sim/worker.cc
+        predicates/predicateeditor.h
+        predicates/predicateeditor.cc
         ../shared/Classes/Util/StringUtils.h
         ../shared/Classes/Util/StringUtils.cc
         ../shared/Classes/Util/NotifyCenter.h
