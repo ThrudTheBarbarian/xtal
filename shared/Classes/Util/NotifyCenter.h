@@ -53,8 +53,7 @@
 #include <chrono>
 #include <vector>
 
-#include "properties.h"
-#include "macros.h"
+#include "structures.h"
 
 /*****************************************************************************\
 |* Notification strings as defines to reduce typos

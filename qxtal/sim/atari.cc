@@ -516,6 +516,28 @@ Atari::Atari(Simulator* sim, IO *io, bool loadLabels)
 	_dpy->init();
 
 	/*************************************************************************\
+	|* Listen for reload notifications
+	\*************************************************************************/
+	auto nc = NotifyCenter::defaultNotifyCenter();
+	nc->addObserver([=](NotifyData &nd){_reload(nd);}, NTFY_XEX_CHANGED);
+
+	/*************************************************************************\
+	|* Reset to start
+	\*************************************************************************/
+	_reset();
+	}
+
+/*****************************************************************************\
+|* Reset the simulator
+\*****************************************************************************/
+void Atari::_reset(void)
+	{
+	/*************************************************************************\
+	|* Zero everything
+	\*************************************************************************/
+	_sim->reset();
+
+	/*************************************************************************\
 	|* Adds 52K bytes of RAM at $0
 	\*************************************************************************/
 	_sim->addRAM(0, MAX_RAM);
@@ -634,6 +656,19 @@ Atari * Atari::instance(Simulator* sim, IO *io, bool loadLabels)
 		_a8 = new Atari(sim, io, loadLabels);
 	return _a8;
 	}
+
+/*****************************************************************************\
+|* Notification: we need to reload the binary
+\*****************************************************************************/
+void Atari::_reload(NotifyData &nd)
+	{
+	_reset();
+
+	String path = nd.stringValue();
+	fprintf(stderr, "Reloading %s\n", path.c_str());
+	load(path);
+	}
+
 
 /*****************************************************************************\
 |* Load a binary file. This (slightly ab)uses the Atari binary load format to

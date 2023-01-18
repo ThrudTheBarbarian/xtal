@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QFileSystemWatcher>
 
 #include "NotifyCenter.h"
 #include "properties.h"
@@ -28,6 +29,7 @@ class MainWindow : public QMainWindow
 	GETSET(IO*, io, Io);							// Input/Output channel
 	GETSET(Atari*, hw, Hw);							// Atari model with BIOS etc
 	GET(uint32_t, address);							// Where to run from
+	GET(QFileSystemWatcher, fsWatcher);				// Monitors XEX files
 
 	private:
 		Ui::MainWindow *ui;
@@ -69,5 +71,10 @@ class MainWindow : public QMainWindow
 	  |* UI : we clicked on the load button
 	  \*********************************************************************/
 	  void _toolbarAction(QAction *a);
+
+	  /*********************************************************************\
+	  |* UI : we clicked on the load button
+	  \*********************************************************************/
+	  void _xexChanged(const QString &path);
 	};
 #endif // MAINWINDOW_H

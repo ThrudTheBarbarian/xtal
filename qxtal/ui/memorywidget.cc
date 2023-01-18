@@ -18,16 +18,7 @@ MemoryWidget::MemoryWidget(QWidget *parent)
 	/*************************************************************************\
 	|* Initialise the arrays
 	\*************************************************************************/
-	memset(_written, 0x00, sizeof(_written));
-	memset(_last, 0x00, sizeof(_last));
-
-	memset(_wr, 0x00, sizeof(_wr));
-	memset(_pc, 0x00, sizeof(_pc));
-	memset(_rd, 0x00, sizeof(_rd));
-
-	memset(_pgWr, 0x00, sizeof(_pgWr));
-	memset(_pgRd, 0x00, sizeof(_pgRd));
-	memset(_pgPc, 0x00, sizeof(_pgPc));
+	_reset();
 
 	/*************************************************************************\
 	|* Fetch the font
@@ -54,6 +45,7 @@ MemoryWidget::MemoryWidget(QWidget *parent)
 	auto nc = NotifyCenter::defaultNotifyCenter();
 	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);
 	nc->addObserver([=](NotifyData &nd){_assemblyComplete(nd);}, NTFY_ASM_DONE);
+	nc->addObserver([=](NotifyData &nd){_reload(nd);}, NTFY_XEX_CHANGED);
 
 
 	/*************************************************************************\
@@ -92,6 +84,82 @@ void MemoryWidget::setMemStartEditor(QLineEdit *editor)
 	QObject::connect(_memStart, &QLineEdit::textChanged,
 					 this,		&MemoryWidget::memStartChanged);
 	}
+/*****************************************************************************\
+|* Paint a heatmap
+\*****************************************************************************/
+void MemoryWidget::_heatmap(QPainter &painter,
+							uint32_t *data,
+							QRect& r,
+							int offset)
+	{
+	int x = r.x();
+	int y = r.y();
+	int w = r.width();
+	int h = r.height();
+
+	painter.setPen(QColor(128,128,128,255));
+	painter.drawRect(x,y,w+1,h+1);
+	x++;
+	y++;
+
+	QPixmap pix(256,256);
+	pix.fill();
+	QPainter P(&pix);
+
+	const int dx	= 16;
+	const int dw	= dx - 1;
+	int idx			= offset;
+
+	for (int i=0; i<16; i++)
+		{
+		for (int j=0; j<16; j++)
+			{
+			int val = data[idx++];
+
+			if (val > 0)
+				{
+				if (val <= 4)
+					P.fillRect(j*dx,i*dx,dw,dw,_grn[val -1]);
+
+				else if (val < 4 + 16)
+					P.fillRect(j*dx,i*dx,dw,dw,_blu[(val-4)/4]);
+
+				else if (val < 4 + 16 + 64)
+					P.fillRect(j*dx,i*dx,dw,dw,_red[(val-16-4)/16]);
+
+				else if (val <= 4 + 16 + 64 + 256)
+					{
+					P.fillRect(j*dx,i*dx,dw,dw,_black);
+					int col = (val - 64 - 16 - 4) / 64;
+					P.fillRect(j*dx+dw/4+1,i*dx+dw/4+1,dw/2,dw/2,_grn[col]);
+					}
+
+				else if (val <= 4 + 16 + 64 + 256 + 1024)
+					{
+					P.fillRect(j*dx,i*dx,dw,dw,_black);
+					int col = (val - 256 - 64 - 16 - 4) / 256;
+					P.fillRect(j*dx+dw/4+1,i*dx+dw/4+1,dw/2,dw/2,_blu[col]);
+					}
+
+				else if (val <= 4 + 16 + 64 + 256 + 1024 + 4096)
+					{
+					P.fillRect(j*dx,i*dx,dw,dw,_black);
+					int col = (val - 1024 - 256 - 64 - 16 - 4) / 1024;
+					P.fillRect(j*dx+dw/4+1,i*dx+dw/4+1,dw/2,dw/2,_red[col]);
+					}
+
+				else
+					P.fillRect(j*dx,i*dx,dw,dw,_black);
+				}
+			}
+		}
+
+	painter.drawPixmap(x, y, pix);
+	}
+
+
+#pragma mark -- Private methods
+
 
 /*****************************************************************************\
 |* Paint the widget
@@ -178,77 +246,22 @@ void MemoryWidget::paintEvent(QPaintEvent *)
 
 
 /*****************************************************************************\
-|* Paint a heatmap
+|* Reset the widget
 \*****************************************************************************/
-void MemoryWidget::_heatmap(QPainter &painter,
-							uint32_t *data,
-							QRect& r,
-							int offset)
+void MemoryWidget::_reset(void)
 	{
-	int x = r.x();
-	int y = r.y();
-	int w = r.width();
-	int h = r.height();
+	memset(_written, 0x00, sizeof(_written));
+	memset(_last, 0x00, sizeof(_last));
 
-	painter.setPen(QColor(128,128,128,255));
-	painter.drawRect(x,y,w+1,h+1);
-	x++;
-	y++;
+	memset(_wr, 0x00, sizeof(_wr));
+	memset(_pc, 0x00, sizeof(_pc));
+	memset(_rd, 0x00, sizeof(_rd));
 
-	QPixmap pix(256,256);
-	pix.fill();
-	QPainter P(&pix);
-
-	const int dx	= 16;
-	const int dw	= dx - 1;
-	int idx			= offset;
-
-	for (int i=0; i<16; i++)
-		{
-		for (int j=0; j<16; j++)
-			{
-			int val = data[idx++];
-
-			if (val > 0)
-				{
-				if (val <= 4)
-					P.fillRect(j*dx,i*dx,dw,dw,_grn[val -1]);
-
-				else if (val < 4 + 16)
-					P.fillRect(j*dx,i*dx,dw,dw,_blu[(val-4)/4]);
-
-				else if (val < 4 + 16 + 64)
-					P.fillRect(j*dx,i*dx,dw,dw,_red[(val-16-4)/16]);
-
-				else if (val <= 4 + 16 + 64 + 256)
-					{
-					P.fillRect(j*dx,i*dx,dw,dw,_black);
-					int col = (val - 64 - 16 - 4) / 64;
-					P.fillRect(j*dx+dw/4+1,i*dx+dw/4+1,dw/2,dw/2,_grn[col]);
-					}
-
-				else if (val <= 4 + 16 + 64 + 256 + 1024)
-					{
-					P.fillRect(j*dx,i*dx,dw,dw,_black);
-					int col = (val - 256 - 64 - 16 - 4) / 256;
-					P.fillRect(j*dx+dw/4+1,i*dx+dw/4+1,dw/2,dw/2,_blu[col]);
-					}
-
-				else if (val <= 4 + 16 + 64 + 256 + 1024 + 4096)
-					{
-					P.fillRect(j*dx,i*dx,dw,dw,_black);
-					int col = (val - 1024 - 256 - 64 - 16 - 4) / 1024;
-					P.fillRect(j*dx+dw/4+1,i*dx+dw/4+1,dw/2,dw/2,_red[col]);
-					}
-
-				else
-					P.fillRect(j*dx,i*dx,dw,dw,_black);
-				}
-			}
-		}
-
-	painter.drawPixmap(x, y, pix);
+	memset(_pgWr, 0x00, sizeof(_pgWr));
+	memset(_pgRd, 0x00, sizeof(_pgRd));
+	memset(_pgPc, 0x00, sizeof(_pgPc));
 	}
+
 
 
 
@@ -336,6 +349,14 @@ void MemoryWidget::memStartChanged(const QString& text)
 
 #pragma mark -- notifications
 
+
+/*****************************************************************************\
+|* Notification: Listen for the simulator to become ready
+\*****************************************************************************/
+void MemoryWidget::_reload(NotifyData &nd)
+	{
+	_reset();
+	}
 
 /*****************************************************************************\
 |* Notification: Listen for the simulator to become ready

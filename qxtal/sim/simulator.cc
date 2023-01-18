@@ -285,14 +285,6 @@ Simulator::Simulator(int maxRam,
 	_profileData.extra	= new uint64_t[_maxRam];
 	_profileData.mflag	= new uint64_t[_maxRam];
 
-	for (int i=0; i<_maxRam; i++)
-		{
-		_readCbs[i]		= nullptr;
-		_writeCbs[i]	= nullptr;
-		_execCbs[i]		= nullptr;
-		_mem[i]			= 0x0;
-		_memState[i]	= MS_UNDEFINED | MS_INVALID;
-		}
 
 	/*************************************************************************\
 	|* And other state
@@ -323,6 +315,15 @@ void Simulator::reset(void)
 	{
 	_regs = {0, 0, 0, 0, 0xFF, 0, 0xFF};
 	setFlags(0xFF, 0x34);
+
+	for (int i=0; i<_maxRam; i++)
+		{
+		_readCbs[i]		= nullptr;
+		_writeCbs[i]	= nullptr;
+		_execCbs[i]		= nullptr;
+		_mem[i]			= 0x0;
+		_memState[i]	= MS_UNDEFINED | MS_INVALID;
+		}
 	}
 
 /*****************************************************************************\

@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+#include "NotifyCenter.h"
 #include "properties.h"
 #include "simulator.h"
 
@@ -49,6 +50,16 @@ class Atari
 					   int data,
 					   Simulator::Registers *regs);
 
+
+		/*********************************************************************\
+		|* Screen: Reset the machine
+		\*********************************************************************/
+		void _reset(void);
+
+		/*********************************************************************\
+		|* Notification: reload the current binary file
+		\*********************************************************************/
+		void _reload(NotifyData &nd);
 
 
 

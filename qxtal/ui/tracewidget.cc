@@ -22,6 +22,7 @@ TraceWidget::TraceWidget(QWidget *parent)
 	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);
 	nc->addObserver([=](NotifyData &nd){_asmSelectionChanged(nd);}, NTFY_ASM_SEL_CHG);
 	nc->addObserver([=](NotifyData &nd){_prepareToSimulate(nd);}, NTFY_SIM_START);
+	nc->addObserver([=](NotifyData &nd){_reload(nd);}, NTFY_XEX_CHANGED);
 
 	QObject::connect(this, &TraceWidget::currentItemChanged,
 					 this, &TraceWidget::_handleSelectionChanged);
@@ -65,6 +66,14 @@ void TraceWidget::_clearCurrentSelection(void)
 #pragma mark -- Notifications
 
 
+
+/*****************************************************************************\
+|* Notification: Listen for the simulator to become ready
+\*****************************************************************************/
+void TraceWidget::_reload(NotifyData &nd)
+	{
+	_prepareToSimulate(nd);
+	}
 
 /*****************************************************************************\
 |* Notification: Listen for the simulator to become ready

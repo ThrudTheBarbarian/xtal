@@ -46,6 +46,11 @@ class TraceWidget : public QListWidget
 		void _asmSelectionChanged(NotifyData &nd);
 
 		/*********************************************************************\
+		|* Notification: reload the current binary file
+		\*********************************************************************/
+		void _reload(NotifyData &nd);
+
+		/*********************************************************************\
 		|* Handle selection
 		\*********************************************************************/
 		void _handleSelectionChanged(QListWidgetItem *current,
@@ -72,6 +77,9 @@ class TraceWidget : public QListWidget
 						  MemoryOp op0,
 						  MemoryOp op1,
 						  MemoryOp op2);
+
+
+
 	};
 
 #endif // TRACEWIDGET_H

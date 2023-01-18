@@ -59,6 +59,11 @@ class MemoryWidget : public QWidget
 		void _heatmap(QPainter &P, uint32_t *data, QRect&r, int offset);
 
 		/*********************************************************************\
+		|* Reset the widget
+		\*********************************************************************/
+		void _reset(void);
+
+		/*********************************************************************\
 		|* Listen for the simulator to become ready
 		\*********************************************************************/
 		void _simulatorReady(NotifyData &nd);
@@ -67,6 +72,12 @@ class MemoryWidget : public QWidget
 		|* Notification: a binary was just loaded
 		\*********************************************************************/
 		void _assemblyComplete(NotifyData &nd);
+
+		/*********************************************************************\
+		|* Notification: reload the current binary file
+		\*********************************************************************/
+		void _reload(NotifyData &nd);
+
 
 	protected:
 

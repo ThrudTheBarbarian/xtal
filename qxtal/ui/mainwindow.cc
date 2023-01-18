@@ -33,6 +33,12 @@ MainWindow::MainWindow(QWidget *parent)
 	QCoreApplication::setApplicationName("qxtal");
 
 	/*************************************************************************\
+	|* Connect the QFilesystemWatcher to monitor the current XEX
+	\*************************************************************************/
+	connect(&_fsWatcher, &QFileSystemWatcher::fileChanged,
+			this, &MainWindow::_xexChanged);
+
+	/*************************************************************************\
 	|* Listen for binary-loaded notifications
 	\*************************************************************************/
 	auto nc = NotifyCenter::defaultNotifyCenter();
@@ -137,7 +143,14 @@ void MainWindow::_toolbarLoadXEX(void)
 		}
 
 	if (files.length() > 0)
-		_hw->load(files.at(0).toStdString());
+		{
+		QString path = files.at(0);
+		_hw->load(path.toStdString());
+
+		if (_fsWatcher.files().size() > 0)
+			_fsWatcher.removePaths(_fsWatcher.files());
+		_fsWatcher.addPath(path);
+		}
 	}
 
 
@@ -187,3 +200,16 @@ void MainWindow::_simulationDone(NotifyData& nd)
 	ui->actionStop->setEnabled(false);
 	}
 
+
+
+
+#pragma mark -- Toolbar
+
+/*****************************************************************************\
+|* Tell the world that the file has changed
+\*****************************************************************************/
+void MainWindow::_xexChanged(const QString& path)
+	{
+	auto nc = NotifyCenter::defaultNotifyCenter();
+	nc->notify(NTFY_XEX_CHANGED, path.toStdString());
+	}
