@@ -51,6 +51,11 @@ class TraceWidget : public QListWidget
 		void _reload(NotifyData &nd);
 
 		/*********************************************************************\
+		|* Notification: simulation is complete
+		\*********************************************************************/
+		void _simulationDone(NotifyData &nd);
+
+		/*********************************************************************\
 		|* Handle selection
 		\*********************************************************************/
 		void _handleSelectionChanged(QListWidgetItem *current,

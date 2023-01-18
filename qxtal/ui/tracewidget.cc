@@ -22,6 +22,7 @@ TraceWidget::TraceWidget(QWidget *parent)
 	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);
 	nc->addObserver([=](NotifyData &nd){_asmSelectionChanged(nd);}, NTFY_ASM_SEL_CHG);
 	nc->addObserver([=](NotifyData &nd){_prepareToSimulate(nd);}, NTFY_SIM_START);
+	nc->addObserver([=](NotifyData &nd){_simulationDone(nd);}, NTFY_SIM_DONE);
 	nc->addObserver([=](NotifyData &nd){_reload(nd);}, NTFY_XEX_CHANGED);
 
 	QObject::connect(this, &TraceWidget::currentItemChanged,
@@ -73,6 +74,15 @@ void TraceWidget::_clearCurrentSelection(void)
 void TraceWidget::_reload(NotifyData &nd)
 	{
 	_prepareToSimulate(nd);
+	}
+
+
+/*****************************************************************************\
+|* Notification: Simulation is complete, position the "cursor" at the end
+\*****************************************************************************/
+void TraceWidget::_simulationDone(NotifyData &nd)
+	{
+	setCurrentRow(count()-1);
 	}
 
 /*****************************************************************************\
