@@ -27,6 +27,7 @@ class TraceWidget : public QListWidget
 	GET(ItemMap, itemMap);			// Map of address to item
 	GET(SelectionList, selected);	// List of currently selected items
 	GET(int, previousRow);			// Previously selected row
+	GET(TraceItem *, lastItem);		// Last item in the widget
 
 	private:
 
@@ -49,11 +50,6 @@ class TraceWidget : public QListWidget
 		|* Notification: reload the current binary file
 		\*********************************************************************/
 		void _reload(NotifyData &nd);
-
-		/*********************************************************************\
-		|* Notification: simulation is complete
-		\*********************************************************************/
-		void _simulationDone(NotifyData &nd);
 
 		/*********************************************************************\
 		|* Handle selection
@@ -84,6 +80,7 @@ class TraceWidget : public QListWidget
 						  MemoryOp op2);
 
 
+		void simulationDone(uint32_t address);
 
 	};
 

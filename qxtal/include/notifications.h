@@ -57,4 +57,9 @@
 \*************************************************************************/
 #define NTFY_XEX_CHANGED		"N:xex:changed"
 
+/*************************************************************************\
+|* Notification constant: A breakpoint has been restored
+\*************************************************************************/
+#define NTFY_BP_RESTORE			"N:bp:restore"
+
 #endif // NOTIFICATIONS_H

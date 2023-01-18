@@ -51,6 +51,11 @@ class AsmWidget : public QListWidget
 		void _traceSelection(NotifyData &nd);
 
 		/*********************************************************************\
+		|* Notification: A breakpoint has been restored
+		\*********************************************************************/
+		void _bpRestored(NotifyData &nd);
+
+		/*********************************************************************\
 		|* Private method: Toggle breakpoint at an instruction
 		\*********************************************************************/
 		void _toggleBreakpoint(AsmItem *item, bool shift);

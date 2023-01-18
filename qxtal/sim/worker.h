@@ -93,6 +93,7 @@ class Worker : public QThread
 							MemoryOp op2);
 
 
+		void simulationDone(uint32_t pc);
 	};
 
 #endif // WORKER_H

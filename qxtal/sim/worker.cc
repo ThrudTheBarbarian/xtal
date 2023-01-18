@@ -1,8 +1,6 @@
 #include <QDebug>
 
 #include "atari.h"
-#include "NotifyCenter.h"
-#include "notifications.h"
 #include "worker.h"
 
 /*****************************************************************************\
@@ -205,11 +203,9 @@ void Worker::_playForward(uint32_t address)
 		emit simulationStep(buf, regs, op0, op1, op2);
 
 		}
+	emit simulationDone(sim->regs().pc);
+	//_address = sim->regs().pc;
 
-	_address = sim->regs().pc;
-
-	auto nc = NotifyCenter::defaultNotifyCenter();
-	nc->notify(NTFY_SIM_DONE, (int)_address);
 	}
 
 
@@ -218,7 +214,7 @@ void Worker::_playForward(uint32_t address)
 \*****************************************************************************/
 void Worker::_reset(uint32_t address)
 	{
-	_hw->sim()->reset();
+	_hw->sim()->reset(false);
 	}
 
 

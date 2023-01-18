@@ -1,6 +1,8 @@
+#include "instructions.h"
 #include "macros.h"
 #include "simulator.h"
-#include "instructions.h"
+#include "notifications.h"
+#include "NotifyCenter.h"
 
 #define HAVE_BUILTIN_EXPECT 1
 #include "likely.h"
@@ -311,18 +313,22 @@ Simulator::~Simulator(void)
 /*****************************************************************************\
 |* Reset state
 \*****************************************************************************/
-void Simulator::reset(void)
+void Simulator::reset(bool hard)
 	{
 	_regs = {0, 0, 0, 0, 0xFF, 0, 0xFF};
 	setFlags(0xFF, 0x34);
 
-	for (int i=0; i<_maxRam; i++)
+	if (hard)
 		{
-		_readCbs[i]		= nullptr;
-		_writeCbs[i]	= nullptr;
-		_execCbs[i]		= nullptr;
-		_mem[i]			= 0x0;
-		_memState[i]	= MS_UNDEFINED | MS_INVALID;
+		_breakpoints.clear();
+		for (int i=0; i<_maxRam; i++)
+			{
+			_readCbs[i]		= nullptr;
+			_writeCbs[i]	= nullptr;
+			_execCbs[i]		= nullptr;
+			_mem[i]			= 0x0;
+			_memState[i]	= MS_UNDEFINED | MS_INVALID;
+			}
 		}
 	}
 
@@ -985,6 +991,22 @@ Simulator::InstructionInfo Simulator::insnInfo(uint32_t address)
 
 #pragma mark -- Breakpoints
 
+
+/*****************************************************************************\
+|* Breakpoint: return a breakpoint if one is active
+\*****************************************************************************/
+void Simulator::applyBreakpoints(BreakpointMap& bps)
+	{
+	auto nc = NotifyCenter::defaultNotifyCenter();
+
+	for (Elements<uint32_t, PredicateInfo> kv : bps)
+		{
+		int address = kv.key & 0xFFFF;
+		_memState[address] |= MS_BREAKPOINT;
+		_breakpoints[address] = kv.value;
+		nc->notify(NTFY_BP_RESTORE, address);
+		}
+	}
 
 /*****************************************************************************\
 |* Breakpoint: return a breakpoint if one is active

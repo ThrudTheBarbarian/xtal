@@ -22,7 +22,6 @@ TraceWidget::TraceWidget(QWidget *parent)
 	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);
 	nc->addObserver([=](NotifyData &nd){_asmSelectionChanged(nd);}, NTFY_ASM_SEL_CHG);
 	nc->addObserver([=](NotifyData &nd){_prepareToSimulate(nd);}, NTFY_SIM_START);
-	nc->addObserver([=](NotifyData &nd){_simulationDone(nd);}, NTFY_SIM_DONE);
 	nc->addObserver([=](NotifyData &nd){_reload(nd);}, NTFY_XEX_CHANGED);
 
 	QObject::connect(this, &TraceWidget::currentItemChanged,
@@ -45,9 +44,22 @@ void TraceWidget::addTraceItem(const QString& text,
 	item->setData(Qt::FontRole, _font);
 	_itemMap[regs.pc].push_back(item);
 	addItem(item);
+
+	_lastItem = item;
 	}
 
 
+
+/*****************************************************************************\
+|* Public slot - simulation is complete
+\*****************************************************************************/
+void TraceWidget::simulationDone(uint32_t address)
+	{
+	auto nc = NotifyCenter::defaultNotifyCenter();
+	nc->notify(NTFY_SIM_DONE, (int)address);
+
+	setCurrentItem(_lastItem);
+	}
 
 #pragma mark -- Private Methods
 
@@ -67,7 +79,6 @@ void TraceWidget::_clearCurrentSelection(void)
 #pragma mark -- Notifications
 
 
-
 /*****************************************************************************\
 |* Notification: Listen for the simulator to become ready
 \*****************************************************************************/
@@ -77,13 +88,6 @@ void TraceWidget::_reload(NotifyData &nd)
 	}
 
 
-/*****************************************************************************\
-|* Notification: Simulation is complete, position the "cursor" at the end
-\*****************************************************************************/
-void TraceWidget::_simulationDone(NotifyData &nd)
-	{
-	setCurrentRow(count()-1);
-	}
 
 /*****************************************************************************\
 |* Notification: Listen for the simulator to become ready
@@ -93,6 +97,8 @@ void TraceWidget::_simulatorReady(NotifyData &nd)
 	_hw = static_cast<Atari *>(nd.voidValue());
 	QObject::connect(_hw->worker(), &Worker::simulationStep,
 					 this, &TraceWidget::addTraceItem);
+	QObject::connect(_hw->worker(), &Worker::simulationDone,
+					 this, &TraceWidget::simulationDone);
 	}
 
 

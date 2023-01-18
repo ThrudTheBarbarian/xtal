@@ -165,6 +165,7 @@ void MainWindow::_toolbarRunSim(void)
 	nc->notify(NTFY_SIM_START, (int)_address);
 
 	_hw->worker()->schedule(CMD_RESET, _address);
+	fprintf(stderr, "Running from address: $%04x\n", _address);
 	_hw->worker()->schedule(CMD_PLAY_FORWARD, _address);
 	}
 

@@ -33,6 +33,7 @@ AsmWidget::AsmWidget(QWidget *parent)
 	nc->addObserver([=](NotifyData &nd){_simulatorReady(nd);}, NTFY_SIM_AVAILABLE);
 	nc->addObserver([=](NotifyData &nd){_binaryLoaded(nd);}, NTFY_BINARY_LOADED);
 	nc->addObserver([=](NotifyData &nd){_traceSelection(nd);}, NTFY_TRACE_SEL_CHG);
+	nc->addObserver([=](NotifyData &nd){_bpRestored(nd);}, NTFY_BP_RESTORE);
 
 
 	/*************************************************************************\
@@ -339,6 +340,19 @@ void AsmWidget::_traceSelection(NotifyData& nd)
 	}
 
 
+
+/*****************************************************************************\
+|* Notification: Listen for the simulator to become ready
+\*****************************************************************************/
+void AsmWidget::_bpRestored(NotifyData &nd)
+	{
+	int address = nd.integerValue();
+	if (_itemMap.count(address))
+		{
+		AsmItem *item = _itemMap[address];
+		item->setIcon(_redDot);
+		}
+	}
 
 #pragma mark -- signals
 

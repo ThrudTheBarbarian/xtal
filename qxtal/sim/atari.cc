@@ -662,11 +662,12 @@ Atari * Atari::instance(Simulator* sim, IO *io, bool loadLabels)
 \*****************************************************************************/
 void Atari::_reload(NotifyData &nd)
 	{
+	Simulator::BreakpointMap bps = _sim->breakpoints();
 	_reset();
-
 	String path = nd.stringValue();
 	fprintf(stderr, "Reloading %s\n", path.c_str());
 	load(path);
+	_sim->applyBreakpoints(bps);
 	}
 
 
