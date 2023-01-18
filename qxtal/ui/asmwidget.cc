@@ -393,7 +393,10 @@ void AsmWidget::mousePressEvent(QMouseEvent *event)
 			{
 			int infoId		= item->infoId();
 			if (infoId >=0 && infoId < _infoList.size())
-				_toggleBreakpoint(item, event->pos().x());
+				{
+				bool shift = ((event->modifiers() & Qt::ShiftModifier) != 0);
+				_toggleBreakpoint(item, shift);
+				}
 			}
 		}
 	}
@@ -407,25 +410,27 @@ void AsmWidget::mousePressEvent(QMouseEvent *event)
 /*****************************************************************************\
 |* Private Method: toggle a breakpoint on or off
 \*****************************************************************************/
-void AsmWidget::_toggleBreakpoint(AsmItem *item, int x)
+void AsmWidget::_toggleBreakpoint(AsmItem *item, bool shift)
 	{
 	int infoId = item->infoId();
 	Simulator::InstructionInfo info = _infoList[infoId];
 
 	PredicateInfo bpInfo = _hw->sim()->breakpointAt(info.addr);
 	bool active = (bpInfo.num > 0);
+	bool edit	= (active && shift);
 
-	if (!active)
+	if (edit || (!active))
 		{
 		fprintf(stderr, "Editing breakkpoint at $%04x\n", info.addr);
 		PredicateEditor *pe = new PredicateEditor("Configure breakpoint", this);
+
 		PredicateContextInfo *pci = new PredicateContextInfo();
 		pci->item = item;
 		pci->address = info.addr;
 
 		pe->setContext(pci);
 
-		QStringList what = {"Always", "A", "X", "Y", "Status", "Memory", "022222"};
+		QStringList what = {"Always", "A", "X", "Y", "Status", "02222"};
 		pe->setWhat(what);
 
 		QStringList cond = {"is less than",
@@ -435,7 +440,10 @@ void AsmWidget::_toggleBreakpoint(AsmItem *item, int x)
 							"is greater than",
 							"is not equal to"};
 		pe->setConditions(cond);
-		pe->addRow();
+		if (edit)
+			pe->configure(bpInfo);
+		else
+			pe->addRow();
 
 		connect(pe, &PredicateEditor::ok, this, &AsmWidget::_bpEdited);
 		pe->show();

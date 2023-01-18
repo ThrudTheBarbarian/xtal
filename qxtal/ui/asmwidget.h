@@ -5,9 +5,9 @@
 #include <QObject>
 
 #include "sim/atari.h"
+#include "predicates/predicateinfo.h"
 #include "NotifyCenter.h"
 
-struct PredicateInfo;
 class AsmItem;
 class AsmWidget : public QListWidget
 	{
@@ -53,7 +53,7 @@ class AsmWidget : public QListWidget
 		/*********************************************************************\
 		|* Private method: Toggle breakpoint at an instruction
 		\*********************************************************************/
-		void _toggleBreakpoint(AsmItem *item, int x);
+		void _toggleBreakpoint(AsmItem *item, bool shift);
 
 
 		/*********************************************************************\

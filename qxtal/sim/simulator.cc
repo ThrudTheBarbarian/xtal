@@ -1022,6 +1022,74 @@ void Simulator::clearBreakpoint(int address)
 	_breakpoints[address] = PredicateInfo::nilPredicate();
 	}
 
+/*****************************************************************************\
+|* Breakpoint: determine if a breakpoint will trigger
+\*****************************************************************************/
+bool Simulator::_checkBreakpoint(int address)
+	{
+	bool shouldBreak = false;
+
+	PredicateInfo info = breakpointAt(address);
+	if (info.enabled)
+		{
+		for (int i=0; i<info.num && (!shouldBreak); i++)
+			{
+			int what = 0;
+			switch (info.what[i])
+				{
+				case 0:
+					return true;
+				case 1:
+					what = _regs.a;
+					break;
+				case 2:
+					what = _regs.x;
+					break;
+				case 3:
+					what = _regs.y;
+					break;
+				case 4:
+					what = _regs.p;
+					break;
+				default:
+					what = 0;
+					fprintf(stderr, "Unknown 'what' term in predicate (%d)\n",
+							info.what[i]);
+					break;
+				}
+
+			switch (info.cond[i])
+				{
+				case 0:
+					shouldBreak = (what < info.values[i]);
+					break;
+				case 1:
+					shouldBreak = (what <= info.values[i]);
+					break;
+				case 2:
+					shouldBreak = (what == info.values[i]);
+					break;
+				case 3:
+					shouldBreak = (what >= info.values[i]);
+					break;
+				case 4:
+					shouldBreak = (what > info.values[i]);
+					break;
+				case 5:
+					shouldBreak = (what != info.values[i]);
+					break;
+				default:
+					shouldBreak = true;
+					fprintf(stderr, "Unknown 'condition' term in predicate (%d)\n",
+							info.cond[i]);
+					break;
+				}
+			}
+		}
+
+	return shouldBreak;
+	}
+
 #pragma mark -- Private Methods
 
 
@@ -1544,8 +1612,11 @@ void Simulator::next(void)
 
 	if ((_memState[_regs.pc] & MS_BREAKPOINT) == MS_BREAKPOINT)
 		{
-		setError(E_BREAKPOINT, _regs.pc);
-		return;
+		if (_checkBreakpoint(_regs.pc))
+			{
+			setError(E_BREAKPOINT, _regs.pc);
+			return;
+			}
 		}
 
 	/*************************************************************************\

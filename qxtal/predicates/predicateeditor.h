@@ -74,12 +74,17 @@ class PredicateEditor : public QDialog
 		/*********************************************************************\
 		|* Add a row
 		\*********************************************************************/
-		void addRow(const QString& defaultValue = "");
+		void addRow(const QString& defaultValue = "", int what = 0, int cond=0);
 
 		/*********************************************************************\
 		|* Set a preferred size
 		\*********************************************************************/
 		QSize sizeHint(void);
+
+		/*********************************************************************\
+		|* Set the configuration
+		\*********************************************************************/
+		void configure(PredicateInfo info);
 
 	private slots:
 

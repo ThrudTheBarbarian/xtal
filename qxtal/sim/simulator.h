@@ -327,6 +327,11 @@ class Simulator : public QObject
 			void _rti(void);
 
 			/*********************************************************************\
+			|* Check if a breakpoint will fire
+			\*********************************************************************/
+			bool _checkBreakpoint(int address);
+
+			/*********************************************************************\
 			|* Extra cycles due to page boundaries
 			\*********************************************************************/
 			void _handleExtraAbsoluteX(uint32_t address);

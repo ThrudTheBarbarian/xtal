@@ -108,7 +108,7 @@ PredicateEditor::PredicateEditor(QString title, QWidget *parent)
 /*****************************************************************************\
 |* Add a row with a default value
 \*****************************************************************************/
-void PredicateEditor::addRow(const QString& defaultValue)
+void PredicateEditor::addRow(const QString& defaultValue, int wIdx, int cIdx)
 	{
 	if (_saLayout->count() > 0)
 		_saLayout->removeWidget(_lastEntry);
@@ -125,6 +125,7 @@ void PredicateEditor::addRow(const QString& defaultValue)
 	what->addItems(_what);
 	what->setMinimumHeight(30);
 	what->setObjectName("what");
+	what->setCurrentIndex(wIdx);
 	layout->addWidget(what);
 	connect(what, &QComboBox::currentIndexChanged,
 			this, &PredicateEditor::_whatChanged);
@@ -133,6 +134,7 @@ void PredicateEditor::addRow(const QString& defaultValue)
 	cond->setMinimumHeight(30);
 	cond->addItems(_conditions);
 	cond->setObjectName("cond");
+	cond->setCurrentIndex(cIdx);
 	layout->addWidget(cond);
 	_condMap[what] = cond;
 
@@ -153,7 +155,7 @@ void PredicateEditor::addRow(const QString& defaultValue)
 	_saLayout->addWidget(w);
 	_saLayout->addWidget(_lastEntry, 1);
 
-	if (_how[0] == 0)
+	if (_how[wIdx] == 0)
 		{
 		cond->hide();
 		val->hide();
@@ -198,6 +200,18 @@ void PredicateEditor::setWhat(QStringList& what)
 	}
 
 
+/*****************************************************************************\
+|* Configure the current editor
+\*****************************************************************************/
+void PredicateEditor::configure(PredicateInfo info)
+	{
+	for (int i=0; i<info.num; i++)
+		{
+		QString val = QString("%1").arg(info.values[i]);
+		addRow(val, info.what[i], info.cond[i]);
+		}
+	}
+
 #pragma mark -- private methods
 
 
@@ -217,10 +231,11 @@ void PredicateEditor::_ok(void)
 	{
 	done(0);
 	PredicateInfo info;
-	info.num	= _hideMap.size();
-	info.what	= new int[info.num];
-	info.cond	= new int[info.num];
-	info.values = new int[info.num];
+	info.num		= _hideMap.size();
+	info.what		= new int[info.num];
+	info.cond		= new int[info.num];
+	info.values		= new int[info.num];
+	info.enabled	= (info.num > 0);
 
 	QScrollArea *scroll = static_cast<QScrollArea *>(_widgetMap[SCROLLAREA]);
 	QObjectList kids = scroll->widget()->children();
