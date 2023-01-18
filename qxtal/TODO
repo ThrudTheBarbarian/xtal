@@ -1,0 +1,11 @@
+To do:
+
+  - Breakpoints list / management area (that's what the lower-middle part was intended to be)
+  - Call-graph extraction and display
+  - Interactive changes (edit assembly, reassemble, resimulate, show changes)
+  - Syntax highlighting in the assembly / instruction stream
+  - Parsing bytes into more-meaningful higher-level constructs (eg: these 4 bytes are a float of value...)
+  - Use QFilesystemWatcher to auto-load the XEX if it changes on disk
+  
+Done:
+  - The afore-mentioned breakpoints predicate editor
