@@ -62,4 +62,9 @@
 \*************************************************************************/
 #define NTFY_BP_RESTORE			"N:bp:restore"
 
+/*************************************************************************\
+|* Notification constant: Preferences have changed
+\*************************************************************************/
+#define NTFY_PREFS_CHANGED		"N:prefs:changed"
+
 #endif // NOTIFICATIONS_H

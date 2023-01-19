@@ -8,7 +8,10 @@
 
 #include "commands.h"
 #include "properties.h"
+#include "preferences.h"
 #include "sim/simulator.h"
+
+#include "NotifyCenter.h"
 
 class Atari;
 class Worker : public QThread
@@ -37,6 +40,7 @@ class Worker : public QThread
 		bool				_active;		// Currently busy
 		QVector<WorkItem>	_queue;			// List of things to do
 		Atari *				_hw;			// Hardware weak reference
+		Preferences			_prefs;			// Current prefs
 
 		/*********************************************************************\
 		|* Play backwards
@@ -62,6 +66,11 @@ class Worker : public QThread
 		|* Reset the simulator
 		\*********************************************************************/
 		void _reset(uint32_t address);
+
+		/*********************************************************************\
+		|* Preferences changed
+		\*********************************************************************/
+		void _prefsChanged(NotifyData& nd);
 
 	protected:
 		/*********************************************************************\

@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "./ui_preferences.h"
 
 #include <QFileDialog>
 #include <QResource>
@@ -21,9 +22,21 @@
 MainWindow::MainWindow(QWidget *parent)
 		   :QMainWindow(parent)
 		   ,ui(new Ui::MainWindow)
+		   ,prefs(new Ui::Preferences)
 	{
+	/*************************************************************************\
+	|* Set up the main UI
+	\*************************************************************************/
 	QResource::registerResource("resources.qrc");
 	ui->setupUi(this);
+
+	/*************************************************************************\
+	|* Set up the preferences dialog
+	\*************************************************************************/
+	_prefsDialog = new QDialog(this);
+	prefs->setupUi(_prefsDialog);
+	connect(prefs->buttons, &QDialogButtonBox::accepted,
+			this, &MainWindow::_prefsAccepted);
 
 	/*************************************************************************\
 	|* Set up the defaults parameters
@@ -106,6 +119,15 @@ MainWindow::~MainWindow()
 
 
 /*****************************************************************************\
+|* Tell the world that the file has changed
+\*****************************************************************************/
+void MainWindow::_xexChanged(const QString& path)
+	{
+	auto nc = NotifyCenter::defaultNotifyCenter();
+	nc->notify(NTFY_XEX_CHANGED, path.toStdString());
+	}
+
+/*****************************************************************************\
 |* Toolbar action - we want to load an XEX
 \*****************************************************************************/
 void MainWindow::_toolbarAction(QAction *a)
@@ -116,6 +138,8 @@ void MainWindow::_toolbarAction(QAction *a)
 		_toolbarRunSim();
 	else if (a->text() == "Stop")
 		_toolbarStopSim();
+	else if (a->text() == "Settings")
+		_toolbarSettings();
 	}
 
 /*****************************************************************************\
@@ -153,6 +177,13 @@ void MainWindow::_toolbarLoadXEX(void)
 		}
 	}
 
+/*****************************************************************************\
+|* Toolbar action - launch the settings dialog
+\*****************************************************************************/
+void MainWindow::_toolbarSettings(void)
+	{
+	_prefsDialog->show();
+	}
 
 /*****************************************************************************\
 |* Toolbar action - we want to run the simulator
@@ -204,13 +235,19 @@ void MainWindow::_simulationDone(NotifyData& nd)
 
 
 
-#pragma mark -- Toolbar
+#pragma mark -- Preferences
 
 /*****************************************************************************\
-|* Tell the world that the file has changed
+|* We want to change the preferences
 \*****************************************************************************/
-void MainWindow::_xexChanged(const QString& path)
+void MainWindow::_prefsAccepted(void)
 	{
+	_prefVals.cycleLimit = prefs->cyclesLimit->text().toInt();
+
 	auto nc = NotifyCenter::defaultNotifyCenter();
-	nc->notify(NTFY_XEX_CHANGED, path.toStdString());
+	nc->notify(NTFY_PREFS_CHANGED, &_prefVals);
 	}
+
+
+
+

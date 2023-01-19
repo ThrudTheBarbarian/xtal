@@ -7,5 +7,6 @@
         <file>rsrc/icons/step-forward.png</file>
         <file>rsrc/icons/stop.png</file>
         <file>rsrc/icons/red-dot.png</file>
+        <file>rsrc/icons/settings.png</file>
     </qresource>
 </RCC>

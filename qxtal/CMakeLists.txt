@@ -20,9 +20,9 @@ set(PROJECT_SOURCES
         include/instructions.h
         include/notifications.h
         include/commands.h
+        include/preferences.h
         ui/mainwindow.cc
         ui/mainwindow.h
-        ui/mainwindow.ui
         ui/asmwidget.h
         ui/asmwidget.cc
         ui/asmitem.h
@@ -39,6 +39,8 @@ set(PROJECT_SOURCES
         ui/tracewidget.cc
         ui/traceitem.h
         ui/traceitem.cc
+        ui/mainwindow.ui
+        ui/preferences.ui
         sim/simulator.h
         sim/simulator.cc
         sim/mathpack.h

@@ -1,6 +1,7 @@
 #include <QDebug>
 
 #include "atari.h"
+#include "notifications.h"
 #include "worker.h"
 
 /*****************************************************************************\
@@ -10,7 +11,12 @@ Worker::Worker(Atari *hw)
 	   :QThread()
 	   ,_active(false)
 	   ,_hw(hw)
-	{}
+	{
+	_prefs.cycleLimit = 10000;
+
+	auto nc = NotifyCenter::defaultNotifyCenter();
+	nc->addObserver([=](NotifyData &nd){_prefsChanged(nd);}, NTFY_PREFS_CHANGED);
+	}
 
 /*****************************************************************************\
 |* Public method: schedule a task. Return if we were previously active
@@ -157,7 +163,7 @@ void Worker::_playForward(uint32_t address)
 	Simulator *sim = _hw->sim();
 	sim->setError(Simulator::E_NONE, 0, true);
 	sim->regs().pc = _address = address;
-
+	sim->setCycleLimit(_prefs.cycleLimit);
 
 	/*************************************************************************\
 	|* Loop while we need to
@@ -215,6 +221,17 @@ void Worker::_playForward(uint32_t address)
 void Worker::_reset(uint32_t address)
 	{
 	_hw->sim()->reset(false);
+	}
+
+
+
+/*****************************************************************************\
+|* Notification: update the prefs
+\*****************************************************************************/
+void Worker::_prefsChanged(NotifyData& nd)
+	{
+	Preferences *prefs = static_cast<Preferences *>(nd.voidValue());
+	_prefs = *prefs;
 	}
 
 
