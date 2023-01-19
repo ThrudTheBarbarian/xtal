@@ -1,7 +1,21 @@
 ;
 ; Floating math support for xtal based on Rankin / Woz code
 ;
-
+;
+; Maths representation looks like:
+;
+; Exponent    Two's Complement Mantissa
+; SEEEEEEE  SM.MMMMMM  MMMMMMMM  MMMMMMMM
+;    n         n+1        n+2      n+3
+;
+; Where:
+;  -  there's an implied '.' between the 6th and 7th positions in the
+;     first byte of the mantissa,
+;  -  Each position of 'M' represents a /2, so the first one after the
+;     dot is 0.5, then 0.25, then 0.125, then 0.0625 etc
+;  -  E=0 is represented as 0x80, with +ve values of E going higher and
+;     negative values going lower
+;
 .include stdmacros.s
 .include modules/stdio/stdio.s
 
@@ -502,17 +516,17 @@ fp_Agt8Shft:
 ; Shift Fx Y times to the right
 ;
 f_shftMore:
-	asl PLUS1,x					; shift Fx mantissa 1
+	asl PLUS_1,x				; shift Fx mantissa 1
 	bcc f_skipShift				; if +ve, skip add
-	inc PLUS1,x					; will set b7 eventually
+	inc PLUS_1,x				; will set b7 eventually
 
 f_skipShift:
-	ror PLUS1,x					; shift Fx mantissa (correct for ASL)
-	ror PLUS1,x					; shift Fx mantissa (place carry in b7)
+	ror PLUS_1,x				; shift Fx mantissa (correct for ASL)
+	ror PLUS_1,x				; shift Fx mantissa (place carry in b7)
 
 fp_Ylt8Shft:
-	ror PLUS2,x					; shift Fx mantissa 2
-	ror PLUS3,x					; shift Fx mantissa 3
+	ror PLUS_2,x				; shift Fx mantissa 2
+	ror PLUS_3,x				; shift Fx mantissa 3
 	iny
 	bne f_shftMore				; branch if more to do (Y!=0)
 

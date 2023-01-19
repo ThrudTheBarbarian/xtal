@@ -78,6 +78,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$PROJECT_DIR/atof.s"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "$PROJECT_DIR/test.s"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
