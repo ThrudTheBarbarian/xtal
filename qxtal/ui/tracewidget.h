@@ -75,9 +75,7 @@ class TraceWidget : public QListWidget
 	public slots:
 		void addTraceItem(const QString& text,
 						  Simulator::Registers regs,
-						  MemoryOp op0,
-						  MemoryOp op1,
-						  MemoryOp op2);
+						  Simulator::MemOpList ops);
 
 
 		void simulationDone(uint32_t address);

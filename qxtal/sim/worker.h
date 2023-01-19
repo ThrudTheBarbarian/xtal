@@ -97,9 +97,7 @@ class Worker : public QThread
 	signals:
 		void simulationStep(const QString& description,
 							Simulator::Registers regs,
-							MemoryOp op0,
-							MemoryOp op1,
-							MemoryOp op2);
+							Simulator::MemOpList ops);
 
 
 		void simulationDone(uint32_t pc);

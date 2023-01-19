@@ -34,11 +34,9 @@ TraceWidget::TraceWidget(QWidget *parent)
 \*****************************************************************************/
 void TraceWidget::addTraceItem(const QString& text,
 							   Simulator::Registers regs,
-							   MemoryOp op0,
-							   MemoryOp op1,
-							   MemoryOp op2)
+							   Simulator::MemOpList ops)
 	{
-	TraceItem *item = new TraceItem(" "+text, regs, op0, op1, op2);
+	TraceItem *item = new TraceItem(" "+text, regs, ops);
 	//fprintf(stderr, "$%04x: %d %d\n", regs.pc, op0.isValid, op1.isValid);
 
 	item->setData(Qt::FontRole, _font);
@@ -191,7 +189,7 @@ void TraceWidget::_handleSelectionChanged(QListWidgetItem *current,
 		|* Figure out the memory differences between the previous selection
 		|* and the current one
 		\*********************************************************************/
-		std::vector<MemoryOp> ops;
+		Simulator::MemOpList ops;
 		int thisRow		= currentRow();
 		bool forwards	= true;
 
@@ -200,17 +198,8 @@ void TraceWidget::_handleSelectionChanged(QListWidgetItem *current,
 				{
 				TraceItem *ti = static_cast<TraceItem *>(item(i));
 				if (ti != nullptr)
-					{
-					MemoryOp op   = ti->op0();
-					if (op.isValid)
+					for (MemoryOp op : ti->ops())
 						ops.push_back(op);
-					op = ti->op1();
-					if (op.isValid)
-						ops.push_back(op);
-					op = ti->op2();
-					if (op.isValid)
-						ops.push_back(op);
-					}
 				}
 
 		else if (_previousRow > thisRow)
@@ -219,17 +208,8 @@ void TraceWidget::_handleSelectionChanged(QListWidgetItem *current,
 				{
 				TraceItem *ti = static_cast<TraceItem *>(item(i));
 				if (ti != nullptr)
-					{
-					MemoryOp op   = ti->op0();
-					if (op.isValid)
+					for (MemoryOp op : ti->ops())
 						ops.push_back(op);
-					op = ti->op1();
-					if (op.isValid)
-						ops.push_back(op);
-					op = ti->op2();
-					if (op.isValid)
-						ops.push_back(op);
-					}
 				}
 			forwards = false;
 			}
