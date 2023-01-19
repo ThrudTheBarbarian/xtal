@@ -144,6 +144,7 @@ fp_toString:
 	lda #' '					; By default we're +ve
 	bit flt_m1					; Test for -ve
 	bpl f2s_plus				; skip if Y
+	lda flt_m1					; Fetch the byte-with-sign-bit
 	and  #$7f					; clear sign bit
 	sta flt_m1					; and store
 	lda #'-'
@@ -395,8 +396,9 @@ f_done:
 ; Multiply F1 by 10
 ;
 fp_mult10:
-	_xfer32 flt_x2,flt_x1		; copy F1 to F2
-	tax							; copy exponent, returns with exp in A
+	_xfer32 flt_x1,flt_x2		; copy F1 to F2
+	lda flt_x1					; make sure the exponent is in A
+	tax							; copy exponent
 	beq f_done					; return if 0 exponent
 	
 	clc
