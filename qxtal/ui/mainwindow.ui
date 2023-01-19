@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1565</width>
+    <width>1390</width>
     <height>1154</height>
    </rect>
   </property>
@@ -25,13 +25,13 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>1565</width>
+     <width>1200</width>
      <height>1012</height>
     </size>
    </property>
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,1">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0">
       <item>
        <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
         <property name="sizeConstraint">
@@ -132,7 +132,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="midVL" stretch="1,1">
+       <layout class="QVBoxLayout" name="midVL" stretch="2,1">
         <item>
          <widget class="TraceWidget" name="traceWidget">
           <property name="sizePolicy">
@@ -174,12 +174,12 @@
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="rightVL" stretch="0">
+       <layout class="QVBoxLayout" name="rightVL" stretch="1">
         <item>
          <widget class="AsmWidget" name="asmWidget">
           <property name="minimumSize">
            <size>
-            <width>0</width>
+            <width>400</width>
             <height>1</height>
            </size>
           </property>
@@ -196,7 +196,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1565</width>
+     <width>1390</width>
      <height>24</height>
     </rect>
    </property>
