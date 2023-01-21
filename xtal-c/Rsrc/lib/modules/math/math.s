@@ -88,14 +88,14 @@ FP_PAGE0		= $00		; Used with indexed addressing
 ; =============================================================================
 init:
 
-_fploadAcc fpdata
-_fploadOp fpdata2
-jsr FP_add
+_fploadAcc two
+_fploadOp eight
+jsr FP_mul
 brk
 
-fpdata:
-.byte $00,$00,$40,$01
-fpdata2:
+two:
+.byte $00,$00,$40,$02
+eight:
 .byte $00,$00,$40,$04
 
 
@@ -181,12 +181,49 @@ addr1:
 	bne addr1					; Not zero ? continue!
 	rts
 
+
+; =============================================================================
+;
+; Routine    : clrmem
+; Description: Variable precision clear-memory
+; Notes      : 1) Precision stored in X
+
+clrmem:
+	lda #0						; set up 0-value
+	tay							; initialise index pointer
+
+clrm1:
+	sta (FP_topnt),Y			; Clear memory location
+	iny							; increment memory offset
+	dex							; decrement count
+	bne clrm1					; Done ? No: loop
+	rts							; Yes : return
+
+; =============================================================================
+;
+; Routine    : movind
+; Description: Variable precision indirect move
+; Notes      : 1) Precision stored in X
+
+movind:
+	ldy #0						; initialise the index pointer
+
+movin1:
+	lda (FP_frmpnt),Y			; fetch byte to transfer
+	sta (FP_topnt),Y			; store byte in new location
+	iny							; increment memory offset
+	dex							; decrement count
+	bne movin1					; Done ? No: loop
+	rts							; Yes : return
+	
 ; =============================================================================
 ;
 ; Routine    : FP_norm
 ; Description: Normalises a floating point number so that the first '1'
 ;              bit of the mantissa is up against where the virtual binary
 ;              point is.
+; Result  	 : FPAcc = NORMALISE(FPAcc)
+;
 ; Notes      : 1) Treat negative numbers by complementing, normalising and
 ;                 re-complementing
 ;              2) Must check for mantissa == 0, else we'll be forever in a
@@ -284,6 +321,8 @@ accset:
 ; Routine    : FP_add
 ; Description: Adds the FP accumulator and FPop registers, leaving the result
 ;			 : in the accumulator
+; Result  	 : FPAcc = FPAcc + FPop
+;
 ; Notes      : 1) If either value is 0, then just return because X + 0 = X
 ;              2) If the exponents differ by at least 23, there is no point in
 ;			   	  adding, so just return immediately as well
@@ -440,9 +479,176 @@ rescnt:
 	
 	
 
+; =============================================================================
+;
+; Routine    : FP_sub
+; Description: This is just a call into FP_add, after complementing the value
+;              to subtract.
+; Result  	 : FPAcc = FPop - FPAcc
+;
 
+@FP_sub:
+	ldx #FP_lsw					; set pointer to FPAcc LSB
+	ldy #3						; set precision counter
+	jsr complm					; complement the accumulator
+	jmp FP_add					; "add" the values together
 
+	
+	
+	
 
+; =============================================================================
+;
+; Routine    : FP_mul
+; Description: Rotate through all powers of 2 in the multiplicand and add
+;              appropriate values as we go
+; Result  	 : FPAcc = FPop * FPAcc
+;
+; Notes      : 1) Uses partial product register to store info
+;              2) Eventual sign is calculated from input signs
+; Algorithm  :
+;
+;         ┌──────────────────┐
+;         │      Start       │
+;         └──────────────────┘
+;                   │
+;                   ▼
+;         ┌──────────────────┐
+;         │ Shift multiplier │
+;    ┌───▶│right, placing LSB│
+;    │    │     in Carry     │
+;    │    └──────────────────┘
+;    │              │
+;    │              ▼
+;    │    ┌──────────────────┐Yes
+;    │    │   Carry == 1 ?   │──────────────┐
+;    │    └──────────────────┘              ▼
+;    │            No│            ┌────────────────────┐
+;    │              │            │Add multiplicand to │
+;    │              │            │  partial product   │
+;    │              ▼            └────────────────────┘
+;    │    ┌──────────────────┐              │
+;    │    │  Shift partial   │              │
+;    │    │  product right   │◀─────────────┘
+;    │    └──────────────────┘
+;    │              │
+;    │              ▼
+;    │    ┌──────────────────┐
+;    │    │   All bits of    │
+;    └────│    multiplier    │
+;       No│    checked ?     │
+;         └──────────────────┘
+;                   │ Yes
+;                   ▼
+;         ┌──────────────────┐
+;         │Return with answer│
+;         │in partial product│
+;         └──────────────────┘
+;
+
+@FP_mul:
+	jsr cksign					; set up and check sign of mantissa
+	lda FP_oexp					; get FPop exponent
+	clc							; add FPAcc exponent ..
+	adc FP_acce					; .. to FPop exponent
+	sta FP_acce					; store in FPAcc exponent
+	inc FP_acce					; inc by 1 for algorithm compensation
+
+setmct:
+	lda #$17					; set bit counter
+	sta FP_cntr					; store bit counter
+
+multip:
+	ldx #FP_msw					; Set pointer to FPAcc MSB
+	ldy #3						; set precision counter
+	jsr rotatr					; rotate FPAcc right, 1 bit
+	bcc nadopp					; C==0 ? Don't add partial-product
+
+addopp:
+	ldx #FP_mcand1				; pointer to LSB of multiplicand
+	stx FP_fmpnt				; store from-pointer
+	ldx #FP_work1				; pointer to LSB of partial product
+	stx FP_topnt				; store to-pointer
+	ldx #$6						; set precision counter
+	jsr adder					; add multiplicand to partial product
+
+nadopp:
+	ldx #FP_work6				; set pointer to MSB of partial product
+	ldy #$6						; set precision counter
+	jsr rotatr					; rotate partial product right, 1 bit
+	dec FP_cntr					; decrement the bit counter
+	bne multip					; not zero, continue multiplying
+	ldx #FP_work6				; else, set pointer to partial product MSB
+	ldy #6						; set precision counter
+	jsr rotatr					; make room for possible rounding
+	ldx #FP_work3				; set pointer to bit 24 of partial product
+	lda FP_PAGE0,X				; fetch LSB-1 of result
+	rol A						; rotate 24th bit to sign
+	bpl prexfr					; if 24th bit == 0, branch ahead
+	clc							; clear carry for addition
+	ldy #3						; set precision counter
+	lda #$40					; add 1 to 23rd bit of partial product ..
+	adc FP_PAGE0,X				; .. to round off result
+	sta FP_work3				; store sum in memory
+	
+cround:
+	lda #0						; clear A without changing carry
+	adc FP_PAGE0,X				; add with carry to propagate
+	sta FP_PAGE0,X				; store in partial product
+	inx							; increment index pointer
+	dey							; decrement counter
+	bne cround					; not zero, add next byte
+
+prexfr:
+	ldx #FP_lswe				; set pointer to FPAcc LSB-1
+	stx FP_topnt				; store in to-pointer
+	ldx #FP_work3				; set pointer to partial product LSB-1
+	stx FP_frmpnt				; store in from-pointer
+	ldx #4						; set precision counter
+	
+exmldv:
+	jsr movind					; move partial product to FPAcc
+	jsr FP_norm					; normalise result
+	lda FP_signs				; get sign storage
+	bne multex					; if != 0, sign is +ve
+	ldx #FP_lsw					; else set pointer to FPAcc LSB
+	ldy #$3						; set precision pointer
+	jsr complm					; complement result
+
+multex:
+	rts							; return to sender
+
+cksign:
+	lda #0						; set page portion of pointers
+	sta FP_topnt+1				; zero page of to-pointer
+	sta FP_frmpnt+1				; zero page of from-pointer
+	lda #FP_work0				; set pointer to work area
+	sta FP_topnt				; store in to-pointer
+	ldx #8						; set precision pointer
+	jsr clrmem					; clear memory
+	
+	lda #$1						; initialise sign indicator..
+	sta FP_signs				; .. by storing 1 in signs
+	
+	lda FP_msw					; fetch FPAcc MSB
+	bpl opsgnt					; +ve, check FPop
+
+negfpa:
+	dec FP_signs				; -ve: decrement signs
+	ldx #FP_lsw					; set pointer to FPAcc LSB
+	ldy #3						; set precision counter
+	jsr complm					; make +ve for multiplication
+	
+opsgnt:
+	lda FP_omsw					; is FPop -ve ?
+	bmi negop					; yes ? complement value
+	rts
+
+negop:
+	dec FP_signs				; decrement signs indicator
+	ldx #FP_olsw				; set pointer to FPop LSB
+	ldy #3						; set precision counter
+	jmp complm					; complement and return
 
 
 	
