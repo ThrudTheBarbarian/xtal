@@ -184,40 +184,40 @@ void TraceWidget::_handleSelectionChanged(QListWidgetItem *current,
 		\*********************************************************************/
 		auto nc = NotifyCenter::defaultNotifyCenter();
 		nc->notify(NTFY_TRACE_SEL_CHG, theItem);
-
-		/*********************************************************************\
-		|* Figure out the memory differences between the previous selection
-		|* and the current one
-		\*********************************************************************/
-		Simulator::MemOpList ops;
-		int thisRow		= currentRow();
-		bool forwards	= true;
-
-		if (_previousRow < thisRow)
-			for (int i=_previousRow; i<thisRow; i++)
-				{
-				TraceItem *ti = static_cast<TraceItem *>(item(i));
-				if (ti != nullptr)
-					for (MemoryOp op : ti->ops())
-						ops.push_back(op);
-				}
-
-		else if (_previousRow > thisRow)
-			{
-			for (int i=_previousRow-1; i>=thisRow; i--)
-				{
-				TraceItem *ti = static_cast<TraceItem *>(item(i));
-				if (ti != nullptr)
-					for (MemoryOp op : ti->ops())
-						ops.push_back(op);
-				}
-			forwards = false;
-			}
-
-		if (ops.size() > 0)
-			emit updateMemory(ops, forwards);
-		_previousRow = thisRow;
 		}
 	else
 		_propagateSelection = true;
+
+	/*********************************************************************\
+	|* Figure out the memory differences between the previous selection
+	|* and the current one
+	\*********************************************************************/
+	Simulator::MemOpList ops;
+	int thisRow		= currentRow();
+	bool forwards	= true;
+
+	if (_previousRow < thisRow)
+		for (int i=_previousRow; i<thisRow; i++)
+			{
+			TraceItem *ti = static_cast<TraceItem *>(item(i));
+			if (ti != nullptr)
+				for (MemoryOp op : ti->ops())
+					ops.push_back(op);
+			}
+
+	else if (_previousRow > thisRow)
+		{
+		for (int i=_previousRow-1; i>=thisRow; i--)
+			{
+			TraceItem *ti = static_cast<TraceItem *>(item(i));
+			if (ti != nullptr)
+				for (MemoryOp op : ti->ops())
+					ops.push_back(op);
+			}
+		forwards = false;
+		}
+
+	if (ops.size() > 0)
+		emit updateMemory(ops, forwards);
+	_previousRow = thisRow;
 	}
