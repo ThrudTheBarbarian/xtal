@@ -321,6 +321,7 @@ void Simulator::reset(bool hard)
 	if (hard)
 		{
 		_breakpoints.clear();
+		_labels.clear();
 		for (int i=0; i<_maxRam; i++)
 			{
 			_readCbs[i]		= nullptr;
@@ -1349,14 +1350,14 @@ void Simulator::_getLabel(uint32_t address, int slack, String &label)
 	int delta = 1;
 	while (delta <= slack)
 		{
-		AddressMap::iterator it = _labels.find(address+delta);
+		AddressMap::iterator it = _labels.find(address-delta);
 		if (it != _labels.end())
 			{
 			label = it->second + " + "+ std::to_string(delta);
 			break;
 			}
 
-		it = _labels.find(address-delta);
+		it = _labels.find(address+delta);
 		if (it != _labels.end())
 			{
 			label = it->second + " - " + std::to_string(delta);
