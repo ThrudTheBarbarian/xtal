@@ -2,7 +2,7 @@
 //  Float65.cc
 //  float65
 //
-//  Created by Simon Gornall on 1/21/23.
+//  Created by Thrud The Barbarian on 1/21/23.
 //
 //
 //  Maths floating point routines

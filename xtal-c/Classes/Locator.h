@@ -2,7 +2,7 @@
 //  Locator.h
 //  xtal-c
 //
-//  Created by Simon Gornall on 12/28/22.
+//  Created by Thrud The Barbarian on 12/28/22.
 //
 
 #ifndef Locator_h

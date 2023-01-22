@@ -2,7 +2,7 @@
 //  Function.cc
 //  xtal-a
 //
-//  Created by Simon Gornall on 11/22/22.
+//  Created by Thrud The Barbarian on 11/22/22.
 //
 
 #include <ranges>

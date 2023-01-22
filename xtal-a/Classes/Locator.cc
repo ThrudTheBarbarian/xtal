@@ -2,7 +2,7 @@
 //  Locator.cc
 //  xtal-a
 //
-//  Created by Simon Gornall on 11/17/22.
+//  Created by Thrud The Barbarian on 11/17/22.
 //
 
 #include "Engine.h"

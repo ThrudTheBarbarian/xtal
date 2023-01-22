@@ -16,27 +16,28 @@
 ; Definitions:
 ; ------------
 
-FP_tsign        = $80       ; Sign indicator
-FP_signs        = $81       ; Signs indicator (mult and div)
 
-FP_lswe         = $82       ; FP accumulator extension
-FP_lsw          = $83       ; FP accumulator least significant byte
-FP_nsw          = $84       ; FP accumulator next significant byte
-FP_msw          = $85       ; FP accumulator most significant byte
-FP_acce         = $86       ; FP accumulator exponent
+FP_lswe         = $80       ; FP accumulator extension
+FP_lsw          = $81       ; FP accumulator least significant byte
+FP_nsw          = $82       ; FP accumulator next significant byte
+FP_msw          = $83       ; FP accumulator most significant byte
+FP_acce         = $84       ; FP accumulator exponent
 
-FP_olswe        = $87       ; FP op extension
-FP_olsw         = $88       ; FP op least significant byte
-FP_onsw         = $89       ; FP op next significant byte
-FP_omsw         = $8A       ; FP op most signifcant byte
-FP_oexp         = $8B       ; FP op exponent
+FP_mcand0       = $85       ; Multiplicand work area. Note that these ..
+FP_mcand1       = $86       ; .. three bytes must be located immediately ..
+FP_mcand2       = $87       ; .. before the FPop space
+FP_olswe        = $88       ; FP op extension
+FP_olsw         = $89       ; FP op least significant byte
+FP_onsw         = $8A       ; FP op next significant byte
+FP_omsw         = $8B       ; FP op most signifcant byte
+FP_oexp         = $8C       ; FP op exponent
 
 FP_fmpnt        = $F0       ; From pointer (2 bytes)
 FP_topnt        = $F2       ; To pointer   (2 bytes)
 FP_cntr         = $F4       ; Counter
-FP_mcand0       = $F5       ; Multiplication work area
-FP_mcand1       = $F6       ; Multiplication work area
-FP_mcand2       = $F7       ; Multiplication work area
+FP_err			= $F5		; Error codes
+FP_tsign        = $F5       ; Sign indicator
+FP_signs        = $F6       ; Signs indicator (mult and div)
 FP_work0        = $F8       ; Work area
 FP_work1        = $F9       ; Work area
 FP_work2        = $FA       ; Work area
@@ -47,6 +48,8 @@ FP_work6        = $FE       ; Work area
 FP_work7        = $FF       ; Work area
 
 FP_PAGE0        = $00       ; Used with indexed addressing
+
+FLT_DIV0		= $80		; Error: attempt to divide by 0
 
 ; =============================================================================
 ; FP macros
@@ -88,18 +91,21 @@ FP_PAGE0        = $00       ; Used with indexed addressing
 init:
 
 _fploadAcc two
-_fploadOp nine
-jsr FP_sub
+_fploadOp mnine
+jsr FP_div
 brk
 
 two:
 .byte $00,$00,$40,$02
 nine:
 .byte $00,$00,$48,$04
+three:
+.byte $00,$00,$60,$02
+
 mtwo:
 .byte $00,$00,$c0,$02
 mnine:
-.byte $00,$00,$c8,$04
+.byte $00,$00,$b8,$04
 
 
 ; =============================================================================
@@ -523,7 +529,7 @@ rescnt:
 ;
 
 @FP_sub:
-    ldx #FP_olsw                ; set pointer to FPAcc LSB
+    ldx #FP_lsw                 ; set pointer to FPAcc LSB
     ldy #3                      ; set precision counter
     jsr complm                  ; complement the accumulator
     jmp FP_add                  ; "add" the values together
@@ -541,6 +547,9 @@ rescnt:
 ;
 ; Notes      : 1) Uses partial product register to store info
 ;              2) Eventual sign is calculated from input signs
+;			   3) Uses 6-byte register for accumulator then normalises, so
+;				  needs the memory layout of multiplicand work-space as
+;				  laid out in register arrangement in ZP
 ; Algorithm  :
 ;
 ;             +------------------+
@@ -616,7 +625,7 @@ nadopp:
     ldx #FP_work6               ; else, set pointer to partial product MSB
     ldy #6                      ; set precision counter
     jsr rotatr                  ; make room for possible rounding
-    ldx #FP_work3               ; set pointer to bit 24 of partial product
+    ldx #FP_work3                ; set pointer to bit 24 of partial product
     lda FP_PAGE0,X              ; fetch LSB-1 of result
     rol A                       ; rotate 24th bit to sign
     bpl prexfr                  ; if 24th bit == 0, branch ahead
@@ -651,12 +660,15 @@ exmldv:
     jsr complm                  ; complement result
 
 multex:
+	lda #0						; set the error status
+	sta FP_err					; and store for caller
     rts                         ; return to sender
 
 cksign:
     lda #0                      ; set page portion of pointers
     sta FP_topnt+1              ; zero page of to-pointer
     sta FP_fmpnt+1              ; zero page of from-pointer
+    
     lda #FP_work0               ; set pointer to work area
     sta FP_topnt                ; store in to-pointer
     ldx #8                      ; set precision pointer
@@ -692,3 +704,168 @@ negop:
 
 
     
+
+; =============================================================================
+;
+; Routine    : FP_div
+; Description: Opposite of FP_mul above, a series of shift/subtract ops instead
+;              of shift/add
+; Result     : FPAcc = FPop / FPacc
+; Notes      :
+;
+; Algorithm  :
+;                                    +------------+
+;                                    |   Start    |
+;                                    +------------+
+;                                           |
+;                                           v
+;          +-----------------+    Yes+------------+
+;          | Complement Facc |<------|FPacc < 0 ? |
+;          +-----------------+       +------------+
+;                   |                       | No
+;                   +-----------------------+
+;                                           v
+;          +-----------------+    Yes+------------+
+;          | Complement Fop  |<------| FPop < 0 ? |
+;          +-----------------+       +------------+
+;                   |                       | No
+;                   +-----------------------+
+;                                           v
+;          +-----------------+       +------------+
+;          |  Jump to error  |<------|Divisor == 0|
+;          +-----------------+       +------------+
+;                                           |
+;                                           v
+;                            +----------------------------+
+;                            |     Subtract exponents     |
+;                            +----------------------------+
+;                                           |
+;                                           |
+;                                           v
+;                            +----------------------------+
+;                            |Divide mantissa (shift/sub) |
+;                            +----------------------------+
+;                                           |
+;                                           v
+;                            +----------------------------+
+;                            | Round off partial product  |
+;                            +----------------------------+
+;                                           |
+;                                           v
+;                            +----------------------------+
+;                            | Move to FPAcc / normalise  |
+;                            +----------------------------+
+;                                           |
+;                                           v
+;                           Yes---------------------------+
+;                     +------| Initial signs different ?  |
+;                     |      +----------------------------+
+;                     v                     | No
+;            +-----------------+            |
+;            | Complement Facc |            |
+;            +-----------------+            v
+;                     |               +-----------+
+;                     +-------------->|  Finish   |
+;                                     +-----------+
+;
+
+@FP_div:
+    jsr cksign                  ; set up and check sign of mantissa
+	lda FP_msw					; check for divide by zero
+	beq derror					; Divide-by-zero error
+	
+subexp:
+	lda FP_oexp					; Get dividend exponent
+	sec							; Prepare for subtract
+	sbc FP_acce					; Subtract divisor exponent
+	sta FP_acce					; Store subtracted exponent
+	inc FP_acce					; Algorithm compensation
+	
+setdct:
+	lda #$17					; set the divide-count
+	sta FP_cntr					; store the counter
+
+divide:
+	jsr setsub					; subtract divisor from dividend
+	bmi nogo					; if result -ve, rotate vlaue in quotient
+	ldx #FP_olsw				; set pointer to dividend
+	stx FP_topnt				; store in to-pointer
+	ldx #FP_work0				; set pointer to quotient
+	stx FP_fmpnt				; store in from-pointer
+	ldx #3						; Set precision counter
+	jsr movind					; move quotient to dividend
+	sec							; set carry for +ve results
+	jmp quorot					; rotate quotient
+
+derror:
+	lda #FLT_DIV0				; get error code
+	sta FP_err					; store in the error register
+	rts							; return. Maybe BRK instead ?
+	
+nogo:
+	clc							; Negative result, clear carry
+
+quorot:
+	ldx #FP_work4				; Set pointer to quotient LSB
+	ldy #$3						; Set precision counter
+	jsr rotl					; rotate carry into LSB of quotient
+	
+	ldx #FP_olsw				; Set pointer to dividend LSB
+	ldy #$3						; Set precision counter
+	jsr rotatl					; rotate dividend left
+	
+	dec FP_cntr					; One more bit-division done
+	bne divide					; loop if more yet to do
+	
+	jsr setsub					; Do it one more time for rounding
+	bmi dvexit					; if minus, no rounding
+	lda #$1						; else (0,+ve) add 1 to 23rd bit
+	clc							; prepare for add chain
+	adc FP_work4				; Round off quotient LSB
+	sta FP_work4				; Restore byte in work area
+	lda #$0						; clear A, but not carry
+	adc FP_work5				; Add carry to 2nd byte of quotient
+	sta FP_work5				; Store result
+	lda #$0						; clear A, but not carry
+	adc FP_work6				; Add carry to 3rd byte of quotient
+	sta FP_work6				; Store result
+	bpl dvexit					; if msb == 0, exit
+	ldx #FP_work6				; else prepare to rotate right
+	ldy #$3						; set precision
+	jsr rotatr					; clear sign bit counter
+	inc FP_acce					; compensate exponent for rotate
+	
+dvexit:
+	ldx #FP_lswe				; set pointer to FPacc
+	stx FP_topnt				; store in the to-pointer
+	ldx #FP_work3				; set pointer to quotient
+	stx	FP_fmpnt				; store in the from-pointer
+	ldx #$4						; set the precision counter
+	jmp exmldv					; move quotient to FPAcc, normalise, exit
+	
+setsub:
+	ldx #FP_work0				; set pointer to work area
+	stx FP_topnt				; store in to-pointer
+	ldx #FP_lsw					; set pointer to FPacc LSB
+	stx FP_fmpnt				; store in from-pointer
+	ldx #3						; set precision count
+	jsr movind					; copy FPAcc to work area
+	
+	ldx #FP_work0				; prepare for subtraction
+	stx FP_topnt				; store work0 into to-pointer
+	ldx #FP_olsw				; set pointer to FPop LSB 
+	stx FP_fmpnt				; store in from-pointer
+	ldy #$0						; initialise index pointer
+	ldx #3						; set precision count
+	sec							; set up for subtraction
+
+subr1:
+	lda (FP_fmpnt),Y			; Fetch FPop byte (dividend)
+	sbc (FP_topnt),Y			; subtract FPacc byte (divisor)
+	sta (FP_topnt),Y			; store in place of divisor
+	iny							; increment index pointer
+	dex							; decrement precision counter
+	bne subr1					; not zero ? continue
+	lda FP_work2				; set sign bit result in N flag
+	rts
+	

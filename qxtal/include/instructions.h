@@ -2,7 +2,7 @@
 //  instructions.h
 //  xtal
 //
-//  Created by Simon Gornall on 11/28/22.
+//  Created by Thrud The Barbarian on 11/28/22.
 //
 
 #ifndef instructions_h

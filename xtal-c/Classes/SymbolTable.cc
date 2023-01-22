@@ -2,7 +2,7 @@
 //  SymbolTable.cc
 //  xtal-c
 //
-//  Created by Simon Gornall on 11/26/22.
+//  Created by Thrud The Barbarian on 11/26/22.
 //
 
 #include "Emitter.h"

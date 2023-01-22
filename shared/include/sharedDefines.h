@@ -2,7 +2,7 @@
 //  defines.h
 //  xtal
 //
-//  Created by Simon Gornall on 11/28/22.
+//  Created by Thrud The Barbarian on 11/28/22.
 //
 
 #ifndef sharedDefines_h

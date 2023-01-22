@@ -2,7 +2,7 @@
 //  Types.cc
 //  xtal-c
 //
-//  Created by Simon Gornall on 11/30/22.
+//  Created by Thrud The Barbarian on 11/30/22.
 //
 
 #include "Types.h"

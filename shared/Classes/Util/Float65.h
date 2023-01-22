@@ -2,7 +2,7 @@
 //  Float65.h
 //  float65
 //
-//  Created by Simon Gornall on 1/21/23.
+//  Created by Thrud The Barbarian on 1/21/23.
 //
 
 #ifndef Float65_h

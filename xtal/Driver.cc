@@ -2,7 +2,7 @@
 //  Driver.cc
 //  xtal
 //
-//  Created by Simon Gornall on 11/25/22.
+//  Created by Thrud The Barbarian on 11/25/22.
 //
 #include <cstdlib>
 #include <cstdio>
