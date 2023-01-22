@@ -1108,7 +1108,12 @@ int Scanner::_handle6502(Token::TokenInfo info,
     \************************************************************************/
 	AddressingMode amode = A_NONE;
 	if (args.length() == 0)
-		amode = A_IMPLIED;
+		{
+		if (info.which == P_ASL)
+			amode = A_ACCUMULATOR;
+		else
+			amode = A_IMPLIED;
+		}
 	else if (args[0] == '#')
 		{
 		amode = A_IMMEDIATE;
