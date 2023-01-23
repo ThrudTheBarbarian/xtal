@@ -204,8 +204,15 @@ float Float65::toFloat(void)
 		frac /= 2;
 		}
 	
-	for (int i=0; i<_val.b[3]+1; i++)
-		sum *= 2;
+	if (_val.b[3] >= 0x80)
+		{
+		int num = (~_val.b[3] + 1) & 0xff;
+		for (int i=0; i<num-1; i++)
+			sum /= 2;
+		}
+	else
+		for (int i=0; i<_val.b[3]+1; i++)
+			sum *= 2;
 	
 	if (minus)
 		sum = - sum;
