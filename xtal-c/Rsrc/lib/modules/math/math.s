@@ -118,12 +118,20 @@ FLT_DIV0		= $80		; Error: attempt to divide by 0
 ; =============================================================================
 init:
 
-lda #<str
-sta FP_svec
-lda #>str
-sta FP_svec+1
+;lda #<str
+;sta FP_svec
+;lda #>str
+;sta FP_svec+1
 
-jsr FP_stof
+;jsr FP_stof
+
+_fploadAcc two
+
+lda #$40
+sta FP_svec
+lda #0
+sta FP_svec+1
+jsr FP_ftos
 brk
 
 two:
@@ -138,8 +146,12 @@ mtwo:
 mnine:
 .byte $00,$00,$b8,$04
 
+m_pi:
+.byte $1d,$90,$64,$02
+
 str:
 .byte "0.0045."
+
 
 
 ; =============================================================================
@@ -1128,4 +1140,147 @@ decbin:
 	
 	
 	
+	
+
+
+; =============================================================================
+;
+; Routine    : FP_ftos
+; Description: Converts a float number to an (at)ascii string
+; Result     : S = convert(FPacc)
+; Notes      :
+
+emit:
+	ldy FP_sindx				; Load Y with the index
+	sta (FP_svec),Y				; store A in the next position
+	inc FP_sindx				; and pre-increment for next time
+	rts
+
+@FP_ftos:
+	lda #0
+	sta FP_ioexpd				; clear decimal exponenet storage
+	lda FP_msw					; Is value to be converted -ve ?
+	bmi outneg					; yes: make +ve and output "-"
+	lda #'+'					; else get ascii for '+'
+	bne ahead1					; go display '+' sign
+
+outneg:
+	ldx #FP_lsw					; set pointer to FPAcc LSB
+	ldy #3						; set precision counter
+	jsr complm					; complement -> FPAcc now +ve
+	lda #'-'					; and set the output char to be '-'
+
+ahead1:
+	jsr emit					; Output a byte to the string
+	lda #'0'					; set up (at)ascii 0
+	jsr emit					; and emit
+	lda #'.'					; set up ascii '.'
+	jsr emit					; and emit
+	dec FP_acce					; decrement FPacc exponent
+	
+decext:
+	bpl decexd					; if compensated, exponent >= 0
+	lda #4						; exponent -ve, add 4 to FP_acce
+	clc							; clear for addition
+	adc FP_acce					; add 4 to the exponent
+	bpl decout					; if exponent >= 0, output mantissa
+	jsr fpix10					; else: multiply mantissa by 10
+
+decrep:
+	lda FP_acce					; get exponent
+	jmp decext					; repeat test for >= 0
+
+decexd:
+	jsr fpd10					; multiply Facc by 0.1
+	jmp decrep					; check status of FPacc exponent
+
+decout:
+	ldx #FP_iostr				; Set up for move op
+	stx FP_topnt				; store working reg in to-pointer
+	ldx #FP_lsw					; set pointer to FPacc LSB
+	stx FP_fmpnt				; store in from-pointer
+	ldx #3						; set precision counter
+	jsr movind					; move FPacc to output registers
+	
+	lda #0
+	sta FP_iostr3				; clear ioreg MSB+1
+	ldx #FP_iostr				; set pointer to output LSB byte
+	ldy #3						; set precision counter
+	jsr rotatl					; rotate to compensate for sign bit
+	jsr decbin					; output reg x10, overflow in MSB+1
+
+compen:
+	inc FP_acce					; increment FPacc exponent
+	beq outdig					; output digit when compensation done
+	ldx #FP_iostr3				; else rotate right to compensate
+	ldy #4						; For any remainder in binary exponent..
+	jsr rotatr					; .. perform rotate-right op
+	jmp compen					; repeat until exponent == 0
+
+outdig:
+	lda #7						; set digit counter to 7 ..
+	sta FP_iocnt				; .. for output operation
+	lda FP_iostr3				; fetch BCD, see if 1st digit is 0
+	beq zerodg					; yes: check remainder of digits
+
+outdgs:
+	lda FP_iostr3				; get BCD from output register
+	ora #$30					; form (at)ascii digit
+	jsr emit					; and send it out
+
+decrdg:
+	dec FP_iocnt				; decrement digit counter
+	beq expout					; if =0: done, output exponent
+	jsr decbin					; else: get next digit
+	jmp outdgs					; form (at)ascii and output
+
+zerodg:
+	dec FP_ioexpd				; decrement exponent for skipping display
+	lda FP_iostr2				; check if mantissa == 0
+	bne decrdg					; if not zero, continue output
+	lda FP_iostr1				; same
+	bne decrdg					; same
+	lda FP_iostr				; same
+	bne decrdg					; same
+	
+	lda #0						; mantissa 0 ..
+	sta FP_ioexpd				; .. clear exponent ..
+	beq decrdg					; .. before finishing output
+	
+expout:
+	lda #'E'					; set up (at)ascii code for 'E'
+	jsr emit					; and output
+	lda FP_ioexpd				; test if -ve
+	bmi exoutn					; yes: display '-' and negate
+	lda #'+'					; no: set (at)ascii code for '+'
+	jmp ahead2					; and go display the exponent
+
+exoutn:
+	eor #$ff					; two's complement the exponent..
+	sta FP_ioexpd				; .. to make negative value into..
+	inc FP_ioexpd				; .. a positive
+	lda #'-'					; set ascii code for '-'
+
+ahead2:
+	jsr emit					; and output
+	ldy #$0						; clear 10's counter
+	lda FP_ioexpd				; get exponent
+
+sub12:
+	sec							; prepare for subtraction
+	sbc #$A						; subtract 10's from exponent
+	bmi toomuch					; if -ve, ready for output
+	sta FP_ioexpd				; store +ve result
+	iny							; increment 10's counter
+	jmp sub12					; continue subtraction
+
+toomuch:
+	tya							; 10's digit first
+	ora #$30					; convert to (at)ascii
+	jsr emit					; and output
+	lda FP_ioexpd				; get 1's
+	ora #$30					; convert to (at)ascii
+	jsr emit					; and output
+	lda #0						; terminate the string
+	jmp emit
 	
