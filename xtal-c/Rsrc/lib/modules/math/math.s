@@ -16,6 +16,8 @@
 ; Definitions:
 ; ------------
 
+FP_fmpnt        = $1C       ; From pointer (2 bytes)
+FP_topnt        = $1E       ; To pointer   (2 bytes)
 
 FP_lswe         = $80       ; FP accumulator extension
 FP_lsw          = $81       ; FP accumulator least significant byte
@@ -26,26 +28,52 @@ FP_acce         = $84       ; FP accumulator exponent
 FP_mcand0       = $85       ; Multiplicand work area. Note that these ..
 FP_mcand1       = $86       ; .. three bytes must be located immediately ..
 FP_mcand2       = $87       ; .. before the FPop space
+
 FP_olswe        = $88       ; FP op extension
 FP_olsw         = $89       ; FP op least significant byte
 FP_onsw         = $8A       ; FP op next significant byte
 FP_omsw         = $8B       ; FP op most signifcant byte
 FP_oexp         = $8C       ; FP op exponent
 
-FP_fmpnt        = $F0       ; From pointer (2 bytes)
-FP_topnt        = $F2       ; To pointer   (2 bytes)
-FP_cntr         = $F4       ; Counter
-FP_err			= $F5		; Error codes
-FP_tsign        = $F5       ; Sign indicator
-FP_signs        = $F6       ; Signs indicator (mult and div)
-FP_work0        = $F8       ; Work area
-FP_work1        = $F9       ; Work area
-FP_work2        = $FA       ; Work area
-FP_work3        = $FB       ; Work area
-FP_work4        = $FC       ; Work area
-FP_work5        = $FD       ; Work area
-FP_work6        = $FE       ; Work area
-FP_work7        = $FF       ; Work area
+FP_err			= $8D		; Error codes
+
+FP_cntr         = $F0       ; Counter
+FP_tsign        = $F1       ; Sign indicator
+FP_signs        = $F2       ; Signs indicator (mult and div)
+FP_work0        = $F3       ; Work area
+FP_work1        = $F4       ; Work area
+FP_work2        = $F5       ; Work area
+FP_work3        = $F6       ; Work area
+FP_work4        = $F7       ; Work area
+FP_work5        = $F8       ; Work area
+FP_work6        = $F9       ; Work area
+FP_work7        = $FA       ; Work area
+
+FP_svec			= $FC		; Pointer to string
+FP_sindx		= $FE
+FP_iocnt		= $FF		; index into string
+
+; We can use the ZIOCB space, as long as there's no actual i/o taking
+; place, and as long as the values stored there don't need to persist
+; outside of the function they're being used in.
+
+FP_inmtas		= $20		; to f/a mantissa sign
+FP_inexps		= $21		; to f/a exponent sign
+FP_inprdi		= $22		; to f/a period indicator
+FP_iolsw		= $23		; to f/a LSB
+FP_ionsw		= $24		; to f/a mid-SB
+FP_iomsw		= $25		; to f/a MSB
+FP_ioexp		= $26		; to f/a exponent
+FP_iostr		= $27		; to f/a storage
+FP_iostr1		= $28		; to f/a storage
+FP_iostr2		= $29		; to f/a storage
+FP_iostr3		= $2A		; to f/a storage
+FP_ioexpd		= $2B		; to f/a exponent storage
+FP_tplsw		= $2C		; temp input storage, LSB
+FP_tpnsw		= $2D		; temp input storage, mid-SB
+FP_tpmsw		= $2E		; temp input storage, MSB
+FP_tpexp		= $2F		; temp input storage, exponent
+FP_temp1		= $FB		; temp storage for pages
 
 FP_PAGE0        = $00       ; Used with indexed addressing
 
@@ -90,9 +118,12 @@ FLT_DIV0		= $80		; Error: attempt to divide by 0
 ; =============================================================================
 init:
 
-_fploadAcc two
-_fploadOp mnine
-jsr FP_div
+lda #<str
+sta FP_svec
+lda #>str
+sta FP_svec+1
+
+jsr FP_stof
 brk
 
 two:
@@ -106,6 +137,9 @@ mtwo:
 .byte $00,$00,$c0,$02
 mnine:
 .byte $00,$00,$b8,$04
+
+str:
+.byte "0.0045."
 
 
 ; =============================================================================
@@ -853,7 +887,7 @@ setsub:
 	
 	ldx #FP_work0				; prepare for subtraction
 	stx FP_topnt				; store work0 into to-pointer
-	ldx #FP_olsw				; set pointer to FPop LSB 
+	ldx #FP_olsw				; set pointer to FPop LSB
 	stx FP_fmpnt				; store in from-pointer
 	ldy #$0						; initialise index pointer
 	ldx #3						; set precision count
@@ -868,4 +902,230 @@ subr1:
 	bne subr1					; not zero ? continue
 	lda FP_work2				; set sign bit result in N flag
 	rts
+	
+
+; =============================================================================
+;
+; Routine    : FP_stof
+; Description: Converts an (AT)ASCII string to a float number
+; Result     : FPAcc = convert(ptr)
+; Notes      :
+
+input:
+	ldy FP_sindx				; get the index of the byte to fetch
+	lda (FP_svec),Y				; fetch the next byte
+	inc FP_sindx				; increment the index pointer
+	rts
+
+@FP_stof:
+    lda #0                      ; set page portion of pointers
+    sta FP_topnt+1              ; zero page of to-pointer
+    sta FP_fmpnt+1              ; zero page of from-pointer
+    sta FP_sindx				; zero string index
+    
+	cld							; clear decimal mode flag
+	
+	ldx #FP_inmtas				; set pointer to storage area
+	stx FP_topnt				; store in to-pointer
+	ldx #$0c					; set precision counter
+	jsr clrmem					; clear the storage area
+	
+	jsr input					; fetch the next character in the string
+	
+	cmp #'+'					; test to see if it's a + sign
+	beq ninput					; if so, just get the next input
+	cmp #'-'					; test to see if it's a - sign
+	bne notplm					; no, test if valid char
+	sta FP_inmtas				; make input-sign non-zero
+	
+ninput:
+	jsr input					; get next character from string
+
+notplm:
+	cmp #'.'					; do we have a decimal point
+	bne spriod					; no: skip period
+
+period:
+	ldx FP_inprdi				; X <- whether we've seen a period before
+	cpx #'.' 					; Do we already have a decimal point ?
+	beq endinp					; Yes: end input
+
+per1:
+	sta FP_inprdi				; store the fact that we have a .
+	ldy #0						; zero the index
+	sty FP_iocnt					; Reset the digit counter
+	jmp ninput					; next character
+
+spriod:
+	cmp #'E'					; test for E for exponent notation
+	bne sfndxp					; no, skip the found-exponent code
+
+fndexp:
+	jsr input					; get the next character
+	cmp #'+'					; test for '+' sign
+	beq expinp					; yes ? ignore, fetch next char
+	cmp #'-'					; test for '-' sign
+	bne noexps					; no, test for digit
+	sta FP_inexps				; yes: store exponent minus sign
+
+expinp:
+	jsr input					; get the next character
+
+noexps:
+	cmp #'0'					; number, test lower limit
+
+island:
+	bmi endinp					; No, end input string
+	cmp #':'					; numner, test upper limit
+	bpl endinp					; illegal char, stop accepting input
+	and #$0F					; strip off everything except the lower nibble
+	sta FP_temp1				; store BCD in temporary storage
+	ldx $FP_ioexpd				; set pointer to exponent storage
+	lda #$3						; test for upper limit of exponent
+	cmp FP_PAGE0,X				; is tens digit > 3
+	bmi endinp					; yes, end input
+	lda FP_PAGE0,X				; store temporarily in A
+	clc							; clear carry so it doesn't interfere
+	rol FP_PAGE0,X				; tens digit x2
+	rol FP_PAGE0,X				; tens digit x2 (again) => x4
+	adc FP_PAGE0,X				; tens digit + original => x5
+	rol FP_PAGE0,X				; tens digit x2			=> x10
+	adc FP_temp1				; Add new input
+	sta FP_PAGE0,X				; store in exponent storage
+	jmp expinp					; next character
+	
+sfndxp:
+	cmp #'0'					; number, test lower limit
+	bmi endinp					; No, end input string
+	cmp #':'					; numner, test upper limit
+	bpl endinp					; illegal char, stop accepting input
+	tay							; store temporarily
+	lda #$F8					; Input too large ?
+	bit FP_iostr2				; AND with mem, +ve if too large
+	bne ninput					; yes, ignore and fetch next char
+	tya							; retrieve the value
+	inc FP_iocnt					; increment digit counter
+	and #$0F					; mask off any non-numeric parts
+	pha							; save temporarily
+	jsr decbin					; multiply previous value x 10
+	ldx #FP_iostr				; set pointer to storage
+	pla							; fetch digit just obtained
+	clc							; clear for addition
+	adc FP_PAGE0,X				; add digit to storage
+	sta FP_PAGE0,X				; save new sum
+	lda #0						; clear A for next addition
+	adc FP_PAGE0+1,X			; add carry to next byte
+	sta FP_PAGE0+1,X			; store in next byte
+	lda #0						; clear A for next addition
+	adc FP_PAGE0+2,X			; add carry to next byte
+	sta FP_PAGE0+2,X			; store in next byte
+	jmp ninput					; next character...
+
+endinp:
+	lda FP_inmtas				; Test is +ve or -ve
+	beq finput					; indicator zero, number +ve
+	ldx #FP_iostr				; index to LSB of input mantissa
+	ldy #$03					; set precision
+	jsr complm					; 2's complement for negative
+
+finput:
+	lda #$0
+	sta FP_iostr-1				; clear input storage LSB-1
+	lda #FP_lswe				; set pointer to FPacc
+	sta FP_topnt				; store in to-pointer
+	lda #FP_iostr-1				; set pointer to input storage
+	sta FP_fmpnt				; store in from-pointer
+	ldx #4						; set precision
+	jsr movind					; move input to FPacc
+	
+	ldy #$17					; set exponent for normalisation
+	sty FP_acce					; store in FPAcc exponent
+	jsr FP_norm					; normalise the input
+	lda FP_inexps				; Test exponent sign indicator
+	beq posexp					; +ve ? Same exponent
+	lda #$ff					; -ve ? Form 2's complement ..
+	eor FP_ioexpd				; .. of exponent value ..
+	sta FP_ioexpd				; .. by complementing and ..
+	inc FP_ioexpd				; .. and incrementing
+	
+posexp:
+	lda FP_inprdi				; Test period indicator
+	beq expok					; if zero, no decimal point
+	lda #0						; clear A
+	sec							; prepare for subtraction
+	sbc FP_iocnt					; form negative of digit-count
+
+expok:
+	clc							; clear carry for addition
+	adc FP_ioexpd				; add to compensate for decimal point
+	sta FP_ioexpd				; store results
+	bmi minexp					; -ve exponent, adjust to 0
+	bne expfix					; not zero, adjust to 0
+	rts							; return with value in FPacc
+
+expfix:
+	jsr fpix10					; multiply by 10 ..
+	bne expfix					; .. until we're good
+	rts
+
+fpix10:
+	lda #$4						; multiply FPAcc by 10
+	sta FP_oexp					; load FPop with a value of 10 ..
+	lda #$50					; .. by setting the exponent to 4 ..
+	sta FP_omsw					; .. and the mantissa to $50 ..
+	lda #0						; ..
+	sta FP_onsw					; .. $00 ..
+	sta FP_olsw					; .. $00
+	jsr FP_mul					; and multiply
+	dec FP_ioexpd				; decrement decimal exponent
+	rts							; return to test for completion
+
+minexp:
+	jsr fpd10					; compensate decimal exponent minus ..
+	bne minexp					; .. until done
+	rts
+
+fpd10:
+	lda #$fd					; multiply FPAcc by 0.1
+	sta FP_oexp					; load FPop with a value of 0.1 ..
+	lda #$66					; .. by setting the exponent to -3 ..
+	sta FP_omsw					; .. and the mantissa to $66 ..
+	sta FP_onsw					; .. $66 ..
+	lda #$67					; ..
+	sta FP_olsw					; .. $67
+	jsr FP_mul					; and multiply
+	inc FP_ioexpd				; increment decimal exponent
+	rts							; return
+	
+decbin:
+	lda #0
+	sta FP_iostr3				; clear MSB+1 of result
+	ldx #FP_iolsw				; set pointer to io work area
+	stx FP_topnt				; store in to-pointer
+	ldx #FP_iostr				; set pointer to io storage
+	stx FP_fmpnt				; store in from-pointer
+	ldx #$4						; set the precision
+	jsr movind					; copy io storage to work area
+	
+	ldx #FP_iostr				; set pointer to original value
+	ldy #$4						; set precision counter
+	jsr rotatl					; start x10 routine (total = x2)
+
+	ldx #FP_iostr				; set pointer to original value
+	ldy #$4						; set precision counter
+	jsr rotatl					; do x10 routine (total = x4)
+
+	ldx #FP_iolsw				; set pointer to io work area
+	stx FP_fmpnt				; set from-pointer
+	ldx #FP_iostr				; set pointer to io storage
+	stx FP_topnt				; store in to-pointer
+	ldx #4						; set precision counter
+	jsr adder					; add original to rotated (total = x5)
+	
+	ldx #FP_iostr				; reset pointer
+	ldy #$4						; set precision counter
+	jmp rotatl					; x2 again (total = x10) and return
+	
+	
+	
 	
